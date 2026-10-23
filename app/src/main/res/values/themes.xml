@@ -1,0 +1,4 @@
+<resources>
+    <!-- Only covers the window before Compose draws; the real theme lives in ui/theme. -->
+    <style name="Theme.ChoreMe" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

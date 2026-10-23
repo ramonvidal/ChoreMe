@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">ChoreMe</string>
+    <string name="nav_today">Today</string>
+    <string name="nav_groceries">Groceries</string>
+    <string name="nav_agenda">Agenda</string>
+    <string name="nav_family">Family</string>
+    <string name="coming_soon">Coming soon</string>
+    <string name="today_placeholder">Chores anyone can grab will show up here. Kids\' completed chores wait for a parent\'s OK.</string>
+    <string name="groceries_placeholder">Your weekly staples and the things you\'ve run out of.</string>
+    <string name="agenda_placeholder">Your family Google Calendar, alongside chores that are due.</string>
+    <string name="family_placeholder">Create a family or join one with an invite code.</string>
+</resources>
