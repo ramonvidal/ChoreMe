@@ -17,6 +17,7 @@ in the way and what you propose, before writing the code.
 | `:core:model` | Models and rules in **plain Kotlin** (no Android): chores, members, sessions, groceries | nothing |
 | `:core:data` | Firebase: auth and Firestore repositories | `:core:model` |
 | `:core:ui` | Theme, shared composables, strings used by more than one feature, error messages | `:core:model` |
+| `:core:calendar` | The phone's calendars (Android `CalendarContract`): read events, add events with alerts | `:core:model` |
 | `:feature:<name>` | One tab or flow: `onboarding`, `chores`, `groceries`, `agenda`, `family` | `:core:*` only |
 | `:app` | Wires features together: activity, root screen, navigation | anything; nothing depends on it |
 

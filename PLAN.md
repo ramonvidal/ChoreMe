@@ -12,7 +12,7 @@
 | Kids | Kids are members with the `KID` role. Chores they complete go to a parent for **approval** before counting as done; a rejected chore goes back to the same kid |
 | Kids' sign-in | Kids **don't need a Google account**: a parent creates a kid profile, and a kid's device joins it with a parent's approval (see below) |
 | Rewards | None for now: **parent approval is enough** |
-| Calendar | Use the family's **existing Google Calendar** (user picks it from their calendar list); Google sends the alerts |
+| Calendar | Use the family's **existing Google Calendar** through the calendars already synced on each phone (Android `CalendarContract`), not the Google Calendar API: no Google Cloud setup, works offline, and Google sends the alerts. Each phone picks which calendars to show |
 | Location | Deferred to the last phase |
 | Notifications | Free plan: each phone posts a **morning summary** (WorkManager) and the app shows badges. Server push ("Leo finished the dishes" instantly) needs the paid Blaze plan; revisit later |
 | Offline | Firestore's built-in offline cache; no separate local database. Writes show up at once and sync when there's signal |
@@ -85,8 +85,12 @@ rules let kids make only the grab / let go / "I finished" steps, in their own na
       send back; parents can record a chore done by a kid without a phone.
       Morning reminder on each phone, badge on Today for approvals, and a link
       to the grocery list when it has items.
-- [ ] **Phase 4: Agenda.** Pick the existing family Google Calendar, show its events
-      with chores that are due, add events from the app.
+- [x] **Phase 4: Agenda.** The next 14 days, day by day: events from the chosen
+      calendars (family calendar preselected by name; repeating events included)
+      next to the chores due. Tap an event to open it in the calendar app. Quick
+      "Add event" with day, time, length and an alert (all-day events alert the
+      evening before). Calendar access lives in its own `:core:calendar` module.
+      Kids without a Google account on their phone see the chores only.
 - [ ] **Phase 5: Location.** Opt-in live family map and arrive/leave alerts.
 - [ ] **Extras.** Home-screen widget ("Out of…" and today's chores), weekly
       scoreboard or points for kids (not needed for now), dark mode polish.

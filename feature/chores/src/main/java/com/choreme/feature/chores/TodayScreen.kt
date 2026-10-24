@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.choreme.core.ui.emoji
 import com.choreme.core.model.Member
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreStatus

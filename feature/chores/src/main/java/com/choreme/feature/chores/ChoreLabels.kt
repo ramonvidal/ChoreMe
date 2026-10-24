@@ -13,21 +13,6 @@ import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 
-internal val ChoreTemplate.emoji: String
-    get() = when (this) {
-        ChoreTemplate.DISHES -> "🍽️"
-        ChoreTemplate.LAUNDRY -> "🧺"
-        ChoreTemplate.FOLD_CLOTHES -> "👕"
-        ChoreTemplate.CLEAN_KITCHEN -> "🧽"
-        ChoreTemplate.CLEAN_BATHROOM -> "🛁"
-        ChoreTemplate.TRASH -> "🗑️"
-        ChoreTemplate.VACUUM -> "🧹"
-        ChoreTemplate.MAKE_BEDS -> "🛏️"
-        ChoreTemplate.WATER_PLANTS -> "🪴"
-        ChoreTemplate.GROCERIES -> "🛒"
-        ChoreTemplate.OTHER -> "✨"
-    }
-
 @get:StringRes
 internal val ChoreTemplate.title: Int
     get() = when (this) {

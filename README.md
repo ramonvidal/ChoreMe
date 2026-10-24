@@ -69,11 +69,12 @@ app/              Activity, root screen, bottom navigation: wires the features t
 core/model/       Plain Kotlin models and rules (chores, sessions, groceries), no Android
 core/data/        Firebase repositories: auth, families, groceries
 core/ui/          Theme, shared composables, shared strings and error messages
+core/calendar/    The phone's calendars: read events, add events with alerts
 feature/
   onboarding/     Sign in, create or join a family, wait for approval
   chores/         Today tab
   groceries/      Grocery list
-  agenda/         Agenda tab
+  agenda/         Family calendar and chores, day by day
   family/         Members, invite code, join approvals
 build-logic/
   convention/     Shared Gradle setup for each kind of module

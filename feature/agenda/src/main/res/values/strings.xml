@@ -1,4 +1,46 @@
 <resources>
-    <string name="agenda_placeholder">Your family Google Calendar, alongside chores that are due.</string>
     <string name="agenda_title">Agenda</string>
+
+    <string name="permission_title">Show your family calendar</string>
+    <string name="permission_body">ChoreMe shows the calendars already on this phone, like a shared Google Calendar, next to your chores. Events you add here go to that calendar, and Google sends the alerts to everyone who shares it.</string>
+    <string name="permission_allow">Allow calendar access</string>
+    <string name="no_calendars">There are no calendars on this phone. Add a Google account with the family calendar in the phone\'s settings to see it here. Chores still show below.</string>
+
+    <string name="choose_title">Which calendars should the agenda show?</string>
+    <string name="choose_hint">This choice is only for this phone.</string>
+    <string name="choose_save">Show these</string>
+    <string name="change_calendars">Calendars</string>
+    <string name="read_only">read only</string>
+
+    <string name="all_day">All day</string>
+    <string name="time_range">%1$s – %2$s</string>
+    <string name="nothing_today">Nothing planned today</string>
+    <string name="chore_due">Chore</string>
+    <string name="open_failed">No calendar app to open this event</string>
+
+    <string name="add_event">Add event</string>
+    <string name="event_title">What\'s happening</string>
+    <string name="event_calendar">Calendar</string>
+    <string name="event_day">Day</string>
+    <string name="event_pick_day">Pick a day</string>
+    <string name="event_all_day">All day</string>
+    <string name="event_starts">Starts at %1$s</string>
+    <string name="event_change_time">Change</string>
+    <string name="event_duration">How long</string>
+    <string name="event_alert">Alert</string>
+    <string name="event_alert_evening_before">The evening before at %1$s</string>
+    <plurals name="event_alert_minutes">
+        <item quantity="one">%d minute before</item>
+        <item quantity="other">%d minutes before</item>
+    </plurals>
+    <string name="event_alert_hour">1 hour before</string>
+    <string name="event_alert_day">1 day before</string>
+    <string name="duration_minutes">%1$d min</string>
+    <plurals name="duration_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="ok">OK</string>
 </resources>

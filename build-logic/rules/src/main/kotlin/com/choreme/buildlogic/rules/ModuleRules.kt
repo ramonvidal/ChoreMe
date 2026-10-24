@@ -17,6 +17,8 @@ object ModuleRules {
         ":core:model" to emptySet(),
         ":core:data" to setOf(":core:model"),
         ":core:ui" to setOf(":core:model"),
+        // The phone's calendars (CalendarContract), kept apart from Firebase in :core:data.
+        ":core:calendar" to setOf(":core:model"),
     )
 
     val PURE_KOTLIN: Set<String> = setOf(":core:model")
