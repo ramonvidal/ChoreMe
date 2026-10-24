@@ -197,6 +197,69 @@ describe('grocery list', () => {
   });
 });
 
+describe('chores', () => {
+  const chore = {
+    title: 'Wash dishes', template: 'DISHES', recurrenceType: 'EVERY_DAYS', everyDays: 1, weekDays: [],
+    dueDate: '2026-10-24', status: 'OPEN', claimedBy: null, completedBy: null, approvedBy: null,
+    lastDoneBy: null, lastDoneOn: null, createdBy: 'alice',
+  };
+  const ref = (db) => doc(db, 'families', FAMILY, 'chores', 'dishes');
+
+  beforeEach(async () => {
+    await createFamilyBatch(parent('alice'), 'alice');
+    for (const kid of ['kid1', 'kid2']) {
+      await setDoc(doc(kidDevice(kid), 'families', FAMILY, 'joinRequests', kid), joinRequest('KID'));
+      await approveKidBatch(parent('alice'), kid, `member-${kid}`);
+    }
+    await setDoc(ref(parent('alice')), chore);
+  });
+
+  test('only parents create and delete chores', async () => {
+    const kidRef = doc(kidDevice('kid1'), 'families', FAMILY, 'chores', 'new');
+    await assertFails(setDoc(kidRef, chore));
+    await assertFails(deleteDoc(ref(kidDevice('kid1'))));
+    await assertSucceeds(deleteDoc(ref(parent('alice'))));
+  });
+
+  test('a kid grabs, lets go, then finishes a chore for approval', async () => {
+    const db = kidDevice('kid1');
+    await assertSucceeds(updateDoc(ref(db), { status: 'CLAIMED', claimedBy: 'member-kid1' }));
+    await assertSucceeds(updateDoc(ref(db), { status: 'OPEN', claimedBy: null }));
+    await assertSucceeds(updateDoc(ref(db), { status: 'PENDING_APPROVAL', claimedBy: 'member-kid1', completedBy: 'member-kid1' }));
+  });
+
+  test('a kid cannot grab a chore in someone else\'s name or take over a sibling\'s', async () => {
+    await assertFails(updateDoc(ref(kidDevice('kid1')), { status: 'CLAIMED', claimedBy: 'member-kid2' }));
+    await updateDoc(ref(kidDevice('kid2')), { status: 'CLAIMED', claimedBy: 'member-kid2' });
+    await assertFails(updateDoc(ref(kidDevice('kid1')), { status: 'OPEN', claimedBy: null }));
+    await assertFails(updateDoc(ref(kidDevice('kid1')), { status: 'PENDING_APPROVAL', claimedBy: 'member-kid1', completedBy: 'member-kid1' }));
+  });
+
+  test('a kid cannot skip approval or edit the chore', async () => {
+    const db = kidDevice('kid1');
+    await assertFails(updateDoc(ref(db), { status: 'DONE', completedBy: 'member-kid1' }));
+    await assertFails(updateDoc(ref(db), { title: 'Nothing' }));
+    await assertFails(updateDoc(ref(db), { dueDate: '2027-01-01' }));
+    await updateDoc(ref(db), { status: 'PENDING_APPROVAL', claimedBy: 'member-kid1', completedBy: 'member-kid1' });
+    // Approving is a parent's job, even for the sibling.
+    await assertFails(updateDoc(ref(kidDevice('kid2')), { status: 'OPEN', lastDoneBy: 'member-kid1', approvedBy: 'member-kid2' }));
+  });
+
+  test('a parent approves, which reopens the chore for its next date', async () => {
+    await updateDoc(ref(kidDevice('kid1')), { status: 'PENDING_APPROVAL', claimedBy: 'member-kid1', completedBy: 'member-kid1' });
+    await assertSucceeds(updateDoc(ref(parent('alice')), {
+      status: 'OPEN', dueDate: '2026-10-25', claimedBy: null, completedBy: null,
+      approvedBy: 'alice', lastDoneBy: 'member-kid1', lastDoneOn: '2026-10-24',
+    }));
+  });
+
+  test('outsiders cannot see chores, and malformed chores are rejected', async () => {
+    await assertFails(getDocs(collection(parent('mallory'), 'families', FAMILY, 'chores')));
+    await assertFails(setDoc(doc(parent('alice'), 'families', FAMILY, 'chores', 'bad'), { ...chore, status: 'FINISHED' }));
+    await assertFails(setDoc(doc(parent('alice'), 'families', FAMILY, 'chores', 'bad'), { ...chore, title: '' }));
+  });
+});
+
 describe('user pointers', () => {
   test('users can only write their own pointer', async () => {
     await assertSucceeds(setDoc(doc(parent('bob'), 'users', 'bob'), { familyId: FAMILY }));

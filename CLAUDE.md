@@ -23,8 +23,13 @@ in the way and what you propose, before writing the code.
 - **Features never depend on each other.** What two features share moves down into
   a `:core` module.
 - **Each feature exposes one entry point**, its `XxxNavigation.kt` (a route constant
-  and a `NavGraphBuilder` extension). Screens and helpers are `internal`. Onboarding is
-  the exception: `:app` shows its screens directly, outside navigation.
+  and a `NavGraphBuilder` extension). Screens and helpers are `internal`; view models
+  stay public because Hilt needs them to be. Known exceptions, keep the list short:
+  - `:feature:onboarding`: `:app` shows its screens directly, outside navigation.
+  - `:feature:chores`: `ChoreReminders.schedule()`, which `:app` calls at startup.
+- **Features talk to each other only through `:app`.** If one needs to send people to
+  another (Today linking to the grocery list), it takes a callback like
+  `onOpenGroceries` and `:app` does the navigation.
 - **Logic goes in `:core:model`** whenever it doesn't need Android, so it stays testable
   on the plain JVM. View models orchestrate; they don't hold business rules.
 - **Each module owns its strings.** Strings used by one feature live in that feature;

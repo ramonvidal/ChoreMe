@@ -14,6 +14,7 @@
 | Rewards | None for now: **parent approval is enough** |
 | Calendar | Use the family's **existing Google Calendar** (user picks it from their calendar list); Google sends the alerts |
 | Location | Deferred to the last phase |
+| Notifications | Free plan: each phone posts a **morning summary** (WorkManager) and the app shows badges. Server push ("Leo finished the dishes" instantly) needs the paid Blaze plan; revisit later |
 | Offline | Firestore's built-in offline cache; no separate local database. Writes show up at once and sync when there's signal |
 
 ## Sharing and sync
@@ -34,7 +35,8 @@ families/{familyId}              name, inviteCode, createdBy
   members/{memberId}             name, role (PARENT | KID), color, uids[]
   joinRequests/{uid}             name, role, deviceName, createdAt
   groceryItems/{itemId}          name, category, isNeeded, isStaple, updatedAt, updatedBy
-  chores/{choreId}               (Phase 3) title, icon, recurrence, status, claimedBy, completedBy, approvedBy
+  chores/{choreId}               title, template, recurrenceType, everyDays, weekDays[], dueDate,
+                                 status, claimedBy, completedBy, approvedBy, lastDoneBy, lastDoneOn
 inviteCodes/{code}               familyId, familyName
 users/{uid}                      familyId, familyName: lets a device find its family again
 ```
@@ -54,8 +56,11 @@ The parent's approval is the security check, so this works without Cloud
 Functions and the project stays on the free Spark plan. Kids without any device
 still get chores: a parent can mark a chore as done on their behalf.
 
-Chore states: `OPEN → CLAIMED → (kid) PENDING_APPROVAL → DONE`; parents go straight
-to `DONE`. The rule lives in `domain/model/Chore.kt` and is unit tested.
+Chore states: `OPEN → CLAIMED → (kid) PENDING_APPROVAL → done`; parents' work counts
+straight away. "Done" means `DONE` for one-off chores; recurring chores go back to
+`OPEN` on their next date, counted from the later of the due date and the day it was
+done. The rules live in `core/model/.../chore/` and are unit tested; the Firestore
+rules let kids make only the grab / let go / "I finished" steps, in their own name.
 
 ## Phases
 
@@ -72,10 +77,14 @@ to `DONE`. The rule lives in `domain/model/Chore.kt` and is unit tested.
       aisle sorting in store order, starred "usuals" with one-tap restock, a
       starter list for new families, and offline-first sync. Item ids come from
       the name, so two phones adding "Milk" offline end up with one item.
-- [ ] **Phase 3: Chores.** Templates (laundry, dishes, kitchen, bathroom, fold
-      clothes, …), recurrence, grab/complete, parent approval queue, push
-      notifications for overdue chores and approvals. A "Go grocery shopping"
-      chore appears when the list grows.
+- [x] **Phase 3: Chores.** Templates (dishes, laundry, fold clothes, kitchen,
+      bathroom, trash, vacuum, beds, plants, groceries) or anything typed;
+      repeat once, every N days or on chosen weekdays. Today tab with "waiting
+      for your OK", to do (late ones highlighted), coming up and done today.
+      Anyone grabs a chore; kids' finished chores go to a parent to approve or
+      send back; parents can record a chore done by a kid without a phone.
+      Morning reminder on each phone, badge on Today for approvals, and a link
+      to the grocery list when it has items.
 - [ ] **Phase 4: Agenda.** Pick the existing family Google Calendar, show its events
       with chores that are due, add events from the app.
 - [ ] **Phase 5: Location.** Opt-in live family map and arrive/leave alerts.

@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -45,9 +46,9 @@ enum class TopLevelDestination(
     Family(FAMILY_ROUTE, R.string.nav_family, Icons.Filled.Person),
 }
 
-/** The signed-in app. [pendingJoinRequests] badges the Family tab for parents. */
+/** The signed-in app. The counts badge the Family and Today tabs for parents. */
 @Composable
-fun ChoreMeNavHost(pendingJoinRequests: Int = 0) {
+fun ChoreMeNavHost(pendingJoinRequests: Int = 0, pendingApprovals: Int = 0) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
@@ -59,15 +60,13 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0) {
                     val selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true
                     NavigationBarItem(
                         selected = selected,
-                        onClick = {
-                            navController.navigate(destination.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
+                        onClick = { navController.navigateToTab(destination.route) },
                         icon = {
-                            val badgeCount = if (destination == TopLevelDestination.Family) pendingJoinRequests else 0
+                            val badgeCount = when (destination) {
+                                TopLevelDestination.Family -> pendingJoinRequests
+                                TopLevelDestination.Today -> pendingApprovals
+                                else -> 0
+                            }
                             BadgedBox(badge = { if (badgeCount > 0) Badge { Text(badgeCount.toString()) } }) {
                                 Icon(destination.icon, contentDescription = null)
                             }
@@ -83,10 +82,19 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0) {
             startDestination = TopLevelDestination.Today.route,
             modifier = Modifier.padding(innerPadding),
         ) {
-            todayScreen()
+            todayScreen(onOpenGroceries = { navController.navigateToTab(TopLevelDestination.Groceries.route) })
             groceriesScreen()
             agendaScreen()
             familyScreen()
         }
+    }
+}
+
+/** Switches tabs the way the bottom bar does, keeping each tab's state. */
+private fun NavHostController.navigateToTab(route: String) {
+    navigate(route) {
+        popUpTo(graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
     }
 }

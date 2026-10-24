@@ -19,6 +19,7 @@ object FirestoreSchema {
     const val MEMBER_UIDS = "memberUids"
     const val JOIN_REQUESTS = "joinRequests"
     const val GROCERY_ITEMS = "groceryItems"
+    const val CHORES = "chores"
 
     const val FAMILY_ID = "familyId"
     const val FAMILY_NAME = "familyName"
@@ -36,6 +37,20 @@ object FirestoreSchema {
     const val IS_STAPLE = "isStaple"
     const val UPDATED_AT = "updatedAt"
     const val UPDATED_BY = "updatedBy"
+
+    // Chores
+    const val TITLE = "title"
+    const val TEMPLATE = "template"
+    const val RECURRENCE_TYPE = "recurrenceType"
+    const val EVERY_DAYS = "everyDays"
+    const val WEEK_DAYS = "weekDays"
+    const val DUE_DATE = "dueDate"
+    const val STATUS = "status"
+    const val CLAIMED_BY = "claimedBy"
+    const val COMPLETED_BY = "completedBy"
+    const val APPROVED_BY = "approvedBy"
+    const val LAST_DONE_BY = "lastDoneBy"
+    const val LAST_DONE_ON = "lastDoneOn"
 }
 
 private fun DocumentSnapshot.role(): Role =

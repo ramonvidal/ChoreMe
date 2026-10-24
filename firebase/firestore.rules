@@ -48,6 +48,32 @@ service cloud.firestore {
         && item.isStaple is bool;
     }
 
+    function myMemberId(f) {
+      return get(membershipPath(f)).data.memberId;
+    }
+
+    function validChore(c) {
+      return c.title is string && c.title.size() > 0 && c.title.size() <= 60
+        && c.status in ['OPEN', 'CLAIMED', 'PENDING_APPROVAL', 'DONE']
+        && c.recurrenceType in ['ONCE', 'EVERY_DAYS', 'WEEKLY']
+        && c.dueDate is string && c.dueDate.size() == 10;
+    }
+
+    // Kids can grab an open chore, let go of one they hold, or say they finished it.
+    // Finishing only ever sends it to a parent; kids never mark chores done themselves.
+    function isKidChoreStep(f) {
+      let before = resource.data;
+      let after = request.resource.data;
+      let me = myMemberId(f);
+      return after.diff(before).affectedKeys().hasOnly(['status', 'claimedBy', 'completedBy', 'updatedAt', 'updatedBy'])
+        && (
+          (before.status == 'OPEN' && after.status == 'CLAIMED' && after.claimedBy == me)
+          || (before.status == 'CLAIMED' && before.claimedBy == me && after.status == 'OPEN' && after.claimedBy == null)
+          || (before.status in ['OPEN', 'CLAIMED'] && (before.claimedBy == null || before.claimedBy == me)
+              && after.status == 'PENDING_APPROVAL' && after.claimedBy == me && after.completedBy == me)
+        );
+    }
+
     // Pointer from a user to their family, for finding it again after signing in.
     // It grants nothing: access is checked against memberUids.
     match /users/{uid} {
@@ -98,6 +124,12 @@ service cloud.firestore {
           && request.resource.data.role in ['PARENT', 'KID']
           && !(isAnonymous() && request.resource.data.role == 'PARENT');
         allow delete: if isParent(f) || (signedIn() && request.auth.uid == uid);
+      }
+
+      match /chores/{choreId} {
+        allow read: if isMember(f);
+        allow create, delete: if isParent(f) && (request.method == 'delete' || validChore(request.resource.data));
+        allow update: if validChore(request.resource.data) && (isParent(f) || (isMember(f) && isKidChoreStep(f)));
       }
 
       // Everyone in the family, kids included, can say "we're out of eggs".

@@ -14,6 +14,8 @@ googleServices = "4.4.3"
 coroutines = "1.10.2"
 credentials = "1.5.0"
 googleId = "1.1.1"
+work = "2.10.1"
+androidxHilt = "1.2.0"
 junit = "4.13.2"
 
 [libraries]
@@ -34,6 +36,9 @@ androidx-compose-material-icons-core = { module = "androidx.compose.material:mat
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "androidxHilt" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidxHilt" }
+androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 
 
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }

@@ -20,6 +20,7 @@ import com.choreme.ui.navigation.ChoreMeNavHost
 fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
     val session by viewModel.session.collectAsStateWithLifecycle()
     val pendingJoinRequests by viewModel.pendingJoinRequests.collectAsStateWithLifecycle()
+    val pendingApprovals by viewModel.pendingApprovals.collectAsStateWithLifecycle()
 
     when (val state = session) {
         SessionState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -29,6 +30,6 @@ fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
         SessionState.SignedOut -> SignInScreen()
         is SessionState.NoFamily -> OnboardingScreen(state)
         is SessionState.AwaitingApproval -> AwaitingApprovalScreen(state)
-        is SessionState.InFamily -> ChoreMeNavHost(pendingJoinRequests = pendingJoinRequests)
+        is SessionState.InFamily -> ChoreMeNavHost(pendingJoinRequests = pendingJoinRequests, pendingApprovals = pendingApprovals)
     }
 }
