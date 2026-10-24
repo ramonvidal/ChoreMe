@@ -4,6 +4,8 @@ on:
   push:
     branches: [main, "claude/**"]
   pull_request:
+  # Lets anyone with access rebuild from the Actions tab, e.g. after adding the Firebase secrets.
+  workflow_dispatch:
 
 jobs:
   build:
