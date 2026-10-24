@@ -15,6 +15,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.choreme.core.model.Member
 import com.choreme.core.model.location.GeoPoint
 import com.choreme.core.model.location.LocationStatus
 import com.choreme.core.model.location.Place
@@ -28,13 +29,15 @@ import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.util.GeoPoint as OsmPoint
 
 /**
- * OpenStreetMap with a dot per member who shares and a circle per saved place.
+ * OpenStreetMap with a dot per member who shares and a circle per saved place. [me] is this
+ * phone's own position, shown even when not sharing, and in place of its shared (older) dot.
  * [focus] moves the map, e.g. when a member is tapped in the list.
  */
 @Composable
 internal fun FamilyMap(
     members: List<MemberOnMap>,
     places: List<Place>,
+    me: Pair<Member, GeoPoint>?,
     focus: GeoPoint?,
     modifier: Modifier = Modifier,
 ) {
@@ -68,7 +71,9 @@ internal fun FamilyMap(
                     title = place.name
                 }
             }
-            val shown = members.mapNotNull { m -> (m.status as? LocationStatus.Known)?.let { m to it } }
+            val shown = members
+                .filter { it.member.id != me?.first?.id }
+                .mapNotNull { m -> (m.status as? LocationStatus.Known)?.let { m to it } }
             shown.forEach { (m, status) ->
                 map.overlays += Marker(map).apply {
                     position = status.location.point.toOsm()
@@ -77,15 +82,24 @@ internal fun FamilyMap(
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 }
             }
+            me?.let { (member, point) ->
+                map.overlays += Marker(map).apply {
+                    position = point.toOsm()
+                    title = member.name
+                    icon = memberIcon(context, memberColor(member.color).toArgb(), member.name.take(1).uppercase(), stale = false)
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                }
+            }
+            val allPoints = shown.map { it.second.location.point.toOsm() } + listOfNotNull(me?.second?.toOsm())
             when {
                 focus != null && focus != lastFocus[0] -> {
                     lastFocus[0] = focus
                     map.controller.animateTo(focus.toOsm(), FOCUS_ZOOM, null)
                 }
                 // The first time there's something to show, fit everyone on screen.
-                !fittedOnce[0] && shown.isNotEmpty() -> {
+                !fittedOnce[0] && allPoints.isNotEmpty() -> {
                     fittedOnce[0] = true
-                    val points = shown.map { it.second.location.point.toOsm() }
+                    val points = allPoints
                     if (points.size == 1) {
                         map.controller.setCenter(points.single())
                     } else {

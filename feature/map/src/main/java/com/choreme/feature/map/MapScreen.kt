@@ -83,7 +83,13 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
 
     Column(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxWidth().weight(1f)) {
-            FamilyMap(state.members, state.places, focus, Modifier.fillMaxSize())
+            FamilyMap(
+                members = state.members,
+                places = state.places,
+                me = state.me?.let { me -> state.myFix?.let { fix -> me to fix.point } },
+                focus = focus,
+                modifier = Modifier.fillMaxSize(),
+            )
             SmallFloatingActionButton(
                 onClick = {
                     viewModel.refresh()

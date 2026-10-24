@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -109,23 +110,31 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    /** Gets a fresh position and, when sharing, sends it if it's worth sending. */
+    /**
+     * Gets a fresh position and, when sharing, sends it if it's worth sending. Waits for the
+     * family to load first, so opening the map shares right away instead of skipping it.
+     */
     fun refresh() {
         viewModelScope.launch {
-            val fix = device.current() ?: return@launch
+            val fix = device.current()
+            if (fix == null) {
+                if (device.hasPermission()) _actionState.value = ActionState(error = R.string.no_position)
+                return@launch
+            }
             myFix.value = fix
-            val state = uiState.value
+            if (!sharing.isSharing.value) return@launch
+            val state = uiState.first { !it.loading }
             val familyId = state.familyId ?: return@launch
             val me = state.me ?: return@launch
-            if (!sharing.isSharing.value) return@launch
             val next = MemberLocation(me.id, fix.point, fix.accuracyMeters, fix.at)
             val previous = (state.members.firstOrNull { it.member.id == me.id }?.status as? LocationStatus.Known)?.location
-            if (shouldPublish(previous, next)) {
-                try {
-                    locations.publish(familyId, next)
-                } catch (e: Exception) {
-                    Log.w("ChoreMe", "Couldn't share location", e)
-                }
+            if (!shouldPublish(previous, next)) return@launch
+            _actionState.value = try {
+                locations.publish(familyId, next)
+                ActionState()
+            } catch (e: Exception) {
+                Log.w("ChoreMe", "Couldn't share location", e)
+                ActionState(error = R.string.share_failed)
             }
         }
     }

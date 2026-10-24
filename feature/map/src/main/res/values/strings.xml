@@ -37,5 +37,8 @@
     <string name="radius_meters">%1$d m</string>
     <string name="delete_place">Delete %1$s</string>
     <string name="refresh">Update now</string>
+    <string name="you">You</string>
+    <string name="no_position">Couldn\'t find where this phone is. Check that location is turned on in the phone\'s quick settings.</string>
+    <string name="share_failed">Couldn\'t share your location with the family. Check your connection; if it keeps happening, the Firebase database rules may need updating.</string>
     <string name="osm_credit">© OpenStreetMap contributors</string>
 </resources>
