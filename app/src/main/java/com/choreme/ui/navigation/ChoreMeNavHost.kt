@@ -7,6 +7,8 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -40,8 +42,9 @@ enum class TopLevelDestination(
     Family("family", R.string.nav_family, Icons.Filled.Person),
 }
 
+/** The signed-in app. [pendingJoinRequests] badges the Family tab for parents. */
 @Composable
-fun ChoreMeNavHost() {
+fun ChoreMeNavHost(pendingJoinRequests: Int = 0) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
@@ -60,7 +63,12 @@ fun ChoreMeNavHost() {
                                 restoreState = true
                             }
                         },
-                        icon = { Icon(destination.icon, contentDescription = null) },
+                        icon = {
+                            val badgeCount = if (destination == TopLevelDestination.Family) pendingJoinRequests else 0
+                            BadgedBox(badge = { if (badgeCount > 0) Badge { Text(badgeCount.toString()) } }) {
+                                Icon(destination.icon, contentDescription = null)
+                            }
+                        },
                         label = { Text(stringResource(destination.label)) },
                     )
                 }

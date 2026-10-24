@@ -18,3 +18,7 @@ app/google-services.json
 # Signing
 *.jks
 *.keystore
+
+# Firebase tooling
+firebase/node_modules/
+firebase/*.log

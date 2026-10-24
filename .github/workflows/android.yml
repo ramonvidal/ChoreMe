@@ -19,6 +19,15 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # Both are optional: without them the APK builds, but has no sync and no Google sign-in.
+      - name: Add Firebase config and shared debug key
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          DEBUG_KEYSTORE_BASE64: ${{ secrets.DEBUG_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json; echo "Firebase config added"; fi
+          if [ -n "$DEBUG_KEYSTORE_BASE64" ]; then printf '%s' "$DEBUG_KEYSTORE_BASE64" | base64 -d > app/debug.keystore; echo "Debug key added"; fi
+
       - name: Unit tests
         run: ./gradlew testDebugUnitTest
 
@@ -29,3 +38,29 @@ jobs:
         with:
           name: choreme-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+
+  firestore-rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: firebase
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: firebase/package-lock.json
+
+      # The Firestore emulator runs on Java.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - run: npm ci
+
+      - name: Firestore security rules tests
+        run: npm test

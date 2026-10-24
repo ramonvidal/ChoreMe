@@ -16,7 +16,7 @@ import com.choreme.R
 
 /** Stand-in for screens that later phases fill in. */
 @Composable
-fun PlaceholderScreen(title: String, description: String) {
+fun PlaceholderScreen(title: String, description: String, showComingSoon: Boolean = true) {
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
@@ -28,10 +28,12 @@ fun PlaceholderScreen(title: String, description: String) {
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
         )
-        Text(
-            stringResource(R.string.coming_soon),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-        )
+        if (showComingSoon) {
+            Text(
+                stringResource(R.string.coming_soon),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
     }
 }

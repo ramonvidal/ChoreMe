@@ -1,0 +1,97 @@
+rules_version = '2';
+
+// Data model and the joining flow are described in PLAN.md.
+// Access to a family is decided only by families/{f}/memberUids/{uid}, which only
+// the family's creator (for themselves, at creation) or a parent can write.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAnonymous() {
+      return request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
+
+    function familyPath(f) {
+      return /databases/$(database)/documents/families/$(f);
+    }
+
+    function membershipPath(f) {
+      return /databases/$(database)/documents/families/$(f)/memberUids/$(request.auth.uid);
+    }
+
+    function isMember(f) {
+      return signedIn() && exists(membershipPath(f));
+    }
+
+    function isParent(f) {
+      return isMember(f) && get(membershipPath(f)).data.role == 'PARENT';
+    }
+
+    // True only inside the batch that creates family f, for its creator.
+    function isCreatingFamily(f) {
+      return signedIn()
+        && !exists(familyPath(f))
+        && getAfter(familyPath(f)).data.createdBy == request.auth.uid;
+    }
+
+    function validName(name) {
+      return name is string && name.size() > 0 && name.size() <= 40;
+    }
+
+    // Pointer from a user to their family, for finding it again after signing in.
+    // It grants nothing: access is checked against memberUids.
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    match /inviteCodes/{code} {
+      allow get: if signedIn();
+      allow create: if isCreatingFamily(request.resource.data.familyId)
+        && getAfter(familyPath(request.resource.data.familyId)).data.inviteCode == code;
+    }
+
+    match /families/{f} {
+      allow get: if isMember(f);
+      allow create: if signedIn() && !isAnonymous()
+        && request.resource.data.createdBy == request.auth.uid
+        && validName(request.resource.data.name);
+      allow update: if isParent(f)
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.inviteCode == resource.data.inviteCode;
+
+      match /memberUids/{uid} {
+        allow get: if isMember(f) || (signedIn() && request.auth.uid == uid);
+        allow list: if isMember(f);
+        allow create: if isParent(f)
+          || (isCreatingFamily(f) && uid == request.auth.uid
+              && request.resource.data.role == 'PARENT'
+              && request.resource.data.memberId == uid);
+        allow delete: if isParent(f);
+      }
+
+      match /members/{memberId} {
+        allow read: if isMember(f);
+        allow create: if (isParent(f) || (isCreatingFamily(f) && memberId == request.auth.uid))
+          && request.resource.data.role in ['PARENT', 'KID']
+          && validName(request.resource.data.name);
+        allow update: if isParent(f) && validName(request.resource.data.name);
+        allow delete: if isParent(f);
+      }
+
+      match /joinRequests/{uid} {
+        allow get: if (signedIn() && request.auth.uid == uid) || isParent(f);
+        allow list: if isParent(f);
+        allow create, update: if signedIn() && request.auth.uid == uid
+          && exists(familyPath(f))
+          && !isMember(f)
+          && validName(request.resource.data.name)
+          && request.resource.data.role in ['PARENT', 'KID']
+          && !(isAnonymous() && request.resource.data.role == 'PARENT');
+        allow delete: if isParent(f) || (signedIn() && request.auth.uid == uid);
+      }
+    }
+  }
+}

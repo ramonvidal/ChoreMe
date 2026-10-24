@@ -11,31 +11,63 @@ See [PLAN.md](PLAN.md) for the roadmap and design decisions.
 Kotlin, Jetpack Compose (Material 3), Hilt, Room, and Firebase (Auth, Firestore,
 Cloud Messaging). Minimum Android 8.0 (API 26).
 
-## Getting started
+## Setting up Firebase (one time)
 
-1. Install [Android Studio](https://developer.android.com/studio) and open this folder.
-2. Set up Firebase (needed for sync; the app builds and runs without it):
-   1. Create a project at <https://console.firebase.google.com> (the free Spark plan is enough).
-   2. Add an **Android app** with package name `com.choreme`.
-   3. Download `google-services.json` and put it in `app/`. It is git-ignored on purpose.
-   4. Enable **Authentication → Google** and create a **Firestore** database.
-3. Run the `app` configuration on a device or emulator.
+Sync and sign-in need a Firebase project. The free Spark plan is enough.
 
-## Downloading a build without Android Studio
+1. Create a project at <https://console.firebase.google.com>.
+2. **Authentication → Sign-in method**: enable **Google** and **Anonymous**
+   (anonymous is how kids without a Google account sign in).
+3. **Firestore Database**: create a database (production mode, any nearby region).
+4. **Firestore → Rules**: replace the rules with the contents of
+   [`firebase/firestore.rules`](firebase/firestore.rules) and publish. Or, with the
+   Firebase CLI: `cd firebase && npx firebase deploy --only firestore:rules --project <your-project-id>`.
+5. **Project settings → Your apps → Add app → Android**, package name `com.choreme`.
+6. Google sign-in only works for apps signed with a key whose **SHA-1** is
+   registered there, so everyone uses one shared debug key:
+   ```sh
+   keytool -genkeypair -v -keystore app/debug.keystore -storepass android -keypass android \
+     -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+   keytool -list -v -keystore app/debug.keystore -storepass android | grep SHA1
+   ```
+   Add that SHA-1 to the Android app in Firebase. `app/debug.keystore` is git-ignored;
+   keep a copy somewhere safe.
+7. Download `google-services.json` (after adding the SHA-1) into `app/`. It is git-ignored too.
 
-Every push runs the **Android build** GitHub Action. Open the run under the
-repository's *Actions* tab and download the `choreme-debug-apk` artifact, then
-install it on your phone (allow installing from unknown sources).
+### Building in GitHub Actions
 
-CI builds don't include `google-services.json`, so sync is off in those APKs for now.
+Every push runs the **Android build** workflow, which uploads a `choreme-debug-apk`
+artifact you can install on a phone (allow installing from unknown sources). For
+that APK to sync and sign in, add two repository secrets under *Settings → Secrets
+and variables → Actions*:
+
+| Secret | Value |
+|---|---|
+| `GOOGLE_SERVICES_JSON` | The full contents of `google-services.json` |
+| `DEBUG_KEYSTORE_BASE64` | The output of `base64 -w0 app/debug.keystore` |
+
+Without them the APK still builds, but shows a "Sync isn't set up" screen.
+
+### Building locally
+
+Open the folder in [Android Studio](https://developer.android.com/studio), with
+`google-services.json` and `debug.keystore` in `app/`, and run the `app` configuration.
+
+## Tests
+
+- App logic: `./gradlew testDebugUnitTest`
+- Firestore security rules (needs Node.js and Java): `cd firebase && npm ci && npm test`
 
 ## Project layout
 
 ```
 app/src/main/java/com/choreme/
   domain/model/   Plain Kotlin models and rules (e.g. kid chores need a parent's approval)
-  data/local/     Room database (offline storage)
+  data/           Firebase repositories (auth, families) and Room
   di/             Hilt modules (database, Firebase)
-  feature/        One package per screen: today, groceries, agenda, family
+  domain/session/ Which screen to show: signed out, joining, waiting for approval, in a family
+  feature/        One package per screen: onboarding, today, groceries, agenda, family
   ui/             Theme, navigation, shared composables
+firebase/
+  firestore.rules Who can read and write what; tested in firebase/test
 ```

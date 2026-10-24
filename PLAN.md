@@ -17,27 +17,36 @@
 ## Sharing and sync
 
 A **family** is the unit of sharing. One parent creates it and gets an invite code
-(also as a QR code or share link); others sign in and enter the code to join.
-Firestore security rules allow only members to read or write a family's data, and
-only parents to approve chores or manage members.
+to share. Anyone else, parent or kid, signs in, enters the code and **asks to
+join**; a parent approves them from the Family tab (a badge shows when someone is
+waiting). The code alone never gives access, so a leaked code is harmless.
+
+Access is decided only by `memberUids/{uid}`, which only a parent can write (or
+the creator, for themselves, when creating the family). Kids can't approve
+requests, change roles or remove members. These rules live in
+`firebase/firestore.rules` and are tested against the Firestore emulator in CI.
 
 ```
 families/{familyId}              name, inviteCode, createdBy
-  members/{memberId}             name, role (PARENT | KID), color, deviceUids[]
-  joinRequests/{uid}             kid member requested, deviceName, createdAt
+  memberUids/{uid}               memberId, role: the access list, one entry per signed-in device
+  members/{memberId}             name, role (PARENT | KID), color, uids[]
+  joinRequests/{uid}             name, role, deviceName, createdAt
+inviteCodes/{code}               familyId, familyName
+users/{uid}                      familyId, familyName: lets a device find its family again
   chores/{choreId}               title, icon, recurrence, status, claimedBy, completedBy, approvedBy
   groceryItems/{itemId}          name, category, isNeeded, isStaple, updatedAt
 ```
 
 ### Kids without a Google account
 
-1. A parent adds a **kid profile** (name, color) in the Family tab.
-2. On the kid's phone or tablet, the app is opened with **"I'm joining as a kid"**,
-   the family invite code is entered and the kid picks their profile. The device
-   signs in with Firebase **anonymous auth**, so no email or Google account is needed.
-3. This creates a join request that a parent **approves on their own phone**.
-   Only then do the security rules link that device to the kid profile.
-4. A kid can have several devices, and a parent can remove one at any time.
+1. On the kid's phone or tablet, they tap **"I'm a kid"**, type their name and the
+   invite code. The device signs in with Firebase **anonymous auth**, so no email or
+   Google account is needed. Anonymous devices can only ask to join as a kid.
+2. A parent **approves it on their own phone** and picks which kid it belongs to:
+   an existing kid profile or a new one. A kid can have several devices.
+3. A parent can remove a kid (and so all their devices) at any time. A kid who
+   signs out needs approval again, since anonymous accounts can't sign back in.
+4. Parents can also add a **kid profile without a device** from the Family tab.
 
 The parent's approval is the security check, so this works without Cloud
 Functions and the project stays on the free Spark plan. Kids without any device
@@ -51,9 +60,10 @@ to `DONE`. The rule lives in `domain/model/Chore.kt` and is unit tested.
 - [x] **Phase 0: Skeleton.** Compose app with bottom navigation (Today, Groceries,
       Agenda, Family), Hilt, Room, Firebase wiring, chore approval rules with tests,
       GitHub Actions building the APK.
-- [ ] **Phase 1: Family and accounts.** Google sign-in for parents, create or join
-      a family by invite code, member list, parent/kid roles, kid profiles joined
-      by approved devices, Firestore security rules.
+- [x] **Phase 1: Family and accounts.** Google sign-in for parents, anonymous
+      sign-in for kids, create a family, ask to join by invite code, parent
+      approval of every join, members list, kid profiles with or without a device,
+      Firestore security rules with emulator tests.
 - [ ] **Phase 2: Groceries.** Staples catalog grouped by category; tap to mark
       "out of", tap again in the store to mark bought; "weekly restock" button;
       quick add with autocomplete; live sync.
@@ -69,4 +79,4 @@ to `DONE`. The rule lives in `domain/model/Chore.kt` and is unit tested.
 
 ## Open questions
 
-- None right now. Phase 1 needs the Firebase project (see README).
+- None right now. To try Phase 1 on a phone, set up Firebase (see README).

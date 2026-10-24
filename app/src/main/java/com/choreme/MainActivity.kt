@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.choreme.ui.navigation.ChoreMeNavHost
+import com.choreme.ui.root.RootScreen
 import com.choreme.ui.theme.ChoreMeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ChoreMeTheme {
-                ChoreMeNavHost()
+                RootScreen()
             }
         }
     }

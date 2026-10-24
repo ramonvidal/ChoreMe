@@ -24,6 +24,18 @@ android {
         versionName = "0.1.0"
     }
 
+    // CI and every developer must sign debug builds with the same key, because its
+    // SHA-1 is registered in Firebase for Google sign-in. See README.
+    val sharedDebugKeystore = file("debug.keystore")
+    if (sharedDebugKeystore.exists()) {
+        signingConfigs.getByName("debug") {
+            storeFile = sharedDebugKeystore
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -44,6 +56,7 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        optIn.addAll("kotlinx.coroutines.ExperimentalCoroutinesApi", "androidx.compose.material3.ExperimentalMaterial3Api")
     }
 }
 
@@ -79,6 +92,9 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.messaging)
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services)
+    implementation(libs.googleid)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
