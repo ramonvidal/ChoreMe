@@ -1,9 +1,8 @@
+// Wires the features together; the only module that may depend on features.
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("choreme.android.application")
+    id("choreme.android.compose")
+    id("choreme.android.hilt")
 }
 
 // Firebase config is per-developer and not committed (see README). Without it the app
@@ -14,12 +13,9 @@ if (file("google-services.json").exists()) {
 
 android {
     namespace = "com.choreme"
-    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.choreme"
-        minSdk = 26
-        targetSdk = 35
         versionCode = 1
         versionName = "0.1.0"
     }
@@ -42,57 +38,21 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    buildFeatures {
-        compose = true
-    }
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        optIn.addAll(
-            "kotlinx.coroutines.ExperimentalCoroutinesApi",
-            "androidx.compose.material3.ExperimentalMaterial3Api",
-            "androidx.compose.foundation.ExperimentalFoundationApi",
-            "androidx.compose.foundation.layout.ExperimentalLayoutApi",
-        )
-    }
 }
 
 dependencies {
+    implementation(projects.core.model)
+    implementation(projects.core.data)
+    implementation(projects.core.ui)
+    implementation(projects.feature.onboarding)
+    implementation(projects.feature.chores)
+    implementation(projects.feature.groceries)
+    implementation(projects.feature.agenda)
+    implementation(projects.feature.family)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
-
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material.icons.core)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
-
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.firestore)
-    implementation(libs.firebase.messaging)
-    implementation(libs.kotlinx.coroutines.play.services)
-    implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play.services)
-    implementation(libs.googleid)
-
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlinx.coroutines.test)
 }

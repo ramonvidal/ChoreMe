@@ -1,0 +1,25 @@
+<resources>
+    <string name="family_invite_hint">Share this code so others can ask to join:</string>
+    <string name="family_share_invite">Share invite code</string>
+    <string name="family_invite_message">Join the %1$s family on ChoreMe with the code %2$s</string>
+    <string name="family_requests_title">Waiting to join</string>
+    <string name="family_members_title">Members</string>
+    <string name="family_add_kid">Add a kid without a phone</string>
+    <string name="family_add_kid_hint">Parents can mark this kid\'s chores done for them. If they get a device later, link it when approving it.</string>
+    <string name="family_remove_confirm">Remove %1$s from the family? Their devices will lose access.</string>
+    <string name="kid_name">Kid\'s name</string>
+    <string name="request_wants_kid">%1$s wants to join as a kid</string>
+    <string name="request_wants_parent">%1$s wants to join as a parent</string>
+    <string name="request_link_to">This device belongs to:</string>
+    <string name="request_new_profile">New profile for %1$s</string>
+    <string name="member_me">%1$s (you)</string>
+    <string name="member_no_device">No device</string>
+    <plurals name="member_devices">
+        <item quantity="one">%d device</item>
+        <item quantity="other">%d devices</item>
+    </plurals>
+    <string name="role_parent">Parent</string>
+    <string name="role_kid">Kid</string>
+    <string name="sign_out">Sign out</string>
+    <string name="sign_out_kid_warning">This device will need a parent\'s approval again to rejoin. Sign out anyway?</string>
+</resources>

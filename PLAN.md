@@ -5,6 +5,7 @@
 | Topic | Decision |
 |---|---|
 | Platform | Android only: Kotlin + Jetpack Compose |
+| Structure | **As modular as possible**: `:core:*` and `:feature:*` Gradle modules, rules in `CLAUDE.md`, checked on every build |
 | Sync | Firebase: Auth (Google sign-in) + Cloud Firestore (offline cache, real-time) + Cloud Messaging |
 | UI language | English |
 | Chore assignment | **Whoever grabs it**: chores are open to everyone, and one tap claims one |

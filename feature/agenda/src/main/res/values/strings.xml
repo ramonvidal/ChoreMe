@@ -1,0 +1,4 @@
+<resources>
+    <string name="agenda_placeholder">Your family Google Calendar, alongside chores that are due.</string>
+    <string name="agenda_title">Agenda</string>
+</resources>

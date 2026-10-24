@@ -1,0 +1,26 @@
+<resources>
+    <string name="sign_in_tagline">Chores, groceries and the family calendar, shared by everyone at home.</string>
+    <string name="sign_in_google">Sign in with Google</string>
+    <string name="sign_in_kid">I\'m a kid</string>
+    <string name="sign_in_kid_hint">No Google account needed. A parent will approve this device.</string>
+    <string name="onboarding_title">Set up your family</string>
+    <string name="onboarding_title_kid">Ask to join your family</string>
+    <string name="onboarding_declined">Your request was declined, or you were removed from the family. You can ask again below.</string>
+    <string name="onboarding_create_title">Start a new family</string>
+    <string name="onboarding_create">Create family</string>
+    <string name="onboarding_join_title">Join with an invite code</string>
+    <string name="onboarding_join_hint">Ask a parent for the code. It\'s on their Family tab.</string>
+    <string name="onboarding_join">Ask to join</string>
+    <string name="onboarding_join_as_kid">I\'m a kid</string>
+    <string name="onboarding_switch_account">Use a different account</string>
+    <string name="onboarding_back">Back</string>
+    <string name="your_name">Your name</string>
+    <string name="family_name">Family name</string>
+    <string name="invite_code">Invite code</string>
+    <string name="awaiting_title">Waiting for a parent in %1$s</string>
+    <string name="awaiting_body">They\'ll see your request on their Family tab. This screen moves on by itself once they approve it.</string>
+    <string name="awaiting_cancel">Cancel request</string>
+    <string name="firebase_missing_title">Sync isn\'t set up</string>
+    <string name="firebase_missing_body">This build has no Firebase configuration, so family sharing can\'t work. Add app/google-services.json as described in the README and rebuild.</string>
+    <string name="error_sign_in">Couldn\'t sign in. Check your connection and try again.</string>
+</resources>

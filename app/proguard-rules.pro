@@ -1,2 +1,1 @@
-# Firestore maps documents onto these classes by reflection.
--keepclassmembers class com.choreme.data.remote.** { *; }
+# Firestore data is read and written as maps, so nothing relies on reflection yet.

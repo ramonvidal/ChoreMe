@@ -1,0 +1,4 @@
+<resources>
+    <string name="today_placeholder">Chores anyone can grab will show up here. Kids\' completed chores wait for a parent\'s OK.</string>
+    <string name="today_title">Today</string>
+</resources>

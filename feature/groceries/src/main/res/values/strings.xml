@@ -1,0 +1,30 @@
+<resources>
+    <string name="grocery_quick_add">Out of something? Type it here</string>
+    <string name="grocery_to_buy">To buy (%1$d)</string>
+    <string name="grocery_restock">Restock usuals (%1$d)</string>
+    <string name="grocery_nothing_to_buy">Nothing to buy. Tap below whatever runs out.</string>
+    <string name="grocery_at_home">At home</string>
+    <string name="grocery_at_home_hint">Tap what ran out to add it to the list. Long-press to edit.</string>
+    <string name="grocery_bought">%1$s bought</string>
+    <string name="grocery_already_on_list">%1$s is already on the list</string>
+    <string name="grocery_empty_title">Your family\'s shopping list</string>
+    <string name="grocery_empty_body">Everything you add stays here for next time, so the weekly shop is just a few taps. Start with common items, or type your own above.</string>
+    <string name="grocery_add_starter">Start with common items</string>
+    <string name="grocery_edit_title">Edit item</string>
+    <string name="grocery_item_name">Name</string>
+    <string name="grocery_staple">A usual</string>
+    <string name="grocery_staple_hint">Bought most weeks. \"Restock usuals\" adds all of these at once.</string>
+    <string name="grocery_category">Aisle</string>
+    <string name="grocery_delete">Delete from the list for good</string>
+    <string name="category_produce">Fruit &amp; vegetables</string>
+    <string name="category_bakery">Bakery</string>
+    <string name="category_meat_fish">Meat &amp; fish</string>
+    <string name="category_dairy_eggs">Dairy &amp; eggs</string>
+    <string name="category_pantry">Pantry</string>
+    <string name="category_frozen">Frozen</string>
+    <string name="category_drinks">Drinks</string>
+    <string name="category_snacks">Snacks &amp; sweets</string>
+    <string name="category_household">Household &amp; cleaning</string>
+    <string name="category_personal_care">Personal care</string>
+    <string name="category_other">Other</string>
+</resources>

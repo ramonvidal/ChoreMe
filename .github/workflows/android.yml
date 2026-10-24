@@ -28,8 +28,12 @@ jobs:
           if [ -n "$GOOGLE_SERVICES_JSON" ]; then printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json; echo "Firebase config added"; fi
           if [ -n "$DEBUG_KEYSTORE_BASE64" ]; then printf '%s' "$DEBUG_KEYSTORE_BASE64" | base64 -d > app/debug.keystore; echo "Debug key added"; fi
 
+      - name: Module structure rules tests
+        run: ./gradlew -p build-logic :rules:test
+
+      # Every Gradle invocation also checks the module structure (choreme.module-rules).
       - name: Unit tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew :core:model:test testDebugUnitTest
 
       - name: Build debug APK
         run: ./gradlew assembleDebug

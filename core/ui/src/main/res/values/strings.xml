@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">ChoreMe</string>
+    <string name="coming_soon">Coming soon</string>
+    <string name="approve">Approve</string>
+    <string name="decline">Decline</string>
+    <string name="remove">Remove</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="undo">Undo</string>
+    <string name="error_generic">Something went wrong. Check your connection and try again.</string>
+    <string name="error_offline">You need to be online to join a family.</string>
+    <string name="error_name_required">Please enter a name.</string>
+    <string name="error_family_name_required">Please enter a family name.</string>
+    <string name="error_invite_code_invalid">Invite codes have 6 letters and numbers.</string>
+    <string name="error_invite_code_not_found">No family has that invite code. Check it with a parent.</string>
+</resources>

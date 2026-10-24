@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.choreme.ui.root.RootScreen
-import com.choreme.ui.theme.ChoreMeTheme
+import com.choreme.core.ui.theme.ChoreMeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

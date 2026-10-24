@@ -55,20 +55,29 @@ Open the folder in [Android Studio](https://developer.android.com/studio), with
 
 ## Tests
 
-- App logic: `./gradlew testDebugUnitTest`
+- App logic: `./gradlew :core:model:test testDebugUnitTest`
+- Module structure rules: `./gradlew -p build-logic :rules:test`
 - Firestore security rules (needs Node.js and Java): `cd firebase && npm ci && npm test`
 
 ## Project layout
 
+The app is split into small Gradle modules; the rules for what may depend on what are
+in [CLAUDE.md](CLAUDE.md) and are checked on every build.
+
 ```
-app/src/main/java/com/choreme/
-  domain/model/   Plain Kotlin models and rules (e.g. kid chores need a parent's approval)
-  domain/grocery/ Grocery list logic: quick add, suggestions, aisle guessing
-  data/           Firebase repositories: auth, families, groceries
-  di/             Hilt modules (database, Firebase)
-  domain/session/ Which screen to show: signed out, joining, waiting for approval, in a family
-  feature/        One package per screen: onboarding, today, groceries, agenda, family
-  ui/             Theme, navigation, shared composables
+app/              Activity, root screen, bottom navigation: wires the features together
+core/model/       Plain Kotlin models and rules (chores, sessions, groceries), no Android
+core/data/        Firebase repositories: auth, families, groceries
+core/ui/          Theme, shared composables, shared strings and error messages
+feature/
+  onboarding/     Sign in, create or join a family, wait for approval
+  chores/         Today tab
+  groceries/      Grocery list
+  agenda/         Agenda tab
+  family/         Members, invite code, join approvals
+build-logic/
+  convention/     Shared Gradle setup for each kind of module
+  rules/          The module structure check
 firebase/
   firestore.rules Who can read and write what; tested in firebase/test
 ```

@@ -1,5 +1,6 @@
 package com.choreme.ui.navigation
 
+import com.choreme.R
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -22,24 +23,26 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.choreme.R
-import com.choreme.feature.agenda.AgendaScreen
-import com.choreme.feature.family.FamilyScreen
-import com.choreme.feature.groceries.GroceriesScreen
-import com.choreme.feature.today.TodayScreen
+import com.choreme.feature.agenda.AGENDA_ROUTE
+import com.choreme.feature.agenda.agendaScreen
+import com.choreme.feature.chores.TODAY_ROUTE
+import com.choreme.feature.chores.todayScreen
+import com.choreme.feature.family.FAMILY_ROUTE
+import com.choreme.feature.family.familyScreen
+import com.choreme.feature.groceries.GROCERIES_ROUTE
+import com.choreme.feature.groceries.groceriesScreen
 
 enum class TopLevelDestination(
     val route: String,
     @StringRes val label: Int,
     val icon: ImageVector,
 ) {
-    Today("today", R.string.nav_today, Icons.Filled.Home),
-    Groceries("groceries", R.string.nav_groceries, Icons.Filled.ShoppingCart),
-    Agenda("agenda", R.string.nav_agenda, Icons.Filled.DateRange),
-    Family("family", R.string.nav_family, Icons.Filled.Person),
+    Today(TODAY_ROUTE, R.string.nav_today, Icons.Filled.Home),
+    Groceries(GROCERIES_ROUTE, R.string.nav_groceries, Icons.Filled.ShoppingCart),
+    Agenda(AGENDA_ROUTE, R.string.nav_agenda, Icons.Filled.DateRange),
+    Family(FAMILY_ROUTE, R.string.nav_family, Icons.Filled.Person),
 }
 
 /** The signed-in app. [pendingJoinRequests] badges the Family tab for parents. */
@@ -80,10 +83,10 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0) {
             startDestination = TopLevelDestination.Today.route,
             modifier = Modifier.padding(innerPadding),
         ) {
-            composable(TopLevelDestination.Today.route) { TodayScreen() }
-            composable(TopLevelDestination.Groceries.route) { GroceriesScreen() }
-            composable(TopLevelDestination.Agenda.route) { AgendaScreen() }
-            composable(TopLevelDestination.Family.route) { FamilyScreen() }
+            todayScreen()
+            groceriesScreen()
+            agendaScreen()
+            familyScreen()
         }
     }
 }

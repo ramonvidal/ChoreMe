@@ -9,7 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.choreme.domain.session.SessionState
+import com.choreme.core.model.session.SessionState
 import com.choreme.feature.onboarding.AwaitingApprovalScreen
 import com.choreme.feature.onboarding.FirebaseSetupScreen
 import com.choreme.feature.onboarding.OnboardingScreen

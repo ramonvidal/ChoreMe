@@ -2,10 +2,10 @@ package com.choreme.ui.root
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.choreme.data.FamilyRepository
-import com.choreme.data.FirebaseAvailability
-import com.choreme.domain.model.Role
-import com.choreme.domain.session.SessionState
+import com.choreme.core.data.FamilyRepository
+import com.choreme.core.data.FirebaseAvailability
+import com.choreme.core.model.Role
+import com.choreme.core.model.session.SessionState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
