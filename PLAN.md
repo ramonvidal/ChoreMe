@@ -8,6 +8,7 @@
 | Structure | **As modular as possible**: `:core:*` and `:feature:*` Gradle modules, rules in `CLAUDE.md`, checked on every build |
 | Sync | Firebase: Auth (Google sign-in) + Cloud Firestore (offline cache, real-time) + Cloud Messaging |
 | UI language | English |
+| Chores | **"Something needs doing"**: whoever notices it (kids too) adds it, and it's due now. Repeating is optional, folded away under "Repeat…". Adding something already open shows "already on the list" instead of a duplicate |
 | Chore assignment | **Whoever grabs it**: chores are open to everyone, and one tap claims one |
 | Kids | Kids are members with the `KID` role. Chores they complete go to a parent for **approval** before counting as done; a rejected chore goes back to the same kid |
 | Kids' sign-in | Kids **don't need a Google account**: a parent creates a kid profile, and a kid's device joins it with a parent's approval (see below) |
@@ -98,6 +99,9 @@ rules let kids make only the grab / let go / "I finished" steps, in their own na
       is switched on by each person, asks for "allow all the time" for
       background updates, and can be turned off any time. Parents save places
       where they stand, with a size of 100, 250 or 500 m.
+- [x] **Feedback round 1.** Chores reframed as "noticed needs" (anyone reports,
+      no schedule by default, duplicates caught). Grocery items get an emoji
+      each (🥛 🥚 🍞 🧻 …), falling back to their aisle's.
 - [ ] **Extras.** Home-screen widget ("Out of…" and today's chores), weekly
       scoreboard or points for kids (not needed for now), dark mode polish.
 

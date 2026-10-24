@@ -59,6 +59,11 @@ service cloud.firestore {
         && c.dueDate is string && c.dueDate.size() == 10;
     }
 
+    function isFreshChore(c) {
+      return c.status == 'OPEN' && c.claimedBy == null && c.completedBy == null
+        && c.approvedBy == null && c.lastDoneBy == null;
+    }
+
     // Kids can grab an open chore, let go of one they hold, or say they finished it.
     // Finishing only ever sends it to a parent; kids never mark chores done themselves.
     function isKidChoreStep(f) {
@@ -139,10 +144,16 @@ service cloud.firestore {
         allow delete: if isParent(f) || (signedIn() && request.auth.uid == uid);
       }
 
+      // Anyone who notices something needs doing can add it, in their own name. Kids add
+      // it as a fresh, open chore and can take back only their own untouched reports.
       match /chores/{choreId} {
         allow read: if isMember(f);
-        allow create, delete: if isParent(f) && (request.method == 'delete' || validChore(request.resource.data));
+        allow create: if isMember(f) && validChore(request.resource.data)
+          && request.resource.data.createdBy == myMemberId(f)
+          && (isParent(f) || isFreshChore(request.resource.data));
         allow update: if validChore(request.resource.data) && (isParent(f) || (isMember(f) && isKidChoreStep(f)));
+        allow delete: if isParent(f)
+          || (isMember(f) && resource.data.createdBy == myMemberId(f) && resource.data.status == 'OPEN');
       }
 
       // Shared only while someone chooses to; stopping deletes the document. Each phone

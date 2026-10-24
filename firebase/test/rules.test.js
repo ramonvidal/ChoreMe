@@ -214,10 +214,21 @@ describe('chores', () => {
     await setDoc(ref(parent('alice')), chore);
   });
 
-  test('only parents create and delete chores', async () => {
-    const kidRef = doc(kidDevice('kid1'), 'families', FAMILY, 'chores', 'new');
-    await assertFails(setDoc(kidRef, chore));
-    await assertFails(deleteDoc(ref(kidDevice('kid1'))));
+  test('anyone can report a chore, in their own name', async () => {
+    const kid = kidDevice('kid1');
+    await assertSucceeds(setDoc(doc(kid, 'families', FAMILY, 'chores', 'new'), { ...chore, createdBy: 'member-kid1' }));
+    await assertFails(setDoc(doc(kid, 'families', FAMILY, 'chores', 'fake'), { ...chore, createdBy: 'alice' }));
+    // A kid can't sneak in a chore that's already done or approved.
+    await assertFails(setDoc(doc(kid, 'families', FAMILY, 'chores', 'done'), { ...chore, createdBy: 'member-kid1', status: 'DONE' }));
+    await assertFails(setDoc(doc(kid, 'families', FAMILY, 'chores', 'mine'), { ...chore, createdBy: 'member-kid1', claimedBy: 'member-kid2' }));
+  });
+
+  test('kids can take back their own open reports, parents can delete any', async () => {
+    const kid = kidDevice('kid1');
+    await setDoc(doc(kid, 'families', FAMILY, 'chores', 'mine'), { ...chore, createdBy: 'member-kid1' });
+    await assertFails(deleteDoc(ref(kid)));
+    await assertFails(deleteDoc(doc(kidDevice('kid2'), 'families', FAMILY, 'chores', 'mine')));
+    await assertSucceeds(deleteDoc(doc(kid, 'families', FAMILY, 'chores', 'mine')));
     await assertSucceeds(deleteDoc(ref(parent('alice'))));
   });
 

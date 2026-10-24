@@ -3,13 +3,13 @@
 
     <!-- Sections -->
     <string name="section_awaiting">Waiting for a parent\'s OK</string>
-    <string name="section_to_do">To do</string>
+    <string name="section_to_do">Needs doing</string>
     <string name="section_upcoming">Coming up</string>
     <string name="section_done_today">Done today</string>
-    <string name="nothing_to_do">All done for today 🎉</string>
-    <string name="empty_title">No chores yet</string>
-    <string name="empty_body_parent">Add the chores your family shares, like dishes, laundry or the bathroom. Anyone can grab one, and kids\' finished chores come to you to approve.</string>
-    <string name="empty_body_kid">A parent hasn\'t added any chores yet.</string>
+    <string name="nothing_to_do">Nothing needs doing right now 🎉</string>
+    <string name="empty_title">Nothing needs doing</string>
+    <string name="empty_body_parent">When someone notices something, like a full sink or an overflowing bin, they add it here. Anyone can grab it, and kids\' finished chores come to you to approve.</string>
+    <string name="empty_body_kid">Noticed something that needs doing? Add it with the button below.</string>
     <string name="groceries_link">🛒 %1$d on the grocery list</string>
 
     <!-- Chore cards -->
@@ -31,7 +31,11 @@
         <item quantity="other">%d days late</item>
     </plurals>
     <string name="someone">Someone</string>
-    <string name="add_chore">Add chore</string>
+    <string name="add_chore">Something needs doing</string>
+    <string name="add_chore_title">What needs doing?</string>
+    <string name="already_on_list">%1$s is already on the list</string>
+    <string name="reported_by">%1$s noticed</string>
+    <string name="reported_by_you">You noticed</string>
     <string name="edit_chore">Edit chore</string>
 
     <!-- Repeat -->
@@ -45,7 +49,9 @@
 
     <!-- Editor -->
     <string name="editor_title_label">What needs doing</string>
-    <string name="editor_repeat">Repeat</string>
+    <string name="editor_repeat_show">Repeat…</string>
+    <string name="editor_repeat_hide">Don\'t show repeat options</string>
+    <string name="editor_repeats">Repeats: %1$s</string>
     <string name="editor_every_n_days">Every few days</string>
     <string name="editor_weekdays">On certain days</string>
     <string name="editor_days_less">Fewer days</string>

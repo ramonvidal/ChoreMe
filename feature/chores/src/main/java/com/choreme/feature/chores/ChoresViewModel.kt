@@ -16,6 +16,7 @@ import com.choreme.core.model.chore.approve
 import com.choreme.core.model.chore.buildTodayBoard
 import com.choreme.core.model.chore.claim
 import com.choreme.core.model.chore.complete
+import com.choreme.core.model.chore.findOpenDuplicate
 import com.choreme.core.model.chore.completeFor
 import com.choreme.core.model.chore.reject
 import com.choreme.core.model.chore.unclaim
@@ -36,11 +37,12 @@ data class ChoresUiState(
     val me: Member? = null,
     val today: LocalDate = LocalDate.now(),
     val board: TodayBoard = TodayBoard(emptyList(), emptyList(), emptyList(), emptyList()),
-    val hasChores: Boolean = false,
+    val chores: List<Chore> = emptyList(),
     val members: Map<String, Member> = emptyMap(),
     val groceriesToBuy: Int = 0,
 ) {
     val isParent get() = me?.role == Role.PARENT
+    val hasChores get() = chores.isNotEmpty()
     val kids get() = members.values.filter { it.role == Role.KID }.sortedBy { it.name.lowercase() }
     fun nameOf(memberId: String?): String? = memberId?.let { members[it]?.name }
 }
@@ -75,7 +77,7 @@ class ChoresViewModel @Inject constructor(
                         ?: Member(session.memberId, name = "", role = session.role),
                     today = today,
                     board = buildTodayBoard(allChores, today),
-                    hasChores = allChores.isNotEmpty(),
+                    chores = allChores,
                     members = members.associateBy { it.id },
                     groceriesToBuy = groceryItems.count { it.isNeeded },
                 )
@@ -90,14 +92,19 @@ class ChoresViewModel @Inject constructor(
     fun approve(chore: Chore) = change(chore) { me, today -> approve(me, today) }
     fun reject(chore: Chore) = change(chore) { me, _ -> reject(me) }
 
-    fun create(draft: ChoreDraft) {
-        val (familyId, me) = context() ?: return
+    /** Adds the chore unless the same thing is already waiting to be done; returns that one if so. */
+    fun create(draft: ChoreDraft): Chore? {
+        findOpenDuplicate(draft.title, uiState.value.chores)?.let { return it }
+        val (familyId, me) = context() ?: return null
         chores.create(
             familyId,
             me.id,
             Chore(id = "", title = draft.title.trim(), template = draft.template, recurrence = draft.recurrence, dueDate = draft.dueDate),
         )
+        return null
     }
+
+
 
     fun update(chore: Chore, draft: ChoreDraft) = change(chore) { _, _ ->
         copy(title = draft.title.trim(), template = draft.template, recurrence = draft.recurrence, dueDate = draft.dueDate)

@@ -66,6 +66,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.choreme.core.model.grocery.CategoryGroup
 import com.choreme.core.model.grocery.GroceryCategory
+import com.choreme.core.model.grocery.GroceryIcons
 import com.choreme.core.model.grocery.GroceryItem
 import com.choreme.core.model.grocery.QuickAddResult
 import kotlinx.coroutines.launch
@@ -232,7 +233,7 @@ private fun EmptyCatalog(onAddStarter: () -> Unit) {
 @Composable
 private fun CategoryHeader(category: GroceryCategory) {
     Text(
-        stringResource(category.label),
+        "${GroceryIcons.forCategory(category)}  ${stringResource(category.label)}",
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
@@ -251,6 +252,8 @@ private fun ToBuyRow(item: GroceryItem, onBought: () -> Unit, onEdit: () -> Unit
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(checked = false, onCheckedChange = { onBought() })
+        Text(item.icon, style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.width(12.dp))
         Text(item.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
         if (item.isStaple) StapleIcon()
     }
@@ -281,11 +284,13 @@ private fun ItemChip(item: GroceryItem, onClick: () -> Unit, onLongClick: () -> 
             modifier = Modifier.heightIn(min = 40.dp).padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (item.isStaple) {
-                StapleIcon()
-                Spacer(Modifier.width(4.dp))
-            }
+            Text(item.icon)
+            Spacer(Modifier.width(6.dp))
             Text(item.name, style = MaterialTheme.typography.bodyMedium)
+            if (item.isStaple) {
+                Spacer(Modifier.width(4.dp))
+                StapleIcon()
+            }
         }
     }
 }
@@ -313,7 +318,7 @@ private fun EditItemDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.grocery_edit_title)) },
+        title = { Text("${GroceryIcons.forItem(name, category)}  ${stringResource(R.string.grocery_edit_title)}") },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
@@ -366,3 +371,5 @@ private fun EditItemDialog(
 
 // Matches the limit in firestore.rules.
 private const val MAX_NAME_LENGTH = 60
+
+private val GroceryItem.icon: String get() = GroceryIcons.forItem(name, category)

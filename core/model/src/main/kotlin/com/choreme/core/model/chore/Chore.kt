@@ -18,19 +18,19 @@ enum class ChoreStatus {
     DONE,
 }
 
-/** Common chores with a sensible default schedule; [OTHER] is anything typed by hand. */
-enum class ChoreTemplate(val defaultRecurrence: Recurrence) {
-    DISHES(Recurrence.EveryDays(1)),
-    LAUNDRY(Recurrence.EveryDays(3)),
-    FOLD_CLOTHES(Recurrence.EveryDays(3)),
-    CLEAN_KITCHEN(Recurrence.EveryDays(1)),
-    CLEAN_BATHROOM(Recurrence.EveryDays(7)),
-    TRASH(Recurrence.EveryDays(2)),
-    VACUUM(Recurrence.EveryDays(7)),
-    MAKE_BEDS(Recurrence.EveryDays(1)),
-    WATER_PLANTS(Recurrence.EveryDays(3)),
-    GROCERIES(Recurrence.EveryDays(7)),
-    OTHER(Recurrence.Once),
+/** Things that often need doing around the house; [OTHER] is anything typed by hand. */
+enum class ChoreTemplate {
+    DISHES,
+    LAUNDRY,
+    FOLD_CLOTHES,
+    CLEAN_KITCHEN,
+    CLEAN_BATHROOM,
+    TRASH,
+    VACUUM,
+    MAKE_BEDS,
+    WATER_PLANTS,
+    GROCERIES,
+    OTHER,
 }
 
 data class Chore(
@@ -46,6 +46,8 @@ data class Chore(
     val approvedBy: String? = null,
     val lastDoneBy: String? = null,
     val lastDoneOn: LocalDate? = null,
+    /** Who noticed it needed doing. */
+    val reportedBy: String? = null,
 ) {
     fun isOverdue(today: LocalDate) = isActive && dueDate < today
 
@@ -113,4 +115,13 @@ private fun Chore.finish(doneBy: String, approvedBy: String?, today: LocalDate):
             lastDoneOn = today,
         )
     }
+}
+
+/**
+ * A chore with the same name that still needs doing, if there is one, so two people
+ * noticing the full sink don't add "Wash dishes" twice.
+ */
+fun findOpenDuplicate(title: String, chores: List<Chore>): Chore? {
+    val key = title.trim().lowercase()
+    return chores.firstOrNull { (it.isActive || it.status == ChoreStatus.PENDING_APPROVAL) && it.title.trim().lowercase() == key }
 }

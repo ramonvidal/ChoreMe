@@ -3,6 +3,7 @@ package com.choreme.core.data.remote
 import com.choreme.core.data.remote.FirestoreSchema.APPROVED_BY
 import com.choreme.core.data.remote.FirestoreSchema.CLAIMED_BY
 import com.choreme.core.data.remote.FirestoreSchema.COMPLETED_BY
+import com.choreme.core.data.remote.FirestoreSchema.CREATED_BY
 import com.choreme.core.data.remote.FirestoreSchema.DUE_DATE
 import com.choreme.core.data.remote.FirestoreSchema.EVERY_DAYS
 import com.choreme.core.data.remote.FirestoreSchema.LAST_DONE_BY
@@ -65,5 +66,7 @@ internal fun DocumentSnapshot.toChore(): Chore? = runCatching {
         approvedBy = getString(APPROVED_BY),
         lastDoneBy = getString(LAST_DONE_BY),
         lastDoneOn = getString(LAST_DONE_ON)?.let(LocalDate::parse),
+        // Written once when the chore is reported, never changed afterwards.
+        reportedBy = getString(CREATED_BY),
     )
 }.getOrNull()

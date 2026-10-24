@@ -36,18 +36,7 @@ object CategoryGuesser {
         ),
     )
 
-    private val patterns: List<Pair<Regex, GroceryCategory>> = keywords
-        .flatMap { (category, words) -> words.map { Regex("\\b${Regex.escape(it)}") to category } }
+    private val matcher = KeywordMatcher(keywords)
 
-    /**
-     * The last word usually names the item ("orange juice" is a drink), so the match
-     * ending latest wins; on a tie the longer keyword wins ("peanut butter" over "butter").
-     */
-    fun guess(name: String): GroceryCategory {
-        val lower = name.lowercase()
-        return patterns
-            .mapNotNull { (pattern, category) -> pattern.find(lower)?.let { Triple(it.range.last, it.value.length, category) } }
-            .maxWithOrNull(compareBy({ it.first }, { it.second }))
-            ?.third ?: GroceryCategory.OTHER
-    }
+    fun guess(name: String): GroceryCategory = matcher.match(name) ?: GroceryCategory.OTHER
 }

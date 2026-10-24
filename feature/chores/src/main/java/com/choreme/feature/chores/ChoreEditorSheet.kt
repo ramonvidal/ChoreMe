@@ -45,7 +45,10 @@ import java.time.LocalDate
 
 private enum class RepeatKind { ONCE, EVERY_DAYS, WEEKLY }
 
-/** Adds a chore ([chore] null) or edits one. Picking a template fills in its title and usual schedule. */
+/**
+ * Reports something that needs doing ([chore] null) or edits a chore. Picking a template
+ * fills in the title. Repeating is an extra, folded away under "Repeat".
+ */
 @Composable
 internal fun ChoreEditorSheet(
     chore: Chore?,
@@ -54,7 +57,7 @@ internal fun ChoreEditorSheet(
     onDelete: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
-    val initialRecurrence = chore?.recurrence ?: Recurrence.EveryDays(1)
+    val initialRecurrence = chore?.recurrence ?: Recurrence.Once
     var template by remember { mutableStateOf(chore?.template) }
     var title by remember { mutableStateOf(chore?.title.orEmpty()) }
     var titleFromTemplate by remember { mutableStateOf<String?>(null) }
@@ -62,6 +65,7 @@ internal fun ChoreEditorSheet(
     var everyDays by remember { mutableIntStateOf((initialRecurrence as? Recurrence.EveryDays)?.days ?: 1) }
     var weekDays by remember { mutableStateOf((initialRecurrence as? Recurrence.Weekly)?.days ?: setOf(DayOfWeek.SATURDAY)) }
     var dueDate by remember { mutableStateOf(chore?.dueDate ?: today) }
+    var showRepeat by remember { mutableStateOf(initialRecurrence != Recurrence.Once) }
 
     val templateTitles = ChoreTemplate.entries.associateWith { stringResource(it.title) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -72,11 +76,6 @@ internal fun ChoreEditorSheet(
         if (picked != ChoreTemplate.OTHER && (title.isBlank() || title == titleFromTemplate)) {
             title = templateTitles.getValue(picked)
             titleFromTemplate = title
-        }
-        if (chore == null) {
-            val recurrence = picked.defaultRecurrence
-            kind = recurrence.kind()
-            if (recurrence is Recurrence.EveryDays) everyDays = recurrence.days
         }
     }
 
@@ -91,7 +90,7 @@ internal fun ChoreEditorSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                stringResource(if (chore == null) R.string.add_chore else R.string.edit_chore),
+                stringResource(if (chore == null) R.string.add_chore_title else R.string.edit_chore),
                 style = MaterialTheme.typography.titleLarge,
             )
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -112,59 +111,27 @@ internal fun ChoreEditorSheet(
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            Text(stringResource(R.string.editor_repeat), style = MaterialTheme.typography.labelLarge)
-            RepeatOption(stringResource(R.string.repeat_once), kind == RepeatKind.ONCE) { kind = RepeatKind.ONCE }
-            RepeatOption(stringResource(R.string.repeat_daily), kind == RepeatKind.EVERY_DAYS && everyDays == 1) {
-                kind = RepeatKind.EVERY_DAYS
-                everyDays = 1
+            // Most chores are a one-off "this needs doing now"; repeating is there for those who want it.
+            TextButton(onClick = { showRepeat = !showRepeat }) {
+                Text(
+                    when {
+                        showRepeat -> stringResource(R.string.editor_repeat_hide)
+                        kind == RepeatKind.ONCE -> stringResource(R.string.editor_repeat_show)
+                        else -> stringResource(R.string.editor_repeats, currentRecurrenceLabel(kind, everyDays, weekDays))
+                    },
+                )
             }
-            RepeatOption(stringResource(R.string.editor_every_n_days), kind == RepeatKind.EVERY_DAYS && everyDays > 1) {
-                kind = RepeatKind.EVERY_DAYS
-                if (everyDays == 1) everyDays = 2
-            }
-            if (kind == RepeatKind.EVERY_DAYS && everyDays > 1) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 40.dp)) {
-                    OutlinedIconButton(onClick = { if (everyDays > 2) everyDays-- }) {
-                        Text("−", style = MaterialTheme.typography.titleLarge)
-                    }
-                    Text(
-                        recurrenceLabel(Recurrence.EveryDays(everyDays)),
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    )
-                    OutlinedIconButton(onClick = { if (everyDays < Recurrence.MAX_DAYS) everyDays++ }) {
-                        Text("+", style = MaterialTheme.typography.titleLarge)
-                    }
-                }
-            }
-            RepeatOption(stringResource(R.string.editor_weekdays), kind == RepeatKind.WEEKLY) { kind = RepeatKind.WEEKLY }
-            if (kind == RepeatKind.WEEKLY) {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(start = 40.dp),
-                ) {
-                    WEEK.forEach { day ->
-                        FilterChip(
-                            selected = day in weekDays,
-                            onClick = { weekDays = if (day in weekDays) weekDays - day else weekDays + day },
-                            label = { Text(day.shortName()) },
-                        )
-                    }
-                }
-            }
-
-            Text(stringResource(R.string.editor_starts), style = MaterialTheme.typography.labelLarge)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(today, today.plusDays(1)).forEach { date ->
-                    FilterChip(
-                        selected = dueDate == date,
-                        onClick = { dueDate = date },
-                        label = { Text(dayLabel(date, today)) },
-                    )
-                }
-                if (dueDate != today && dueDate != today.plusDays(1)) {
-                    FilterChip(selected = true, onClick = {}, label = { Text(stringResource(R.string.editor_starts_on, dayLabel(dueDate, today))) })
-                }
-            }
+            if (showRepeat) RepeatSection(
+                kind = kind,
+                everyDays = everyDays,
+                weekDays = weekDays,
+                dueDate = dueDate,
+                today = today,
+                onKind = { kind = it },
+                onEveryDays = { everyDays = it },
+                onWeekDays = { weekDays = it },
+                onDueDate = { dueDate = it },
+            )
 
             val recurrence = when (kind) {
                 RepeatKind.ONCE -> Recurrence.Once
@@ -182,13 +149,80 @@ internal fun ChoreEditorSheet(
                 Spacer(Modifier.width(8.dp))
                 Button(
                     onClick = {
-                        onSave(ChoreDraft(title, template ?: ChoreTemplate.OTHER, checkNotNull(recurrence), dueDate))
+                        val due = if (chore == null && recurrence == Recurrence.Once) today else dueDate
+                        onSave(ChoreDraft(title, template ?: ChoreTemplate.OTHER, checkNotNull(recurrence), due))
                     },
                     enabled = title.isNotBlank() && recurrence != null,
                 ) { Text(stringResource(CoreUiR.string.save)) }
             }
         }
     }
+}
+
+@Composable
+private fun RepeatSection(
+    kind: RepeatKind,
+    everyDays: Int,
+    weekDays: Set<DayOfWeek>,
+    dueDate: LocalDate,
+    today: LocalDate,
+    onKind: (RepeatKind) -> Unit,
+    onEveryDays: (Int) -> Unit,
+    onWeekDays: (Set<DayOfWeek>) -> Unit,
+    onDueDate: (LocalDate) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        RepeatOption(stringResource(R.string.repeat_once), kind == RepeatKind.ONCE) { onKind(RepeatKind.ONCE) }
+        RepeatOption(stringResource(R.string.repeat_daily), kind == RepeatKind.EVERY_DAYS && everyDays == 1) {
+            onKind(RepeatKind.EVERY_DAYS)
+            onEveryDays(1)
+        }
+        RepeatOption(stringResource(R.string.editor_every_n_days), kind == RepeatKind.EVERY_DAYS && everyDays > 1) {
+            onKind(RepeatKind.EVERY_DAYS)
+            if (everyDays == 1) onEveryDays(2)
+        }
+        if (kind == RepeatKind.EVERY_DAYS && everyDays > 1) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 40.dp)) {
+                OutlinedIconButton(onClick = { if (everyDays > 2) onEveryDays(everyDays - 1) }) {
+                    Text("−", style = MaterialTheme.typography.titleLarge)
+                }
+                Text(recurrenceLabel(Recurrence.EveryDays(everyDays)), modifier = Modifier.padding(horizontal = 16.dp))
+                OutlinedIconButton(onClick = { if (everyDays < Recurrence.MAX_DAYS) onEveryDays(everyDays + 1) }) {
+                    Text("+", style = MaterialTheme.typography.titleLarge)
+                }
+            }
+        }
+        RepeatOption(stringResource(R.string.editor_weekdays), kind == RepeatKind.WEEKLY) { onKind(RepeatKind.WEEKLY) }
+        if (kind == RepeatKind.WEEKLY) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(start = 40.dp)) {
+                WEEK.forEach { day ->
+                    FilterChip(
+                        selected = day in weekDays,
+                        onClick = { onWeekDays(if (day in weekDays) weekDays - day else weekDays + day) },
+                        label = { Text(day.shortName()) },
+                    )
+                }
+            }
+        }
+        if (kind != RepeatKind.ONCE) {
+            Text(stringResource(R.string.editor_starts), style = MaterialTheme.typography.labelLarge)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(today, today.plusDays(1)).forEach { date ->
+                    FilterChip(selected = dueDate == date, onClick = { onDueDate(date) }, label = { Text(dayLabel(date, today)) })
+                }
+                if (dueDate != today && dueDate != today.plusDays(1)) {
+                    FilterChip(selected = true, onClick = {}, label = { Text(stringResource(R.string.editor_starts_on, dayLabel(dueDate, today))) })
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun currentRecurrenceLabel(kind: RepeatKind, everyDays: Int, weekDays: Set<DayOfWeek>): String = when (kind) {
+    RepeatKind.ONCE -> recurrenceLabel(Recurrence.Once)
+    RepeatKind.EVERY_DAYS -> recurrenceLabel(Recurrence.EveryDays(everyDays))
+    RepeatKind.WEEKLY -> if (weekDays.isEmpty()) recurrenceLabel(Recurrence.Once) else recurrenceLabel(Recurrence.Weekly(weekDays))
 }
 
 @Composable

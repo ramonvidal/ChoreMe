@@ -85,3 +85,15 @@ class ChoreTest {
         assertEquals("mom", done.approvedBy)
     }
 }
+
+class DuplicateChoreTest {
+    private val today = LocalDate.of(2026, 10, 25)
+
+    @Test
+    fun `an open chore with the same name is a duplicate, a finished one isn't`() {
+        val open = Chore(id = "1", title = "Wash dishes", dueDate = today)
+        val done = Chore(id = "2", title = "Clean bathroom", dueDate = today, status = ChoreStatus.DONE)
+        assertEquals(open, findOpenDuplicate("  wash DISHES ", listOf(open, done)))
+        assertNull(findOpenDuplicate("Clean bathroom", listOf(open, done)))
+    }
+}

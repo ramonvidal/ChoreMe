@@ -32,6 +32,8 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,6 +41,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +57,8 @@ import com.choreme.core.ui.emoji
 import com.choreme.core.model.Member
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreStatus
+import com.choreme.core.model.chore.Recurrence
+import kotlinx.coroutines.launch
 import java.time.temporal.ChronoUnit
 
 @Composable
@@ -62,6 +67,10 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
     var editing by remember { mutableStateOf<Chore?>(null) }
     var adding by remember { mutableStateOf(false) }
     var doneByFor by remember { mutableStateOf<Chore?>(null) }
+
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     AskForNotificationPermission()
 
@@ -130,7 +139,8 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
             }
         }
 
-        if (state.isParent) {
+        // Anyone who notices something can add it, kids included.
+        if (state.me != null) {
             ExtendedFloatingActionButton(
                 onClick = { adding = true },
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
@@ -138,15 +148,18 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
             )
         }
+        SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp))
     }
 
     if (adding) {
         ChoreEditorSheet(
             chore = null,
             today = state.today,
-            onSave = {
-                viewModel.create(it)
+            onSave = { draft ->
                 adding = false
+                viewModel.create(draft)?.let { existing ->
+                    scope.launch { snackbar.showSnackbar(context.getString(R.string.already_on_list, existing.title)) }
+                }
             },
             onDelete = null,
             onDismiss = { adding = false },
@@ -236,7 +249,12 @@ private fun ChoreCard(
 
     val details = buildList {
         if (overdueDays > 0) add(pluralStringResource(R.plurals.overdue_days, overdueDays, overdueDays))
-        add(recurrenceLabel(chore.recurrence))
+        when (chore.reportedBy) {
+            null -> Unit
+            me.id -> add(stringResource(R.string.reported_by_you))
+            else -> state.nameOf(chore.reportedBy)?.let { add(stringResource(R.string.reported_by, it)) }
+        }
+        if (chore.recurrence != Recurrence.Once) add(recurrenceLabel(chore.recurrence))
         when {
             claimedByMe -> add(stringResource(R.string.you_are_on_it))
             claimedByOther -> add(stringResource(R.string.on_it, state.nameOf(chore.claimedBy) ?: stringResource(R.string.someone)))
