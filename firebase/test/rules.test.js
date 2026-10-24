@@ -13,6 +13,7 @@ import {
   getDocs,
   collection,
   setDoc,
+  updateDoc,
   writeBatch,
 } from 'firebase/firestore';
 
@@ -156,6 +157,43 @@ describe('kids inside the family', () => {
   test('a parent can remove a kid device, which loses access', async () => {
     await assertSucceeds(deleteDoc(doc(parent('alice'), 'families', FAMILY, 'memberUids', 'kid1')));
     await assertFails(getDocs(collection(kidDevice('kid1'), 'families', FAMILY, 'members')));
+  });
+});
+
+describe('grocery list', () => {
+  const milk = { name: 'Milk', category: 'DAIRY_EGGS', isNeeded: true, isStaple: true };
+
+  beforeEach(async () => {
+    await createFamilyBatch(parent('alice'), 'alice');
+    await setDoc(doc(kidDevice('kid1'), 'families', FAMILY, 'joinRequests', 'kid1'), joinRequest('KID'));
+    await approveKidBatch(parent('alice'), 'kid1');
+  });
+
+  test('kids can add items and tick them off', async () => {
+    const db = kidDevice('kid1');
+    const ref = doc(db, 'families', FAMILY, 'groceryItems', 'milk');
+    await assertSucceeds(setDoc(ref, milk));
+    await assertSucceeds(updateDoc(ref, { isNeeded: false }));
+    await assertSucceeds(getDocs(collection(db, 'families', FAMILY, 'groceryItems')));
+  });
+
+  test('outsiders and pending devices cannot see or change the list', async () => {
+    await setDoc(doc(parent('alice'), 'families', FAMILY, 'groceryItems', 'milk'), milk);
+    await setDoc(doc(kidDevice('kid2'), 'families', FAMILY, 'joinRequests', 'kid2'), joinRequest('KID'));
+    for (const db of [parent('mallory'), kidDevice('kid2')]) {
+      await assertFails(getDocs(collection(db, 'families', FAMILY, 'groceryItems')));
+      await assertFails(setDoc(doc(db, 'families', FAMILY, 'groceryItems', 'beer'), { ...milk, name: 'Beer' }));
+      await assertFails(deleteDoc(doc(db, 'families', FAMILY, 'groceryItems', 'milk')));
+    }
+  });
+
+  test('malformed items are rejected', async () => {
+    const db = parent('alice');
+    const ref = doc(db, 'families', FAMILY, 'groceryItems', 'x');
+    await assertFails(setDoc(ref, { ...milk, name: '' }));
+    await assertFails(setDoc(ref, { ...milk, name: 'x'.repeat(61) }));
+    await assertFails(setDoc(ref, { ...milk, isNeeded: 'yes' }));
+    await assertFails(setDoc(ref, { name: 'Milk' }));
   });
 });
 

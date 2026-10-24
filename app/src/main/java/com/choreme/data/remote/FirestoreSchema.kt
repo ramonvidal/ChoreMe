@@ -1,5 +1,7 @@
 package com.choreme.data.remote
 
+import com.choreme.domain.grocery.GroceryCategory
+import com.choreme.domain.grocery.GroceryItem
 import com.choreme.domain.model.Family
 import com.choreme.domain.model.JoinRequest
 import com.choreme.domain.model.Member
@@ -16,6 +18,7 @@ object FirestoreSchema {
     const val MEMBERS = "members"
     const val MEMBER_UIDS = "memberUids"
     const val JOIN_REQUESTS = "joinRequests"
+    const val GROCERY_ITEMS = "groceryItems"
 
     const val FAMILY_ID = "familyId"
     const val FAMILY_NAME = "familyName"
@@ -28,6 +31,11 @@ object FirestoreSchema {
     const val UIDS = "uids"
     const val MEMBER_ID = "memberId"
     const val DEVICE_NAME = "deviceName"
+    const val CATEGORY = "category"
+    const val IS_NEEDED = "isNeeded"
+    const val IS_STAPLE = "isStaple"
+    const val UPDATED_AT = "updatedAt"
+    const val UPDATED_BY = "updatedBy"
 }
 
 private fun DocumentSnapshot.role(): Role =
@@ -62,4 +70,13 @@ fun DocumentSnapshot.toJoinRequest() = JoinRequest(
     name = getString(FirestoreSchema.NAME).orEmpty(),
     role = role(),
     deviceName = getString(FirestoreSchema.DEVICE_NAME).orEmpty(),
+)
+
+fun DocumentSnapshot.toGroceryItem() = GroceryItem(
+    id = id,
+    name = getString(FirestoreSchema.NAME).orEmpty(),
+    category = runCatching { GroceryCategory.valueOf(getString(FirestoreSchema.CATEGORY).orEmpty()) }
+        .getOrDefault(GroceryCategory.OTHER),
+    isNeeded = getBoolean(FirestoreSchema.IS_NEEDED) ?: false,
+    isStaple = getBoolean(FirestoreSchema.IS_STAPLE) ?: false,
 )

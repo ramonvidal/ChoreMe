@@ -8,7 +8,7 @@ See [PLAN.md](PLAN.md) for the roadmap and design decisions.
 
 ## Tech stack
 
-Kotlin, Jetpack Compose (Material 3), Hilt, Room, and Firebase (Auth, Firestore,
+Kotlin, Jetpack Compose (Material 3), Hilt, and Firebase (Auth, Firestore,
 Cloud Messaging). Minimum Android 8.0 (API 26).
 
 ## Setting up Firebase (one time)
@@ -63,7 +63,8 @@ Open the folder in [Android Studio](https://developer.android.com/studio), with
 ```
 app/src/main/java/com/choreme/
   domain/model/   Plain Kotlin models and rules (e.g. kid chores need a parent's approval)
-  data/           Firebase repositories (auth, families) and Room
+  domain/grocery/ Grocery list logic: quick add, suggestions, aisle guessing
+  data/           Firebase repositories: auth, families, groceries
   di/             Hilt modules (database, Firebase)
   domain/session/ Which screen to show: signed out, joining, waiting for approval, in a family
   feature/        One package per screen: onboarding, today, groceries, agenda, family

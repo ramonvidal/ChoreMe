@@ -41,6 +41,13 @@ service cloud.firestore {
       return name is string && name.size() > 0 && name.size() <= 40;
     }
 
+    function validGroceryItem(item) {
+      return item.name is string && item.name.size() > 0 && item.name.size() <= 60
+        && item.category is string && item.category.size() <= 30
+        && item.isNeeded is bool
+        && item.isStaple is bool;
+    }
+
     // Pointer from a user to their family, for finding it again after signing in.
     // It grants nothing: access is checked against memberUids.
     match /users/{uid} {
@@ -91,6 +98,12 @@ service cloud.firestore {
           && request.resource.data.role in ['PARENT', 'KID']
           && !(isAnonymous() && request.resource.data.role == 'PARENT');
         allow delete: if isParent(f) || (signedIn() && request.auth.uid == uid);
+      }
+
+      // Everyone in the family, kids included, can say "we're out of eggs".
+      match /groceryItems/{itemId} {
+        allow read, delete: if isMember(f);
+        allow create, update: if isMember(f) && validGroceryItem(request.resource.data);
       }
     }
   }

@@ -13,6 +13,7 @@
 | Rewards | None for now: **parent approval is enough** |
 | Calendar | Use the family's **existing Google Calendar** (user picks it from their calendar list); Google sends the alerts |
 | Location | Deferred to the last phase |
+| Offline | Firestore's built-in offline cache; no separate local database. Writes show up at once and sync when there's signal |
 
 ## Sharing and sync
 
@@ -31,10 +32,10 @@ families/{familyId}              name, inviteCode, createdBy
   memberUids/{uid}               memberId, role: the access list, one entry per signed-in device
   members/{memberId}             name, role (PARENT | KID), color, uids[]
   joinRequests/{uid}             name, role, deviceName, createdAt
+  groceryItems/{itemId}          name, category, isNeeded, isStaple, updatedAt, updatedBy
+  chores/{choreId}               (Phase 3) title, icon, recurrence, status, claimedBy, completedBy, approvedBy
 inviteCodes/{code}               familyId, familyName
 users/{uid}                      familyId, familyName: lets a device find its family again
-  chores/{choreId}               title, icon, recurrence, status, claimedBy, completedBy, approvedBy
-  groceryItems/{itemId}          name, category, isNeeded, isStaple, updatedAt
 ```
 
 ### Kids without a Google account
@@ -58,15 +59,18 @@ to `DONE`. The rule lives in `domain/model/Chore.kt` and is unit tested.
 ## Phases
 
 - [x] **Phase 0: Skeleton.** Compose app with bottom navigation (Today, Groceries,
-      Agenda, Family), Hilt, Room, Firebase wiring, chore approval rules with tests,
+      Agenda, Family), Hilt, Firebase wiring, chore approval rules with tests,
       GitHub Actions building the APK.
 - [x] **Phase 1: Family and accounts.** Google sign-in for parents, anonymous
       sign-in for kids, create a family, ask to join by invite code, parent
       approval of every join, members list, kid profiles with or without a device,
       Firestore security rules with emulator tests.
-- [ ] **Phase 2: Groceries.** Staples catalog grouped by category; tap to mark
-      "out of", tap again in the store to mark bought; "weekly restock" button;
-      quick add with autocomplete; live sync.
+- [x] **Phase 2: Groceries.** One catalog per family where items move between
+      "at home" and "to buy": tap what ran out, tick it off in the store (with
+      undo). Quick add with autocomplete that never duplicates an item, automatic
+      aisle sorting in store order, starred "usuals" with one-tap restock, a
+      starter list for new families, and offline-first sync. Item ids come from
+      the name, so two phones adding "Milk" offline end up with one item.
 - [ ] **Phase 3: Chores.** Templates (laundry, dishes, kitchen, bathroom, fold
       clothes, …), recurrence, grab/complete, parent approval queue, push
       notifications for overdue chores and approvals. A "Go grocery shopping"
