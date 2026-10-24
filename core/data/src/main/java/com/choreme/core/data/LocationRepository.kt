@@ -73,17 +73,16 @@ class LocationRepository @Inject constructor(
         return GeoPoint(latitude, longitude)
     }
 
-    private fun DocumentSnapshot.toMemberLocation(): MemberLocation? = MemberLocation(
-        memberId = id,
-        point = point() ?: return null,
-        accuracyMeters = getDouble(ACCURACY)?.toFloat() ?: 0f,
-        at = Instant.ofEpochMilli(getLong(AT) ?: return null),
-    )
+    private fun DocumentSnapshot.toMemberLocation(): MemberLocation? {
+        val point = point() ?: return null
+        val at = getLong(AT) ?: return null
+        return MemberLocation(id, point, accuracyMeters = getDouble(ACCURACY)?.toFloat() ?: 0f, at = Instant.ofEpochMilli(at))
+    }
 
-    private fun DocumentSnapshot.toPlace(): Place? = Place(
-        id = id,
-        name = getString(NAME) ?: return null,
-        center = point() ?: return null,
-        radiusMeters = getLong(RADIUS)?.toInt() ?: return null,
-    )
+    private fun DocumentSnapshot.toPlace(): Place? {
+        val name = getString(NAME) ?: return null
+        val center = point() ?: return null
+        val radius = getLong(RADIUS)?.toInt() ?: return null
+        return Place(id, name, center, radius)
+    }
 }
