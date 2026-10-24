@@ -179,11 +179,12 @@ class FamilyRepository @Inject constructor(
         members(familyId).document().set(memberData(name, Role.KID, color, emptyList())).await()
     }
 
-    /** Removes the member and signs all their devices out of the family. */
+    /** Removes the member, signs all their devices out of the family and deletes their shared location. */
     suspend fun removeMember(familyId: String, member: Member) {
         val batch = db.batch()
         member.uids.forEach { batch.delete(memberUids(familyId).document(it)) }
         batch.delete(members(familyId).document(member.id))
+        batch.delete(family(familyId).collection(FirestoreSchema.LOCATIONS).document(member.id))
         batch.commit().await()
     }
 

@@ -74,6 +74,19 @@ service cloud.firestore {
         );
     }
 
+    function validPoint(d) {
+      return d.latitude is number && d.latitude >= -90 && d.latitude <= 90
+        && d.longitude is number && d.longitude >= -180 && d.longitude <= 180;
+    }
+
+    function validLocation(d) {
+      return validPoint(d) && d.accuracy is number && d.at is int;
+    }
+
+    function validPlace(d) {
+      return validName(d.name) && validPoint(d) && d.radius is int && d.radius >= 50 && d.radius <= 2000;
+    }
+
     // Pointer from a user to their family, for finding it again after signing in.
     // It grants nothing: access is checked against memberUids.
     match /users/{uid} {
@@ -130,6 +143,20 @@ service cloud.firestore {
         allow read: if isMember(f);
         allow create, delete: if isParent(f) && (request.method == 'delete' || validChore(request.resource.data));
         allow update: if validChore(request.resource.data) && (isParent(f) || (isMember(f) && isKidChoreStep(f)));
+      }
+
+      // Shared only while someone chooses to; stopping deletes the document. Each phone
+      // can only write the location of the member it belongs to.
+      match /locations/{memberId} {
+        allow read: if isMember(f);
+        allow create, update: if isMember(f) && myMemberId(f) == memberId && validLocation(request.resource.data);
+        allow delete: if isMember(f) && (myMemberId(f) == memberId || isParent(f));
+      }
+
+      match /places/{placeId} {
+        allow read: if isMember(f);
+        allow create, update: if isParent(f) && validPlace(request.resource.data);
+        allow delete: if isParent(f);
       }
 
       // Everyone in the family, kids included, can say "we're out of eggs".

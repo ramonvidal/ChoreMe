@@ -70,11 +70,13 @@ core/model/       Plain Kotlin models and rules (chores, sessions, groceries), n
 core/data/        Firebase repositories: auth, families, groceries
 core/ui/          Theme, shared composables, shared strings and error messages
 core/calendar/    The phone's calendars: read events, add events with alerts
+core/location/    The phone's position, location permissions, the "share my location" switch
 feature/
   onboarding/     Sign in, create or join a family, wait for approval
   chores/         Today tab
   groceries/      Grocery list
   agenda/         Family calendar and chores, day by day
+  map/            Where everyone who shares is, on OpenStreetMap
   family/         Members, invite code, join approvals
 build-logic/
   convention/     Shared Gradle setup for each kind of module

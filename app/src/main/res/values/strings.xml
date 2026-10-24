@@ -3,4 +3,5 @@
     <string name="nav_groceries">Groceries</string>
     <string name="nav_agenda">Agenda</string>
     <string name="nav_family">Family</string>
+    <string name="nav_map">Map</string>
 </resources>

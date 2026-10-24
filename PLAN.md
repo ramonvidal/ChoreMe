@@ -13,7 +13,7 @@
 | Kids' sign-in | Kids **don't need a Google account**: a parent creates a kid profile, and a kid's device joins it with a parent's approval (see below) |
 | Rewards | None for now: **parent approval is enough** |
 | Calendar | Use the family's **existing Google Calendar** through the calendars already synced on each phone (Android `CalendarContract`), not the Google Calendar API: no Google Cloud setup, works offline, and Google sends the alerts. Each phone picks which calendars to show |
-| Location | Deferred to the last phase |
+| Location | **Opt-in per person**, pause any time (stopping deletes the shared position). Everyone in the family, kids included, sees who shares. Updates about every 15 minutes in the background and when the map opens. **OpenStreetMap** (no API key). Named places (Home, School) set by parents. No instant arrive/leave alerts on other phones until server push |
 | Notifications | Free plan: each phone posts a **morning summary** (WorkManager) and the app shows badges. Server push ("Leo finished the dishes" instantly) needs the paid Blaze plan; revisit later |
 | Offline | Firestore's built-in offline cache; no separate local database. Writes show up at once and sync when there's signal |
 
@@ -35,6 +35,8 @@ families/{familyId}              name, inviteCode, createdBy
   members/{memberId}             name, role (PARENT | KID), color, uids[]
   joinRequests/{uid}             name, role, deviceName, createdAt
   groceryItems/{itemId}          name, category, isNeeded, isStaple, updatedAt, updatedBy
+  locations/{memberId}           latitude, longitude, accuracy, at: only while that member shares
+  places/{placeId}               name, latitude, longitude, radius
   chores/{choreId}               title, template, recurrenceType, everyDays, weekDays[], dueDate,
                                  status, claimedBy, completedBy, approvedBy, lastDoneBy, lastDoneOn
 inviteCodes/{code}               familyId, familyName
@@ -91,7 +93,11 @@ rules let kids make only the grab / let go / "I finished" steps, in their own na
       "Add event" with day, time, length and an alert (all-day events alert the
       evening before). Calendar access lives in its own `:core:calendar` module.
       Kids without a Google account on their phone see the chores only.
-- [ ] **Phase 5: Location.** Opt-in live family map and arrive/leave alerts.
+- [x] **Phase 5: Location.** Map tab with a dot per member who shares, and a
+      list saying "At School · 10 min ago" or "Away from saved places". Sharing
+      is switched on by each person, asks for "allow all the time" for
+      background updates, and can be turned off any time. Parents save places
+      where they stand, with a size of 100, 250 or 500 m.
 - [ ] **Extras.** Home-screen widget ("Out of…" and today's chores), weekly
       scoreboard or points for kids (not needed for now), dark mode polish.
 

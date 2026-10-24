@@ -48,6 +48,7 @@ dependencies {
     implementation(projects.feature.chores)
     implementation(projects.feature.groceries)
     implementation(projects.feature.agenda)
+    implementation(projects.feature.map)
     implementation(projects.feature.family)
 
     implementation(libs.androidx.core.ktx)

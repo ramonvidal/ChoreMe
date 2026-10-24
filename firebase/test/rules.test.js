@@ -260,6 +260,52 @@ describe('chores', () => {
   });
 });
 
+describe('locations and places', () => {
+  const here = { latitude: 41.3874, longitude: 2.1686, accuracy: 20, at: 1792900000000 };
+  const loc = (db, memberId) => doc(db, 'families', FAMILY, 'locations', memberId);
+  const place = (db, id) => doc(db, 'families', FAMILY, 'places', id);
+
+  beforeEach(async () => {
+    await createFamilyBatch(parent('alice'), 'alice');
+    for (const kid of ['kid1', 'kid2']) {
+      await setDoc(doc(kidDevice(kid), 'families', FAMILY, 'joinRequests', kid), joinRequest('KID'));
+      await approveKidBatch(parent('alice'), kid, `member-${kid}`);
+    }
+  });
+
+  test('everyone shares and sees locations, but only their own', async () => {
+    await assertSucceeds(setDoc(loc(kidDevice('kid1'), 'member-kid1'), here));
+    await assertSucceeds(setDoc(loc(parent('alice'), 'alice'), here));
+    await assertSucceeds(getDocs(collection(kidDevice('kid2'), 'families', FAMILY, 'locations')));
+    await assertFails(setDoc(loc(kidDevice('kid1'), 'member-kid2'), here));
+    await assertFails(setDoc(loc(parent('alice'), 'member-kid1'), here));
+  });
+
+  test('stopping sharing deletes your location; others cannot delete it, except a parent', async () => {
+    await setDoc(loc(kidDevice('kid1'), 'member-kid1'), here);
+    await assertFails(deleteDoc(loc(kidDevice('kid2'), 'member-kid1')));
+    await assertSucceeds(deleteDoc(loc(kidDevice('kid1'), 'member-kid1')));
+    await setDoc(loc(kidDevice('kid1'), 'member-kid1'), here);
+    await assertSucceeds(deleteDoc(loc(parent('alice'), 'member-kid1')));
+  });
+
+  test('outsiders see nothing, and bad coordinates are rejected', async () => {
+    await setDoc(loc(parent('alice'), 'alice'), here);
+    await assertFails(getDocs(collection(parent('mallory'), 'families', FAMILY, 'locations')));
+    await assertFails(setDoc(loc(parent('alice'), 'alice'), { ...here, latitude: 123 }));
+    await assertFails(setDoc(loc(parent('alice'), 'alice'), { ...here, at: 'now' }));
+  });
+
+  test('parents manage places, everyone can see them', async () => {
+    const home = { name: 'Home', latitude: 41.3874, longitude: 2.1686, radius: 100 };
+    await assertSucceeds(setDoc(place(parent('alice'), 'home'), home));
+    await assertSucceeds(getDocs(collection(kidDevice('kid1'), 'families', FAMILY, 'places')));
+    await assertFails(setDoc(place(kidDevice('kid1'), 'school'), { ...home, name: 'School' }));
+    await assertFails(deleteDoc(place(kidDevice('kid1'), 'home')));
+    await assertFails(setDoc(place(parent('alice'), 'huge'), { ...home, radius: 50000 }));
+  });
+});
+
 describe('user pointers', () => {
   test('users can only write their own pointer', async () => {
     await assertSucceeds(setDoc(doc(parent('bob'), 'users', 'bob'), { familyId: FAMILY }));

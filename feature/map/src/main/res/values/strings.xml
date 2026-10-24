@@ -1,0 +1,41 @@
+<resources>
+    <string name="share_title">Share my location</string>
+    <string name="share_body_off">Off. The family can\'t see where you are.</string>
+    <string name="share_body_on">On. The family sees roughly where you are, updated every 15 minutes or so. Turn it off any time.</string>
+    <string name="share_needs_background">To keep sharing while the app is closed, allow location \"all the time\".</string>
+    <string name="share_allow_background">Allow all the time</string>
+    <string name="background_title">Keep sharing in the background?</string>
+    <string name="background_body">On the next screen, choose \"Allow all the time\". Otherwise your location only updates while ChoreMe is open.</string>
+    <string name="continue_">Continue</string>
+    <string name="not_now">Not now</string>
+
+    <string name="family_title">Family</string>
+    <string name="status_not_sharing">Not sharing</string>
+    <string name="status_at">At %1$s · %2$s</string>
+    <string name="status_away">Away from saved places · %1$s</string>
+    <string name="status_stale">%1$s · phone may be off</string>
+    <string name="just_now">just now</string>
+    <plurals name="minutes_ago">
+        <item quantity="one">%d min ago</item>
+        <item quantity="other">%d min ago</item>
+    </plurals>
+    <plurals name="hours_ago">
+        <item quantity="one">%d hour ago</item>
+        <item quantity="other">%d hours ago</item>
+    </plurals>
+    <plurals name="days_ago">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
+
+    <string name="places_title">Places</string>
+    <string name="places_hint">Name places like Home or School, so the map says \"At School\".</string>
+    <string name="add_place_here">Save where I am as a place</string>
+    <string name="add_place_title">Name this place</string>
+    <string name="place_name">Name</string>
+    <string name="place_radius">Size</string>
+    <string name="radius_meters">%1$d m</string>
+    <string name="delete_place">Delete %1$s</string>
+    <string name="refresh">Update now</string>
+    <string name="osm_credit">© OpenStreetMap contributors</string>
+</resources>

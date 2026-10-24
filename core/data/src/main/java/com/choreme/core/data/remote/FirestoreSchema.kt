@@ -20,6 +20,8 @@ object FirestoreSchema {
     const val JOIN_REQUESTS = "joinRequests"
     const val GROCERY_ITEMS = "groceryItems"
     const val CHORES = "chores"
+    const val LOCATIONS = "locations"
+    const val PLACES = "places"
 
     const val FAMILY_ID = "familyId"
     const val FAMILY_NAME = "familyName"
@@ -51,6 +53,13 @@ object FirestoreSchema {
     const val APPROVED_BY = "approvedBy"
     const val LAST_DONE_BY = "lastDoneBy"
     const val LAST_DONE_ON = "lastDoneOn"
+
+    // Locations and places
+    const val LATITUDE = "latitude"
+    const val LONGITUDE = "longitude"
+    const val ACCURACY = "accuracy"
+    const val AT = "at"
+    const val RADIUS = "radius"
 }
 
 private fun DocumentSnapshot.role(): Role =

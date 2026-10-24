@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -34,6 +35,8 @@ import com.choreme.feature.family.FAMILY_ROUTE
 import com.choreme.feature.family.familyScreen
 import com.choreme.feature.groceries.GROCERIES_ROUTE
 import com.choreme.feature.groceries.groceriesScreen
+import com.choreme.feature.map.MAP_ROUTE
+import com.choreme.feature.map.mapScreen
 
 enum class TopLevelDestination(
     val route: String,
@@ -43,6 +46,7 @@ enum class TopLevelDestination(
     Today(TODAY_ROUTE, R.string.nav_today, Icons.Filled.Home),
     Groceries(GROCERIES_ROUTE, R.string.nav_groceries, Icons.Filled.ShoppingCart),
     Agenda(AGENDA_ROUTE, R.string.nav_agenda, Icons.Filled.DateRange),
+    Places(MAP_ROUTE, R.string.nav_map, Icons.Filled.Place),
     Family(FAMILY_ROUTE, R.string.nav_family, Icons.Filled.Person),
 }
 
@@ -85,6 +89,7 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0, pendingApprovals: Int = 0) {
             todayScreen(onOpenGroceries = { navController.navigateToTab(TopLevelDestination.Groceries.route) })
             groceriesScreen()
             agendaScreen()
+            mapScreen()
             familyScreen()
         }
     }
