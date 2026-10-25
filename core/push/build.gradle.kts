@@ -11,5 +11,10 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.unifiedpush.connector)
+    // The connector depends on desktop Tink, whose full protobuf clashes with Firebase's
+    // protobuf-lite; Tink's Android build is the same API on protobuf-lite.
+    implementation(libs.unifiedpush.connector) {
+        exclude(group = "com.google.crypto.tink", module = "tink")
+    }
+    implementation(libs.tink.android)
 }
