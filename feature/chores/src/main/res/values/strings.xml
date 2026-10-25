@@ -16,6 +16,9 @@
     <string name="grab">I\'ll do it</string>
     <string name="done">Done</string>
     <string name="let_go">Let go</string>
+    <string name="add_to_calendar">📅 Calendar</string>
+    <string name="added_to_calendar">Added to %1$s</string>
+    <string name="no_calendar_app">No calendar app on this phone</string>
     <string name="done_by">Done by…</string>
     <string name="done_by_title">Who did it?</string>
     <string name="not_yet">Not yet</string>

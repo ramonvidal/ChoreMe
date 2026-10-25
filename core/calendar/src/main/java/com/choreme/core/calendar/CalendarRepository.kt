@@ -74,6 +74,19 @@ class CalendarRepository @Inject constructor(@ApplicationContext private val con
         eventId
     }
 
+    /** The calendar app's "new event" screen, filled in; the person picks the calendar there. */
+    fun insertIntent(event: NewEvent, zone: ZoneId = ZoneId.systemDefault()): Intent {
+        // The insert screen expects local times, also for all-day events.
+        val begin = if (event.allDay) event.date.atStartOfDay(zone).toInstant() else event.start(zone)
+        val end = if (event.allDay) event.date.plusDays(1).atStartOfDay(zone).toInstant() else event.end(zone)
+        return Intent(Intent.ACTION_INSERT, CalendarContract.Events.CONTENT_URI)
+            .putExtra(CalendarContract.Events.TITLE, event.title)
+            .putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, event.allDay)
+            .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, begin.toEpochMilli())
+            .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, end.toEpochMilli())
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+
     /** Opens the event in the phone's calendar app, for editing or details. */
     fun openIntent(event: CalendarEvent): Intent =
         Intent(Intent.ACTION_VIEW, ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.id))

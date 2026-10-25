@@ -127,3 +127,10 @@ fun allDayReminderMinutes(date: LocalDate, zone: ZoneId, at: LocalTime): Int {
     val alertAt = date.minusDays(1).atTime(at).atZone(zone).toInstant()
     return Duration.between(alertAt, eventStart).toMinutes().toInt()
 }
+
+/**
+ * Where to put a chore as a calendar event without asking: the one writable calendar the
+ * agenda shows. Null when there are none or several, so the person picks in the calendar app.
+ */
+fun calendarForChores(calendars: List<FamilyCalendar>, shown: Set<Long>?): FamilyCalendar? =
+    calendars.filter { it.isWritable && shown.orEmpty().contains(it.id) }.singleOrNull()

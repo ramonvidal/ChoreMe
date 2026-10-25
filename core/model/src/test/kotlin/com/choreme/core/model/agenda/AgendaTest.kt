@@ -100,3 +100,16 @@ class AgendaTest {
         assertEquals(null, NewEvent("x", today, null, alert = false).reminderMinutes(madrid))
     }
 }
+
+class CalendarForChoresTest {
+    private val family = FamilyCalendar(1, "Family", "a@b", 0, isWritable = true)
+    private val mine = FamilyCalendar(2, "Ramon", "a@b", 0, isWritable = true)
+    private val holidays = FamilyCalendar(3, "Holidays", "a@b", 0, isWritable = false)
+
+    @Test
+    fun `the single writable calendar shown is used, otherwise ask`() {
+        assertEquals(family, calendarForChores(listOf(family, mine, holidays), setOf(1L, 3L)))
+        assertEquals(null, calendarForChores(listOf(family, mine), setOf(1L, 2L)))
+        assertEquals(null, calendarForChores(listOf(family), null))
+    }
+}

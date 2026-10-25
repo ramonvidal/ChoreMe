@@ -2,6 +2,7 @@ package com.choreme.feature.chores
 
 import com.choreme.core.ui.R as CoreUiR
 import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -114,6 +115,19 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
                             onComplete = { viewModel.complete(chore) },
                             onDoneBy = { doneByFor = chore },
                             onEdit = { editing = chore },
+                            onCalendar = {
+                                scope.launch {
+                                    when (val result = viewModel.addToCalendar(chore)) {
+                                        is CalendarResult.Added ->
+                                            snackbar.showSnackbar(context.getString(R.string.added_to_calendar, result.calendarName))
+                                        is CalendarResult.OpenApp -> try {
+                                            context.startActivity(result.intent)
+                                        } catch (e: ActivityNotFoundException) {
+                                            snackbar.showSnackbar(context.getString(R.string.no_calendar_app))
+                                        }
+                                    }
+                                }
+                            },
                         )
                     }
 
@@ -244,6 +258,7 @@ private fun ChoreCard(
     onComplete: () -> Unit,
     onDoneBy: () -> Unit,
     onEdit: () -> Unit,
+    onCalendar: () -> Unit,
 ) {
     val me = state.me ?: return
     val overdueDays = ChronoUnit.DAYS.between(chore.dueDate, state.today).toInt()
@@ -281,6 +296,7 @@ private fun ChoreCard(
                 if (canFinish) Button(onClick = onComplete) { Text(stringResource(R.string.done)) }
                 if (claimedByMe) TextButton(onClick = onUnclaim) { Text(stringResource(R.string.let_go)) }
                 if (state.isParent && state.kids.isNotEmpty()) TextButton(onClick = onDoneBy) { Text(stringResource(R.string.done_by)) }
+                TextButton(onClick = onCalendar) { Text(stringResource(R.string.add_to_calendar)) }
             }
         }
     }

@@ -1,14 +1,19 @@
 package com.choreme.feature.chores
 
+import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.choreme.core.calendar.CalendarChoice
+import com.choreme.core.calendar.CalendarRepository
 import com.choreme.core.data.ChoreRepository
 import com.choreme.core.data.FamilyRepository
 import com.choreme.core.data.GroceryRepository
 import com.choreme.core.data.PushEndpointRepository
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
+import com.choreme.core.model.agenda.NewEvent
+import com.choreme.core.model.agenda.calendarForChores
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreStatus
 import com.choreme.core.model.chore.ChoreTemplate
@@ -27,11 +32,13 @@ import com.choreme.core.model.chore.unclaim
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.push.PushKinds
 import com.choreme.core.push.PushSender
+import com.choreme.core.ui.emoji
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -67,6 +74,11 @@ data class ChoreDraft(
     val dueDate: LocalDate,
 )
 
+sealed interface CalendarResult {
+    data class Added(val calendarName: String) : CalendarResult
+    data class OpenApp(val intent: Intent) : CalendarResult
+}
+
 @HiltViewModel
 class ChoresViewModel @Inject constructor(
     families: FamilyRepository,
@@ -74,6 +86,8 @@ class ChoresViewModel @Inject constructor(
     groceries: GroceryRepository,
     private val endpoints: PushEndpointRepository,
     private val push: PushSender,
+    private val calendar: CalendarRepository,
+    private val calendarChoice: CalendarChoice,
 ) : ViewModel() {
     val uiState: StateFlow<ChoresUiState> = families.session
         .filterIsInstance<SessionState.InFamily>()
@@ -124,6 +138,31 @@ class ChoresViewModel @Inject constructor(
         // Let the rest of the family know right away (phones with ntfy).
         pingInBackground(PushKinds.CHORE_ADDED) { endpoints.othersThan(familyId, me.id) }
         return null
+    }
+
+    /**
+     * Puts the chore on its due day in the family calendar, so it shows in everyone's Google
+     * Calendar. Goes straight in when the agenda shows exactly one calendar this phone can
+     * write to; otherwise the calendar app opens, filled in, to pick one.
+     */
+    suspend fun addToCalendar(chore: Chore): CalendarResult {
+        val event = NewEvent(title = "${chore.template.emoji} ${chore.title}", date = chore.dueDate, startTime = null)
+        val target = if (calendar.hasPermission()) {
+            calendarForChores(calendar.observeCalendars().first(), calendarChoice.selected.value)
+        } else {
+            null
+        }
+        return if (target == null) {
+            CalendarResult.OpenApp(calendar.insertIntent(event))
+        } else {
+            try {
+                calendar.add(target.id, event)
+                CalendarResult.Added(target.name)
+            } catch (e: Exception) {
+                Log.w("ChoreMe", "Couldn't add the chore to the calendar", e)
+                CalendarResult.OpenApp(calendar.insertIntent(event))
+            }
+        }
     }
 
     fun removeSaved(saved: SavedChore) {
