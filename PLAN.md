@@ -124,6 +124,9 @@ rules let kids make only the grab / let go / "I finished" steps, in their own na
       pings work. Agenda gets a **month view** (dots per event in its
       calendar's color and for chores; tap a day for its list), next to the
       two-week list.
+- [x] **Feedback round 4.** Instant pings to parents (kids' finished chores, join
+      requests). Leave family / delete my data. Shopping mode. Chore → calendar
+      event. Per-phone settings (which alerts, quiet hours). Home-screen widget.
 - [ ] **Extras.** Home-screen widget ("Out of…" and today's chores), weekly
       scoreboard or points for kids (not needed for now), dark mode polish.
 

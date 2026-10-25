@@ -51,6 +51,7 @@ dependencies {
     implementation(projects.feature.agenda)
     implementation(projects.feature.map)
     implementation(projects.feature.settings)
+    implementation(projects.feature.widget)
     implementation(projects.feature.family)
 
     implementation(libs.androidx.core.ktx)

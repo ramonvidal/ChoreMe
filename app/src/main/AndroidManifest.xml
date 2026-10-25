@@ -21,6 +21,12 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- choreme://groceries and friends, declared by each feature's navigation entry. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="choreme" />
+            </intent-filter>
         </activity>
 
         <!-- WorkManager is started by ChoreMeApp, with Hilt's worker factory. -->
