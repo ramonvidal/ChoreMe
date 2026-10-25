@@ -11,6 +11,8 @@
     <string name="grocery_empty_body">Everything you add stays here for next time, so the weekly shop is just a few taps. Start with common items, or type your own above.</string>
     <string name="grocery_add_starter">Start with common items</string>
     <string name="grocery_edit_title">Edit item</string>
+    <string name="grocery_shopping_off">🛒 I\'m in the shop</string>
+    <string name="grocery_shopping_on">🛒 Shopping: screen stays on</string>
     <string name="grocery_item_name">Name</string>
     <string name="grocery_staple">A usual</string>
     <string name="grocery_staple_hint">Bought most weeks. \"Restock usuals\" adds all of these at once.</string>

@@ -32,6 +32,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -47,6 +48,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +59,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
@@ -79,6 +82,14 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var editing by remember { mutableStateOf<GroceryItem?>(null) }
+    var shopping by rememberSaveable { mutableStateOf(false) }
+
+    // In the shop, the screen shouldn't go dark between items.
+    val view = LocalView.current
+    DisposableEffect(shopping) {
+        view.keepScreenOn = shopping
+        onDispose { view.keepScreenOn = false }
+    }
 
     fun markBought(item: GroceryItem) {
         viewModel.setNeeded(item, false)
@@ -144,10 +155,19 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
                                 style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.weight(1f),
                             )
-                            TextButton(onClick = viewModel::restockStaples, enabled = state.staplesAtHome > 0) {
-                                Text(stringResource(R.string.grocery_restock, state.staplesAtHome))
+                            if (!shopping) {
+                                TextButton(onClick = viewModel::restockStaples, enabled = state.staplesAtHome > 0) {
+                                    Text(stringResource(R.string.grocery_restock, state.staplesAtHome))
+                                }
                             }
                         }
+                    }
+                    item(key = "shopping-toggle") {
+                        FilterChip(
+                            selected = shopping,
+                            onClick = { shopping = !shopping },
+                            label = { Text(stringResource(if (shopping) R.string.grocery_shopping_on else R.string.grocery_shopping_off)) },
+                        )
                     }
                     if (state.toBuy.isEmpty()) {
                         item(key = "to-buy-empty") {
@@ -161,11 +181,12 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
                     state.toBuy.forEach { group ->
                         item(key = "to-buy-${group.category}") { CategoryHeader(group.category) }
                         items(group.items, key = { "need-${it.id}" }) { item ->
-                            ToBuyRow(item, onBought = { markBought(item) }, onEdit = { editing = item })
+                            ToBuyRow(item, large = shopping, onBought = { markBought(item) }, onEdit = { editing = item })
                         }
                     }
 
-                    if (state.atHome.isNotEmpty()) {
+                    // While shopping only the list matters; "at home" comes back afterwards.
+                    if (state.atHome.isNotEmpty() && !shopping) {
                         item(key = "at-home-header") {
                             Column(Modifier.padding(top = 24.dp)) {
                                 HorizontalDivider()
@@ -242,19 +263,23 @@ private fun CategoryHeader(category: GroceryCategory) {
 
 /** In the store: tick it once it's in the cart. Long-press to edit. */
 @Composable
-private fun ToBuyRow(item: GroceryItem, onBought: () -> Unit, onEdit: () -> Unit) {
+private fun ToBuyRow(item: GroceryItem, large: Boolean, onBought: () -> Unit, onEdit: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
+            .heightIn(min = if (large) 64.dp else 48.dp)
             .clip(RoundedCornerShape(8.dp))
             .combinedClickable(onClick = onBought, onLongClick = onEdit),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(checked = false, onCheckedChange = { onBought() })
-        Text(item.icon, style = MaterialTheme.typography.titleLarge)
+        Text(item.icon, style = if (large) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleLarge)
         Spacer(Modifier.width(12.dp))
-        Text(item.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        Text(
+            item.name,
+            style = if (large) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f),
+        )
         if (item.isStaple) StapleIcon()
     }
 }
