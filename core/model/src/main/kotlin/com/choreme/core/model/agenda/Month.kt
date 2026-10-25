@@ -1,8 +1,11 @@
 package com.choreme.core.model.agenda
 
+import com.choreme.core.model.chore.Chore
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 
 /**
@@ -22,3 +25,21 @@ fun monthGridRange(month: YearMonth, firstDayOfWeek: DayOfWeek = DayOfWeek.MONDA
 }
 
 private const val WEEKS = 6
+
+/**
+ * Everything on each day of the month grid. Late chores are shown on [today], where they
+ * still need doing, rather than on the day they were due.
+ */
+fun buildMonth(
+    events: List<CalendarEvent>,
+    chores: List<Chore>,
+    month: YearMonth,
+    today: LocalDate,
+    zone: ZoneId,
+    firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
+): Map<LocalDate, AgendaDay> {
+    val (from, until) = monthGridRange(month, firstDayOfWeek)
+    val adjusted = chores.map { if (it.isActive && it.dueDate < today) it.copy(dueDate = today) else it }
+    val days = ChronoUnit.DAYS.between(from, until).toInt()
+    return buildAgenda(events, adjusted.filter { it.dueDate >= from }, from, days, zone).associateBy { it.date }
+}

@@ -27,6 +27,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -92,7 +93,31 @@ internal fun AgendaScreen(viewModel: AgendaViewModel = hiltViewModel()) {
     }
 
     Box(Modifier.fillMaxSize()) {
-        LazyColumn(
+        Column(Modifier.fillMaxSize()) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
+        ) {
+            FilterChip(
+                selected = state.view == AgendaView.LIST,
+                onClick = { viewModel.showView(AgendaView.LIST) },
+                label = { Text(stringResource(R.string.view_list)) },
+            )
+            FilterChip(
+                selected = state.view == AgendaView.MONTH,
+                onClick = { viewModel.showView(AgendaView.MONTH) },
+                label = { Text(stringResource(R.string.view_month)) },
+            )
+        }
+        if (state.view == AgendaView.MONTH && state.hasPermission) {
+            MonthView(
+                state = state,
+                onMonth = viewModel::showMonth,
+                onSelect = viewModel::selectDay,
+                onOpenEvent = ::open,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
         ) {
@@ -144,6 +169,7 @@ internal fun AgendaScreen(viewModel: AgendaViewModel = hiltViewModel()) {
             }
             item(key = "error") { ErrorText(actionState.error) }
         }
+        }
 
         if (state.writableSelected.isNotEmpty()) {
             ExtendedFloatingActionButton(
@@ -159,6 +185,7 @@ internal fun AgendaScreen(viewModel: AgendaViewModel = hiltViewModel()) {
         AddEventDialog(
             calendars = state.writableSelected,
             today = state.today,
+            initialDate = if (state.view == AgendaView.MONTH) maxOf(state.selectedDay, state.today) else state.today,
             onAdd = { calendarId, event ->
                 viewModel.addEvent(calendarId, event)
                 adding = false
@@ -182,7 +209,7 @@ private fun DayHeader(date: LocalDate, today: LocalDate) {
 }
 
 @Composable
-private fun EventRow(event: CalendarEvent, onClick: () -> Unit) {
+internal fun EventRow(event: CalendarEvent, onClick: () -> Unit) {
     val zone = ZoneId.systemDefault()
     val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
     Row(
@@ -210,7 +237,7 @@ private fun EventRow(event: CalendarEvent, onClick: () -> Unit) {
 }
 
 @Composable
-private fun ChoreRow(chore: Chore) {
+internal fun ChoreRow(chore: Chore) {
     Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(chore.template.emoji)
         Spacer(Modifier.width(12.dp))

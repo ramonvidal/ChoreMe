@@ -12,6 +12,8 @@ import com.choreme.core.model.agenda.CalendarEvent
 import com.choreme.core.model.agenda.FamilyCalendar
 import com.choreme.core.model.agenda.NewEvent
 import com.choreme.core.model.agenda.buildAgenda
+import com.choreme.core.model.agenda.buildMonth
+import com.choreme.core.model.agenda.monthGridRange
 import com.choreme.core.model.agenda.suggestFamilyCalendars
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.ui.ActionState
@@ -27,6 +29,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneId
 import javax.inject.Inject
 
@@ -37,12 +40,19 @@ data class AgendaUiState(
     val selected: Set<Long>? = null,
     val today: LocalDate = LocalDate.now(),
     val days: List<AgendaDay> = emptyList(),
+    val view: AgendaView = AgendaView.LIST,
+    val month: YearMonth = YearMonth.now(),
+    val monthDays: Map<LocalDate, AgendaDay> = emptyMap(),
+    val selectedDay: LocalDate = LocalDate.now(),
 ) {
+    val selectedDayEntries get() = monthDays[selectedDay]
     val needsChoice get() = hasPermission && calendars.isNotEmpty() && selected == null
     val suggestion get() = suggestFamilyCalendars(calendars)
     val writableSelected get() = calendars.filter { it.isWritable && selected.orEmpty().contains(it.id) }
     fun calendarName(id: Long) = calendars.firstOrNull { it.id == id }?.name
 }
+
+enum class AgendaView { LIST, MONTH }
 
 @HiltViewModel
 class AgendaViewModel @Inject constructor(
@@ -52,21 +62,26 @@ class AgendaViewModel @Inject constructor(
     chores: ChoreRepository,
 ) : ViewModel() {
     private val permission = MutableStateFlow(calendar.hasPermission())
+    private val view = MutableStateFlow(AgendaView.LIST)
+    private val month = MutableStateFlow(YearMonth.now())
+    private val selectedDay = MutableStateFlow(LocalDate.now())
 
     private val calendars = permission.flatMapLatest { granted ->
         if (granted) calendar.observeCalendars() else flowOf(emptyList())
     }
 
-    private val events = combine(permission, choice.selected) { granted, selected -> granted to selected }
-        .flatMapLatest { (granted, selected) ->
+    // Only the days on screen are read: the next two weeks, or the month grid.
+    private val events = combine(permission, choice.selected, view, month) { granted, selected, mode, shownMonth ->
+        EventWindow(granted, selected, mode, shownMonth)
+    }
+        .flatMapLatest { (granted, selected, mode, shownMonth) ->
             if (!granted || selected.isNullOrEmpty()) return@flatMapLatest flowOf(emptyList<CalendarEvent>())
             val zone = ZoneId.systemDefault()
-            val today = LocalDate.now()
-            calendar.observeEvents(
-                selected,
-                from = today.atStartOfDay(zone).toInstant(),
-                until = today.plusDays(DAYS.toLong()).atStartOfDay(zone).toInstant(),
-            )
+            val (from, until) = when (mode) {
+                AgendaView.LIST -> LocalDate.now().let { it to it.plusDays(DAYS.toLong()) }
+                AgendaView.MONTH -> monthGridRange(shownMonth)
+            }
+            calendar.observeEvents(selected, from = from.atStartOfDay(zone).toInstant(), until = until.atStartOfDay(zone).toInstant())
         }
 
     private val familyChores = families.session
@@ -74,17 +89,43 @@ class AgendaViewModel @Inject constructor(
         .flatMapLatest { chores.observeChores(it.familyId) }
         .onStart { emit(emptyList()) }
 
-    val uiState: StateFlow<AgendaUiState> = combine(permission, calendars, choice.selected, events, familyChores) {
-            granted, calendarList, selected, eventList, choreList ->
+    val uiState: StateFlow<AgendaUiState> = combine(
+        combine(permission, calendars, choice.selected, ::Triple),
+        events,
+        familyChores,
+        combine(view, month, selectedDay, ::Triple),
+    ) { (granted, calendarList, selected), eventList, choreList, (mode, shownMonth, day) ->
         val today = LocalDate.now()
+        val zone = ZoneId.systemDefault()
         AgendaUiState(
             hasPermission = granted,
             calendars = calendarList,
             selected = selected,
             today = today,
-            days = buildAgenda(eventList, choreList, from = today, days = DAYS, zone = ZoneId.systemDefault()),
+            days = if (mode == AgendaView.LIST) buildAgenda(eventList, choreList, from = today, days = DAYS, zone = zone) else emptyList(),
+            view = mode,
+            month = shownMonth,
+            monthDays = if (mode == AgendaView.MONTH) buildMonth(eventList, choreList, shownMonth, today, zone) else emptyMap(),
+            selectedDay = day,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AgendaUiState())
+
+    fun showView(mode: AgendaView) {
+        view.value = mode
+    }
+
+    fun showMonth(shown: YearMonth) {
+        month.value = shown
+        // Keep a selected day inside the month being looked at.
+        if (YearMonth.from(selectedDay.value) != shown) {
+            selectedDay.value = if (shown == YearMonth.now()) LocalDate.now() else shown.atDay(1)
+        }
+    }
+
+    fun selectDay(day: LocalDate) {
+        selectedDay.value = day
+        if (YearMonth.from(day) != month.value) month.value = YearMonth.from(day)
+    }
 
     private val _actionState = MutableStateFlow(ActionState())
     val actionState: StateFlow<ActionState> = _actionState
@@ -101,6 +142,13 @@ class AgendaViewModel @Inject constructor(
     }
 
     fun openIntent(event: CalendarEvent): Intent = calendar.openIntent(event)
+
+    private data class EventWindow(
+        val granted: Boolean,
+        val selected: Set<Long>?,
+        val view: AgendaView,
+        val month: YearMonth,
+    )
 
     private companion object {
         /** How far ahead the agenda looks. */

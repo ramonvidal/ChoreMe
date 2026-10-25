@@ -55,12 +55,13 @@ private val ALERT_MINUTES = listOf(10, 30, 60, 24 * 60)
 internal fun AddEventDialog(
     calendars: List<FamilyCalendar>,
     today: LocalDate,
+    initialDate: LocalDate = today,
     onAdd: (calendarId: Long, NewEvent) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var title by remember { mutableStateOf("") }
     var calendarId by remember { mutableStateOf(calendars.first().id) }
-    var date by remember { mutableStateOf(today) }
+    var date by remember { mutableStateOf(initialDate) }
     var allDay by remember { mutableStateOf(false) }
     var startTime by remember { mutableStateOf(LocalTime.now().plusHours(1).withMinute(0).withSecond(0).withNano(0)) }
     var duration by remember { mutableStateOf(Duration.ofHours(1)) }

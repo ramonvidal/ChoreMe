@@ -43,4 +43,9 @@
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>
     <string name="ok">OK</string>
+    <string name="view_list">Next 2 weeks</string>
+    <string name="view_month">Month</string>
+    <string name="previous_month">Previous month</string>
+    <string name="next_month">Next month</string>
+    <string name="nothing_this_day">Nothing on this day</string>
 </resources>

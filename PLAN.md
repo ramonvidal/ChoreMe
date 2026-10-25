@@ -121,7 +121,9 @@ rules let kids make only the grab / let go / "I finished" steps, in their own na
       chores are saved as quick picks ("Saved" row; long-press to remove).
       Battery: no background Firestore listeners, location only sent when moved
       (or every 30 min), recent fixes reused, slower safety-net checks when
-      pings work.
+      pings work. Agenda gets a **month view** (dots per event in its
+      calendar's color and for chores; tap a day for its list), next to the
+      two-week list.
 - [ ] **Extras.** Home-screen widget ("Out of…" and today's chores), weekly
       scoreboard or points for kids (not needed for now), dark mode polish.
 
