@@ -7,6 +7,9 @@ import com.choreme.core.model.AppUpdate
 import com.choreme.core.model.Updates
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -20,26 +23,51 @@ import javax.inject.Singleton
 class UpdateRepository @Inject constructor(@ApplicationContext private val context: Context) {
     private val prefs = context.getSharedPreferences("updates", Context.MODE_PRIVATE)
 
+    private val _available = MutableStateFlow<AppUpdate?>(null)
+
+    /** The update to offer, if any; the banner shows it wherever the check came from. */
+    val available: StateFlow<AppUpdate?> = _available.asStateFlow()
+
     val installedBuild: Long
         get() {
             val info = context.packageManager.getPackageInfo(context.packageName, 0)
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.longVersionCode else @Suppress("DEPRECATION") info.versionCode.toLong()
         }
 
-    /** The newest build if it's newer than this one and not put off with "Later"; checks at most daily. */
-    suspend fun availableUpdate(force: Boolean = false): AppUpdate? = withContext(Dispatchers.IO) {
+    /** As shown to people, e.g. "0.31". */
+    val installedVersion: String
+        get() = context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty()
+
+    /** Checks when one is due (see [Updates.CHECK_EVERY]); a network problem just keeps what's known. */
+    suspend fun refresh() {
         val now = Instant.now()
-        val cached = cachedUpdate()
-        val latest = if (force || Updates.isCheckDue(lastCheck(), now)) {
-            runCatching { fetchLatest() }.getOrNull()?.also { remember(it, now) } ?: cached
-        } else {
-            cached
-        }
-        latest?.takeIf { Updates.shouldOffer(it, installedBuild, dismissedBuild()) }
+        if (Updates.isCheckDue(lastCheck(), now)) runCatching { fetchAndRemember(now) }
+        publish(cachedUpdate())
+    }
+
+    /**
+     * "Check for updates": asks right away, and also offers a version put off with "Later".
+     * Throws when the release page can't be reached.
+     */
+    suspend fun checkNow(): AppUpdate? {
+        prefs.edit().remove(KEY_DISMISSED).apply()
+        fetchAndRemember(Instant.now())
+        publish(cachedUpdate())
+        return _available.value
     }
 
     fun dismiss(update: AppUpdate) {
         prefs.edit().putInt(KEY_DISMISSED, update.buildNumber).apply()
+        _available.value = null
+    }
+
+    private suspend fun fetchAndRemember(now: Instant) {
+        val latest = withContext(Dispatchers.IO) { fetchLatest() }
+        remember(latest, now)
+    }
+
+    private fun publish(latest: AppUpdate?) {
+        _available.value = latest?.takeIf { Updates.shouldOffer(it, installedBuild, dismissedBuild()) }
     }
 
     private fun fetchLatest(): AppUpdate? {
@@ -48,7 +76,7 @@ class UpdateRepository @Inject constructor(@ApplicationContext private val conte
         connection.readTimeout = TIMEOUT_MS
         connection.setRequestProperty("Accept", "application/vnd.github+json")
         try {
-            if (connection.responseCode != HttpURLConnection.HTTP_OK) return null
+            check(connection.responseCode == HttpURLConnection.HTTP_OK) { "Release page answered ${connection.responseCode}" }
             val json = JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
             val build = Updates.buildNumber(json.optString("tag_name")) ?: return null
             val assets = json.optJSONArray("assets") ?: return null

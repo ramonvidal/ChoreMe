@@ -7,8 +7,8 @@ import java.time.Instant
 data class AppUpdate(val buildNumber: Int, val versionName: String, val downloadUrl: String, val sizeBytes: Long)
 
 object Updates {
-    /** How often the app asks for a new build: once a day is plenty for a family app. */
-    val CHECK_EVERY: Duration = Duration.ofDays(1)
+    /** How often the app asks for a new build on its own; Settings can also check right away. */
+    val CHECK_EVERY: Duration = Duration.ofHours(6)
 
     /** Releases are tagged "v0.<build>"; anything else isn't one of ours. */
     fun buildNumber(tag: String): Int? = Regex("""^v0\.(\d+)$""").matchEntire(tag.trim())?.groupValues?.get(1)?.toIntOrNull()

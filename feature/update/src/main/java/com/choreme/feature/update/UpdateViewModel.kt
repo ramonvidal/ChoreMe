@@ -29,7 +29,13 @@ class UpdateViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            updates.availableUpdate()?.let { _state.value = UpdateState.Available(it) }
+            updates.available.collect { update ->
+                // A download or a trip to Settings in progress carries on.
+                val current = _state.value
+                if (current is UpdateState.None || current is UpdateState.Available) {
+                    _state.value = update?.let(UpdateState::Available) ?: UpdateState.None
+                }
+            }
         }
     }
 
@@ -50,8 +56,9 @@ class UpdateViewModel @Inject constructor(
         }
     }
 
-    /** Back from Settings: carry on if installing is now allowed. */
+    /** Each time the app is shown: checks when one is due, and carries on after "allow installs". */
     fun onResume() {
+        viewModelScope.launch { updates.refresh() }
         val waiting = _state.value as? UpdateState.NeedsPermission ?: return
         if (installer.canInstall()) install(waiting.update)
     }

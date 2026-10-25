@@ -22,5 +22,11 @@
     <string name="instant_on">On, through ntfy. Alerts arrive within seconds.</string>
     <string name="instant_off">Off. Install the free ntfy app to get alerts within seconds instead of within 15–30 minutes.</string>
     <string name="instant_install">Get ntfy (free)</string>
+    <string name="updates_section">App updates</string>
+    <string name="updates_installed">This phone has ChoreMe %1$s.</string>
+    <string name="updates_check">Check for updates</string>
+    <string name="updates_up_to_date">You have the newest version.</string>
+    <string name="updates_found">ChoreMe %1$s is ready: tap Install at the top of the screen.</string>
+    <string name="updates_failed">Couldn\'t reach the update page. Check the connection and try again.</string>
     <string name="ok">OK</string>
 </resources>

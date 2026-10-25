@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
@@ -47,6 +48,7 @@ import java.time.format.FormatStyle
 internal fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val endpoint by viewModel.pushEndpoint.collectAsStateWithLifecycle()
+    val updateCheck by viewModel.updateCheck.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var picking by remember { mutableStateOf<Boolean?>(null) } // true: start, false: end
     val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
@@ -98,6 +100,9 @@ internal fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
                 }
             }
         }
+
+        item { Section(R.string.updates_section) }
+        item { UpdatesRow(viewModel.installedVersion, updateCheck, onCheck = viewModel::checkForUpdates) }
     }
 
     val quiet = settings.quietHours
@@ -117,6 +122,24 @@ internal fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             },
             dismissButton = { TextButton(onClick = { picking = null }) { Text(stringResource(CoreUiR.string.cancel)) } },
         )
+    }
+}
+
+@Composable
+internal fun UpdatesRow(installedVersion: String, check: UpdateCheck, onCheck: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(stringResource(R.string.updates_installed, installedVersion), style = MaterialTheme.typography.bodyMedium)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedButton(onClick = onCheck, enabled = check != UpdateCheck.Checking) { Text(stringResource(R.string.updates_check)) }
+            if (check == UpdateCheck.Checking) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+        }
+        val result = when (check) {
+            UpdateCheck.Idle, UpdateCheck.Checking -> null
+            UpdateCheck.UpToDate -> stringResource(R.string.updates_up_to_date)
+            is UpdateCheck.Found -> stringResource(R.string.updates_found, check.version)
+            UpdateCheck.Failed -> stringResource(R.string.updates_failed)
+        }
+        if (result != null) Text(result, style = MaterialTheme.typography.bodySmall)
     }
 }
 
