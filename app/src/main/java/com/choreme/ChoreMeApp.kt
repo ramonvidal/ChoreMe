@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.choreme.feature.chores.ChoreReminders
+import com.choreme.feature.map.PlaceAlerts
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -18,5 +19,6 @@ class ChoreMeApp : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         ChoreReminders.schedule(this)
+        PlaceAlerts.schedule(this)
     }
 }

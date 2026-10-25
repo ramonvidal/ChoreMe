@@ -84,3 +84,37 @@ fun shouldPublish(previous: MemberLocation?, next: MemberLocation): Boolean =
 
 private const val MIN_MOVE_METERS = 50.0
 private val HEARTBEAT: Duration = Duration.ofMinutes(10)
+
+/**
+ * The place someone is at now, given where they were. Leaving needs a margin beyond the
+ * place's edge, so GPS jitter at the boundary doesn't send "left" and "arrived" over and over.
+ */
+fun currentPlace(previous: Place?, point: GeoPoint, accuracyMeters: Float, places: List<Place>): Place? {
+    val stillThere = previous?.let { prev -> places.firstOrNull { it.id == prev.id } }
+        ?.takeIf { point.distanceTo(it.center) <= it.radiusMeters + maxOf(accuracyMeters.toDouble(), LEAVE_MARGIN_METERS) }
+    return stillThere ?: MemberLocation("", point, accuracyMeters, Instant.EPOCH).placeIn(places)
+}
+
+enum class PlaceEventType { ARRIVED, LEFT }
+
+/** "Leo arrived at School": what the family gets told. */
+data class PlaceEvent(
+    val memberId: String,
+    val placeId: String,
+    val placeName: String,
+    val type: PlaceEventType,
+    val at: Instant,
+    /** Set once stored; used so each event is shown only once. */
+    val id: String = "",
+)
+
+/** Events for moving from [from] to [to]: leaving one place and/or arriving at another. */
+fun placeEvents(memberId: String, from: Place?, to: Place?, at: Instant): List<PlaceEvent> {
+    if (from?.id == to?.id) return emptyList()
+    return listOfNotNull(
+        from?.let { PlaceEvent(memberId, it.id, it.name, PlaceEventType.LEFT, at) },
+        to?.let { PlaceEvent(memberId, it.id, it.name, PlaceEventType.ARRIVED, at) },
+    )
+}
+
+private const val LEAVE_MARGIN_METERS = 50.0

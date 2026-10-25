@@ -54,3 +54,37 @@ class LocationTest {
         assertTrue(shouldPublish(at(home.center, minutesAgo = 12), at(home.center)))
     }
 }
+
+class PlaceEventTest {
+    private val home = Place("home", "Home", GeoPoint(41.3874, 2.1686), radiusMeters = 100)
+    private val school = Place("school", "School", GeoPoint(41.3950, 2.1600), radiusMeters = 250)
+    private val places = listOf(home, school)
+    private val now = Instant.parse("2026-10-25T10:00:00Z")
+
+    // About 120 m north of home: outside its 100 m, but inside the leaving margin.
+    private val justOutsideHome = GeoPoint(41.38848, 2.1686)
+
+    @Test
+    fun `jitter at the edge doesn't count as leaving`() {
+        assertEquals(home, currentPlace(previous = home, point = justOutsideHome, accuracyMeters = 10f, places = places))
+        // Arriving from outside still needs to be really inside.
+        assertNull(currentPlace(previous = null, point = justOutsideHome, accuracyMeters = 10f, places = places))
+    }
+
+    @Test
+    fun `walking from home to school leaves one and arrives at the other`() {
+        val at = currentPlace(previous = home, point = school.center, accuracyMeters = 10f, places = places)
+        assertEquals(school, at)
+        assertEquals(
+            listOf(PlaceEventType.LEFT to "Home", PlaceEventType.ARRIVED to "School"),
+            placeEvents("leo", from = home, to = at, at = now).map { it.type to it.placeName },
+        )
+    }
+
+    @Test
+    fun `staying put or a deleted place sends nothing odd`() {
+        assertEquals(emptyList<PlaceEvent>(), placeEvents("leo", home, home, now))
+        // The place was deleted while they were there: they're simply nowhere now, no alert needed beyond "left".
+        assertNull(currentPlace(previous = home, point = home.center, accuracyMeters = 10f, places = listOf(school)))
+    }
+}

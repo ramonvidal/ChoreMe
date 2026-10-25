@@ -164,6 +164,16 @@ service cloud.firestore {
         allow delete: if isMember(f) && (myMemberId(f) == memberId || isParent(f));
       }
 
+      // "Leo arrived at School", written by Leo's phone and picked up by the others.
+      match /placeEvents/{eventId} {
+        allow read: if isMember(f);
+        allow create: if isMember(f) && request.resource.data.memberId == myMemberId(f)
+          && request.resource.data.type in ['ARRIVED', 'LEFT']
+          && validName(request.resource.data.placeName)
+          && request.resource.data.at is int;
+        allow delete: if isMember(f) && (resource.data.memberId == myMemberId(f) || isParent(f));
+      }
+
       match /places/{placeId} {
         allow read: if isMember(f);
         allow create, update: if isParent(f) && validPlace(request.resource.data);

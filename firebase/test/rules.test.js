@@ -307,6 +307,18 @@ describe('locations and places', () => {
     await assertFails(setDoc(loc(parent('alice'), 'alice'), { ...here, at: 'now' }));
   });
 
+  test('arrival events: written about yourself, read by everyone, cleaned up by the author', async () => {
+    const event = { memberId: 'member-kid1', placeId: 'school', placeName: 'School', type: 'ARRIVED', at: 1792900000000 };
+    const events = (db) => collection(db, 'families', FAMILY, 'placeEvents');
+    await assertSucceeds(setDoc(doc(events(kidDevice('kid1')), 'e1'), event));
+    await assertFails(setDoc(doc(events(kidDevice('kid2')), 'e2'), event));
+    await assertFails(setDoc(doc(events(kidDevice('kid1')), 'e3'), { ...event, type: 'TELEPORTED' }));
+    await assertSucceeds(getDocs(events(parent('alice'))));
+    await assertFails(getDocs(events(parent('mallory'))));
+    await assertFails(deleteDoc(doc(events(kidDevice('kid2')), 'e1')));
+    await assertSucceeds(deleteDoc(doc(events(kidDevice('kid1')), 'e1')));
+  });
+
   test('parents manage places, everyone can see them', async () => {
     const home = { name: 'Home', latitude: 41.3874, longitude: 2.1686, radius: 100 };
     await assertSucceeds(setDoc(place(parent('alice'), 'home'), home));

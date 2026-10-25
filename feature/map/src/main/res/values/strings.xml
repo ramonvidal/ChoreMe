@@ -30,7 +30,6 @@
 
     <string name="places_title">Places</string>
     <string name="places_hint">Name places like Home or School, so the map says \"At School\".</string>
-    <string name="add_place_here">Save where I am as a place</string>
     <string name="add_place_title">Name this place</string>
     <string name="place_name">Name</string>
     <string name="place_radius">Size</string>
@@ -40,5 +39,16 @@
     <string name="you">You</string>
     <string name="no_position">Couldn\'t find where this phone is. Check that location is turned on in the phone\'s quick settings.</string>
     <string name="share_failed">Couldn\'t share your location with the family. Check your connection; if it keeps happening, the Firebase database rules may need updating.</string>
+    <string name="save_place">Save this place</string>
+    <string name="place_saved">%1$s saved</string>
+    <string name="place_pending">%1$s saved on this phone; it reaches the family when you\'re online</string>
+    <string name="place_failed">Couldn\'t save the place. Only parents can save places; also check the Firebase database rules are up to date.</string>
+    <string name="alerts_title">Arrival alerts</string>
+    <string name="alerts_body">A notification when someone arrives at or leaves a saved place. It can take up to about 15 minutes to arrive.</string>
+    <string name="alerts_channel">Arrivals and departures</string>
+    <string name="alerts_channel_description">When family members arrive at or leave saved places</string>
+    <string name="alert_arrived">%1$s arrived at %2$s</string>
+    <string name="alert_left">%1$s left %2$s</string>
+    <string name="someone">Someone</string>
     <string name="osm_credit">© OpenStreetMap contributors</string>
 </resources>

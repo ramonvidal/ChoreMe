@@ -22,6 +22,7 @@ object FirestoreSchema {
     const val CHORES = "chores"
     const val LOCATIONS = "locations"
     const val PLACES = "places"
+    const val PLACE_EVENTS = "placeEvents"
 
     const val FAMILY_ID = "familyId"
     const val FAMILY_NAME = "familyName"
@@ -60,6 +61,9 @@ object FirestoreSchema {
     const val ACCURACY = "accuracy"
     const val AT = "at"
     const val RADIUS = "radius"
+    const val PLACE_ID = "placeId"
+    const val PLACE_NAME = "placeName"
+    const val TYPE = "type"
 }
 
 private fun DocumentSnapshot.role(): Role =

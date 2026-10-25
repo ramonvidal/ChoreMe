@@ -21,7 +21,9 @@ import com.choreme.core.ui.ActionState
 import com.choreme.core.ui.runAction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -46,17 +48,35 @@ data class MapUiState(
     val hasBackgroundPermission: Boolean = false,
     /** This phone's latest reading, for centering the map and saving a place. */
     val myFix: DeviceFix? = null,
+    val alertsEnabled: Boolean = true,
 ) {
     val isParent get() = me?.role == Role.PARENT
 }
 
+sealed interface PlaceSaved {
+    data class Saved(val name: String) : PlaceSaved
+
+    /** Saved on this phone; it reaches the family once there's a connection. */
+    data class Pending(val name: String) : PlaceSaved
+    data object Failed : PlaceSaved
+}
+
+private data class Settings(
+    val isSharing: Boolean,
+    val permissions: Pair<Boolean, Boolean>,
+    val fix: DeviceFix?,
+    val alertsEnabled: Boolean,
+)
+
 @HiltViewModel
-class MapViewModel @Inject constructor(
+class MapViewModel @Inject internal constructor(
     @ApplicationContext private val context: Context,
     families: FamilyRepository,
     private val locations: LocationRepository,
     private val device: DeviceLocation,
     private val sharing: SharingChoice,
+    private val tracker: PresenceTracker,
+    private val presence: PresenceStore,
 ) : ViewModel() {
     private val permissions = MutableStateFlow(device.hasPermission() to device.hasBackgroundPermission())
     private val myFix = MutableStateFlow<DeviceFix?>(null)
@@ -68,8 +88,11 @@ class MapViewModel @Inject constructor(
                 families.observeMembers(session.familyId),
                 locations.observeLocations(session.familyId),
                 locations.observePlaces(session.familyId),
-                combine(sharing.isSharing, permissions, myFix) { on, perms, fix -> Triple(on, perms, fix) },
-            ) { members, locationList, places, (isSharing, perms, fix) ->
+                combine(sharing.isSharing, permissions, myFix, presence.alertsEnabled) { on, perms, fix, alerts ->
+                    Settings(on, perms, fix, alerts)
+                },
+            ) { members, locationList, places, settings ->
+                val (isSharing, perms, fix, alerts) = settings
                 val byMember = locationList.associateBy { it.memberId }
                 val now = Instant.now()
                 MapUiState(
@@ -82,6 +105,7 @@ class MapViewModel @Inject constructor(
                     hasPermission = perms.first,
                     hasBackgroundPermission = perms.second,
                     myFix = fix,
+                    alertsEnabled = alerts,
                 )
             }
         }
@@ -130,7 +154,7 @@ class MapViewModel @Inject constructor(
             val previous = (state.members.firstOrNull { it.member.id == me.id }?.status as? LocationStatus.Known)?.location
             if (!shouldPublish(previous, next)) return@launch
             _actionState.value = try {
-                locations.publish(familyId, next)
+                tracker.share(familyId, me.id, fix, state.places)
                 ActionState()
             } catch (e: Exception) {
                 Log.w("ChoreMe", "Couldn't share location", e)
@@ -139,11 +163,27 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    private val _placeSaved = MutableSharedFlow<PlaceSaved>(extraBufferCapacity = 1)
+
+    /** How saving a place went, for a short message on screen. */
+    val placeSaved: SharedFlow<PlaceSaved> = _placeSaved
+
     fun addPlace(name: String, radiusMeters: Int) {
         val familyId = uiState.value.familyId ?: return
         val fix = myFix.value ?: return
-        runAction(_actionState) { locations.addPlace(familyId, name.trim(), fix.point, radiusMeters) }
+        val trimmed = name.trim()
+        viewModelScope.launch {
+            val result = try {
+                if (locations.addPlace(familyId, trimmed, fix.point, radiusMeters)) PlaceSaved.Saved(trimmed) else PlaceSaved.Pending(trimmed)
+            } catch (e: Exception) {
+                Log.w("ChoreMe", "Couldn't save place", e)
+                PlaceSaved.Failed
+            }
+            _placeSaved.emit(result)
+        }
     }
+
+    fun setAlertsEnabled(enabled: Boolean) = presence.setAlertsEnabled(enabled)
 
     fun deletePlace(place: Place) {
         val familyId = uiState.value.familyId ?: return

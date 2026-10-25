@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,6 +34,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,6 +49,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -66,6 +70,20 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
     var focus by remember { mutableStateOf<GeoPoint?>(null) }
     var explainBackground by rememberSaveable { mutableStateOf(false) }
     var addingPlace by rememberSaveable { mutableStateOf(false) }
+    val snackbar = remember { SnackbarHostState() }
+    val context = LocalContext.current
+
+    LaunchedEffect(viewModel) {
+        viewModel.placeSaved.collect { result ->
+            snackbar.showSnackbar(
+                when (result) {
+                    is PlaceSaved.Saved -> context.getString(R.string.place_saved, result.name)
+                    is PlaceSaved.Pending -> context.getString(R.string.place_pending, result.name)
+                    PlaceSaved.Failed -> context.getString(R.string.place_failed)
+                },
+            )
+        }
+    }
 
     val backgroundLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         viewModel.onPermissionsChanged()
@@ -97,6 +115,15 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
                 },
                 modifier = Modifier.align(Alignment.TopEnd).padding(12.dp),
             ) { Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.refresh)) }
+            if (state.isParent && state.myFix != null) {
+                ExtendedFloatingActionButton(
+                    onClick = { addingPlace = true },
+                    icon = { Text("📍") },
+                    text = { Text(stringResource(R.string.save_place)) },
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
+                )
+            }
+            SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter))
             Text(
                 stringResource(R.string.osm_credit),
                 style = MaterialTheme.typography.labelSmall,
@@ -128,6 +155,18 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
                 )
             }
 
+            item(key = "alerts") {
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(stringResource(R.string.alerts_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                            Switch(checked = state.alertsEnabled, onCheckedChange = viewModel::setAlertsEnabled)
+                        }
+                        Text(stringResource(R.string.alerts_body), style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
+
             item(key = "family-title") { SectionTitle(stringResource(R.string.family_title)) }
             items(state.members, key = { "member-${it.member.id}" }) { m ->
                 MemberRow(m, onClick = { (m.status as? LocationStatus.Known)?.let { focus = it.location.point } })
@@ -141,11 +180,6 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
             }
             items(state.places, key = { "place-${it.id}" }) { place ->
                 PlaceRow(place, canDelete = state.isParent, onClick = { focus = place.center }, onDelete = { viewModel.deletePlace(place) })
-            }
-            if (state.isParent && state.myFix != null) {
-                item(key = "add-place") {
-                    OutlinedButton(onClick = { addingPlace = true }) { Text(stringResource(R.string.add_place_here)) }
-                }
             }
             item(key = "error") { ErrorText(actionState.error) }
         }

@@ -38,6 +38,7 @@ families/{familyId}              name, inviteCode, createdBy
   groceryItems/{itemId}          name, category, isNeeded, isStaple, updatedAt, updatedBy
   locations/{memberId}           latitude, longitude, accuracy, at: only while that member shares
   places/{placeId}               name, latitude, longitude, radius
+  placeEvents/{eventId}          memberId, placeId, placeName, type (ARRIVED | LEFT), at; kept 2 days
   chores/{choreId}               title, template, recurrenceType, everyDays, weekDays[], dueDate,
                                  status, claimedBy, completedBy, approvedBy, lastDoneBy, lastDoneOn
 inviteCodes/{code}               familyId, familyName
@@ -102,6 +103,13 @@ rules let kids make only the grab / let go / "I finished" steps, in their own na
 - [x] **Feedback round 1.** Chores reframed as "noticed needs" (anyone reports,
       no schedule by default, duplicates caught). Grocery items get an emoji
       each (🥛 🥚 🍞 🧻 …), falling back to their aisle's.
+- [x] **Feedback round 2.** "Save this place" button on the map with a clear
+      result message. **Arrival alerts**: the phone that moves records "Leo
+      arrived at School" / "Leo left Home" (`placeEvents`), with a margin so GPS
+      jitter at the edge doesn't flap; every phone checks about every 15 minutes
+      and shows a notification. Each phone can turn alerts off. On the free plan
+      alerts take up to ~15–20 minutes; instant alerts need a Cloud Function
+      (Blaze plan) deployed from a computer.
 - [ ] **Extras.** Home-screen widget ("Out of…" and today's chores), weekly
       scoreboard or points for kids (not needed for now), dark mode polish.
 

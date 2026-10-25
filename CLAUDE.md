@@ -29,6 +29,8 @@ in the way and what you propose, before writing the code.
   stay public because Hilt needs them to be. Known exceptions, keep the list short:
   - `:feature:onboarding`: `:app` shows its screens directly, outside navigation.
   - `:feature:chores`: `ChoreReminders.schedule()`, which `:app` calls at startup.
+  - `:feature:map`: `PlaceAlerts.schedule()`, which `:app` calls at startup, so every
+    phone gets arrival alerts, even one that never opened the map.
 - **Features talk to each other only through `:app`.** If one needs to send people to
   another (Today linking to the grocery list), it takes a callback like
   `onOpenGroceries` and `:app` does the navigation.

@@ -6,10 +6,8 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.choreme.core.data.FamilyRepository
 import com.choreme.core.data.FirebaseAvailability
-import com.choreme.core.data.LocationRepository
 import com.choreme.core.location.DeviceLocation
 import com.choreme.core.location.SharingChoice
-import com.choreme.core.model.location.MemberLocation
 import com.choreme.core.model.session.SessionState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -24,7 +22,7 @@ internal class LocationShareWorker @AssistedInject constructor(
     private val sharing: SharingChoice,
     private val device: DeviceLocation,
     private val families: FamilyRepository,
-    private val locations: LocationRepository,
+    private val tracker: PresenceTracker,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
@@ -35,7 +33,7 @@ internal class LocationShareWorker @AssistedInject constructor(
             as? SessionState.InFamily ?: return Result.success()
         val fix = device.current() ?: return Result.success()
         return try {
-            locations.publish(session.familyId, MemberLocation(session.memberId, fix.point, fix.accuracyMeters, fix.at))
+            tracker.share(session.familyId, session.memberId, fix)
             Result.success()
         } catch (e: Exception) {
             Result.retry()
