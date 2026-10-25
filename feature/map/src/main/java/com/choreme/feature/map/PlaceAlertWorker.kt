@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.choreme.core.settings.NotificationSettings
+import com.choreme.core.model.AlertKind
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
@@ -38,6 +40,7 @@ internal class PlaceAlertWorker @AssistedInject constructor(
     private val families: FamilyRepository,
     private val locations: LocationRepository,
     private val store: PresenceStore,
+    private val notifications: NotificationSettings,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
@@ -58,7 +61,7 @@ internal class PlaceAlertWorker @AssistedInject constructor(
             val shown = store.shownEventIds
             val recent = locations.eventsSince(session.familyId, since.minus(LOOK_BACK))
             val events = recent.filter { it.memberId != session.memberId && it.id !in shown }
-            if (store.alertsEnabled.value && canNotify() && events.isNotEmpty()) {
+            if (notifications.isEnabled(AlertKind.ARRIVALS) && canNotify() && events.isNotEmpty()) {
                 val names = families.observeMembers(session.familyId).first().associate { it.id to it.name }
                 events.forEach { show(it, names[it.memberId]) }
             }
@@ -91,7 +94,7 @@ internal class PlaceAlertWorker @AssistedInject constructor(
         )
         val time = event.at.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, CHANNEL_ID))
             .setSmallIcon(R.drawable.ic_notification_place)
             .setContentTitle(title)
             .setContentText(time)

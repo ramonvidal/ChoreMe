@@ -9,7 +9,9 @@ import com.choreme.core.data.LocationRepository
 import com.choreme.core.location.DeviceFix
 import com.choreme.core.location.DeviceLocation
 import com.choreme.core.location.SharingChoice
+import com.choreme.core.model.AlertKind
 import com.choreme.core.push.PushRegistration
+import com.choreme.core.settings.NotificationSettings
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
 import com.choreme.core.model.location.LocationStatus
@@ -28,6 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -82,6 +85,7 @@ class MapViewModel @Inject internal constructor(
     private val tracker: PresenceTracker,
     private val presence: PresenceStore,
     private val push: PushRegistration,
+    private val notifications: NotificationSettings,
 ) : ViewModel() {
     private val hasPushApp = MutableStateFlow(push.hasDistributor())
     private val permissions = MutableStateFlow(device.hasPermission() to device.hasBackgroundPermission())
@@ -94,7 +98,7 @@ class MapViewModel @Inject internal constructor(
                 families.observeMembers(session.familyId),
                 locations.observeLocations(session.familyId),
                 locations.observePlaces(session.familyId),
-                combine(sharing.isSharing, permissions, myFix, presence.alertsEnabled, combine(hasPushApp, push.endpoint, ::Pair)) {
+                combine(sharing.isSharing, permissions, myFix, notifications.settings.map { it.isEnabled(AlertKind.ARRIVALS) }, combine(hasPushApp, push.endpoint, ::Pair)) {
                         on, perms, fix, alerts, (pushApp, endpoint) ->
                     Settings(on, perms, fix, alerts, InstantAlerts(pushApp, endpoint != null))
                 },
@@ -192,7 +196,7 @@ class MapViewModel @Inject internal constructor(
         }
     }
 
-    fun setAlertsEnabled(enabled: Boolean) = presence.setAlertsEnabled(enabled)
+    fun setAlertsEnabled(enabled: Boolean) = notifications.setEnabled(AlertKind.ARRIVALS, enabled)
 
     /** When the map is shown again, e.g. after installing ntfy. */
     fun onResume() {

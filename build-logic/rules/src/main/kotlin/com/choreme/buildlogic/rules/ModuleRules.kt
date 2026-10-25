@@ -23,6 +23,8 @@ object ModuleRules {
         ":core:location" to setOf(":core:model"),
         // Wake-up pings between family phones through UnifiedPush (e.g. the free ntfy app).
         ":core:push" to setOf(":core:model"),
+        // This phone's own choices (which alerts, quiet hours), read by several features.
+        ":core:settings" to setOf(":core:model"),
     )
 
     val PURE_KOTLIN: Set<String> = setOf(":core:model")

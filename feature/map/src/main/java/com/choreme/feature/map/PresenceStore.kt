@@ -58,19 +58,10 @@ internal class PresenceStore @Inject constructor(@ApplicationContext context: Co
         get() = prefs.getStringSet(KEY_SHOWN, emptySet()).orEmpty()
         set(value) = prefs.edit().putStringSet(KEY_SHOWN, value).apply()
 
-    private val _alertsEnabled = MutableStateFlow(prefs.getBoolean(KEY_ALERTS, true))
-    val alertsEnabled: StateFlow<Boolean> = _alertsEnabled.asStateFlow()
-
-    fun setAlertsEnabled(enabled: Boolean) {
-        prefs.edit().putBoolean(KEY_ALERTS, enabled).apply()
-        _alertsEnabled.value = enabled
-    }
-
     private companion object {
         const val KEY_PLACE = "last_place"
         const val KEY_KNOWN = "place_known"
         const val KEY_CHECKED = "alerts_checked_until"
-        const val KEY_ALERTS = "alerts_enabled"
         const val KEY_SHOWN = "shown_events"
         const val KEY_SHARED_MEMBER = "shared_member"
         const val KEY_SHARED_LAT = "shared_lat"

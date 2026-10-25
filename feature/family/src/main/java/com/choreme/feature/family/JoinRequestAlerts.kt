@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.choreme.core.settings.NotificationSettings
+import com.choreme.core.model.AlertKind
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
@@ -64,6 +66,7 @@ internal class JoinRequestWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val availability: FirebaseAvailability,
     private val families: FamilyRepository,
+    private val notifications: NotificationSettings,
 ) : CoroutineWorker(context, params) {
     private val prefs = context.getSharedPreferences("join-requests", Context.MODE_PRIVATE)
 
@@ -75,7 +78,7 @@ internal class JoinRequestWorker @AssistedInject constructor(
         val requests = withTimeoutOrNull(TIMEOUT_MS) { families.observeJoinRequests(session.familyId).first() }
             ?: return Result.retry()
         val shown = prefs.getStringSet(KEY_SHOWN, emptySet()).orEmpty()
-        if (canNotify()) requests.filter { it.uid !in shown }.forEach { show(it.uid, it.name) }
+        if (canNotify() && notifications.isEnabled(AlertKind.JOIN_REQUESTS)) requests.filter { it.uid !in shown }.forEach { show(it.uid, it.name) }
         prefs.edit().putStringSet(KEY_SHOWN, requests.map { it.uid }.toSet()).apply()
         return Result.success()
     }
@@ -92,7 +95,7 @@ internal class JoinRequestWorker @AssistedInject constructor(
                 .apply { description = context.getString(R.string.join_channel_description) },
         )
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, CHANNEL_ID))
             .setSmallIcon(R.drawable.ic_notification_family)
             .setContentTitle(context.getString(R.string.join_title, name))
             .setContentText(context.getString(R.string.join_body))

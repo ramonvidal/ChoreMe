@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.choreme.core.settings.NotificationSettings
+import com.choreme.core.model.AlertKind
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
@@ -33,10 +35,11 @@ internal class ChoreReminderWorker @AssistedInject constructor(
     private val availability: FirebaseAvailability,
     private val families: FamilyRepository,
     private val chores: ChoreRepository,
+    private val notifications: NotificationSettings,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        if (!availability.isConfigured || !canNotify()) return Result.success()
+        if (!availability.isConfigured || !canNotify() || !notifications.isEnabled(AlertKind.MORNING_SUMMARY)) return Result.success()
         val session = withTimeoutOrNull(TIMEOUT_MS) { families.session.first { it != SessionState.Loading } }
             as? SessionState.InFamily ?: return Result.success()
         val allChores = withTimeoutOrNull(TIMEOUT_MS) { chores.observeChores(session.familyId).first() }
@@ -74,7 +77,7 @@ internal class ChoreReminderWorker @AssistedInject constructor(
         val contentIntent = launch?.let {
             PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, CHANNEL_ID))
             .setSmallIcon(R.drawable.ic_notification_chores)
             .setContentTitle(title)
             .setContentText(context.getString(R.string.reminder_body))

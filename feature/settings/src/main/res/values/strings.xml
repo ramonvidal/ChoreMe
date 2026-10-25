@@ -1,0 +1,24 @@
+<resources>
+    <string name="settings_title">This phone</string>
+    <string name="settings_hint">These choices are only for this phone.</string>
+    <string name="alerts_section">Notifications</string>
+    <string name="alert_new_chores">New chores</string>
+    <string name="alert_new_chores_hint">When someone adds something that needs doing</string>
+    <string name="alert_approvals">Chores to approve</string>
+    <string name="alert_approvals_hint">When a kid finishes a chore (parents)</string>
+    <string name="alert_join_requests">Join requests</string>
+    <string name="alert_join_requests_hint">When someone asks to join the family (parents)</string>
+    <string name="alert_arrivals">Arrivals and departures</string>
+    <string name="alert_arrivals_hint">When someone arrives at or leaves a saved place</string>
+    <string name="alert_morning">Morning summary</string>
+    <string name="alert_morning_hint">At 8:00, what needs doing today</string>
+    <string name="quiet_section">Quiet hours</string>
+    <string name="quiet_hint">Notifications still arrive, just without sound or vibration.</string>
+    <string name="quiet_from">From %1$s</string>
+    <string name="quiet_to">Until %1$s</string>
+    <string name="instant_section">Instant alerts</string>
+    <string name="instant_on">⚡ On, through ntfy. Alerts arrive within seconds.</string>
+    <string name="instant_off">Off. Install the free ntfy app to get alerts within seconds instead of within 15–30 minutes.</string>
+    <string name="instant_install">Get ntfy (free)</string>
+    <string name="ok">OK</string>
+</resources>

@@ -37,6 +37,8 @@ import com.choreme.feature.groceries.GROCERIES_ROUTE
 import com.choreme.feature.groceries.groceriesScreen
 import com.choreme.feature.map.MAP_ROUTE
 import com.choreme.feature.map.mapScreen
+import com.choreme.feature.settings.SETTINGS_ROUTE
+import com.choreme.feature.settings.settingsScreen
 
 enum class TopLevelDestination(
     val route: String,
@@ -90,7 +92,8 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0, pendingApprovals: Int = 0) {
             groceriesScreen()
             agendaScreen()
             mapScreen()
-            familyScreen()
+            familyScreen(onOpenSettings = { navController.navigate(SETTINGS_ROUTE) })
+            settingsScreen()
         }
     }
 }

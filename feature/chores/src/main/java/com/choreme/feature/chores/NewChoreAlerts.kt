@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.choreme.core.settings.NotificationSettings
+import com.choreme.core.model.AlertKind
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
@@ -91,6 +93,7 @@ internal class NewChoreWorker @AssistedInject constructor(
     private val availability: FirebaseAvailability,
     private val families: FamilyRepository,
     private val chores: ChoreRepository,
+    private val notifications: NotificationSettings,
 ) : CoroutineWorker(context, params) {
     private val prefs = context.getSharedPreferences("new-chores", Context.MODE_PRIVATE)
 
@@ -110,7 +113,7 @@ internal class NewChoreWorker @AssistedInject constructor(
             // Look back a little: a chore added offline reaches the server later than it was made.
             val recent = chores.reportedSince(session.familyId, since.minus(LOOK_BACK))
             val fresh = recent.filter { it.id !in shown && it.reportedBy != session.memberId && it.isActive }
-            if (fresh.isNotEmpty() && canNotify()) {
+            if (fresh.isNotEmpty() && canNotify() && notifications.isEnabled(AlertKind.NEW_CHORES)) {
                 val names = families.observeMembers(session.familyId).first().associate { it.id to it.name }
                 fresh.forEach { show(it, names[it.reportedBy]) }
             }
@@ -132,7 +135,7 @@ internal class NewChoreWorker @AssistedInject constructor(
         // Keyed by chore and who did it, so the same chore finished again next week alerts again.
         val key = { chore: Chore -> "${chore.id}|${chore.completedBy}|${chore.dueDate}" }
         val fresh = waiting.filter { key(it) !in shown }
-        if (fresh.isNotEmpty() && canNotify()) {
+        if (fresh.isNotEmpty() && canNotify() && notifications.isEnabled(AlertKind.APPROVALS)) {
             val names = families.observeMembers(familyId).first().associate { it.id to it.name }
             fresh.forEach { showApproval(it, names[it.completedBy]) }
         }
@@ -147,7 +150,7 @@ internal class NewChoreWorker @AssistedInject constructor(
                 .apply { description = context.getString(R.string.approval_channel_description) },
         )
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val notification = NotificationCompat.Builder(context, APPROVAL_CHANNEL_ID)
+        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, APPROVAL_CHANNEL_ID))
             .setSmallIcon(R.drawable.ic_notification_chores)
             .setContentTitle(context.getString(R.string.approval_title, who ?: context.getString(R.string.someone), chore.title))
             .setContentText(context.getString(R.string.approval_body))
@@ -169,7 +172,7 @@ internal class NewChoreWorker @AssistedInject constructor(
                 .apply { description = context.getString(R.string.new_chore_channel_description) },
         )
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, CHANNEL_ID))
             .setSmallIcon(R.drawable.ic_notification_chores)
             .setContentTitle("${chore.template.emoji} ${chore.title}")
             .setContentText(context.getString(R.string.new_chore_body, who ?: context.getString(R.string.someone)))

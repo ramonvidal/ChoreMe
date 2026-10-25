@@ -19,8 +19,9 @@ in the way and what you propose, before writing the code.
 | `:core:ui` | Theme, shared composables, strings used by more than one feature, error messages | `:core:model` |
 | `:core:calendar` | The phone's calendars (Android `CalendarContract`): read events, add events with alerts | `:core:model` |
 | `:core:location` | The phone's own position (fused location provider), location permissions, the "share my location" switch | `:core:model` |
+| `:core:settings` | This phone's choices: which alerts it shows, quiet hours. Read by the features' workers | `:core:model` |
 | `:core:push` | Free instant wake-up pings between family phones (UnifiedPush, e.g. the ntfy app). Pings carry no family data; features react through `PushListener` | `:core:model` |
-| `:feature:<name>` | One tab or flow: `onboarding`, `chores`, `groceries`, `agenda`, `map`, `family` | `:core:*` only |
+| `:feature:<name>` | One tab or flow: `onboarding`, `chores`, `groceries`, `agenda`, `map`, `family`, `settings` | `:core:*` only |
 | `:app` | Wires features together: activity, root screen, navigation | anything; nothing depends on it |
 
 - **Features never depend on each other.** What two features share moves down into
