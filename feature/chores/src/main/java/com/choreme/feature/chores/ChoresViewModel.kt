@@ -6,11 +6,13 @@ import androidx.lifecycle.viewModelScope
 import com.choreme.core.data.ChoreRepository
 import com.choreme.core.data.FamilyRepository
 import com.choreme.core.data.GroceryRepository
+import com.choreme.core.data.PushEndpointRepository
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreTemplate
 import com.choreme.core.model.chore.Recurrence
+import com.choreme.core.model.chore.SavedChore
 import com.choreme.core.model.chore.TodayBoard
 import com.choreme.core.model.chore.approve
 import com.choreme.core.model.chore.buildTodayBoard
@@ -19,8 +21,11 @@ import com.choreme.core.model.chore.complete
 import com.choreme.core.model.chore.findOpenDuplicate
 import com.choreme.core.model.chore.completeFor
 import com.choreme.core.model.chore.reject
+import com.choreme.core.model.chore.shouldSaveForLater
 import com.choreme.core.model.chore.unclaim
 import com.choreme.core.model.session.SessionState
+import com.choreme.core.push.PushKinds
+import com.choreme.core.push.PushSender
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +33,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -40,11 +46,16 @@ data class ChoresUiState(
     val chores: List<Chore> = emptyList(),
     val members: Map<String, Member> = emptyMap(),
     val groceriesToBuy: Int = 0,
+    /** Hand-typed chores kept as quick picks. */
+    val savedChores: List<SavedChore> = emptyList(),
 ) {
     val isParent get() = me?.role == Role.PARENT
     val hasChores get() = chores.isNotEmpty()
     val kids get() = members.values.filter { it.role == Role.KID }.sortedBy { it.name.lowercase() }
     fun nameOf(memberId: String?): String? = memberId?.let { members[it]?.name }
+
+    /** Parents tidy up any saved chore; others only their own. */
+    fun canRemove(saved: SavedChore) = isParent || saved.createdBy == me?.id
 }
 
 /** What the person typed in the chore editor. */
@@ -60,6 +71,8 @@ class ChoresViewModel @Inject constructor(
     families: FamilyRepository,
     private val chores: ChoreRepository,
     groceries: GroceryRepository,
+    private val endpoints: PushEndpointRepository,
+    private val push: PushSender,
 ) : ViewModel() {
     val uiState: StateFlow<ChoresUiState> = families.session
         .filterIsInstance<SessionState.InFamily>()
@@ -68,7 +81,8 @@ class ChoresViewModel @Inject constructor(
                 chores.observeChores(session.familyId),
                 families.observeMembers(session.familyId),
                 groceries.observeItems(session.familyId),
-            ) { allChores, members, groceryItems ->
+                chores.observeSavedChores(session.familyId),
+            ) { allChores, members, groceryItems, saved ->
                 val today = LocalDate.now()
                 ChoresUiState(
                     loading = false,
@@ -80,6 +94,7 @@ class ChoresViewModel @Inject constructor(
                     chores = allChores,
                     members = members.associateBy { it.id },
                     groceriesToBuy = groceryItems.count { it.isNeeded },
+                    savedChores = saved,
                 )
             }
         }
@@ -101,7 +116,24 @@ class ChoresViewModel @Inject constructor(
             me.id,
             Chore(id = "", title = draft.title.trim(), template = draft.template, recurrence = draft.recurrence, dueDate = draft.dueDate),
         )
+        // Something typed by hand becomes a quick pick for next time.
+        if (shouldSaveForLater(draft.template, draft.title, uiState.value.savedChores)) {
+            chores.saveForLater(familyId, me.id, draft.title)
+        }
+        // Let the rest of the family know right away (phones with ntfy).
+        viewModelScope.launch {
+            try {
+                push.ping(endpoints.othersThan(familyId, me.id), PushKinds.CHORE_ADDED)
+            } catch (e: Exception) {
+                Log.w("ChoreMe", "Couldn't ping the family", e)
+            }
+        }
         return null
+    }
+
+    fun removeSaved(saved: SavedChore) {
+        val (familyId, _) = context() ?: return
+        chores.deleteSaved(familyId, saved.id)
     }
 
 

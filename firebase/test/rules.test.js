@@ -232,6 +232,17 @@ describe('chores', () => {
     await assertSucceeds(deleteDoc(ref(parent('alice'))));
   });
 
+  test('saved chores: anyone saves one in their own name; the saver or a parent removes it', async () => {
+    const saved = (db, id) => doc(db, 'families', FAMILY, 'choreTemplates', id);
+    const feedCat = { title: 'Feed the cat', createdBy: 'member-kid1' };
+    await assertSucceeds(setDoc(saved(kidDevice('kid1'), 'feed-the-cat'), feedCat));
+    await assertFails(setDoc(saved(kidDevice('kid2'), 'x'), feedCat));
+    await assertFails(setDoc(saved(kidDevice('kid1'), 'y'), { ...feedCat, title: '' }));
+    await assertSucceeds(getDocs(collection(kidDevice('kid2'), 'families', FAMILY, 'choreTemplates')));
+    await assertFails(deleteDoc(saved(kidDevice('kid2'), 'feed-the-cat')));
+    await assertSucceeds(deleteDoc(saved(parent('alice'), 'feed-the-cat')));
+  });
+
   test('a kid grabs, lets go, then finishes a chore for approval', async () => {
     const db = kidDevice('kid1');
     await assertSucceeds(updateDoc(ref(db), { status: 'CLAIMED', claimedBy: 'member-kid1' }));

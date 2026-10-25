@@ -2,19 +2,26 @@ package com.choreme.core.data
 
 import android.util.Log
 import com.choreme.core.data.remote.FirestoreSchema
+import com.choreme.core.data.remote.FirestoreSchema.CREATED_AT
 import com.choreme.core.data.remote.FirestoreSchema.CREATED_BY
+import com.choreme.core.data.remote.FirestoreSchema.TITLE
 import com.choreme.core.data.remote.FirestoreSchema.UPDATED_AT
 import com.choreme.core.data.remote.FirestoreSchema.UPDATED_BY
 import com.choreme.core.data.remote.documentsFlow
 import com.choreme.core.data.remote.toChore
 import com.choreme.core.data.remote.toFields
+import com.choreme.core.model.NameKeys
 import com.choreme.core.model.chore.Chore
+import com.choreme.core.model.chore.SavedChore
+import com.google.firebase.Timestamp
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Lazy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.tasks.await
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,16 +34,16 @@ import javax.inject.Singleton
 class ChoreRepository @Inject constructor(
     private val firestore: Lazy<FirebaseFirestore>,
 ) {
-    private fun chores(familyId: String) = firestore.get()
-        .collection(FirestoreSchema.FAMILIES).document(familyId)
-        .collection(FirestoreSchema.CHORES)
+    private fun family(familyId: String) = firestore.get().collection(FirestoreSchema.FAMILIES).document(familyId)
+    private fun chores(familyId: String) = family(familyId).collection(FirestoreSchema.CHORES)
+    private fun savedChores(familyId: String) = family(familyId).collection(FirestoreSchema.CHORE_TEMPLATES)
 
     fun observeChores(familyId: String): Flow<List<Chore>> =
         chores(familyId).documentsFlow().map { docs -> docs.mapNotNull { it.toChore() } }
 
     fun create(familyId: String, memberId: String, chore: Chore) {
         chores(familyId).document()
-            .set(chore.toFields() + mapOf(CREATED_BY to memberId) + stamp(memberId))
+            .set(chore.toFields() + mapOf(CREATED_BY to memberId, CREATED_AT to FieldValue.serverTimestamp()) + stamp(memberId))
             .logFailure()
     }
 
@@ -50,6 +57,33 @@ class ChoreRepository @Inject constructor(
 
     fun delete(familyId: String, choreId: String) {
         chores(familyId).document(choreId).delete().logFailure()
+    }
+
+    /** Chores reported after [after] (by the server's clock), for "Leo noticed: Wash dishes" alerts. */
+    suspend fun reportedSince(familyId: String, after: Instant): List<Chore> =
+        chores(familyId)
+            .whereGreaterThan(CREATED_AT, Timestamp(after.epochSecond, after.nano))
+            .get()
+            .await()
+            .documents
+            .mapNotNull { it.toChore() }
+
+    fun observeSavedChores(familyId: String): Flow<List<SavedChore>> =
+        savedChores(familyId).documentsFlow().map { docs ->
+            docs.mapNotNull { doc ->
+                val title = doc.getString(TITLE) ?: return@mapNotNull null
+                SavedChore(doc.id, title, doc.getString(CREATED_BY).orEmpty())
+            }.sortedBy { it.title.lowercase() }
+        }
+
+    /** Keeps a hand-typed chore for next time; saving the same name twice keeps one. */
+    fun saveForLater(familyId: String, memberId: String, title: String) {
+        val ref = NameKeys.documentId(title)?.let(savedChores(familyId)::document) ?: return
+        ref.set(mapOf(TITLE to title.trim(), CREATED_BY to memberId)).logFailure()
+    }
+
+    fun deleteSaved(familyId: String, savedId: String) {
+        savedChores(familyId).document(savedId).delete().logFailure()
     }
 
     private fun stamp(memberId: String) = mapOf(UPDATED_AT to FieldValue.serverTimestamp(), UPDATED_BY to memberId)

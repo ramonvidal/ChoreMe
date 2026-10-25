@@ -19,8 +19,9 @@ object ChoreReminders {
     private const val WORK_NAME = "chore-morning-reminder"
     private val REMINDER_TIME: LocalTime = LocalTime.of(8, 0)
 
-    /** Safe to call on every app start: an existing schedule is kept. */
+    /** Safe to call on every app start: an existing schedule is kept. Also sets up new-chore alerts. */
     fun schedule(context: Context) {
+        NewChoreAlerts.schedule(context)
         val request = PeriodicWorkRequestBuilder<ChoreReminderWorker>(1, TimeUnit.DAYS)
             .setInitialDelay(untilNext(REMINDER_TIME).toMillis(), TimeUnit.MILLISECONDS)
             .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())

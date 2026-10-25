@@ -7,6 +7,8 @@ android {
 }
 
 dependencies {
+    // Telling the family's other phones when a chore is added.
+    implementation(projects.core.push)
     // Morning reminders.
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.hilt.work)

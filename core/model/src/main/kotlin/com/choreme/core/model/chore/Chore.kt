@@ -1,6 +1,7 @@
 package com.choreme.core.model.chore
 
 import com.choreme.core.model.Member
+import com.choreme.core.model.NameKeys
 import com.choreme.core.model.Role
 import java.time.LocalDate
 
@@ -116,6 +117,14 @@ private fun Chore.finish(doneBy: String, approvedBy: String?, today: LocalDate):
         )
     }
 }
+
+/** A chore someone typed by hand, kept as a quick pick for next time. */
+data class SavedChore(val id: String, val title: String, val createdBy: String)
+
+/** A hand-typed chore (not one of the built-in templates) is saved unless it already is. */
+fun shouldSaveForLater(template: ChoreTemplate, title: String, saved: List<SavedChore>): Boolean =
+    template == ChoreTemplate.OTHER && title.isNotBlank() &&
+        saved.none { NameKeys.key(it.title) == NameKeys.key(title) }
 
 /**
  * A chore with the same name that still needs doing, if there is one, so two people

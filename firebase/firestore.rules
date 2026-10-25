@@ -192,6 +192,15 @@ service cloud.firestore {
         allow delete: if isParent(f);
       }
 
+      // Chores someone typed by hand, kept as quick picks for next time.
+      match /choreTemplates/{templateId} {
+        allow read: if isMember(f);
+        allow create, update: if isMember(f) && request.resource.data.createdBy == myMemberId(f)
+          && request.resource.data.title is string
+          && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 60;
+        allow delete: if isParent(f) || (isMember(f) && resource.data.createdBy == myMemberId(f));
+      }
+
       // Everyone in the family, kids included, can say "we're out of eggs".
       match /groceryItems/{itemId} {
         allow read, delete: if isMember(f);

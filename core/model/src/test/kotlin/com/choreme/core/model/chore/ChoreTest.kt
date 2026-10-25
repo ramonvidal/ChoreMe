@@ -97,3 +97,15 @@ class DuplicateChoreTest {
         assertNull(findOpenDuplicate("Clean bathroom", listOf(open, done)))
     }
 }
+
+class SavedChoreTest {
+    private val saved = listOf(SavedChore("feed-the-cat", "Feed the cat", "leo"))
+
+    @Test
+    fun `typed chores are saved once, templates never`() {
+        assertEquals(true, shouldSaveForLater(ChoreTemplate.OTHER, "Water the garden", saved))
+        assertEquals(false, shouldSaveForLater(ChoreTemplate.OTHER, " feed THE cat", saved))
+        assertEquals(false, shouldSaveForLater(ChoreTemplate.DISHES, "Wash dishes", saved))
+        assertEquals(false, shouldSaveForLater(ChoreTemplate.OTHER, "  ", saved))
+    }
+}

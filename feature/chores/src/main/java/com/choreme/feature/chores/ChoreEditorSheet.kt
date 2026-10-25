@@ -1,6 +1,8 @@
 package com.choreme.feature.chores
 
 import com.choreme.core.ui.R as CoreUiR
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -11,9 +13,11 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +25,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -32,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -40,6 +46,7 @@ import com.choreme.core.ui.emoji
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreTemplate
 import com.choreme.core.model.chore.Recurrence
+import com.choreme.core.model.chore.SavedChore
 import java.time.DayOfWeek
 import java.time.LocalDate
 
@@ -56,7 +63,11 @@ internal fun ChoreEditorSheet(
     onSave: (ChoreDraft) -> Unit,
     onDelete: (() -> Unit)?,
     onDismiss: () -> Unit,
+    savedChores: List<SavedChore> = emptyList(),
+    canRemoveSaved: (SavedChore) -> Boolean = { false },
+    onRemoveSaved: (SavedChore) -> Unit = {},
 ) {
+    var removing by remember { mutableStateOf<SavedChore?>(null) }
     val initialRecurrence = chore?.recurrence ?: Recurrence.Once
     var template by remember { mutableStateOf(chore?.template) }
     var title by remember { mutableStateOf(chore?.title.orEmpty()) }
@@ -101,6 +112,24 @@ internal fun ChoreEditorSheet(
                         label = { Text("${option.emoji} ${templateTitles.getValue(option)}") },
                     )
                 }
+            }
+            if (savedChores.isNotEmpty()) {
+                Text(stringResource(R.string.saved_chores), style = MaterialTheme.typography.labelLarge)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    savedChores.forEach { saved ->
+                        SavedChoreChip(
+                            title = saved.title,
+                            selected = template == ChoreTemplate.OTHER && title == saved.title,
+                            onClick = {
+                                template = ChoreTemplate.OTHER
+                                title = saved.title
+                                titleFromTemplate = saved.title
+                            },
+                            onLongClick = { if (canRemoveSaved(saved)) removing = saved },
+                        )
+                    }
+                }
+                Text(stringResource(R.string.saved_chore_hint), style = MaterialTheme.typography.bodySmall)
             }
             OutlinedTextField(
                 value = title,
@@ -156,6 +185,34 @@ internal fun ChoreEditorSheet(
                 ) { Text(stringResource(CoreUiR.string.save)) }
             }
         }
+    }
+
+    removing?.let { saved ->
+        AlertDialog(
+            onDismissRequest = { removing = null },
+            text = { Text(stringResource(R.string.remove_saved_chore, saved.title)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    onRemoveSaved(saved)
+                    removing = null
+                }) { Text(stringResource(CoreUiR.string.remove)) }
+            },
+            dismissButton = { TextButton(onClick = { removing = null }) { Text(stringResource(CoreUiR.string.cancel)) } },
+        )
+    }
+}
+
+/** Like a FilterChip, plus long-press (to remove it from the saved list). */
+@Composable
+private fun SavedChoreChip(title: String, selected: Boolean, onClick: () -> Unit, onLongClick: () -> Unit) {
+    val shape = RoundedCornerShape(8.dp)
+    Surface(
+        shape = shape,
+        color = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        modifier = Modifier.clip(shape).combinedClickable(onClick = onClick, onLongClick = onLongClick),
+    ) {
+        Text("${ChoreTemplate.OTHER.emoji} $title", modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp))
     }
 }
 

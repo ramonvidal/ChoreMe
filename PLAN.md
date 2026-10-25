@@ -41,7 +41,8 @@ families/{familyId}              name, inviteCode, createdBy
   places/{placeId}               name, latitude, longitude, radius
   placeEvents/{eventId}          memberId, placeId, placeName, type (ARRIVED | LEFT), at; kept 2 days
   pushEndpoints/{uid}            memberId, url: where to ping this device (UnifiedPush)
-  chores/{choreId}               title, template, recurrenceType, everyDays, weekDays[], dueDate,
+  choreTemplates/{nameKey}       title, createdBy: hand-typed chores kept as quick picks
+  chores/{choreId}               createdAt, title, template, recurrenceType, everyDays, weekDays[], dueDate,
                                  status, claimedBy, completedBy, approvedBy, lastDoneBy, lastDoneOn
 inviteCodes/{code}               familyId, familyName
 users/{uid}                      familyId, familyName: lets a device find its family again
@@ -115,6 +116,12 @@ rules let kids make only the grab / let go / "I finished" steps, in their own na
       and show the alert within seconds. Pings carry only the kind of change;
       addresses live in `pushEndpoints`. Next candidates for pings: kids'
       finished chores (to parents) and join requests.
+- [x] **Feedback round 3.** "Leo noticed: Wash dishes" notifications on the
+      other phones (instant with ntfy, otherwise within 30 minutes). Hand-typed
+      chores are saved as quick picks ("Saved" row; long-press to remove).
+      Battery: no background Firestore listeners, location only sent when moved
+      (or every 30 min), recent fixes reused, slower safety-net checks when
+      pings work.
 - [ ] **Extras.** Home-screen widget ("Out of…" and today's chores), weekly
       scoreboard or points for kids (not needed for now), dark mode polish.
 

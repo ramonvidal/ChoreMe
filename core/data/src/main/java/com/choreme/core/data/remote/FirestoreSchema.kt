@@ -20,6 +20,7 @@ object FirestoreSchema {
     const val JOIN_REQUESTS = "joinRequests"
     const val GROCERY_ITEMS = "groceryItems"
     const val CHORES = "chores"
+    const val CHORE_TEMPLATES = "choreTemplates"
     const val LOCATIONS = "locations"
     const val PLACES = "places"
     const val PLACE_EVENTS = "placeEvents"

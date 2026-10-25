@@ -155,6 +155,9 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
         ChoreEditorSheet(
             chore = null,
             today = state.today,
+            savedChores = state.savedChores,
+            canRemoveSaved = state::canRemove,
+            onRemoveSaved = viewModel::removeSaved,
             onSave = { draft ->
                 adding = false
                 viewModel.create(draft)?.let { existing ->

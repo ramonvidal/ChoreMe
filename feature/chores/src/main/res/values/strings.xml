@@ -73,6 +73,16 @@
     <string name="template_groceries">Grocery shopping</string>
     <string name="template_other">Something else</string>
 
+    <!-- New chore alerts -->
+    <string name="new_chore_channel">New chores</string>
+    <string name="new_chore_channel_description">When someone in the family adds something that needs doing</string>
+    <string name="new_chore_body">%1$s noticed it needs doing</string>
+
+    <!-- Saved chores -->
+    <string name="saved_chores">Saved</string>
+    <string name="saved_chore_hint">Chores you type are saved here for next time. Long-press one to remove it.</string>
+    <string name="remove_saved_chore">Remove \"%1$s\" from saved chores?</string>
+
     <!-- Reminders -->
     <string name="reminder_channel">Chore reminders</string>
     <string name="reminder_channel_description">A morning summary of the chores due today</string>

@@ -12,4 +12,7 @@ interface PushListener {
 object PushKinds {
     /** Someone arrived at or left a saved place. */
     const val PLACE_EVENTS = "place-events"
+
+    /** Someone noticed something that needs doing. */
+    const val CHORE_ADDED = "chore-added"
 }

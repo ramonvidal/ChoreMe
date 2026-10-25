@@ -1,16 +1,11 @@
 package com.choreme.core.model.grocery
 
-object GroceryNames {
-    /** Two names refer to the same item if they only differ in case or spacing. */
-    fun key(name: String): String = name.trim().lowercase().replace(Regex("\\s+"), " ")
+import com.choreme.core.model.NameKeys
 
-    /**
-     * Document id derived from the name, so two phones adding "Milk" while offline end
-     * up with one item instead of two. Null when the name has no usable characters.
-     */
-    fun documentId(name: String): String? =
-        key(name).map { if (it.isLetterOrDigit()) it else '-' }.joinToString("")
-            .replace(Regex("-+"), "-").trim('-').take(100).ifEmpty { null }
+object GroceryNames {
+    fun key(name: String): String = NameKeys.key(name)
+
+    fun documentId(name: String): String? = NameKeys.documentId(name)
 }
 
 sealed interface QuickAddResult {
