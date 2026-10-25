@@ -14,7 +14,6 @@ import com.choreme.core.push.PushRegistration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -28,7 +27,7 @@ class RootViewModel @Inject constructor(
     families: FamilyRepository,
     chores: ChoreRepository,
     push: PushRegistration,
-    endpoints: PushEndpointRepository,
+    private val endpoints: PushEndpointRepository,
 ) : ViewModel() {
     val session: StateFlow<SessionState> =
         (if (availability.isConfigured) families.session else flowOf(SessionState.FirebaseNotConfigured))
@@ -56,19 +55,24 @@ class RootViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
+    /** Where other phones can ping this one; null without a UnifiedPush app such as ntfy. */
+    val pushEndpoint: StateFlow<String?> = push.endpoint
+
     init {
-        // Instant pings (only if a UnifiedPush app such as ntfy is installed): connect, then
-        // tell the family where this phone can be reached.
         push.register()
+    }
+
+    /**
+     * Tells the family where this phone can be pinged. Called by the screen while it's
+     * visible, so no Firestore listener is kept alive in the background for it.
+     */
+    fun registerForPings(state: SessionState, url: String?) {
+        if (state !is SessionState.InFamily || url == null) return
         viewModelScope.launch {
-            combine(session, push.endpoint, ::Pair).collect { (state, url) ->
-                if (state is SessionState.InFamily && url != null) {
-                    try {
-                        endpoints.register(state.familyId, state.memberId, url)
-                    } catch (e: Exception) {
-                        Log.w("ChoreMe", "Couldn't register for pings", e)
-                    }
-                }
+            try {
+                endpoints.register(state.familyId, state.memberId, url)
+            } catch (e: Exception) {
+                Log.w("ChoreMe", "Couldn't register for pings", e)
             }
         }
     }

@@ -83,7 +83,8 @@ fun shouldPublish(previous: MemberLocation?, next: MemberLocation): Boolean =
         Duration.between(previous.at, next.at) >= HEARTBEAT
 
 private const val MIN_MOVE_METERS = 50.0
-private val HEARTBEAT: Duration = Duration.ofMinutes(10)
+// Long enough that a phone sitting still mostly stays quiet; well within LocationStatus.STALE_AFTER.
+private val HEARTBEAT: Duration = Duration.ofMinutes(30)
 
 /**
  * The place someone is at now, given where they were. Leaving needs a margin beyond the

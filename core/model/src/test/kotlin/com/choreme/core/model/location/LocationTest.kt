@@ -51,7 +51,8 @@ class LocationTest {
         assertTrue(shouldPublish(null, at(home.center)))
         assertFalse(shouldPublish(last, at(GeoPoint(41.38745, 2.16865))))
         assertTrue(shouldPublish(last, at(school.center)))
-        assertTrue(shouldPublish(at(home.center, minutesAgo = 12), at(home.center)))
+        assertFalse(shouldPublish(at(home.center, minutesAgo = 12), at(home.center)))
+        assertTrue(shouldPublish(at(home.center, minutesAgo = 31), at(home.center)))
     }
 }
 

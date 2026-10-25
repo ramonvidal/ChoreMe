@@ -22,7 +22,7 @@ class PushRegistration @Inject constructor(@ApplicationContext private val conte
     val endpoint: StateFlow<String?> = _endpoint.asStateFlow()
 
     /** Whether a distributor app such as ntfy is installed. */
-    fun hasDistributor(): Boolean = UnifiedPush.getDistributors(context).isNotEmpty()
+    fun hasDistributor(): Boolean = isAvailable(context)
 
     /** Safe to call often; does nothing without a distributor. */
     fun register() {
@@ -43,6 +43,9 @@ class PushRegistration @Inject constructor(@ApplicationContext private val conte
 
     companion object {
         private const val KEY_ENDPOINT = "endpoint"
+
+        /** For code that runs before Hilt, such as scheduling at app start. */
+        fun isAvailable(context: Context): Boolean = UnifiedPush.getDistributors(context).isNotEmpty()
 
         /** The free ntfy app on Google Play, the simplest distributor to install. */
         const val NTFY_PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=io.heckel.ntfy"

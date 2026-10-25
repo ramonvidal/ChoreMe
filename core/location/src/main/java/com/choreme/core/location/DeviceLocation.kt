@@ -13,6 +13,7 @@ import com.google.android.gms.tasks.CancellationTokenSource
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeoutOrNull
+import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -32,12 +33,19 @@ class DeviceLocation @Inject constructor(@ApplicationContext private val context
         hasPermission() && (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || isGranted(Manifest.permission.ACCESS_BACKGROUND_LOCATION))
 
     /**
-     * A fresh reading at battery-friendly accuracy (Wi-Fi and cell towers, GPS if needed),
-     * or null without permission or if none comes in time.
+     * A recent reading at battery-friendly accuracy (Wi-Fi and cell towers, GPS if needed),
+     * or null without permission or if none comes in time. A fix Android already has from
+     * the last few minutes, from any app, is reused: it costs no battery at all.
      */
     @SuppressLint("MissingPermission") // Checked by hasPermission().
     suspend fun current(): DeviceFix? {
         if (!hasPermission()) return null
+        val last = runCatching { client.lastLocation.await() }.getOrNull()
+        if (last != null && last.accuracy <= GOOD_ENOUGH_METERS &&
+            Duration.between(Instant.ofEpochMilli(last.time), Instant.now()) <= FRESH_ENOUGH
+        ) {
+            return DeviceFix(GeoPoint(last.latitude, last.longitude), last.accuracy, Instant.ofEpochMilli(last.time))
+        }
         val cancel = CancellationTokenSource()
         val location = withTimeoutOrNull(TIMEOUT_MS) {
             client.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, cancel.token).await()
@@ -56,5 +64,7 @@ class DeviceLocation @Inject constructor(@ApplicationContext private val context
         const val BACKGROUND_PERMISSION = Manifest.permission.ACCESS_BACKGROUND_LOCATION
 
         private const val TIMEOUT_MS = 30_000L
+        private const val GOOD_ENOUGH_METERS = 100f
+        private val FRESH_ENOUGH: Duration = Duration.ofMinutes(5)
     }
 }

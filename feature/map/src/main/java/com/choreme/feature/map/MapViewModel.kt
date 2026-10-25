@@ -13,10 +13,8 @@ import com.choreme.core.push.PushRegistration
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
 import com.choreme.core.model.location.LocationStatus
-import com.choreme.core.model.location.MemberLocation
 import com.choreme.core.model.location.Place
 import com.choreme.core.model.location.locationStatus
-import com.choreme.core.model.location.shouldPublish
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.ui.ActionState
 import com.choreme.core.ui.runAction
@@ -137,6 +135,7 @@ class MapViewModel @Inject internal constructor(
             refresh()
         } else {
             LocationSharing.stop(context)
+            tracker.forgetShared()
             val state = uiState.value
             val familyId = state.familyId ?: return
             val memberId = state.me?.id ?: return
@@ -160,9 +159,9 @@ class MapViewModel @Inject internal constructor(
             val state = uiState.first { !it.loading }
             val familyId = state.familyId ?: return@launch
             val me = state.me ?: return@launch
-            val next = MemberLocation(me.id, fix.point, fix.accuracyMeters, fix.at)
-            val previous = (state.members.firstOrNull { it.member.id == me.id }?.status as? LocationStatus.Known)?.location
-            if (!shouldPublish(previous, next)) return@launch
+            // The family can't see this phone right now (e.g. a parent tidied up): send it regardless.
+            val visible = state.members.firstOrNull { it.member.id == me.id }?.status is LocationStatus.Known
+            if (!visible) tracker.forgetShared()
             _actionState.value = try {
                 tracker.share(familyId, me.id, fix, state.places)
                 ActionState()

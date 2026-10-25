@@ -57,6 +57,14 @@ internal fun FamilyMap(
     // Plain holders, not state: changing them must not trigger another redraw.
     val fittedOnce = remember { booleanArrayOf(false) }
     val lastFocus = remember { arrayOfNulls<GeoPoint>(1) }
+    // Drawing a bitmap per member on every update adds up; draw each look once.
+    val icons = remember { HashMap<String, BitmapDrawable>() }
+    fun iconFor(member: Member, stale: Boolean): BitmapDrawable {
+        val initial = member.name.take(1).uppercase()
+        return icons.getOrPut("${member.color}|$initial|$stale") {
+            memberIcon(context, memberColor(member.color).toArgb(), initial, stale)
+        }
+    }
     AndroidView(
         factory = { mapView },
         modifier = modifier,
@@ -78,7 +86,7 @@ internal fun FamilyMap(
                 map.overlays += Marker(map).apply {
                     position = status.location.point.toOsm()
                     title = m.member.name
-                    icon = memberIcon(context, memberColor(m.member.color).toArgb(), m.member.name.take(1).uppercase(), status.isStale)
+                    icon = iconFor(m.member, status.isStale)
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 }
             }
@@ -86,7 +94,7 @@ internal fun FamilyMap(
                 map.overlays += Marker(map).apply {
                     position = point.toOsm()
                     title = member.name
-                    icon = memberIcon(context, memberColor(member.color).toArgb(), member.name.take(1).uppercase(), stale = false)
+                    icon = iconFor(member, stale = false)
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 }
             }

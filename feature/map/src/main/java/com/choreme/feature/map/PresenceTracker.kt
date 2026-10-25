@@ -7,6 +7,7 @@ import com.choreme.core.model.location.MemberLocation
 import com.choreme.core.model.location.Place
 import com.choreme.core.model.location.currentPlace
 import com.choreme.core.model.location.placeEvents
+import com.choreme.core.model.location.shouldPublish
 import com.choreme.core.push.PushKinds
 import com.choreme.core.push.PushSender
 import kotlinx.coroutines.flow.first
@@ -25,7 +26,11 @@ internal class PresenceTracker @Inject constructor(
     private val push: PushSender,
 ) {
     suspend fun share(familyId: String, memberId: String, fix: DeviceFix, places: List<Place>? = null) {
-        locations.publish(familyId, MemberLocation(memberId, fix.point, fix.accuracyMeters, fix.at))
+        val next = MemberLocation(memberId, fix.point, fix.accuracyMeters, fix.at)
+        // Sitting still: no upload and no place check, which is most of the day for most phones.
+        if (!shouldPublish(store.lastShared?.takeIf { it.memberId == memberId }, next)) return
+        locations.publish(familyId, next)
+        store.lastShared = next
 
         val known = places ?: locations.observePlaces(familyId).first()
         val previous = store.lastPlaceId?.let { id -> known.firstOrNull { it.id == id } }
@@ -38,5 +43,10 @@ internal class PresenceTracker @Inject constructor(
             if (events.isNotEmpty()) push.ping(endpoints.othersThan(familyId, memberId), PushKinds.PLACE_EVENTS)
         }
         store.lastPlaceId = now?.id
+    }
+
+    /** After sharing stops (the shared position is deleted), the next share must go out. */
+    fun forgetShared() {
+        store.lastShared = null
     }
 }
