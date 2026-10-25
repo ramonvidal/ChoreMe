@@ -9,6 +9,7 @@ import com.choreme.core.data.LocationRepository
 import com.choreme.core.location.DeviceFix
 import com.choreme.core.location.DeviceLocation
 import com.choreme.core.location.SharingChoice
+import com.choreme.core.push.PushRegistration
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
 import com.choreme.core.model.location.LocationStatus
@@ -49,6 +50,7 @@ data class MapUiState(
     /** This phone's latest reading, for centering the map and saving a place. */
     val myFix: DeviceFix? = null,
     val alertsEnabled: Boolean = true,
+    val instant: InstantAlerts = InstantAlerts(hasApp = false, connected = false),
 ) {
     val isParent get() = me?.role == Role.PARENT
 }
@@ -66,7 +68,11 @@ private data class Settings(
     val permissions: Pair<Boolean, Boolean>,
     val fix: DeviceFix?,
     val alertsEnabled: Boolean,
+    val instant: InstantAlerts,
 )
+
+/** Instant alerts through a UnifiedPush app such as ntfy. */
+data class InstantAlerts(val hasApp: Boolean, val connected: Boolean)
 
 @HiltViewModel
 class MapViewModel @Inject internal constructor(
@@ -77,7 +83,9 @@ class MapViewModel @Inject internal constructor(
     private val sharing: SharingChoice,
     private val tracker: PresenceTracker,
     private val presence: PresenceStore,
+    private val push: PushRegistration,
 ) : ViewModel() {
+    private val hasPushApp = MutableStateFlow(push.hasDistributor())
     private val permissions = MutableStateFlow(device.hasPermission() to device.hasBackgroundPermission())
     private val myFix = MutableStateFlow<DeviceFix?>(null)
 
@@ -88,11 +96,12 @@ class MapViewModel @Inject internal constructor(
                 families.observeMembers(session.familyId),
                 locations.observeLocations(session.familyId),
                 locations.observePlaces(session.familyId),
-                combine(sharing.isSharing, permissions, myFix, presence.alertsEnabled) { on, perms, fix, alerts ->
-                    Settings(on, perms, fix, alerts)
+                combine(sharing.isSharing, permissions, myFix, presence.alertsEnabled, combine(hasPushApp, push.endpoint, ::Pair)) {
+                        on, perms, fix, alerts, (pushApp, endpoint) ->
+                    Settings(on, perms, fix, alerts, InstantAlerts(pushApp, endpoint != null))
                 },
             ) { members, locationList, places, settings ->
-                val (isSharing, perms, fix, alerts) = settings
+                val (isSharing, perms, fix, alerts, instant) = settings
                 val byMember = locationList.associateBy { it.memberId }
                 val now = Instant.now()
                 MapUiState(
@@ -106,6 +115,7 @@ class MapViewModel @Inject internal constructor(
                     hasBackgroundPermission = perms.second,
                     myFix = fix,
                     alertsEnabled = alerts,
+                    instant = instant,
                 )
             }
         }
@@ -184,6 +194,12 @@ class MapViewModel @Inject internal constructor(
     }
 
     fun setAlertsEnabled(enabled: Boolean) = presence.setAlertsEnabled(enabled)
+
+    /** When the map is shown again, e.g. after installing ntfy. */
+    fun onResume() {
+        hasPushApp.value = push.hasDistributor()
+        push.register()
+    }
 
     fun deletePlace(place: Place) {
         val familyId = uiState.value.familyId ?: return

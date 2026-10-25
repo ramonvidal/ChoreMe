@@ -53,6 +53,12 @@ Without them the APK still builds, but shows a "Sync isn't set up" screen.
 Open the folder in [Android Studio](https://developer.android.com/studio), with
 `google-services.json` and `debug.keystore` in `app/`, and run the `app` configuration.
 
+## Instant alerts (optional, free)
+
+Install the free **ntfy** app from Google Play on each phone that should get instant
+arrival alerts. No account or settings needed: ChoreMe finds it and connects by itself.
+Phones without it still get alerts, within about 15 minutes.
+
 ## Tests
 
 - App logic: `./gradlew :core:model:test testDebugUnitTest`
@@ -71,6 +77,7 @@ core/data/        Firebase repositories: auth, families, groceries
 core/ui/          Theme, shared composables, shared strings and error messages
 core/calendar/    The phone's calendars: read events, add events with alerts
 core/location/    The phone's position, location permissions, the "share my location" switch
+core/push/        Free instant pings between family phones (UnifiedPush, e.g. the ntfy app)
 feature/
   onboarding/     Sign in, create or join a family, wait for approval
   chores/         Today tab

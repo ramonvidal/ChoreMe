@@ -182,7 +182,10 @@ class FamilyRepository @Inject constructor(
     /** Removes the member, signs all their devices out of the family and deletes their shared location. */
     suspend fun removeMember(familyId: String, member: Member) {
         val batch = db.batch()
-        member.uids.forEach { batch.delete(memberUids(familyId).document(it)) }
+        member.uids.forEach {
+            batch.delete(memberUids(familyId).document(it))
+            batch.delete(family(familyId).collection(FirestoreSchema.PUSH_ENDPOINTS).document(it))
+        }
         batch.delete(members(familyId).document(member.id))
         batch.delete(family(familyId).collection(FirestoreSchema.LOCATIONS).document(member.id))
         batch.commit().await()

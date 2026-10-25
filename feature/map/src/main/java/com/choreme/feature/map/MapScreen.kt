@@ -1,6 +1,8 @@
 package com.choreme.feature.map
 
 import com.choreme.core.ui.R as CoreUiR
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -54,8 +56,10 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.choreme.core.location.DeviceLocation
+import com.choreme.core.push.PushRegistration
 import com.choreme.core.model.location.GeoPoint
 import com.choreme.core.model.location.LocationStatus
 import com.choreme.core.model.location.Place
@@ -98,6 +102,10 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
     }
 
     LaunchedEffect(Unit) { viewModel.refresh() }
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResume()
+        onPauseOrDispose { }
+    }
 
     Column(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxWidth().weight(1f)) {
@@ -163,6 +171,16 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
                             Switch(checked = state.alertsEnabled, onCheckedChange = viewModel::setAlertsEnabled)
                         }
                         Text(stringResource(R.string.alerts_body), style = MaterialTheme.typography.bodySmall)
+                        when {
+                            state.instant.connected -> Text(stringResource(R.string.instant_on), style = MaterialTheme.typography.bodyMedium)
+                            state.instant.hasApp -> Text(stringResource(R.string.instant_connecting), style = MaterialTheme.typography.bodySmall)
+                            else -> {
+                                Text(stringResource(R.string.instant_off), style = MaterialTheme.typography.bodySmall)
+                                TextButton(onClick = {
+                                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PushRegistration.NTFY_PLAY_STORE_URL)))
+                                }) { Text(stringResource(R.string.instant_install)) }
+                            }
+                        }
                     }
                 }
             }

@@ -15,7 +15,8 @@
 | Rewards | None for now: **parent approval is enough** |
 | Calendar | Use the family's **existing Google Calendar** through the calendars already synced on each phone (Android `CalendarContract`), not the Google Calendar API: no Google Cloud setup, works offline, and Google sends the alerts. Each phone picks which calendars to show |
 | Location | **Opt-in per person**, pause any time (stopping deletes the shared position). Everyone in the family, kids included, sees who shares. Updates about every 15 minutes in the background and when the map opens. **OpenStreetMap** (no API key). Named places (Home, School) set by parents. No instant arrive/leave alerts on other phones until server push |
-| Notifications | Free plan: each phone posts a **morning summary** (WorkManager) and the app shows badges. Server push ("Leo finished the dishes" instantly) needs the paid Blaze plan; revisit later |
+| Cost | **Everything free**: Firebase Spark plan, OpenStreetMap, the phone's own calendar, GitHub Actions, and UnifiedPush through the free ntfy app for instant pings. No paid plan, no server of our own |
+| Notifications | Each phone posts a **morning summary** (WorkManager) and the app shows badges. **Instant pings** between phones go through UnifiedPush: each phone with the free **ntfy** app installed gets a contentless wake-up ping and reads the details from Firestore. Phones without it fall back to checking every ~15 minutes |
 | Offline | Firestore's built-in offline cache; no separate local database. Writes show up at once and sync when there's signal |
 
 ## Sharing and sync
@@ -39,6 +40,7 @@ families/{familyId}              name, inviteCode, createdBy
   locations/{memberId}           latitude, longitude, accuracy, at: only while that member shares
   places/{placeId}               name, latitude, longitude, radius
   placeEvents/{eventId}          memberId, placeId, placeName, type (ARRIVED | LEFT), at; kept 2 days
+  pushEndpoints/{uid}            memberId, url: where to ping this device (UnifiedPush)
   chores/{choreId}               title, template, recurrenceType, everyDays, weekDays[], dueDate,
                                  status, claimedBy, completedBy, approvedBy, lastDoneBy, lastDoneOn
 inviteCodes/{code}               familyId, familyName
@@ -107,9 +109,12 @@ rules let kids make only the grab / let go / "I finished" steps, in their own na
       result message. **Arrival alerts**: the phone that moves records "Leo
       arrived at School" / "Leo left Home" (`placeEvents`), with a margin so GPS
       jitter at the edge doesn't flap; every phone checks about every 15 minutes
-      and shows a notification. Each phone can turn alerts off. On the free plan
-      alerts take up to ~15–20 minutes; instant alerts need a Cloud Function
-      (Blaze plan) deployed from a computer.
+      and shows a notification. Each phone can turn alerts off.
+- [x] **Instant alerts, free.** New `:core:push` module (UnifiedPush). Phones
+      with the free ntfy app get pinged the moment someone arrives or leaves,
+      and show the alert within seconds. Pings carry only the kind of change;
+      addresses live in `pushEndpoints`. Next candidates for pings: kids'
+      finished chores (to parents) and join requests.
 - [ ] **Extras.** Home-screen widget ("Out of…" and today's chores), weekly
       scoreboard or points for kids (not needed for now), dark mode polish.
 

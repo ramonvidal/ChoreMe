@@ -8,6 +8,7 @@ android {
 
 dependencies {
     implementation(projects.core.location)
+    implementation(projects.core.push)
     // OpenStreetMap tiles: free, no API key.
     implementation(libs.osmdroid)
     // Background location updates.

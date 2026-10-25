@@ -174,6 +174,18 @@ service cloud.firestore {
         allow delete: if isMember(f) && (resource.data.memberId == myMemberId(f) || isParent(f));
       }
 
+      // Where to send a phone a wake-up ping (UnifiedPush, e.g. through the free ntfy app).
+      // One per signed-in device; the ping itself carries no family data.
+      match /pushEndpoints/{uid} {
+        allow read: if isMember(f);
+        allow create, update: if isMember(f) && request.auth.uid == uid
+          && request.resource.data.memberId == myMemberId(f)
+          && request.resource.data.url is string
+          && request.resource.data.url.matches('https://.*')
+          && request.resource.data.url.size() <= 500;
+        allow delete: if (signedIn() && request.auth.uid == uid) || isParent(f);
+      }
+
       match /places/{placeId} {
         allow read: if isMember(f);
         allow create, update: if isParent(f) && validPlace(request.resource.data);

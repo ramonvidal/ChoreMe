@@ -44,6 +44,7 @@ dependencies {
     implementation(projects.core.model)
     implementation(projects.core.data)
     implementation(projects.core.ui)
+    implementation(projects.core.push)
     implementation(projects.feature.onboarding)
     implementation(projects.feature.chores)
     implementation(projects.feature.groceries)

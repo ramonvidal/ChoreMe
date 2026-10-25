@@ -21,6 +21,8 @@ object ModuleRules {
         ":core:calendar" to setOf(":core:model"),
         // The phone's own position (fused location provider) and whether it shares it.
         ":core:location" to setOf(":core:model"),
+        // Wake-up pings between family phones through UnifiedPush (e.g. the free ntfy app).
+        ":core:push" to setOf(":core:model"),
     )
 
     val PURE_KOTLIN: Set<String> = setOf(":core:model")

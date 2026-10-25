@@ -50,5 +50,9 @@
     <string name="alert_arrived">%1$s arrived at %2$s</string>
     <string name="alert_left">%1$s left %2$s</string>
     <string name="someone">Someone</string>
+    <string name="instant_on">⚡ Instant: alerts arrive within seconds.</string>
+    <string name="instant_off">For instant alerts instead of up to 15 minutes, install the free ntfy app. No account needed; ChoreMe connects to it by itself.</string>
+    <string name="instant_install">Get ntfy (free)</string>
+    <string name="instant_connecting">ntfy is installed; connecting…</string>
     <string name="osm_credit">© OpenStreetMap contributors</string>
 </resources>

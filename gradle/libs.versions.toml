@@ -17,6 +17,7 @@ googleId = "1.1.1"
 work = "2.10.1"
 playServicesLocation = "21.3.0"
 osmdroid = "6.1.20"
+unifiedpush = "3.1.0"
 androidxHilt = "1.2.0"
 junit = "4.13.2"
 
@@ -54,6 +55,7 @@ googleid = { module = "com.google.android.libraries.identity.googleid:googleid",
 
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 osmdroid = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid" }
+unifiedpush-connector = { module = "org.unifiedpush.android:connector", version.ref = "unifiedpush" }
 
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }

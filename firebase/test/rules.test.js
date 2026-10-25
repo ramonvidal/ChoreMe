@@ -319,6 +319,18 @@ describe('locations and places', () => {
     await assertSucceeds(deleteDoc(doc(events(kidDevice('kid1')), 'e1')));
   });
 
+  test('each phone registers its own push address, which the family can read', async () => {
+    const endpoint = (db, uid) => doc(db, 'families', FAMILY, 'pushEndpoints', uid);
+    const mine = { memberId: 'member-kid1', url: 'https://ntfy.sh/upAbC123?up=1' };
+    await assertSucceeds(setDoc(endpoint(kidDevice('kid1'), 'kid1'), mine));
+    await assertFails(setDoc(endpoint(kidDevice('kid2'), 'kid1'), { ...mine, memberId: 'member-kid2' }));
+    await assertFails(setDoc(endpoint(kidDevice('kid1'), 'kid1'), { ...mine, memberId: 'alice' }));
+    await assertFails(setDoc(endpoint(kidDevice('kid1'), 'kid1'), { ...mine, url: 'http://insecure.example' }));
+    await assertSucceeds(getDocs(collection(kidDevice('kid2'), 'families', FAMILY, 'pushEndpoints')));
+    await assertFails(getDocs(collection(parent('mallory'), 'families', FAMILY, 'pushEndpoints')));
+    await assertSucceeds(deleteDoc(endpoint(parent('alice'), 'kid1')));
+  });
+
   test('parents manage places, everyone can see them', async () => {
     const home = { name: 'Home', latitude: 41.3874, longitude: 2.1686, radius: 100 };
     await assertSucceeds(setDoc(place(parent('alice'), 'home'), home));
