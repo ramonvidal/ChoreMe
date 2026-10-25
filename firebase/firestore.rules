@@ -56,7 +56,8 @@ service cloud.firestore {
       return c.title is string && c.title.size() > 0 && c.title.size() <= 60
         && c.status in ['OPEN', 'CLAIMED', 'PENDING_APPROVAL', 'DONE']
         && c.recurrenceType in ['ONCE', 'EVERY_DAYS', 'WEEKLY']
-        && c.dueDate is string && c.dueDate.size() == 10;
+        && c.dueDate is string && c.dueDate.size() == 10
+        && (!('notifyWhenDone' in c) || c.notifyWhenDone is bool);
     }
 
     function isFreshChore(c) {

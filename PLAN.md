@@ -43,7 +43,7 @@ families/{familyId}              name, inviteCode, createdBy
   pushEndpoints/{uid}            memberId, url: where to ping this device (UnifiedPush)
   choreTemplates/{nameKey}       title, createdBy: hand-typed chores kept as quick picks
   chores/{choreId}               createdAt, title, template, recurrenceType, everyDays, weekDays[], dueDate,
-                                 status, claimedBy, completedBy, approvedBy, lastDoneBy, lastDoneOn
+                                 status, claimedBy, completedBy, approvedBy, lastDoneBy, lastDoneOn, notifyWhenDone
 inviteCodes/{code}               familyId, familyName
 users/{uid}                      familyId, familyName: lets a device find its family again
 ```
@@ -127,6 +127,9 @@ rules let kids make only the grab / let go / "I finished" steps, in their own na
 - [x] **Feedback round 4.** Instant pings to parents (kids' finished chores, join
       requests). Leave family / delete my data. Shopping mode. Chore → calendar
       event. Per-phone settings (which alerts, quiet hours). Home-screen widget.
+- [x] **"Let everyone know when it's done"** per chore (on by default): the rest of
+      the family gets "✅ Leo did: Wash dishes" when it's finished (for kids, once
+      approved). Each phone can switch these off in its settings.
 - [ ] **Extras.** Home-screen widget ("Out of…" and today's chores), weekly
       scoreboard or points for kids (not needed for now), dark mode polish.
 

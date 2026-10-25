@@ -275,6 +275,12 @@ describe('chores', () => {
     }));
   });
 
+  test('"let everyone know when done" is a yes/no that kids cannot flip', async () => {
+    await assertSucceeds(updateDoc(ref(parent('alice')), { notifyWhenDone: false }));
+    await assertFails(updateDoc(ref(parent('alice')), { notifyWhenDone: 'yes' }));
+    await assertFails(updateDoc(ref(kidDevice('kid1')), { notifyWhenDone: true }));
+  });
+
   test('outsiders cannot see chores, and malformed chores are rejected', async () => {
     await assertFails(getDocs(collection(parent('mallory'), 'families', FAMILY, 'chores')));
     await assertFails(setDoc(doc(parent('alice'), 'families', FAMILY, 'chores', 'bad'), { ...chore, status: 'FINISHED' }));

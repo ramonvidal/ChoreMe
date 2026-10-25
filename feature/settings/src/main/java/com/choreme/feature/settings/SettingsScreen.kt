@@ -114,6 +114,7 @@ internal fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
 
 private val ALERTS = listOf(
     Triple(AlertKind.NEW_CHORES, R.string.alert_new_chores, R.string.alert_new_chores_hint),
+    Triple(AlertKind.CHORES_DONE, R.string.alert_chores_done, R.string.alert_chores_done_hint),
     Triple(AlertKind.APPROVALS, R.string.alert_approvals, R.string.alert_approvals_hint),
     Triple(AlertKind.JOIN_REQUESTS, R.string.alert_join_requests, R.string.alert_join_requests_hint),
     Triple(AlertKind.ARRIVALS, R.string.alert_arrivals, R.string.alert_arrivals_hint),

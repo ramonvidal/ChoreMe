@@ -68,6 +68,15 @@ class ChoreRepository @Inject constructor(
             .documents
             .mapNotNull { it.toChore() }
 
+    /** Chores changed after [after] (server clock), e.g. to find the ones just finished. */
+    suspend fun changedSince(familyId: String, after: Instant): List<Chore> =
+        chores(familyId)
+            .whereGreaterThan(UPDATED_AT, Timestamp(after.epochSecond, after.nano))
+            .get()
+            .await()
+            .documents
+            .mapNotNull { it.toChore() }
+
     fun observeSavedChores(familyId: String): Flow<List<SavedChore>> =
         savedChores(familyId).documentsFlow().map { docs ->
             docs.mapNotNull { doc ->

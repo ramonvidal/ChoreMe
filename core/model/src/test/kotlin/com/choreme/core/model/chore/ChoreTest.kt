@@ -109,3 +109,24 @@ class SavedChoreTest {
         assertEquals(false, shouldSaveForLater(ChoreTemplate.OTHER, "  ", saved))
     }
 }
+
+class JustFinishedTest {
+    private val mom = Member(id = "mom", name = "Mom", role = Role.PARENT)
+    private val leo = Member(id = "leo", name = "Leo", role = Role.KID)
+    private val today = LocalDate.of(2026, 10, 25)
+    private val dishes = Chore(id = "1", title = "Wash dishes", recurrence = Recurrence.EveryDays(1), dueDate = today)
+
+    @Test
+    fun `finishing counts, grabbing and a kid's unapproved done don't`() {
+        assertEquals(true, dishes.complete(mom, today).wasJustFinished(dishes))
+        assertEquals(false, dishes.claim(leo).wasJustFinished(dishes))
+        val pending = dishes.complete(leo, today)
+        assertEquals(false, pending.wasJustFinished(dishes))
+        assertEquals(true, pending.approve(mom, today).wasJustFinished(pending))
+    }
+
+    @Test
+    fun `chores announce when done unless switched off`() {
+        assertEquals(true, dishes.notifyWhenDone)
+    }
+}

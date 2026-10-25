@@ -8,6 +8,7 @@ import com.choreme.core.data.remote.FirestoreSchema.DUE_DATE
 import com.choreme.core.data.remote.FirestoreSchema.EVERY_DAYS
 import com.choreme.core.data.remote.FirestoreSchema.LAST_DONE_BY
 import com.choreme.core.data.remote.FirestoreSchema.LAST_DONE_ON
+import com.choreme.core.data.remote.FirestoreSchema.NOTIFY_WHEN_DONE
 import com.choreme.core.data.remote.FirestoreSchema.RECURRENCE_TYPE
 import com.choreme.core.data.remote.FirestoreSchema.STATUS
 import com.choreme.core.data.remote.FirestoreSchema.TEMPLATE
@@ -43,6 +44,7 @@ internal fun Chore.toFields(): Map<String, Any?> = mapOf(
     APPROVED_BY to approvedBy,
     LAST_DONE_BY to lastDoneBy,
     LAST_DONE_ON to lastDoneOn?.toString(),
+    NOTIFY_WHEN_DONE to notifyWhenDone,
 )
 
 /** Null for documents that can't be read as a chore, so one bad document doesn't hide the rest. */
@@ -68,5 +70,7 @@ internal fun DocumentSnapshot.toChore(): Chore? = runCatching {
         lastDoneOn = getString(LAST_DONE_ON)?.let(LocalDate::parse),
         // Written once when the chore is reported, never changed afterwards.
         reportedBy = getString(CREATED_BY),
+        // Chores from before this option existed announce too.
+        notifyWhenDone = getBoolean(NOTIFY_WHEN_DONE) ?: true,
     )
 }.getOrNull()

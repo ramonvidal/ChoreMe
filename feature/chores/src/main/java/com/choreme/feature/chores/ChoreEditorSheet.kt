@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -26,6 +27,7 @@ import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -77,6 +79,7 @@ internal fun ChoreEditorSheet(
     var weekDays by remember { mutableStateOf((initialRecurrence as? Recurrence.Weekly)?.days ?: setOf(DayOfWeek.SATURDAY)) }
     var dueDate by remember { mutableStateOf(chore?.dueDate ?: today) }
     var showRepeat by remember { mutableStateOf(initialRecurrence != Recurrence.Once) }
+    var notifyWhenDone by remember { mutableStateOf(chore?.notifyWhenDone ?: true) }
 
     val templateTitles = ChoreTemplate.entries.associateWith { stringResource(it.title) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -140,6 +143,16 @@ internal fun ChoreEditorSheet(
                 modifier = Modifier.fillMaxWidth(),
             )
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .toggleable(value = notifyWhenDone, onValueChange = { notifyWhenDone = it }, role = Role.Switch),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(stringResource(R.string.editor_notify_when_done), modifier = Modifier.weight(1f))
+                Switch(checked = notifyWhenDone, onCheckedChange = null)
+            }
+
             // Most chores are a one-off "this needs doing now"; repeating is there for those who want it.
             TextButton(onClick = { showRepeat = !showRepeat }) {
                 Text(
@@ -179,7 +192,7 @@ internal fun ChoreEditorSheet(
                 Button(
                     onClick = {
                         val due = if (chore == null && recurrence == Recurrence.Once) today else dueDate
-                        onSave(ChoreDraft(title, template ?: ChoreTemplate.OTHER, checkNotNull(recurrence), due))
+                        onSave(ChoreDraft(title, template ?: ChoreTemplate.OTHER, checkNotNull(recurrence), due, notifyWhenDone))
                     },
                     enabled = title.isNotBlank() && recurrence != null,
                 ) { Text(stringResource(CoreUiR.string.save)) }

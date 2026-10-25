@@ -49,6 +49,8 @@ data class Chore(
     val lastDoneOn: LocalDate? = null,
     /** Who noticed it needed doing. */
     val reportedBy: String? = null,
+    /** "Let everyone know when it's done": the family gets "Leo did: Wash dishes". */
+    val notifyWhenDone: Boolean = true,
 ) {
     fun isOverdue(today: LocalDate) = isActive && dueDate < today
 
@@ -117,6 +119,13 @@ private fun Chore.finish(doneBy: String, approvedBy: String?, today: LocalDate):
         )
     }
 }
+
+/**
+ * True when [this] is [before] just finished: someone's name went on it as done (a parent
+ * finishing it, or approving a kid's). A kid saying "done" doesn't count until approved.
+ */
+fun Chore.wasJustFinished(before: Chore): Boolean =
+    lastDoneBy != null && (lastDoneOn != before.lastDoneOn || lastDoneBy != before.lastDoneBy)
 
 /** A chore someone typed by hand, kept as a quick pick for next time. */
 data class SavedChore(val id: String, val title: String, val createdBy: String)

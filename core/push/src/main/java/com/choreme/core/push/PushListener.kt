@@ -16,6 +16,9 @@ object PushKinds {
     /** Someone noticed something that needs doing. */
     const val CHORE_ADDED = "chore-added"
 
+    /** A chore was finished (and, for a kid's, approved). */
+    const val CHORE_DONE = "chore-done"
+
     /** A kid finished a chore; parents need to approve it. */
     const val CHORE_TO_APPROVE = "chore-to-approve"
 

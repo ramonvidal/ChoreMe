@@ -74,7 +74,9 @@ internal object NewChoreAlerts {
 
 internal class NewChoreListener @Inject constructor(@ApplicationContext private val context: Context) : PushListener {
     override fun onPing(kind: String) {
-        if (kind == PushKinds.CHORE_ADDED || kind == PushKinds.CHORE_TO_APPROVE) NewChoreAlerts.checkNow(context)
+        if (kind in setOf(PushKinds.CHORE_ADDED, PushKinds.CHORE_TO_APPROVE, PushKinds.CHORE_DONE)) {
+            NewChoreAlerts.checkNow(context)
+        }
     }
 }
 
@@ -121,11 +123,45 @@ internal class NewChoreWorker @AssistedInject constructor(
                 .putLong(KEY_CHECKED, now.toEpochMilli())
                 .putStringSet(KEY_SHOWN, recent.map { it.id }.toSet())
                 .apply()
+            showDone(session.familyId, session.memberId, since.minus(LOOK_BACK))
             if (session.role == Role.PARENT) showApprovals(session.familyId)
             Result.success()
         } catch (e: Exception) {
             Result.retry()
         }
+    }
+
+    /** "Leo did: Wash dishes" for chores others finished, if the chore asks to tell everyone. */
+    private suspend fun showDone(familyId: String, memberId: String, since: Instant) {
+        val today = java.time.LocalDate.now()
+        val done = chores.changedSince(familyId, since)
+            .filter { it.notifyWhenDone && it.lastDoneOn == today && it.lastDoneBy != null && it.lastDoneBy != memberId }
+        // Keyed by who and when, so a daily chore done again tomorrow announces again.
+        val key = { chore: Chore -> "${chore.id}|${chore.lastDoneBy}|${chore.lastDoneOn}" }
+        val shown = prefs.getStringSet(KEY_DONE_SHOWN, emptySet()).orEmpty()
+        val fresh = done.filter { key(it) !in shown }
+        if (fresh.isNotEmpty() && canNotify() && notifications.isEnabled(AlertKind.CHORES_DONE)) {
+            val names = families.observeMembers(familyId).first().associate { it.id to it.name }
+            fresh.forEach { showDoneNotification(it, names[it.lastDoneBy]) }
+        }
+        prefs.edit().putStringSet(KEY_DONE_SHOWN, (shown + fresh.map(key)).takeLastKeys()).apply()
+    }
+
+    @Suppress("MissingPermission") // Checked by the caller.
+    private fun showDoneNotification(chore: Chore, who: String?) {
+        val context = applicationContext
+        context.getSystemService(NotificationManager::class.java).createNotificationChannel(
+            NotificationChannel(DONE_CHANNEL_ID, context.getString(R.string.done_channel), NotificationManager.IMPORTANCE_LOW)
+                .apply { description = context.getString(R.string.done_channel_description) },
+        )
+        val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
+        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, DONE_CHANNEL_ID))
+            .setSmallIcon(R.drawable.ic_notification_chores)
+            .setContentTitle(context.getString(R.string.done_title, who ?: context.getString(R.string.someone), chore.title))
+            .setAutoCancel(true)
+            .setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
+            .build()
+        NotificationManagerCompat.from(context).notify("done-${chore.id}".hashCode(), notification)
     }
 
     /** Kids' finished chores waiting for this parent's OK, each shown once. */
@@ -187,8 +223,16 @@ internal class NewChoreWorker @AssistedInject constructor(
         const val KEY_CHECKED = "checked_until"
         const val KEY_SHOWN = "shown"
         const val KEY_APPROVALS_SHOWN = "approvals_shown"
+        const val KEY_DONE_SHOWN = "done_shown"
+        const val DONE_CHANNEL_ID = "chores-done"
         const val APPROVAL_CHANNEL_ID = "approvals"
         const val TIMEOUT_MS = 30_000L
         val LOOK_BACK: Duration = Duration.ofHours(1)
     }
+}
+
+/** Keeps today's and yesterday's "done" keys; older ones can't come back (they're filtered by date). */
+private fun Set<String>.takeLastKeys(): Set<String> {
+    val recent = setOf(java.time.LocalDate.now().toString(), java.time.LocalDate.now().minusDays(1).toString())
+    return filter { key -> recent.any { key.endsWith(it) } }.toSet()
 }

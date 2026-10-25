@@ -29,6 +29,7 @@ import com.choreme.core.model.chore.completeFor
 import com.choreme.core.model.chore.reject
 import com.choreme.core.model.chore.shouldSaveForLater
 import com.choreme.core.model.chore.unclaim
+import com.choreme.core.model.chore.wasJustFinished
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.push.PushKinds
 import com.choreme.core.push.PushSender
@@ -72,6 +73,7 @@ data class ChoreDraft(
     val template: ChoreTemplate,
     val recurrence: Recurrence,
     val dueDate: LocalDate,
+    val notifyWhenDone: Boolean = true,
 )
 
 sealed interface CalendarResult {
@@ -129,7 +131,14 @@ class ChoresViewModel @Inject constructor(
         chores.create(
             familyId,
             me.id,
-            Chore(id = "", title = draft.title.trim(), template = draft.template, recurrence = draft.recurrence, dueDate = draft.dueDate),
+            Chore(
+                id = "",
+                title = draft.title.trim(),
+                template = draft.template,
+                recurrence = draft.recurrence,
+                dueDate = draft.dueDate,
+                notifyWhenDone = draft.notifyWhenDone,
+            ),
         )
         // Something typed by hand becomes a quick pick for next time.
         if (shouldSaveForLater(draft.template, draft.title, uiState.value.savedChores)) {
@@ -173,7 +182,13 @@ class ChoresViewModel @Inject constructor(
 
 
     fun update(chore: Chore, draft: ChoreDraft) = change(chore) { _, _ ->
-        copy(title = draft.title.trim(), template = draft.template, recurrence = draft.recurrence, dueDate = draft.dueDate)
+        copy(
+            title = draft.title.trim(),
+            template = draft.template,
+            recurrence = draft.recurrence,
+            dueDate = draft.dueDate,
+            notifyWhenDone = draft.notifyWhenDone,
+        )
     }
 
     fun delete(chore: Chore) {
@@ -197,6 +212,9 @@ class ChoresViewModel @Inject constructor(
             return
         }
         chores.save(familyId, me.id, chore, updated)
+        if (updated.notifyWhenDone && updated.wasJustFinished(chore)) {
+            pingInBackground(PushKinds.CHORE_DONE) { endpoints.othersThan(familyId, me.id) }
+        }
         if (updated.status == ChoreStatus.PENDING_APPROVAL && chore.status != ChoreStatus.PENDING_APPROVAL) {
             val parents = uiState.value.members.values.filter { it.role == Role.PARENT }.map { it.id }.toSet()
             pingInBackground(PushKinds.CHORE_TO_APPROVE) { endpoints.of(familyId, parents) }

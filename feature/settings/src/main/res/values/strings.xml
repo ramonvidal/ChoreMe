@@ -4,6 +4,8 @@
     <string name="alerts_section">Notifications</string>
     <string name="alert_new_chores">New chores</string>
     <string name="alert_new_chores_hint">When someone adds something that needs doing</string>
+    <string name="alert_chores_done">Chores done</string>
+    <string name="alert_chores_done_hint">When someone finishes a chore marked \"let everyone know\"</string>
     <string name="alert_approvals">Chores to approve</string>
     <string name="alert_approvals_hint">When a kid finishes a chore (parents)</string>
     <string name="alert_join_requests">Join requests</string>

@@ -46,7 +46,7 @@ internal class WidgetPushListener @Inject constructor(@ApplicationContext privat
     }
 
     private companion object {
-        val REFRESH_ON = setOf(PushKinds.CHORE_ADDED, PushKinds.CHORE_TO_APPROVE)
+        val REFRESH_ON = setOf(PushKinds.CHORE_ADDED, PushKinds.CHORE_TO_APPROVE, PushKinds.CHORE_DONE)
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     }
 }

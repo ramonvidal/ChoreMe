@@ -62,6 +62,10 @@
     <string name="editor_starts">First time</string>
     <string name="editor_starts_on">Next due %1$s</string>
     <string name="editor_delete">Delete chore</string>
+    <string name="editor_notify_when_done">Let everyone know when it\'s done</string>
+    <string name="done_channel">Chores done</string>
+    <string name="done_channel_description">When someone finishes a chore</string>
+    <string name="done_title">✅ %1$s did: %2$s</string>
 
     <!-- Templates -->
     <string name="template_dishes">Wash dishes</string>

@@ -5,6 +5,7 @@ import java.time.LocalTime
 /** The kinds of notification ChoreMe can post; each can be turned off per phone. */
 enum class AlertKind {
     NEW_CHORES,
+    CHORES_DONE,
     APPROVALS,
     JOIN_REQUESTS,
     ARRIVALS,
