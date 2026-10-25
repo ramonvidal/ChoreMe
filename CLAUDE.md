@@ -20,8 +20,9 @@ in the way and what you propose, before writing the code.
 | `:core:calendar` | The phone's calendars (Android `CalendarContract`): read events, add events with alerts | `:core:model` |
 | `:core:location` | The phone's own position (fused location provider), location permissions, the "share my location" switch | `:core:model` |
 | `:core:settings` | This phone's choices: which alerts it shows, quiet hours. Read by the features' workers | `:core:model` |
+| `:core:update` | Updating the app itself: checks the GitHub release page, downloads the APK, hands it to Android's installer | `:core:model` |
 | `:core:push` | Free instant wake-up pings between family phones (UnifiedPush, e.g. the ntfy app). Pings carry no family data; features react through `PushListener` | `:core:model` |
-| `:feature:<name>` | One tab or flow: `onboarding`, `chores`, `groceries`, `agenda`, `map`, `family`, `settings`, `widget` | `:core:*` only |
+| `:feature:<name>` | One tab or flow: `onboarding`, `chores`, `groceries`, `agenda`, `map`, `family`, `settings`, `widget`, `update` | `:core:*` only |
 | `:app` | Wires features together: activity, root screen, navigation | anything; nothing depends on it |
 
 - **Features never depend on each other.** What two features share moves down into
@@ -33,6 +34,7 @@ in the way and what you propose, before writing the code.
   - `:feature:chores`: `ChoreReminders.schedule()`, which `:app` calls at startup.
   - `:feature:map`: `PlaceAlerts.schedule()`, which `:app` calls at startup, so every
     phone gets arrival alerts, even one that never opened the map.
+  - `:feature:update`: `UpdateBanner()`, which `:app` shows at the top of the screen.
   - `:feature:widget` has no screen in the app. Android needs its receiver, startup
     initializer and Hilt entry point to be public; `:app` doesn't call it at all.
 - **Features open each other from outside the app through deep links** they declare

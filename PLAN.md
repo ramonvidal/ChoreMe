@@ -130,6 +130,10 @@ rules let kids make only the grab / let go / "I finished" steps, in their own na
 - [x] **"Let everyone know when it's done"** per chore (on by default): the rest of
       the family gets "✅ Leo did: Wash dishes" when it's finished (for kids, once
       approved). Each phone can switch these off in its settings.
+- [x] **Updates from inside the app.** Once a day ChoreMe checks the release page;
+      a newer build shows "ChoreMe 0.31 is available – Install", downloads, and
+      Android asks to confirm. No store or extra app needed (only the very first
+      install is from the link). Modules `:core:update` and `:feature:update`.
 - [ ] **Extras.** Home-screen widget ("Out of…" and today's chores), weekly
       scoreboard or points for kids (not needed for now), dark mode polish.
 

@@ -25,6 +25,8 @@ object ModuleRules {
         ":core:push" to setOf(":core:model"),
         // This phone's own choices (which alerts, quiet hours), read by several features.
         ":core:settings" to setOf(":core:model"),
+        // Updating the app itself from the project's release page.
+        ":core:update" to setOf(":core:model"),
     )
 
     val PURE_KOTLIN: Set<String> = setOf(":core:model")

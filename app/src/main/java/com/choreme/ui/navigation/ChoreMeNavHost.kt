@@ -39,6 +39,7 @@ import com.choreme.feature.map.MAP_ROUTE
 import com.choreme.feature.map.mapScreen
 import com.choreme.feature.settings.SETTINGS_ROUTE
 import com.choreme.feature.settings.settingsScreen
+import com.choreme.feature.update.UpdateBanner
 
 enum class TopLevelDestination(
     val route: String,
@@ -60,6 +61,7 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0, pendingApprovals: Int = 0) {
     val currentDestination = backStackEntry?.destination
 
     Scaffold(
+        topBar = { UpdateBanner() },
         bottomBar = {
             NavigationBar {
                 TopLevelDestination.entries.forEach { destination ->
