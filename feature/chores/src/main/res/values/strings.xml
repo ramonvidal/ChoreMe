@@ -78,6 +78,11 @@
     <string name="new_chore_channel_description">When someone in the family adds something that needs doing</string>
     <string name="new_chore_body">%1$s noticed it needs doing</string>
 
+    <string name="approval_channel">Chores to approve</string>
+    <string name="approval_channel_description">When a kid says they finished a chore</string>
+    <string name="approval_title">%1$s finished: %2$s</string>
+    <string name="approval_body">Waiting for your OK</string>
+
     <!-- Saved chores -->
     <string name="saved_chores">Saved</string>
     <string name="saved_chore_hint">Chores you type are saved here for next time. Long-press one to remove it.</string>

@@ -177,7 +177,9 @@ service cloud.firestore {
       // Where to send a phone a wake-up ping (UnifiedPush, e.g. through the free ntfy app).
       // One per signed-in device; the ping itself carries no family data.
       match /pushEndpoints/{uid} {
-        allow read: if isMember(f);
+        // Someone waiting to join may ping the family's phones, so parents see the request at once.
+        allow read: if isMember(f)
+          || (signedIn() && exists(/databases/$(database)/documents/families/$(f)/joinRequests/$(request.auth.uid)));
         allow create, update: if isMember(f) && request.auth.uid == uid
           && request.resource.data.memberId == myMemberId(f)
           && request.resource.data.url is string

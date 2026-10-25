@@ -121,7 +121,8 @@ class FamilyRepository @Inject constructor(
         }
     }
 
-    suspend fun requestToJoin(code: String, yourName: String, role: Role) {
+    /** Returns the family asked to join. */
+    suspend fun requestToJoin(code: String, yourName: String, role: Role): String {
         val uid = requireUid()
         val invite = try {
             db.collection(FirestoreSchema.INVITE_CODES).document(code).get(Source.SERVER).await()
@@ -138,6 +139,7 @@ class FamilyRepository @Inject constructor(
         )
         batch.set(userPointer(uid), mapOf(FAMILY_ID to familyId, FAMILY_NAME to invite.getString(FAMILY_NAME).orEmpty()))
         batch.commit().await()
+        return familyId
     }
 
     suspend fun cancelJoinRequest(familyId: String) {

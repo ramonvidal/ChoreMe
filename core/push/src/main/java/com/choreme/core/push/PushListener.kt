@@ -15,4 +15,10 @@ object PushKinds {
 
     /** Someone noticed something that needs doing. */
     const val CHORE_ADDED = "chore-added"
+
+    /** A kid finished a chore; parents need to approve it. */
+    const val CHORE_TO_APPROVE = "chore-to-approve"
+
+    /** Someone asked to join the family; parents need to let them in. */
+    const val JOIN_REQUEST = "join-request"
 }

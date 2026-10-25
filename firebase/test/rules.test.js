@@ -342,6 +342,13 @@ describe('locations and places', () => {
     await assertSucceeds(deleteDoc(endpoint(parent('alice'), 'kid1')));
   });
 
+  test('someone waiting to join can read where to ping, strangers cannot', async () => {
+    await setDoc(doc(parent('alice'), 'families', FAMILY, 'pushEndpoints', 'alice'), { memberId: 'alice', url: 'https://ntfy.sh/upA?up=1' });
+    await setDoc(doc(parent('bob'), 'families', FAMILY, 'joinRequests', 'bob'), joinRequest('PARENT', 'Bob'));
+    await assertSucceeds(getDocs(collection(parent('bob'), 'families', FAMILY, 'pushEndpoints')));
+    await assertFails(getDocs(collection(parent('mallory'), 'families', FAMILY, 'pushEndpoints')));
+  });
+
   test('parents manage places, everyone can see them', async () => {
     const home = { name: 'Home', latitude: 41.3874, longitude: 2.1686, radius: 100 };
     await assertSucceeds(setDoc(place(parent('alice'), 'home'), home));

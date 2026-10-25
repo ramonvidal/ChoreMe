@@ -22,4 +22,8 @@
     <string name="role_kid">Kid</string>
     <string name="sign_out">Sign out</string>
     <string name="sign_out_kid_warning">This device will need a parent\'s approval again to rejoin. Sign out anyway?</string>
+    <string name="join_channel">Join requests</string>
+    <string name="join_channel_description">When someone asks to join the family</string>
+    <string name="join_title">%1$s wants to join the family</string>
+    <string name="join_body">Open the Family tab to let them in</string>
 </resources>

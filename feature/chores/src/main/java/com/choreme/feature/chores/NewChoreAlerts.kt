@@ -23,7 +23,9 @@ import androidx.work.WorkerParameters
 import com.choreme.core.data.ChoreRepository
 import com.choreme.core.data.FamilyRepository
 import com.choreme.core.data.FirebaseAvailability
+import com.choreme.core.model.Role
 import com.choreme.core.model.chore.Chore
+import com.choreme.core.model.chore.ChoreStatus
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.push.PushKinds
 import com.choreme.core.push.PushListener
@@ -70,7 +72,7 @@ internal object NewChoreAlerts {
 
 internal class NewChoreListener @Inject constructor(@ApplicationContext private val context: Context) : PushListener {
     override fun onPing(kind: String) {
-        if (kind == PushKinds.CHORE_ADDED) NewChoreAlerts.checkNow(context)
+        if (kind == PushKinds.CHORE_ADDED || kind == PushKinds.CHORE_TO_APPROVE) NewChoreAlerts.checkNow(context)
     }
 }
 
@@ -116,10 +118,43 @@ internal class NewChoreWorker @AssistedInject constructor(
                 .putLong(KEY_CHECKED, now.toEpochMilli())
                 .putStringSet(KEY_SHOWN, recent.map { it.id }.toSet())
                 .apply()
+            if (session.role == Role.PARENT) showApprovals(session.familyId)
             Result.success()
         } catch (e: Exception) {
             Result.retry()
         }
+    }
+
+    /** Kids' finished chores waiting for this parent's OK, each shown once. */
+    private suspend fun showApprovals(familyId: String) {
+        val waiting = chores.observeChores(familyId).first().filter { it.status == ChoreStatus.PENDING_APPROVAL }
+        val shown = prefs.getStringSet(KEY_APPROVALS_SHOWN, emptySet()).orEmpty()
+        // Keyed by chore and who did it, so the same chore finished again next week alerts again.
+        val key = { chore: Chore -> "${chore.id}|${chore.completedBy}|${chore.dueDate}" }
+        val fresh = waiting.filter { key(it) !in shown }
+        if (fresh.isNotEmpty() && canNotify()) {
+            val names = families.observeMembers(familyId).first().associate { it.id to it.name }
+            fresh.forEach { showApproval(it, names[it.completedBy]) }
+        }
+        prefs.edit().putStringSet(KEY_APPROVALS_SHOWN, waiting.map(key).toSet()).apply()
+    }
+
+    @Suppress("MissingPermission") // Checked by the caller.
+    private fun showApproval(chore: Chore, who: String?) {
+        val context = applicationContext
+        context.getSystemService(NotificationManager::class.java).createNotificationChannel(
+            NotificationChannel(APPROVAL_CHANNEL_ID, context.getString(R.string.approval_channel), NotificationManager.IMPORTANCE_DEFAULT)
+                .apply { description = context.getString(R.string.approval_channel_description) },
+        )
+        val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
+        val notification = NotificationCompat.Builder(context, APPROVAL_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification_chores)
+            .setContentTitle(context.getString(R.string.approval_title, who ?: context.getString(R.string.someone), chore.title))
+            .setContentText(context.getString(R.string.approval_body))
+            .setAutoCancel(true)
+            .setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
+            .build()
+        NotificationManagerCompat.from(context).notify("approve-${chore.id}".hashCode(), notification)
     }
 
     private fun canNotify() = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
@@ -148,6 +183,8 @@ internal class NewChoreWorker @AssistedInject constructor(
         const val CHANNEL_ID = "new-chores"
         const val KEY_CHECKED = "checked_until"
         const val KEY_SHOWN = "shown"
+        const val KEY_APPROVALS_SHOWN = "approvals_shown"
+        const val APPROVAL_CHANNEL_ID = "approvals"
         const val TIMEOUT_MS = 30_000L
         val LOOK_BACK: Duration = Duration.ofHours(1)
     }

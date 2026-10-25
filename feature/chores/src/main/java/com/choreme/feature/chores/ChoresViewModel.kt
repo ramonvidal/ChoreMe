@@ -10,6 +10,7 @@ import com.choreme.core.data.PushEndpointRepository
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
 import com.choreme.core.model.chore.Chore
+import com.choreme.core.model.chore.ChoreStatus
 import com.choreme.core.model.chore.ChoreTemplate
 import com.choreme.core.model.chore.Recurrence
 import com.choreme.core.model.chore.SavedChore
@@ -121,13 +122,7 @@ class ChoresViewModel @Inject constructor(
             chores.saveForLater(familyId, me.id, draft.title)
         }
         // Let the rest of the family know right away (phones with ntfy).
-        viewModelScope.launch {
-            try {
-                push.ping(endpoints.othersThan(familyId, me.id), PushKinds.CHORE_ADDED)
-            } catch (e: Exception) {
-                Log.w("ChoreMe", "Couldn't ping the family", e)
-            }
-        }
+        pingInBackground(PushKinds.CHORE_ADDED) { endpoints.othersThan(familyId, me.id) }
         return null
     }
 
@@ -163,6 +158,20 @@ class ChoresViewModel @Inject constructor(
             return
         }
         chores.save(familyId, me.id, chore, updated)
+        if (updated.status == ChoreStatus.PENDING_APPROVAL && chore.status != ChoreStatus.PENDING_APPROVAL) {
+            val parents = uiState.value.members.values.filter { it.role == Role.PARENT }.map { it.id }.toSet()
+            pingInBackground(PushKinds.CHORE_TO_APPROVE) { endpoints.of(familyId, parents) }
+        }
+    }
+
+    private fun pingInBackground(kind: String, to: suspend () -> List<String>) {
+        viewModelScope.launch {
+            try {
+                push.ping(to(), kind)
+            } catch (e: Exception) {
+                Log.w("ChoreMe", "Couldn't ping the family", e)
+            }
+        }
     }
 
     private fun context(): Pair<String, Member>? {

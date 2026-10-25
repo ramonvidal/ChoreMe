@@ -3,10 +3,13 @@ package com.choreme.feature.onboarding
 import androidx.lifecycle.ViewModel
 import com.choreme.core.data.AuthRepository
 import com.choreme.core.data.FamilyRepository
+import com.choreme.core.data.PushEndpointRepository
 import com.choreme.core.model.DomainError
 import com.choreme.core.model.DomainException
 import com.choreme.core.model.InviteCode
 import com.choreme.core.model.Role
+import com.choreme.core.push.PushKinds
+import com.choreme.core.push.PushSender
 import com.choreme.core.ui.ActionState
 import com.choreme.core.ui.runAction
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +21,8 @@ import javax.inject.Inject
 class OnboardingViewModel @Inject constructor(
     private val auth: AuthRepository,
     private val families: FamilyRepository,
+    private val endpoints: PushEndpointRepository,
+    private val push: PushSender,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ActionState())
     val state: StateFlow<ActionState> = _state
@@ -32,7 +37,9 @@ class OnboardingViewModel @Inject constructor(
         requireName(yourName)
         val normalized = InviteCode.normalize(code)
         if (!InviteCode.isValid(normalized)) throw DomainException(DomainError.INVITE_CODE_INVALID)
-        families.requestToJoin(normalized, yourName.trim(), if (asKid) Role.KID else Role.PARENT)
+        val familyId = families.requestToJoin(normalized, yourName.trim(), if (asKid) Role.KID else Role.PARENT)
+        // Best effort: parents with ntfy see the request at once; everyone else sees the badge.
+        runCatching { push.ping(endpoints.all(familyId), PushKinds.JOIN_REQUEST) }
     }
 
     fun cancelRequest(familyId: String) = runAction(_state) { families.cancelJoinRequest(familyId) }

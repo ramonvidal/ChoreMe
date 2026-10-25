@@ -33,6 +33,16 @@ class PushEndpointRepository @Inject constructor(
         endpoints(familyId).document(uid).delete().await()
     }
 
+    /** Addresses of the phones of [memberIds], e.g. the parents. */
+    suspend fun of(familyId: String, memberIds: Set<String>): List<String> =
+        endpoints(familyId).get().await().documents
+            .filter { it.getString(MEMBER_ID) in memberIds }
+            .mapNotNull { it.getString(URL) }
+
+    /** Every phone in the family; what someone waiting to join can ping (see firestore.rules). */
+    suspend fun all(familyId: String): List<String> =
+        endpoints(familyId).get().await().documents.mapNotNull { it.getString(URL) }
+
     /** Addresses of the family's other members' phones. */
     suspend fun othersThan(familyId: String, memberId: String): List<String> =
         endpoints(familyId).get().await().documents
