@@ -37,6 +37,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +58,7 @@ import com.choreme.core.model.Family
 import com.choreme.core.model.JoinRequest
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
+import com.choreme.core.data.requestGoogleIdToken
 import com.choreme.core.ui.ErrorText
 import com.choreme.core.ui.theme.memberColor
 
@@ -67,6 +69,9 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
     var showAddKid by rememberSaveable { mutableStateOf(false) }
     var confirmSignOut by rememberSaveable { mutableStateOf(false) }
     var memberToRemove by remember { mutableStateOf<Member?>(null) }
+    var confirmLeave by rememberSaveable { mutableStateOf(false) }
+    var confirmDelete by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -118,6 +123,47 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(R.string.sign_out)) }
         }
+
+        item {
+            HorizontalDivider()
+            Text(
+                stringResource(R.string.privacy_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 12.dp),
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
+                OutlinedButton(onClick = { confirmLeave = true }, enabled = !actionState.busy) {
+                    Text(stringResource(R.string.leave_family))
+                }
+                TextButton(onClick = { confirmDelete = true }, enabled = !actionState.busy) {
+                    Text(stringResource(R.string.delete_my_data), color = MaterialTheme.colorScheme.error)
+                }
+            }
+        }
+    }
+
+    if (confirmLeave) {
+        ConfirmDialog(
+            text = stringResource(if (state.members.size <= 1) R.string.leave_last_confirm else R.string.leave_confirm),
+            confirmLabel = stringResource(R.string.leave_family),
+            onConfirm = {
+                confirmLeave = false
+                viewModel.leave()
+            },
+            onDismiss = { confirmLeave = false },
+        )
+    }
+
+    if (confirmDelete) {
+        ConfirmDialog(
+            text = stringResource(R.string.delete_confirm),
+            confirmLabel = stringResource(R.string.delete_my_data),
+            onConfirm = {
+                confirmDelete = false
+                viewModel.deleteMyData { requestGoogleIdToken(context) }
+            },
+            onDismiss = { confirmDelete = false },
+        )
     }
 
     if (showAddKid) {

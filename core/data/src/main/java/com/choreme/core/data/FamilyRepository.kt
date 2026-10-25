@@ -27,7 +27,9 @@ import com.choreme.core.model.Family
 import com.choreme.core.model.InviteCode
 import com.choreme.core.model.JoinRequest
 import com.choreme.core.model.Member
+import com.choreme.core.model.LeaveOutcome
 import com.choreme.core.model.Role
+import com.choreme.core.model.leaveOutcome
 import com.choreme.core.model.session.FamilyPointer
 import com.choreme.core.model.session.Remote
 import com.choreme.core.model.session.SessionState
@@ -193,6 +195,56 @@ class FamilyRepository @Inject constructor(
         batch.commit().await()
     }
 
+    /**
+     * Takes this device out of the family, along with what it shares about this person
+     * (position, ping address, arrival history). The last one out deletes the whole family.
+     */
+    suspend fun leave(familyId: String, me: Member, members: List<Member>) {
+        val uid = requireUid()
+        when (leaveOutcome(me, members)) {
+            LeaveOutcome.BLOCKED_LAST_PARENT -> throw DomainException(DomainError.LAST_PARENT)
+            LeaveOutcome.DELETE_FAMILY -> deleteFamily(familyId, uid)
+            LeaveOutcome.LEAVE -> {
+                val events = family(familyId).collection(FirestoreSchema.PLACE_EVENTS)
+                    .whereEqualTo(MEMBER_ID, me.id).get().await().documents
+                val batch = db.batch()
+                events.forEach { batch.delete(it.reference) }
+                batch.delete(family(familyId).collection(FirestoreSchema.PUSH_ENDPOINTS).document(uid))
+                val otherDevices = me.uids - uid
+                if (otherDevices.isEmpty()) {
+                    batch.delete(members(familyId).document(me.id))
+                    batch.delete(family(familyId).collection(FirestoreSchema.LOCATIONS).document(me.id))
+                } else {
+                    batch.update(members(familyId).document(me.id), UIDS, otherDevices)
+                }
+                batch.delete(userPointer(uid))
+                // Last, since every other write above needs this device to still be a member.
+                batch.delete(memberUids(familyId).document(uid))
+                batch.commit().await()
+            }
+        }
+    }
+
+    /** Everything under the family, then the family itself; this device's own access goes last. */
+    private suspend fun deleteFamily(familyId: String, uid: String) {
+        val familyDoc = family(familyId).get().await()
+        FAMILY_COLLECTIONS.forEach { name ->
+            val docs = family(familyId).collection(name).get().await().documents
+                .filterNot { name == FirestoreSchema.MEMBER_UIDS && it.id == uid }
+            docs.chunked(BATCH_LIMIT).forEach { chunk ->
+                val batch = db.batch()
+                chunk.forEach { batch.delete(it.reference) }
+                batch.commit().await()
+            }
+        }
+        val batch = db.batch()
+        familyDoc.getString(INVITE_CODE)?.let { batch.delete(db.collection(FirestoreSchema.INVITE_CODES).document(it)) }
+        batch.delete(family(familyId))
+        batch.delete(userPointer(uid))
+        batch.commit().await()
+        memberUids(familyId).document(uid).delete().await()
+    }
+
     private fun memberData(name: String, role: Role, color: Int, uids: List<String>) =
         mapOf(NAME to name, ROLE to role.name, COLOR to color, UIDS to uids)
 
@@ -200,5 +252,20 @@ class FamilyRepository @Inject constructor(
 
     private companion object {
         const val CODE_ATTEMPTS = 3
+        const val BATCH_LIMIT = 400
+
+        // memberUids last among these, so this parent can still delete the rest.
+        val FAMILY_COLLECTIONS = listOf(
+            FirestoreSchema.CHORES,
+            FirestoreSchema.CHORE_TEMPLATES,
+            FirestoreSchema.GROCERY_ITEMS,
+            FirestoreSchema.PLACE_EVENTS,
+            FirestoreSchema.PLACES,
+            FirestoreSchema.LOCATIONS,
+            FirestoreSchema.PUSH_ENDPOINTS,
+            FirestoreSchema.JOIN_REQUESTS,
+            FirestoreSchema.MEMBERS,
+            FirestoreSchema.MEMBER_UIDS,
+        )
     }
 }

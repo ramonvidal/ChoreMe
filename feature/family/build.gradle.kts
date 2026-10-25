@@ -9,6 +9,8 @@ android {
 dependencies {
     // "Bob wants to join" alerts for parents.
     implementation(projects.core.push)
+    // Confirming the Google sign-in before deleting an account.
+    implementation(libs.androidx.credentials)
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)

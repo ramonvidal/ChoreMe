@@ -42,4 +42,6 @@ val DomainError.message: Int
         DomainError.FAMILY_NAME_REQUIRED -> R.string.error_family_name_required
         DomainError.INVITE_CODE_INVALID -> R.string.error_invite_code_invalid
         DomainError.INVITE_CODE_NOT_FOUND -> R.string.error_invite_code_not_found
+        DomainError.LAST_PARENT -> R.string.error_last_parent
+        DomainError.RECENT_SIGN_IN_REQUIRED -> R.string.error_recent_sign_in
     }

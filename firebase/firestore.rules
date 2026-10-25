@@ -92,6 +92,14 @@ service cloud.firestore {
       return validName(d.name) && validPoint(d) && d.radius is int && d.radius >= 50 && d.radius <= 2000;
     }
 
+    // A device leaving a profile it shares with other devices (e.g. a kid's second tablet):
+    // it may only take its own uid off the list.
+    function isLeavingOwnProfile(f, memberId) {
+      return isMember(f) && myMemberId(f) == memberId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uids'])
+        && request.resource.data.uids == resource.data.uids.removeAll([request.auth.uid]);
+    }
+
     // Pointer from a user to their family, for finding it again after signing in.
     // It grants nothing: access is checked against memberUids.
     match /users/{uid} {
@@ -102,6 +110,8 @@ service cloud.firestore {
       allow get: if signedIn();
       allow create: if isCreatingFamily(request.resource.data.familyId)
         && getAfter(familyPath(request.resource.data.familyId)).data.inviteCode == code;
+      // When the last person leaves, the family goes and its code with it.
+      allow delete: if isParent(resource.data.familyId);
     }
 
     match /families/{f} {
@@ -112,6 +122,7 @@ service cloud.firestore {
       allow update: if isParent(f)
         && request.resource.data.createdBy == resource.data.createdBy
         && request.resource.data.inviteCode == resource.data.inviteCode;
+      allow delete: if isParent(f);
 
       match /memberUids/{uid} {
         allow get: if isMember(f) || (signedIn() && request.auth.uid == uid);
@@ -120,7 +131,8 @@ service cloud.firestore {
           || (isCreatingFamily(f) && uid == request.auth.uid
               && request.resource.data.role == 'PARENT'
               && request.resource.data.memberId == uid);
-        allow delete: if isParent(f);
+        // Parents remove anyone; everyone can leave (remove their own device).
+        allow delete: if isParent(f) || (signedIn() && request.auth.uid == uid);
       }
 
       match /members/{memberId} {
@@ -128,8 +140,9 @@ service cloud.firestore {
         allow create: if (isParent(f) || (isCreatingFamily(f) && memberId == request.auth.uid))
           && request.resource.data.role in ['PARENT', 'KID']
           && validName(request.resource.data.name);
-        allow update: if isParent(f) && validName(request.resource.data.name);
-        allow delete: if isParent(f);
+        allow update: if (isParent(f) && validName(request.resource.data.name))
+          || isLeavingOwnProfile(f, memberId);
+        allow delete: if isParent(f) || (isMember(f) && myMemberId(f) == memberId);
       }
 
       match /joinRequests/{uid} {

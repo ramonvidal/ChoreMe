@@ -1,4 +1,4 @@
-package com.choreme.feature.onboarding
+package com.choreme.core.data
 
 import android.annotation.SuppressLint
 import android.content.Context

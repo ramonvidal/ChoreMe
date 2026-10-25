@@ -3,6 +3,7 @@ package com.choreme.feature.family
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.choreme.core.data.AuthRepository
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import com.choreme.core.data.FamilyRepository
 import com.choreme.core.model.DomainError
 import com.choreme.core.model.DomainException
@@ -70,6 +71,31 @@ class FamilyViewModel @Inject constructor(
     fun remove(member: Member) = familyAction { familyId -> families.removeMember(familyId, member) }
 
     fun signOut() = auth.signOut()
+
+    /** Leaves the family; the session then moves on to the "set up your family" screen by itself. */
+    fun leave() = familyAction { familyId ->
+        val me = uiState.value.members.firstOrNull { it.id == uiState.value.me?.memberId } ?: return@familyAction
+        families.leave(familyId, me, uiState.value.members)
+    }
+
+    /**
+     * Leaves the family and deletes the sign-in account. Google accounts are confirmed first
+     * ([getGoogleIdToken] shows the account picker), as Google requires for deleting one.
+     */
+    fun deleteMyData(getGoogleIdToken: suspend () -> String) = familyAction { familyId ->
+        val state = uiState.value
+        val me = state.members.firstOrNull { it.id == state.me?.memberId } ?: return@familyAction
+        if (auth.currentAccount()?.isAnonymous == false) {
+            val token = try {
+                getGoogleIdToken()
+            } catch (e: GetCredentialCancellationException) {
+                return@familyAction
+            }
+            auth.reauthenticateWithGoogle(token)
+        }
+        families.leave(familyId, me, state.members)
+        auth.deleteAccount()
+    }
 
     private fun nextColor() = uiState.value.members.size
 

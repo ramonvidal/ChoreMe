@@ -359,6 +359,43 @@ describe('locations and places', () => {
   });
 });
 
+describe('leaving', () => {
+  beforeEach(async () => {
+    await createFamilyBatch(parent('alice'), 'alice');
+    await setDoc(doc(kidDevice('kid1'), 'families', FAMILY, 'joinRequests', 'kid1'), joinRequest('KID'));
+    await approveKidBatch(parent('alice'), 'kid1');
+  });
+
+  test('a device takes only itself off a shared kid profile, then loses access', async () => {
+    const db = parent('alice');
+    const batch = writeBatch(db);
+    batch.update(doc(db, 'families', FAMILY, 'members', 'kid-leo'), { uids: arrayUnion('kid2') });
+    batch.set(doc(db, 'families', FAMILY, 'memberUids', 'kid2'), { memberId: 'kid-leo', role: 'KID' });
+    await batch.commit();
+
+    const kid = kidDevice('kid1');
+    await assertFails(updateDoc(doc(kid, 'families', FAMILY, 'members', 'kid-leo'), { uids: [] }));
+    await assertFails(updateDoc(doc(kid, 'families', FAMILY, 'members', 'kid-leo'), { uids: ['kid1'], name: 'Boss' }));
+    const leave = writeBatch(kid);
+    leave.update(doc(kid, 'families', FAMILY, 'members', 'kid-leo'), { uids: ['kid2'] });
+    leave.delete(doc(kid, 'families', FAMILY, 'memberUids', 'kid1'));
+    await assertSucceeds(leave.commit());
+    await assertFails(getDocs(collection(kid, 'families', FAMILY, 'members')));
+  });
+
+  test('nobody can remove someone else unless they are a parent', async () => {
+    await assertFails(deleteDoc(doc(kidDevice('kid1'), 'families', FAMILY, 'memberUids', 'alice')));
+    await assertFails(deleteDoc(doc(kidDevice('kid1'), 'families', FAMILY, 'members', 'alice')));
+  });
+
+  test('a parent can delete the family and its invite code', async () => {
+    const db = parent('alice');
+    await assertFails(deleteDoc(doc(kidDevice('kid1'), 'families', FAMILY)));
+    await assertSucceeds(deleteDoc(doc(db, 'inviteCodes', CODE)));
+    await assertSucceeds(deleteDoc(doc(db, 'families', FAMILY)));
+  });
+});
+
 describe('user pointers', () => {
   test('users can only write their own pointer', async () => {
     await assertSucceeds(setDoc(doc(parent('bob'), 'users', 'bob'), { familyId: FAMILY }));
