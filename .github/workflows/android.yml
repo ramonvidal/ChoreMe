@@ -48,19 +48,23 @@ jobs:
           name: choreme-debug-apk
           path: app/build/outputs/apk/debug/*.apk
 
-      # A fixed, public download link that always points at the newest build:
-      # https://github.com/<owner>/<repo>/releases/download/latest/ChoreMe.apk
-      - name: Publish to the "latest" release
+      # One release per build, tagged v0.<build>, so update apps such as Obtainium see a new
+      # version each time. GitHub's fixed link always serves the newest one:
+      # https://github.com/<owner>/<repo>/releases/latest/download/ChoreMe.apk
+      - name: Publish a release
         if: github.event_name != 'pull_request' && github.ref_name == 'claude/family-org-android-app-sdu50s'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           cp app/build/outputs/apk/release/app-release.apk ChoreMe.apk
-          gh release delete latest --cleanup-tag --yes || true
-          gh release create latest ChoreMe.apk \
+          gh release create "v0.${GITHUB_RUN_NUMBER}" ChoreMe.apk \
             --target "$GITHUB_SHA" \
-            --title "ChoreMe (latest build)" \
-            --notes "Build ${GITHUB_RUN_NUMBER} from ${GITHUB_SHA::7}. Install ChoreMe.apk on Android; it updates over any earlier ChoreMe build."
+            --title "ChoreMe 0.${GITHUB_RUN_NUMBER}" \
+            --notes "Build ${GITHUB_RUN_NUMBER} from ${GITHUB_SHA::7}. Install ChoreMe.apk on Android; it updates over any earlier ChoreMe build." \
+            --latest
+          # Keep the three newest releases, and drop the old fixed-name one from before.
+          gh release delete latest --cleanup-tag --yes || true
+          gh release list --limit 100 --json tagName --jq '.[3:][].tagName' | xargs -r -n1 gh release delete --cleanup-tag --yes
 
   firestore-rules:
     runs-on: ubuntu-latest

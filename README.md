@@ -8,7 +8,7 @@ See [PLAN.md](PLAN.md) for the roadmap and design decisions.
 
 ## Installing on a phone
 
-Download **[ChoreMe.apk](https://github.com/ramonvidal/ChoreMe/releases/download/latest/ChoreMe.apk)**
+Download **[ChoreMe.apk](https://github.com/ramonvidal/ChoreMe/releases/latest/download/ChoreMe.apk)**
 on the phone and open it (allow installing from unknown sources). That link always
 points at the newest build and needs no GitHub account. Each build installs over the
 previous one. The free **Obtainium** app can watch the release and update automatically.
