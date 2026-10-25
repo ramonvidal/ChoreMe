@@ -88,6 +88,25 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
     }
 }
 
+/**
+ * UI tests for composables that run on the plain JVM (Robolectric), so CI checks screens
+ * on every push without an emulator. Apply after the feature or library plugin.
+ */
+class AndroidComposeTestsConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) = with(target) {
+        extensions.configure<LibraryExtension> {
+            testOptions.unitTests.isIncludeAndroidResources = true
+        }
+        dependencies {
+            add("testImplementation", libs.library("robolectric"))
+            add("testImplementation", libs.library("androidx.test.ext.junit"))
+            add("testImplementation", platform(libs.library("androidx.compose.bom")))
+            add("testImplementation", libs.library("androidx.compose.ui.test.junit4"))
+            add("debugImplementation", libs.library("androidx.compose.ui.test.manifest"))
+        }
+    }
+}
+
 /** Plain Kotlin, no Android: domain models and rules. */
 class JvmLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {

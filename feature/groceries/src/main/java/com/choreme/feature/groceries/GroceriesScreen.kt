@@ -263,7 +263,7 @@ private fun CategoryHeader(category: GroceryCategory) {
 
 /** In the store: tick it once it's in the cart. Long-press to edit. */
 @Composable
-private fun ToBuyRow(item: GroceryItem, large: Boolean, onBought: () -> Unit, onEdit: () -> Unit) {
+internal fun ToBuyRow(item: GroceryItem, large: Boolean, onBought: () -> Unit, onEdit: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

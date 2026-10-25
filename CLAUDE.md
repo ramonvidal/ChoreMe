@@ -80,6 +80,8 @@ code, also watch for what the check can't see, and point it out:
 - `./gradlew :core:model:test testDebugUnitTest` (`:core:model` is plain Kotlin, so its
   tests run under `test`, not `testDebugUnitTest`)
 - `./gradlew assembleDebug`
+- UI tests for composables run with the unit tests (Robolectric); add them to a module
+  with `id("choreme.android.compose.tests")`
 - `cd firebase && npm test` when rules change
 - `./gradlew -p build-logic :rules:test` when the module rules change
 

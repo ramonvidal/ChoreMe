@@ -11,6 +11,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      # Publishing the APK to the "latest" release.
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -37,13 +40,27 @@ jobs:
       - name: Unit tests
         run: ./gradlew :core:model:test testDebugUnitTest
 
-      - name: Build debug APK
-        run: ./gradlew assembleDebug
+      - name: Build APKs
+        run: ./gradlew assembleDebug assembleRelease
 
       - uses: actions/upload-artifact@v4
         with:
           name: choreme-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+
+      # A fixed, public download link that always points at the newest build:
+      # https://github.com/<owner>/<repo>/releases/download/latest/ChoreMe.apk
+      - name: Publish to the "latest" release
+        if: github.event_name != 'pull_request' && github.ref_name == 'claude/family-org-android-app-sdu50s'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk ChoreMe.apk
+          gh release delete latest --cleanup-tag --yes || true
+          gh release create latest ChoreMe.apk \
+            --target "$GITHUB_SHA" \
+            --title "ChoreMe (latest build)" \
+            --notes "Build ${GITHUB_RUN_NUMBER} from ${GITHUB_SHA::7}. Install ChoreMe.apk on Android; it updates over any earlier ChoreMe build."
 
   firestore-rules:
     runs-on: ubuntu-latest

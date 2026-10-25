@@ -14,10 +14,13 @@ if (file("google-services.json").exists()) {
 android {
     namespace = "com.choreme"
 
+    // Every CI build gets a higher number, so a new APK always installs over the old one.
+    val buildNumber = providers.environmentVariable("GITHUB_RUN_NUMBER").map(String::toInt).getOrElse(1)
+
     defaultConfig {
         applicationId = "com.choreme"
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = buildNumber
+        versionName = "0.$buildNumber"
     }
 
     // CI and every developer must sign debug builds with the same key, because its
@@ -34,7 +37,12 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            // Same key as debug builds: it's the one registered in Firebase, and it means a
+            // release installs over a test build (and the other way round) without uninstalling.
+            signingConfig = signingConfigs.getByName("debug")
+            // Shrinking would make the APK smaller, but can break code that's only found at
+            // runtime; worth turning on once there are UI tests on a real device.
+            isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

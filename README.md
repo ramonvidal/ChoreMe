@@ -6,6 +6,13 @@ everyone's phones.
 
 See [PLAN.md](PLAN.md) for the roadmap and design decisions.
 
+## Installing on a phone
+
+Download **[ChoreMe.apk](https://github.com/ramonvidal/ChoreMe/releases/download/latest/ChoreMe.apk)**
+on the phone and open it (allow installing from unknown sources). That link always
+points at the newest build and needs no GitHub account. Each build installs over the
+previous one. The free **Obtainium** app can watch the release and update automatically.
+
 ## Tech stack
 
 Kotlin, Jetpack Compose (Material 3), Hilt, and Firebase (Auth, Firestore,

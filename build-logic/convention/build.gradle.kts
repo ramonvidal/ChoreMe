@@ -41,6 +41,10 @@ gradlePlugin {
             id = "choreme.android.feature"
             implementationClass = "com.choreme.buildlogic.AndroidFeatureConventionPlugin"
         }
+        register("androidComposeTests") {
+            id = "choreme.android.compose.tests"
+            implementationClass = "com.choreme.buildlogic.AndroidComposeTestsConventionPlugin"
+        }
         register("jvmLibrary") {
             id = "choreme.jvm.library"
             implementationClass = "com.choreme.buildlogic.JvmLibraryConventionPlugin"
