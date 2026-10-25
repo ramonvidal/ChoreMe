@@ -1,6 +1,7 @@
 package com.choreme.feature.groceries
 
 import com.choreme.core.ui.R as CoreUiR
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +34,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -72,6 +74,8 @@ import com.choreme.core.model.grocery.GroceryCategory
 import com.choreme.core.model.grocery.GroceryIcons
 import com.choreme.core.model.grocery.GroceryItem
 import com.choreme.core.model.grocery.QuickAddResult
+import com.choreme.core.ui.ItemIcon
+import com.choreme.core.ui.drawable
 import kotlinx.coroutines.launch
 
 @Composable
@@ -166,6 +170,7 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
                         FilterChip(
                             selected = shopping,
                             onClick = { shopping = !shopping },
+                            leadingIcon = { ItemIcon(CoreUiR.drawable.ic_shopping_cart, Modifier.size(FilterChipDefaults.IconSize)) },
                             label = { Text(stringResource(if (shopping) R.string.grocery_shopping_on else R.string.grocery_shopping_off)) },
                         )
                     }
@@ -252,13 +257,12 @@ private fun EmptyCatalog(onAddStarter: () -> Unit) {
 }
 
 @Composable
-private fun CategoryHeader(category: GroceryCategory) {
-    Text(
-        "${GroceryIcons.forCategory(category)}  ${stringResource(category.label)}",
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
-    )
+internal fun CategoryHeader(category: GroceryCategory) {
+    Row(Modifier.padding(top = 12.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        ItemIcon(GroceryIcons.forCategory(category).drawable, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.width(8.dp))
+        Text(stringResource(category.label), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+    }
 }
 
 /** In the store: tick it once it's in the cart. Long-press to edit. */
@@ -273,7 +277,7 @@ internal fun ToBuyRow(item: GroceryItem, large: Boolean, onBought: () -> Unit, o
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(checked = false, onCheckedChange = { onBought() })
-        Text(item.icon, style = if (large) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleLarge)
+        ItemIcon(item.icon, Modifier.size(if (large) 32.dp else 24.dp), tint = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.width(12.dp))
         Text(
             item.name,
@@ -298,7 +302,7 @@ private fun AtHomeGroup(group: CategoryGroup, viewModel: GroceriesViewModel, onE
 
 /** At home: tap when it runs out. */
 @Composable
-private fun ItemChip(item: GroceryItem, onClick: () -> Unit, onLongClick: () -> Unit) {
+internal fun ItemChip(item: GroceryItem, onClick: () -> Unit, onLongClick: () -> Unit) {
     val shape = RoundedCornerShape(8.dp)
     Surface(
         shape = shape,
@@ -309,7 +313,7 @@ private fun ItemChip(item: GroceryItem, onClick: () -> Unit, onLongClick: () -> 
             modifier = Modifier.heightIn(min = 40.dp).padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(item.icon)
+            ItemIcon(item.icon, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.width(6.dp))
             Text(item.name, style = MaterialTheme.typography.bodyMedium)
             if (item.isStaple) {
@@ -343,7 +347,8 @@ private fun EditItemDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("${GroceryIcons.forItem(name, category)}  ${stringResource(R.string.grocery_edit_title)}") },
+        icon = { ItemIcon(GroceryIcons.forItem(name, category).drawable) },
+        title = { Text(stringResource(R.string.grocery_edit_title)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
@@ -397,4 +402,5 @@ private fun EditItemDialog(
 // Matches the limit in firestore.rules.
 private const val MAX_NAME_LENGTH = 60
 
-private val GroceryItem.icon: String get() = GroceryIcons.forItem(name, category)
+@get:DrawableRes
+private val GroceryItem.icon: Int get() = GroceryIcons.forItem(name, category).drawable

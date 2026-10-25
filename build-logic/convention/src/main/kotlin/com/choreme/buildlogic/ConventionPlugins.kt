@@ -96,9 +96,17 @@ class AndroidComposeTestsConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         extensions.configure<LibraryExtension> {
             testOptions.unitTests.isIncludeAndroidResources = true
+            // Real drawing, so tests can save screenshots (Roborazzi) to build/outputs/roborazzi.
+            testOptions.unitTests.all {
+                it.systemProperty("robolectric.graphicsMode", "NATIVE")
+                it.systemProperty("robolectric.pixelCopyRenderMode", "hardware")
+                it.systemProperty("roborazzi.test.record", "true")
+            }
         }
         dependencies {
             add("testImplementation", libs.library("robolectric"))
+            add("testImplementation", libs.library("roborazzi"))
+            add("testImplementation", libs.library("roborazzi.compose"))
             add("testImplementation", libs.library("androidx.test.ext.junit"))
             add("testImplementation", platform(libs.library("androidx.compose.bom")))
             add("testImplementation", libs.library("androidx.compose.ui.test.junit4"))

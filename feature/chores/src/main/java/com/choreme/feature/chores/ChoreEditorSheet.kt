@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedIconButton
@@ -44,7 +46,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
-import com.choreme.core.ui.emoji
+import com.choreme.core.ui.ItemIcon
+import com.choreme.core.ui.icon
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreTemplate
 import com.choreme.core.model.chore.Recurrence
@@ -112,7 +115,8 @@ internal fun ChoreEditorSheet(
                     FilterChip(
                         selected = template == option,
                         onClick = { pick(option) },
-                        label = { Text("${option.emoji} ${templateTitles.getValue(option)}") },
+                        leadingIcon = { ItemIcon(option.icon, Modifier.size(FilterChipDefaults.IconSize)) },
+                        label = { Text(templateTitles.getValue(option)) },
                     )
                 }
             }
@@ -225,7 +229,11 @@ private fun SavedChoreChip(title: String, selected: Boolean, onClick: () -> Unit
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         modifier = Modifier.clip(shape).combinedClickable(onClick = onClick, onLongClick = onLongClick),
     ) {
-        Text("${ChoreTemplate.OTHER.emoji} $title", modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp))
+        Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            ItemIcon(ChoreTemplate.OTHER.icon, Modifier.size(18.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(title)
+        }
     }
 }
 

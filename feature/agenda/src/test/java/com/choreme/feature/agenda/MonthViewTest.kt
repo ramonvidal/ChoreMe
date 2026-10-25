@@ -2,10 +2,12 @@ package com.choreme.feature.agenda
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.choreme.core.model.agenda.AgendaDay
 import com.choreme.core.model.chore.Chore
+import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -45,6 +47,7 @@ class MonthViewTest {
     fun `lists the selected day, or says it's empty`() {
         compose.setContent { MonthView(state.copy(selectedDay = today.plusDays(2)), onMonth = {}, onSelect = {}, onOpenEvent = {}) }
         compose.onNodeWithText("Vacuum").assertExists()
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/agenda-month.png")
     }
 
     @Test

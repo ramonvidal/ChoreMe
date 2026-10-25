@@ -73,6 +73,15 @@ Phones without it still get alerts, within about 15 minutes.
 - Module structure rules: `./gradlew -p build-logic :rules:test`
 - Firestore security rules (needs Node.js and Java): `cd firebase && npm ci && npm test`
 
+The UI tests also save screenshots of the screens; every CI run uploads them as the
+`screenshots` artifact.
+
+## Icons
+
+Chore and grocery pictures come from [Tabler Icons](https://tabler.io/icons) (MIT) and
+app controls from [Material Symbols](https://fonts.google.com/icons) (Apache 2.0). Their
+licenses ship with the app in `core/ui/src/main/assets/licenses`.
+
 ## Project layout
 
 The app is split into small Gradle modules; the rules for what may depend on what are

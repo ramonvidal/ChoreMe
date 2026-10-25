@@ -21,11 +21,10 @@ class ToBuyRowTest {
     private val milk = GroceryItem(id = "milk", name = "Milk", category = GroceryCategory.DAIRY_EGGS, isNeeded = true, isStaple = false)
 
     @Test
-    fun `shows the item with its icon, and a tap marks it bought`() {
+    fun `shows the item, and a tap marks it bought`() {
         var bought = false
         compose.setContent { ToBuyRow(milk, large = false, onBought = { bought = true }, onEdit = {}) }
 
-        compose.onNodeWithText("🥛").assertExists()
         compose.onNodeWithText("Milk").performClick()
         assertTrue(bought)
     }

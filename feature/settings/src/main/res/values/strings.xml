@@ -19,7 +19,7 @@
     <string name="quiet_from">From %1$s</string>
     <string name="quiet_to">Until %1$s</string>
     <string name="instant_section">Instant alerts</string>
-    <string name="instant_on">⚡ On, through ntfy. Alerts arrive within seconds.</string>
+    <string name="instant_on">On, through ntfy. Alerts arrive within seconds.</string>
     <string name="instant_off">Off. Install the free ntfy app to get alerts within seconds instead of within 15–30 minutes.</string>
     <string name="instant_install">Get ntfy (free)</string>
     <string name="ok">OK</string>

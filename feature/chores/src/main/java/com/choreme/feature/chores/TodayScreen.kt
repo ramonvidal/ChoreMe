@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -54,7 +55,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.choreme.core.ui.emoji
+import com.choreme.core.ui.ItemIcon
+import com.choreme.core.ui.icon
 import com.choreme.core.model.Member
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreStatus
@@ -84,6 +86,8 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
             if (state.groceriesToBuy > 0) {
                 item(key = "groceries") {
                     TextButton(onClick = onOpenGroceries) {
+                        ItemIcon(CoreUiR.drawable.ic_shopping_cart, Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
                         Text(stringResource(R.string.groceries_link, state.groceriesToBuy))
                     }
                 }
@@ -104,7 +108,13 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
 
                     item(key = "todo-title") { SectionTitle(stringResource(R.string.section_to_do)) }
                     if (board.toDo.isEmpty()) {
-                        item(key = "todo-empty") { Text(stringResource(R.string.nothing_to_do), style = MaterialTheme.typography.bodyLarge) }
+                        item(key = "todo-empty") {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                ItemIcon(CoreUiR.drawable.ic_celebration, tint = MaterialTheme.colorScheme.primary)
+                                Spacer(Modifier.width(8.dp))
+                                Text(stringResource(R.string.nothing_to_do), style = MaterialTheme.typography.bodyLarge)
+                            }
+                        }
                     }
                     items(board.toDo, key = { "todo-${it.id}" }) { chore ->
                         ChoreCard(
@@ -240,7 +250,7 @@ private fun EmptyChores(isParent: Boolean) {
 @Composable
 private fun ChoreHeading(chore: Chore, subtitle: String?) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(chore.template.emoji, style = MaterialTheme.typography.headlineSmall)
+        ItemIcon(chore.template.icon, Modifier.size(28.dp), tint = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(chore.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -250,7 +260,7 @@ private fun ChoreHeading(chore: Chore, subtitle: String?) {
 }
 
 @Composable
-private fun ChoreCard(
+internal fun ChoreCard(
     chore: Chore,
     state: ChoresUiState,
     onClaim: () -> Unit,
@@ -296,14 +306,18 @@ private fun ChoreCard(
                 if (canFinish) Button(onClick = onComplete) { Text(stringResource(R.string.done)) }
                 if (claimedByMe) TextButton(onClick = onUnclaim) { Text(stringResource(R.string.let_go)) }
                 if (state.isParent && state.kids.isNotEmpty()) TextButton(onClick = onDoneBy) { Text(stringResource(R.string.done_by)) }
-                TextButton(onClick = onCalendar) { Text(stringResource(R.string.add_to_calendar)) }
+                TextButton(onClick = onCalendar) {
+                    ItemIcon(CoreUiR.drawable.ic_calendar_add_on, Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.add_to_calendar))
+                }
             }
         }
     }
 }
 
 @Composable
-private fun AwaitingCard(chore: Chore, state: ChoresUiState, onApprove: () -> Unit, onReject: () -> Unit) {
+internal fun AwaitingCard(chore: Chore, state: ChoresUiState, onApprove: () -> Unit, onReject: () -> Unit) {
     val who = state.nameOf(chore.completedBy) ?: stringResource(R.string.someone)
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -324,12 +338,16 @@ private fun AwaitingCard(chore: Chore, state: ChoresUiState, onApprove: () -> Un
 }
 
 @Composable
-private fun CompactRow(chore: Chore, trailing: String, onClick: () -> Unit, done: Boolean = false) {
+internal fun CompactRow(chore: Chore, trailing: String, onClick: () -> Unit, done: Boolean = false) {
     Row(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(if (done) "✅" else chore.template.emoji)
+        ItemIcon(
+            if (done) CoreUiR.drawable.ic_check_circle else chore.template.icon,
+            Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.primary,
+        )
         Spacer(Modifier.width(12.dp))
         Text(chore.title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(trailing, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)

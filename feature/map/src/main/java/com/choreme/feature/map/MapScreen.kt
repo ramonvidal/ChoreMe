@@ -59,11 +59,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.choreme.core.location.DeviceLocation
-import com.choreme.core.push.PushRegistration
 import com.choreme.core.model.location.GeoPoint
 import com.choreme.core.model.location.LocationStatus
 import com.choreme.core.model.location.Place
+import com.choreme.core.push.PushRegistration
 import com.choreme.core.ui.ErrorText
+import com.choreme.core.ui.ItemIcon
 import com.choreme.core.ui.theme.memberColor
 import java.time.Duration
 
@@ -126,7 +127,7 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
             if (state.isParent && state.myFix != null) {
                 ExtendedFloatingActionButton(
                     onClick = { addingPlace = true },
-                    icon = { Text("📍") },
+                    icon = { ItemIcon(CoreUiR.drawable.ic_location_on) },
                     text = { Text(stringResource(R.string.save_place)) },
                     modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
                 )
@@ -172,7 +173,11 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
                         }
                         Text(stringResource(R.string.alerts_body), style = MaterialTheme.typography.bodySmall)
                         when {
-                            state.instant.connected -> Text(stringResource(R.string.instant_on), style = MaterialTheme.typography.bodyMedium)
+                            state.instant.connected -> Row(verticalAlignment = Alignment.CenterVertically) {
+                                ItemIcon(CoreUiR.drawable.ic_bolt, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+                                Spacer(Modifier.width(4.dp))
+                                Text(stringResource(R.string.instant_on), style = MaterialTheme.typography.bodyMedium)
+                            }
                             state.instant.hasApp -> Text(stringResource(R.string.instant_connecting), style = MaterialTheme.typography.bodySmall)
                             else -> {
                                 Text(stringResource(R.string.instant_off), style = MaterialTheme.typography.bodySmall)
@@ -292,7 +297,7 @@ private fun ageText(age: Duration): String = when {
 @Composable
 private fun PlaceRow(place: Place, canDelete: Boolean, onClick: () -> Unit, onDelete: () -> Unit) {
     Row(Modifier.fillMaxWidth().clickable(onClick = onClick), verticalAlignment = Alignment.CenterVertically) {
-        Text("📍")
+        ItemIcon(CoreUiR.drawable.ic_location_on, tint = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.width(12.dp))
         Text(place.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
         Text(stringResource(R.string.radius_meters, place.radiusMeters), style = MaterialTheme.typography.bodySmall)

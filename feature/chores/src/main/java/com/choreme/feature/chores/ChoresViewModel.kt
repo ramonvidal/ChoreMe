@@ -33,7 +33,6 @@ import com.choreme.core.model.chore.wasJustFinished
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.push.PushKinds
 import com.choreme.core.push.PushSender
-import com.choreme.core.ui.emoji
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -155,7 +154,7 @@ class ChoresViewModel @Inject constructor(
      * write to; otherwise the calendar app opens, filled in, to pick one.
      */
     suspend fun addToCalendar(chore: Chore): CalendarResult {
-        val event = NewEvent(title = "${chore.template.emoji} ${chore.title}", date = chore.dueDate, startTime = null)
+        val event = NewEvent(title = chore.title, date = chore.dueDate, startTime = null)
         val target = if (calendar.hasPermission()) {
             calendarForChores(calendar.observeCalendars().first(), calendarChoice.selected.value)
         } else {

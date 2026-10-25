@@ -8,9 +8,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.choreme.core.model.AlertKind
 import com.choreme.core.model.QuietHours
 import com.choreme.core.push.PushRegistration
+import com.choreme.core.ui.ItemIcon
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -80,7 +84,11 @@ internal fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         item { Section(R.string.instant_section) }
         item {
             if (endpoint != null) {
-                Text(stringResource(R.string.instant_on))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ItemIcon(CoreUiR.drawable.ic_bolt, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.instant_on))
+                }
             } else {
                 Column {
                     Text(stringResource(R.string.instant_off), style = MaterialTheme.typography.bodyMedium)

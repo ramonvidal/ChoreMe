@@ -9,26 +9,27 @@ class GroceryIconsTest {
 
     @Test
     fun `common items get their own icon`() {
-        assertEquals("🥛", icon("Milk"))
-        assertEquals("🥚", icon("Eggs"))
-        assertEquals("🍞", icon("Bread"))
-        assertEquals("🧻", icon("Toilet paper"))
-        assertEquals("🍅", icon("Cherry tomatoes"))
+        assertEquals(GroceryIcon.MILK, icon("Milk"))
+        assertEquals(GroceryIcon.EGG, icon("Eggs"))
+        assertEquals(GroceryIcon.BREAD, icon("Bread"))
+        assertEquals(GroceryIcon.TOILET_PAPER, icon("Toilet paper"))
+        assertEquals(GroceryIcon.CHERRY, icon("Cherry tomatoes"))
     }
 
     @Test
     fun `the item word wins over describing words`() {
-        assertEquals("🧃", icon("Orange juice"))
-        assertEquals("🥜", icon("Peanut butter"))
-        assertEquals("🍦", icon("Ice cream"))
-        assertEquals("🥔", icon("Sweet potatoes"))
-        assertEquals("🍚", icon("Rice"))
+        assertEquals(GroceryIcon.JUICE, icon("Orange juice"))
+        assertEquals(GroceryIcon.NUT, icon("Peanut butter"))
+        assertEquals(GroceryIcon.ICE_CREAM, icon("Ice cream"))
+        assertEquals(GroceryIcon.CARROT, icon("Sweet potatoes"))
+        assertEquals(GroceryIcon.NOODLES, icon("Rice"))
+        assertEquals(GroceryIcon.MILK, icon("Oat milk"))
     }
 
     @Test
     fun `unknown items fall back to their aisle`() {
-        assertEquals("🥕", icon("Kohlrabi", GroceryCategory.PRODUCE))
-        assertEquals("🛒", icon("Birthday candles"))
+        assertEquals(GroceryIcon.CARROT, icon("Kohlrabi", GroceryCategory.PRODUCE))
+        assertEquals(GroceryIcon.BASKET, icon("Birthday candles"))
     }
 
     @Test

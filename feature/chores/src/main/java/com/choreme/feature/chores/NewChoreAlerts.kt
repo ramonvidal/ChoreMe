@@ -32,7 +32,6 @@ import com.choreme.core.model.session.SessionState
 import com.choreme.core.push.PushKinds
 import com.choreme.core.push.PushListener
 import com.choreme.core.push.PushRegistration
-import com.choreme.core.ui.emoji
 import dagger.Binds
 import dagger.Module
 import dagger.assisted.Assisted
@@ -210,7 +209,7 @@ internal class NewChoreWorker @AssistedInject constructor(
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
         val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, CHANNEL_ID))
             .setSmallIcon(R.drawable.ic_notification_chores)
-            .setContentTitle("${chore.template.emoji} ${chore.title}")
+            .setContentTitle(chore.title)
             .setContentText(context.getString(R.string.new_chore_body, who ?: context.getString(R.string.someone)))
             .setAutoCancel(true)
             .setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })

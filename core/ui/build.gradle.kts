@@ -2,6 +2,7 @@
 plugins {
     id("choreme.android.library")
     id("choreme.android.compose")
+    id("choreme.android.compose.tests")
 }
 
 android {

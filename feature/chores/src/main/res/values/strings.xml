@@ -6,17 +6,17 @@
     <string name="section_to_do">Needs doing</string>
     <string name="section_upcoming">Coming up</string>
     <string name="section_done_today">Done today</string>
-    <string name="nothing_to_do">Nothing needs doing right now 🎉</string>
+    <string name="nothing_to_do">Nothing needs doing right now</string>
     <string name="empty_title">Nothing needs doing</string>
     <string name="empty_body_parent">When someone notices something, like a full sink or an overflowing bin, they add it here. Anyone can grab it, and kids\' finished chores come to you to approve.</string>
     <string name="empty_body_kid">Noticed something that needs doing? Add it with the button below.</string>
-    <string name="groceries_link">🛒 %1$d on the grocery list</string>
+    <string name="groceries_link">%1$d on the grocery list</string>
 
     <!-- Chore cards -->
     <string name="grab">I\'ll do it</string>
     <string name="done">Done</string>
     <string name="let_go">Let go</string>
-    <string name="add_to_calendar">📅 Calendar</string>
+    <string name="add_to_calendar">Calendar</string>
     <string name="added_to_calendar">Added to %1$s</string>
     <string name="no_calendar_app">No calendar app on this phone</string>
     <string name="done_by">Done by…</string>
@@ -65,7 +65,7 @@
     <string name="editor_notify_when_done">Let everyone know when it\'s done</string>
     <string name="done_channel">Chores done</string>
     <string name="done_channel_description">When someone finishes a chore</string>
-    <string name="done_title">✅ %1$s did: %2$s</string>
+    <string name="done_title">%1$s did: %2$s</string>
 
     <!-- Templates -->
     <string name="template_dishes">Wash dishes</string>

@@ -40,6 +40,20 @@ jobs:
       - name: Unit tests
         run: ./gradlew :core:model:test testDebugUnitTest
 
+      # Pictures of the screens that the UI tests draw (Roborazzi), for checking the layout.
+      - name: Collect screenshots
+        if: always()
+        run: |
+          mkdir -p screenshots
+          find . -path '*/build/outputs/roborazzi/*.png' -exec cp {} screenshots/ \;
+          ls screenshots
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: screenshots/
+
       - name: Build APKs
         run: ./gradlew assembleDebug assembleRelease
 
@@ -57,7 +71,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cp app/build/outputs/apk/release/app-release.apk ChoreMe.apk
-          gh release create "v0.${GITHUB_RUN_NUMBER}" ChoreMe.apk \
+          (cd screenshots && zip -q ../screenshots.zip *.png)
+          gh release create "v0.${GITHUB_RUN_NUMBER}" ChoreMe.apk screenshots.zip \
             --target "$GITHUB_SHA" \
             --title "ChoreMe 0.${GITHUB_RUN_NUMBER}" \
             --notes "Build ${GITHUB_RUN_NUMBER} from ${GITHUB_SHA::7}. Install ChoreMe.apk on Android; it updates over any earlier ChoreMe build." \

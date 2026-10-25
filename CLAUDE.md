@@ -45,6 +45,9 @@ in the way and what you propose, before writing the code.
   `onOpenGroceries` and `:app` does the navigation.
 - **Logic goes in `:core:model`** whenever it doesn't need Android, so it stays testable
   on the plain JVM. View models orchestrate; they don't hold business rules.
+- **No emoji in the UI.** Pictures are vector drawables in `:core:ui`: Tabler Icons for
+  chores and grocery items (`ItemIcons.kt`, `ic_item_*`), Material Symbols for controls
+  (`ic_*`). Add a new one by copying its SVG from the library, not by drawing your own.
 - **Each module owns its strings.** Strings used by one feature live in that feature;
   shared ones (Cancel, Save, error messages) live in `:core:ui` and are imported as
   `com.choreme.core.ui.R as CoreUiR`.
@@ -83,7 +86,10 @@ code, also watch for what the check can't see, and point it out:
   tests run under `test`, not `testDebugUnitTest`)
 - `./gradlew assembleDebug`
 - UI tests for composables run with the unit tests (Robolectric); add them to a module
-  with `id("choreme.android.compose.tests")`
+  with `id("choreme.android.compose.tests")`. Screenshot tests save pictures with
+  Roborazzi's `captureRoboImage("build/outputs/roborazzi/<name>.png")`; CI uploads them as
+  the `screenshots` artifact and attaches `screenshots.zip` to each release. Look at them
+  after a UI change
 - `cd firebase && npm test` when rules change
 - `./gradlew -p build-logic :rules:test` when the module rules change
 

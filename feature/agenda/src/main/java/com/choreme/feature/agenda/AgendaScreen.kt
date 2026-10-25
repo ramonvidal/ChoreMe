@@ -54,7 +54,8 @@ import com.choreme.core.model.agenda.CalendarEvent
 import com.choreme.core.model.agenda.FamilyCalendar
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.ui.ErrorText
-import com.choreme.core.ui.emoji
+import com.choreme.core.ui.ItemIcon
+import com.choreme.core.ui.icon
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -239,7 +240,7 @@ internal fun EventRow(event: CalendarEvent, onClick: () -> Unit) {
 @Composable
 internal fun ChoreRow(chore: Chore) {
     Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(chore.template.emoji)
+        ItemIcon(chore.template.icon, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.width(12.dp))
         Text(
             stringResource(R.string.chore_due),

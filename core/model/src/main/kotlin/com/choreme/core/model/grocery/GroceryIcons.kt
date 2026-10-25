@@ -1,74 +1,111 @@
 package com.choreme.core.model.grocery
 
-/** An emoji for every item, so the list can be read at a glance. Falls back to the aisle's. */
+/** A small picture for a grocery item. `:core:ui` draws each one. */
+enum class GroceryIcon {
+    APPLE, BANANA, CITRUS, LEMON, GRAPE, CHERRY, MELON, AVOCADO, CARROT, PEPPER, MUSHROOM, SALAD, LEAF,
+    BREAD, BAGUETTE, CAKE,
+    MEAT, SAUSAGE, FISH,
+    MILK, EGG, CHEESE,
+    NOODLES, CEREAL, WHEAT, SALT, BOTTLE, NUT, SOUP, COFFEE, TEA, CHOCOLATE,
+    ICE_CREAM, PIZZA, FROZEN,
+    WATER, JUICE, BEER, WINE,
+    COOKIE, CHIPS, CANDY,
+    TOILET_PAPER, BUCKET, LAUNDRY, SPRAY, TRASH, BATTERY, BULB,
+    DENTAL, LOTION, RAZOR, DIAPER,
+    PAW,
+    BASKET,
+}
+
+/** A picture for every item, so the list can be read at a glance. Falls back to the aisle's. */
 object GroceryIcons {
-    private val items: Map<String, List<String>> = mapOf(
+    private val items: Map<GroceryIcon, List<String>> = mapOf(
         // Fruit and vegetables
-        "🍎" to listOf("apple"), "🍌" to listOf("banana"), "🍊" to listOf("orange", "mandarin", "clementine"),
-        "🍋" to listOf("lemon", "lime"), "🍇" to listOf("grape"), "🍓" to listOf("strawberr"),
-        "🫐" to listOf("blueberr", "berr"), "🍉" to listOf("watermelon"), "🍈" to listOf("melon"),
-        "🍐" to listOf("pear"), "🍑" to listOf("peach", "nectarine"), "🥝" to listOf("kiwi"), "🥭" to listOf("mango"),
-        "🍍" to listOf("pineapple"), "🥑" to listOf("avocado"), "🍅" to listOf("tomato"), "🥔" to listOf("potato"),
-        "🧅" to listOf("onion"), "🧄" to listOf("garlic"), "🥕" to listOf("carrot"),
-        "🥬" to listOf("lettuce", "salad", "spinach", "cabbage"), "🥒" to listOf("cucumber", "zucchini"),
-        "🫑" to listOf("pepper"), "🍆" to listOf("eggplant", "aubergine"), "🥦" to listOf("broccoli", "cauliflower"),
-        "🍄" to listOf("mushroom"), "🌽" to listOf("corn"), "🌿" to listOf("herb", "parsley", "basil", "mint"),
+        GroceryIcon.APPLE to listOf("apple", "pear", "peach", "nectarine", "kiwi", "mango", "pineapple", "fruit"),
+        GroceryIcon.BANANA to listOf("banana"),
+        GroceryIcon.CITRUS to listOf("orange", "mandarin", "clementine", "grapefruit"),
+        GroceryIcon.LEMON to listOf("lemon", "lime"),
+        GroceryIcon.GRAPE to listOf("grape"),
+        GroceryIcon.CHERRY to listOf("cherr", "strawberr", "blueberr", "raspberr", "berr", "tomato"),
+        GroceryIcon.MELON to listOf("watermelon", "melon"),
+        GroceryIcon.AVOCADO to listOf("avocado"),
+        GroceryIcon.CARROT to listOf("carrot", "potato", "onion", "garlic", "leek", "beet"),
+        GroceryIcon.PEPPER to listOf("pepper", "cucumber", "zucchini", "eggplant", "aubergine", "chili"),
+        GroceryIcon.MUSHROOM to listOf("mushroom"),
+        GroceryIcon.SALAD to listOf("lettuce", "salad", "spinach", "cabbage", "broccoli", "cauliflower", "vegetable"),
+        GroceryIcon.LEAF to listOf("herb", "parsley", "basil", "mint", "coriander", "cilantro"),
         // Bakery
-        "🍞" to listOf("bread", "toast"), "🥖" to listOf("baguette"), "🥯" to listOf("bagel"),
-        "🥐" to listOf("croissant"), "🫓" to listOf("tortilla", "wrap"), "🧁" to listOf("muffin", "cupcake"),
-        "🍰" to listOf("cake"),
+        GroceryIcon.BREAD to listOf("bread", "toast", "bagel", "tortilla", "wrap", "bun"),
+        GroceryIcon.BAGUETTE to listOf("baguette", "croissant"),
+        GroceryIcon.CAKE to listOf("cake", "muffin", "cupcake"),
         // Meat and fish
-        "🍗" to listOf("chicken", "turkey"), "🥩" to listOf("beef", "steak", "pork", "lamb", "meat", "mince", "ground beef"),
-        "🥓" to listOf("bacon", "ham"), "🌭" to listOf("sausage", "hot dog"), "🐟" to listOf("fish", "salmon", "cod", "hake", "tuna steak"),
-        "🦐" to listOf("shrimp", "prawn"),
+        GroceryIcon.MEAT to listOf(
+            "chicken", "turkey", "beef", "steak", "pork", "lamb", "meat", "mince", "ground beef", "bacon", "ham",
+        ),
+        GroceryIcon.SAUSAGE to listOf("sausage", "hot dog"),
+        GroceryIcon.FISH to listOf("fish", "salmon", "cod", "hake", "tuna steak", "shrimp", "prawn"),
         // Dairy and eggs
-        "🥛" to listOf("milk", "kefir"), "🥚" to listOf("egg"), "🧈" to listOf("butter"), "🧀" to listOf("cheese"),
-        "🍶" to listOf("yogurt", "yoghurt", "cream"),
+        GroceryIcon.MILK to listOf("milk", "kefir", "yogurt", "yoghurt", "cream"),
+        GroceryIcon.EGG to listOf("egg"),
+        GroceryIcon.CHEESE to listOf("cheese", "butter"),
         // Pantry
-        "🍝" to listOf("pasta", "spaghetti", "macaroni"), "🍜" to listOf("noodle"), "🍚" to listOf("rice"),
-        "🌾" to listOf("flour", "oat"), "🧂" to listOf("salt", "spice"), "🍬" to listOf("sugar"),
-        "🫒" to listOf("olive", "oil"), "🍯" to listOf("honey"), "🫙" to listOf("jam"), "🥜" to listOf("peanut butter", "nut"),
-        "🥣" to listOf("cereal", "granola", "muesli"), "🫘" to listOf("bean", "lentil", "chickpea"),
-        "🥫" to listOf("canned", "can of", "soup", "tuna", "sauce", "ketchup", "mayo", "mustard"),
-        "☕" to listOf("coffee"), "🍵" to listOf("tea"), "🍫" to listOf("chocolate", "cocoa"),
+        GroceryIcon.NOODLES to listOf("pasta", "spaghetti", "macaroni", "noodle", "rice"),
+        GroceryIcon.CEREAL to listOf("cereal", "granola", "muesli"),
+        GroceryIcon.WHEAT to listOf("flour", "oat", "corn"),
+        GroceryIcon.SALT to listOf("salt", "spice", "sugar"),
+        GroceryIcon.BOTTLE to listOf("olive", "oil", "vinegar", "honey", "jam"),
+        GroceryIcon.NUT to listOf("peanut butter", "nut", "bean", "lentil", "chickpea"),
+        GroceryIcon.SOUP to listOf("canned", "can of", "soup", "tuna", "sauce", "ketchup", "mayo", "mustard"),
+        GroceryIcon.COFFEE to listOf("coffee"),
+        GroceryIcon.TEA to listOf("tea"),
+        GroceryIcon.CHOCOLATE to listOf("chocolate", "cocoa"),
         // Frozen
-        "🍦" to listOf("ice cream"), "🍕" to listOf("pizza"), "🧊" to listOf("ice", "frozen"),
+        GroceryIcon.ICE_CREAM to listOf("ice cream"),
+        GroceryIcon.PIZZA to listOf("pizza"),
+        GroceryIcon.FROZEN to listOf("ice", "frozen"),
         // Drinks
-        "💧" to listOf("water"), "🧃" to listOf("juice"), "🥤" to listOf("soda", "cola", "lemonade"),
-        "🍺" to listOf("beer"), "🍷" to listOf("wine"),
+        GroceryIcon.WATER to listOf("water"),
+        GroceryIcon.JUICE to listOf("juice", "soda", "cola", "lemonade"),
+        GroceryIcon.BEER to listOf("beer"),
+        GroceryIcon.WINE to listOf("wine"),
         // Snacks
-        "🍪" to listOf("cookie", "biscuit"), "🍿" to listOf("popcorn"), "🥨" to listOf("pretzel", "cracker"),
-        "🍟" to listOf("chip", "crisp"), "🍭" to listOf("candy", "sweet"),
+        GroceryIcon.COOKIE to listOf("cookie", "biscuit", "pretzel", "cracker"),
+        GroceryIcon.CHIPS to listOf("chip", "crisp", "popcorn"),
+        GroceryIcon.CANDY to listOf("candy", "sweet"),
         // Household
-        "🧻" to listOf("toilet paper", "paper towel", "kitchen roll", "napkin", "tissue"),
-        "🧽" to listOf("sponge", "dish soap", "dishwasher"), "🧺" to listOf("detergent", "softener", "laundry"),
-        "🧼" to listOf("soap", "cleaner", "bleach"), "🗑️" to listOf("trash bag", "bin bag", "garbage bag"),
-        "🔋" to listOf("battery", "batteries"), "💡" to listOf("light bulb", "bulb"), "🧹" to listOf("broom", "mop"),
+        GroceryIcon.TOILET_PAPER to listOf("toilet paper", "paper towel", "kitchen roll", "napkin", "tissue"),
+        GroceryIcon.BUCKET to listOf("sponge", "dish soap", "dishwasher", "broom", "mop"),
+        GroceryIcon.LAUNDRY to listOf("detergent", "softener", "laundry"),
+        GroceryIcon.SPRAY to listOf("soap", "cleaner", "bleach"),
+        GroceryIcon.TRASH to listOf("trash bag", "bin bag", "garbage bag"),
+        GroceryIcon.BATTERY to listOf("battery", "batteries"),
+        GroceryIcon.BULB to listOf("light bulb", "bulb"),
         // Personal care
-        "🪥" to listOf("toothpaste", "toothbrush", "floss"), "🧴" to listOf("shampoo", "conditioner", "shower gel", "lotion", "sunscreen", "deodorant"),
-        "🪒" to listOf("razor"), "👶" to listOf("diaper", "nappy", "wipes"),
+        GroceryIcon.DENTAL to listOf("toothpaste", "toothbrush", "floss"),
+        GroceryIcon.LOTION to listOf("shampoo", "conditioner", "shower gel", "lotion", "sunscreen", "deodorant"),
+        GroceryIcon.RAZOR to listOf("razor"),
+        GroceryIcon.DIAPER to listOf("diaper", "nappy", "wipes"),
         // Pets
-        "🐾" to listOf("dog food", "cat food", "pet food", "litter"),
+        GroceryIcon.PAW to listOf("dog food", "cat food", "pet food", "litter"),
     )
 
     private val matcher = KeywordMatcher(items)
 
-    fun forItem(name: String, category: GroceryCategory): String = specific(name) ?: forCategory(category)
+    fun forItem(name: String, category: GroceryCategory): GroceryIcon = specific(name) ?: forCategory(category)
 
     /** The item's own icon, if its name is one we know. */
-    internal fun specific(name: String): String? = matcher.match(name)
+    internal fun specific(name: String): GroceryIcon? = matcher.match(name)
 
-    fun forCategory(category: GroceryCategory): String = when (category) {
-        GroceryCategory.PRODUCE -> "🥕"
-        GroceryCategory.BAKERY -> "🥖"
-        GroceryCategory.MEAT_FISH -> "🥩"
-        GroceryCategory.DAIRY_EGGS -> "🧀"
-        GroceryCategory.PANTRY -> "🥫"
-        GroceryCategory.FROZEN -> "🧊"
-        GroceryCategory.DRINKS -> "🥤"
-        GroceryCategory.SNACKS -> "🍪"
-        GroceryCategory.HOUSEHOLD -> "🧹"
-        GroceryCategory.PERSONAL_CARE -> "🧴"
-        GroceryCategory.OTHER -> "🛒"
+    fun forCategory(category: GroceryCategory): GroceryIcon = when (category) {
+        GroceryCategory.PRODUCE -> GroceryIcon.CARROT
+        GroceryCategory.BAKERY -> GroceryIcon.BAGUETTE
+        GroceryCategory.MEAT_FISH -> GroceryIcon.MEAT
+        GroceryCategory.DAIRY_EGGS -> GroceryIcon.CHEESE
+        GroceryCategory.PANTRY -> GroceryIcon.SOUP
+        GroceryCategory.FROZEN -> GroceryIcon.FROZEN
+        GroceryCategory.DRINKS -> GroceryIcon.JUICE
+        GroceryCategory.SNACKS -> GroceryIcon.COOKIE
+        GroceryCategory.HOUSEHOLD -> GroceryIcon.SPRAY
+        GroceryCategory.PERSONAL_CARE -> GroceryIcon.LOTION
+        GroceryCategory.OTHER -> GroceryIcon.BASKET
     }
 }
