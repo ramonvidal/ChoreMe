@@ -3,16 +3,16 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- A cream house with soft corners; the safe zone is the middle 66dp. -->
+    <!-- A white house with soft corners; the safe zone is the middle 66dp. -->
     <path
-        android:fillColor="#FBF6EF"
-        android:strokeColor="#FBF6EF"
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#FFFFFF"
         android:strokeWidth="4"
         android:strokeLineJoin="round"
         android:pathData="M54,31 L79,52 L73,52 L73,75 Q73,78 70,78 L38,78 Q35,78 35,75 L35,52 L29,52 Z" />
-    <!-- Check mark in deep teal -->
+    <!-- Check mark in the app green -->
     <path
-        android:strokeColor="#1F5C5A"
+        android:strokeColor="#2E6B52"
         android:strokeWidth="5.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"

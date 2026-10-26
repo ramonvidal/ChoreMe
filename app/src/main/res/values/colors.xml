@@ -1,5 +1,5 @@
 <resources>
-    <!-- Warm home: terracotta behind a cream house (see core/ui theme). -->
-    <color name="ic_launcher_background">#A8452D</color>
-    <color name="window_background">#FBF6EF</color>
+    <!-- Soft cards: a white house on the app's one green (see core/ui theme). -->
+    <color name="ic_launcher_background">#2E6B52</color>
+    <color name="window_background">#F4F4F2</color>
 </resources>

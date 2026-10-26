@@ -33,11 +33,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -74,7 +71,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -86,6 +82,7 @@ import com.choreme.core.model.grocery.GroceryIcons
 import com.choreme.core.model.grocery.GroceryItem
 import com.choreme.core.model.grocery.QuickAddResult
 import com.choreme.core.ui.ItemIcon
+import com.choreme.core.ui.HeaderLine
 import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.drawable
 import kotlinx.coroutines.launch
@@ -141,9 +138,8 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
             item(key = "header") {
                 TabHeader(
                     title = state.listName ?: stringResource(R.string.list_groceries),
-                    eyebrow = pluralStringResource(R.plurals.grocery_to_buy_count, state.toBuyCount, state.toBuyCount),
-                    modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
-                )
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                ) { HeaderLine(pluralStringResource(R.plurals.grocery_to_buy_count, state.toBuyCount, state.toBuyCount)) }
             }
             item(key = "lists") {
                 ListPicker(
@@ -155,18 +151,13 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
             }
             if (state.othersShopping.isNotEmpty()) {
                 item(key = "others-shopping") {
-                    Card(
-                        Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-                    ) {
-                        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                            ItemIcon(CoreUiR.drawable.ic_shopping_cart, tint = MaterialTheme.colorScheme.primary)
-                            Spacer(Modifier.width(12.dp))
-                            Text(
-                                stringResource(R.string.shopping_now, state.othersShopping.joinToString(", ")),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        }
+                    Card(Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                        Text(
+                            stringResource(R.string.shopping_now, state.othersShopping.joinToString(", ")),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        )
                     }
                 }
             }
@@ -312,19 +303,28 @@ private fun ListPicker(state: GroceriesUiState, onSelect: (String?) -> Unit, onN
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        FilterChip(selected = state.isGroceries, onClick = { onSelect(null) }, label = { Text(stringResource(R.string.list_groceries)) })
-        state.lists.forEach { list ->
-            FilterChip(selected = state.listId == list.id, onClick = { onSelect(list.id) }, label = { Text(list.name) })
-        }
-        AssistChip(
-            onClick = onNew,
-            label = { Text(stringResource(R.string.list_new)) },
-            leadingIcon = { Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(AssistChipDefaults.IconSize)) },
-        )
+        ListTab(stringResource(R.string.list_groceries), state.isGroceries) { onSelect(null) }
+        state.lists.forEach { list -> ListTab(list.name, state.listId == list.id) { onSelect(list.id) } }
+        ListTab("+ " + stringResource(R.string.list_new), selected = false, onClick = onNew)
         if (state.canDeleteList) {
             TextButton(onClick = onDelete) { Text(stringResource(R.string.list_delete), color = MaterialTheme.colorScheme.error) }
         }
     }
+}
+
+/** The shown list in black, the others plain white. */
+@Composable
+private fun ListTab(label: String, selected: Boolean, onClick: () -> Unit) {
+    Text(
+        label,
+        style = MaterialTheme.typography.labelLarge,
+        color = if (selected) MaterialTheme.colorScheme.inverseOnSurface else MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.small)
+            .background(if (selected) MaterialTheme.colorScheme.inverseSurface else MaterialTheme.colorScheme.surfaceContainerLowest)
+            .selectable(selected = selected, onClick = onClick, role = Role.Tab)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+    )
 }
 
 @Composable
@@ -387,11 +387,12 @@ private fun EmptyCatalog(onAddStarter: () -> Unit) {
 
 @Composable
 internal fun CategoryHeader(category: GroceryCategory) {
-    Row(Modifier.padding(top = 12.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        ItemIcon(GroceryIcons.forCategory(category).drawable, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
-        Spacer(Modifier.width(8.dp))
-        Text(stringResource(category.label), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-    }
+    Text(
+        stringResource(category.label),
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 4.dp, top = 12.dp, bottom = 4.dp),
+    )
 }
 
 /** In the store: tick it once it's in the cart. Long-press to edit. */
@@ -408,14 +409,14 @@ internal fun ToBuyRow(item: GroceryItem, large: Boolean, onBought: () -> Unit, o
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(checked = false, onCheckedChange = { onBought() })
-        ItemIcon(item.icon, Modifier.size(if (large) 32.dp else 24.dp), tint = MaterialTheme.colorScheme.primary)
-        Spacer(Modifier.width(12.dp))
         Text(
             item.name,
             style = if (large) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge,
             modifier = Modifier.weight(1f),
         )
         if (item.isStaple) StapleIcon()
+        Spacer(Modifier.width(8.dp))
+        ItemIcon(item.icon, Modifier.size(if (large) 26.dp else 20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -434,26 +435,18 @@ private fun AtHomeGroup(group: CategoryGroup, viewModel: GroceriesViewModel, onE
 /** At home: a big tile to tap when it runs out. Long-press to edit. */
 @Composable
 internal fun ItemTile(item: GroceryItem, onClick: () -> Unit, onLongClick: () -> Unit) {
-    Column(
+    Text(
+        item.name,
+        style = MaterialTheme.typography.bodyLarge,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = Modifier
-            .width(80.dp)
-            .heightIn(min = 84.dp)
-            .clip(MaterialTheme.shapes.medium)
+            .heightIn(min = 44.dp)
+            .clip(MaterialTheme.shapes.small)
             .background(MaterialTheme.colorScheme.surfaceContainerLowest)
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-            .padding(horizontal = 4.dp, vertical = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
-    ) {
-        ItemIcon(item.icon, Modifier.size(28.dp), tint = MaterialTheme.colorScheme.secondary)
-        Text(
-            item.name,
-            style = MaterialTheme.typography.labelMedium,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
+            .padding(horizontal = 14.dp, vertical = 11.dp),
+    )
 }
 
 /** A suggestion while typing: tap to put it on the list. */

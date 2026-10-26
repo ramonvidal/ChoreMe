@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,16 +18,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -34,9 +33,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHost
@@ -54,28 +53,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.choreme.core.model.DayPart
 import com.choreme.core.model.Member
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreStatus
 import com.choreme.core.model.chore.Recurrence
-import com.choreme.core.model.dayPart
-import com.choreme.core.ui.FamilyRow
-import com.choreme.core.ui.IconBubble
+import com.choreme.core.ui.HeaderLine
 import com.choreme.core.ui.ItemIcon
-import com.choreme.core.ui.MemberAvatar
-import com.choreme.core.ui.SummaryChip
 import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.icon
 import java.time.Instant
@@ -127,11 +118,12 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
                     item(key = "todo-title") { SectionTitle(stringResource(R.string.section_to_do)) }
                     if (board.toDo.isEmpty()) {
                         item(key = "todo-empty") {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                ItemIcon(CoreUiR.drawable.ic_celebration, tint = MaterialTheme.colorScheme.primary)
-                                Spacer(Modifier.width(8.dp))
-                                Text(stringResource(R.string.nothing_to_do), style = MaterialTheme.typography.bodyLarge)
-                            }
+                            Text(
+                                stringResource(R.string.nothing_to_do),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 4.dp),
+                            )
                         }
                     }
                     items(board.toDo, key = { "todo-${it.id}" }) { chore ->
@@ -163,18 +155,18 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
 
                     if (board.upcoming.isNotEmpty()) {
                         item(key = "upcoming-title") { SectionTitle(stringResource(R.string.section_upcoming)) }
-                        items(board.upcoming, key = { "upcoming-${it.id}" }) { chore ->
-                            CompactRow(chore, trailing = dayLabel(chore.dueDate, state.today), onClick = { if (state.isParent) editing = chore })
+                        item(key = "upcoming") {
+                            CompactList(board.upcoming, trailing = { dayLabel(it.dueDate, state.today) }, onClick = { if (state.isParent) editing = it })
                         }
                     }
 
                     if (board.doneToday.isNotEmpty()) {
                         item(key = "done-title") { SectionTitle(stringResource(R.string.section_done_today)) }
-                        items(board.doneToday, key = { "done-${it.id}" }) { chore ->
-                            CompactRow(
-                                chore,
-                                trailing = state.nameOf(chore.lastDoneBy) ?: stringResource(R.string.someone),
-                                onClick = { if (state.isParent) editing = chore },
+                        item(key = "done-today") {
+                            CompactList(
+                                board.doneToday,
+                                trailing = { state.nameOf(it.lastDoneBy) ?: stringResource(R.string.someone) },
+                                onClick = { if (state.isParent) editing = it },
                                 done = true,
                             )
                         }
@@ -185,16 +177,14 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
 
         // Anyone who notices something can add it, kids included.
         if (state.me != null) {
-            ExtendedFloatingActionButton(
+            // Black, so it never looks like a chore's own button.
+            FloatingActionButton(
                 onClick = { adding = true },
-                // Dark and round, so it never looks like a chore's own "I'll do it" button.
                 containerColor = MaterialTheme.colorScheme.inverseSurface,
                 contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-                shape = CircleShape,
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.add_chore)) },
+                shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-            )
+            ) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_chore)) }
         }
         SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp))
     }
@@ -298,37 +288,20 @@ private fun AskForNotificationPermission() {
     }
 }
 
-/** "Good evening, Ramon", what's waiting, and the family as circles. */
+/** "Chores", and one grey line: what needs doing and what's on the grocery list. */
 @Composable
 internal fun ChoresHeader(state: ChoresUiState, onOpenGroceries: () -> Unit) {
-    val me = state.me
-    val greeting = when (dayPart(LocalTime.now())) {
-        DayPart.MORNING -> R.string.greeting_morning
-        DayPart.AFTERNOON -> R.string.greeting_afternoon
-        DayPart.EVENING -> R.string.greeting_evening
-    }
-    Column(Modifier.padding(top = 8.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        TabHeader(
-            title = if (me != null && me.name.isNotBlank()) stringResource(greeting, me.name) else stringResource(R.string.chores_title),
-            eyebrow = state.today.format(DateTimeFormatter.ofPattern("EEEE d MMMM")),
-        ) {
-            val toDo = state.board.toDo.size
-            SummaryChip(pluralStringResource(R.plurals.summary_to_do, toDo, toDo))
+    val toDo = state.board.toDo.size
+    TabHeader(title = stringResource(R.string.chores_title), modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)) {
+        Row {
+            HeaderLine(pluralStringResource(R.plurals.summary_to_do, toDo, toDo))
             if (state.groceriesToBuy > 0) {
-                SummaryChip(
+                HeaderLine(" · ")
+                HeaderLine(
                     stringResource(R.string.groceries_link, state.groceriesToBuy),
-                    modifier = Modifier.clip(CircleShape).clickable(onClick = onOpenGroceries),
-                    container = MaterialTheme.colorScheme.secondaryContainer,
-                    content = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.clickable(onClick = onOpenGroceries),
                 )
             }
-        }
-        if (state.members.size > 1) {
-            FamilyRow(
-                members = state.members.values.sortedWith(compareBy({ it.id != me?.id }, { it.name.lowercase() })),
-                meId = me?.id,
-                youLabel = stringResource(R.string.you),
-            )
         }
     }
 }
@@ -337,9 +310,9 @@ internal fun ChoresHeader(state: ChoresUiState, onOpenGroceries: () -> Unit) {
 private fun SectionTitle(text: String) {
     Text(
         text,
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.titleSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(top = 12.dp),
+        modifier = Modifier.padding(start = 4.dp, top = 16.dp, bottom = 4.dp),
     )
 }
 
@@ -348,45 +321,30 @@ private fun EmptyChores(isParent: Boolean) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.empty_title), style = MaterialTheme.typography.titleMedium)
-            Text(stringResource(if (isParent) R.string.empty_body_parent else R.string.empty_body_kid))
+            Text(
+                stringResource(if (isParent) R.string.empty_body_parent else R.string.empty_body_kid),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
 
-/** Who it's about (on it, or noticed it), as their circle and a short line. */
+/** Red is kept for urgent chores only: a small tag. */
 @Composable
-private fun ChoreMeta(person: Member?, text: String, late: Boolean) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        if (person != null) MemberAvatar(person, size = 18.dp)
-        Text(
-            text,
-            style = MaterialTheme.typography.bodySmall,
-            color = if (late) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = if (late) FontWeight.ExtraBold else null,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
-}
-
-/** Red is kept for urgent chores only, so it always means "drop everything". */
-@Composable
-private fun UrgentLabel() {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        ItemIcon(CoreUiR.drawable.ic_priority_high, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.error)
-        Text(
-            stringResource(R.string.urgent).uppercase(),
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.ExtraBold,
-            color = MaterialTheme.colorScheme.error,
-            letterSpacing = 0.8.sp,
-        )
-    }
+private fun UrgentTag() {
+    Text(
+        stringResource(R.string.urgent),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.error,
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.errorContainer, MaterialTheme.shapes.extraSmall)
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+    )
 }
 
 /**
- * One chore, with one main button ("I'll do it" or "Done"); everything else is in the ⋯ menu.
- * Urgent ones are red.
+ * One chore on a white card: grey icon, title, one grey line, and one small button. Tapping the
+ * card opens everything else (done by, reminders, calendar, edit).
  */
 @Composable
 internal fun ChoreCard(
@@ -409,7 +367,6 @@ internal fun ChoreCard(
     val canFinish = !claimedByOther || state.isParent
     var menu by remember { mutableStateOf(false) }
 
-    val person = state.members[chore.claimedBy ?: chore.reportedBy]
     val line = buildList {
         when {
             claimedByMe -> add(stringResource(R.string.you_are_on_it))
@@ -417,120 +374,127 @@ internal fun ChoreCard(
             chore.reportedBy == me.id -> add(stringResource(R.string.reported_by_you))
             chore.reportedBy != null -> state.nameOf(chore.reportedBy)?.let { add(stringResource(R.string.reported_by, it)) }
         }
-        if (overdueDays > 0 && !chore.urgent) add(pluralStringResource(R.plurals.overdue_days, overdueDays, overdueDays))
+        if (overdueDays > 0) add(pluralStringResource(R.plurals.overdue_days, overdueDays, overdueDays))
         if (chore.recurrence != Recurrence.Once) add(recurrenceLabel(chore.recurrence))
         if (reminder != null) add(stringResource(R.string.reminder_at, reminder.atZone(ZoneId.systemDefault()).format(SHORT_TIME)))
     }.joinToString(" · ")
 
-    val urgent = chore.urgent
-    Card(
-        modifier = Modifier.fillMaxWidth().clickable(enabled = state.isParent, onClick = onEdit),
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = if (urgent) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surfaceContainerLowest,
-        ),
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                IconBubble(
-                    chore.template.icon,
-                    container = if (urgent) MaterialTheme.colorScheme.surfaceContainerLowest else MaterialTheme.colorScheme.primaryContainer,
-                    tint = if (urgent) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                )
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    if (urgent) UrgentLabel()
+    // The one thing to do next; green when urgent, plain otherwise.
+    val main = when {
+        chore.status == ChoreStatus.OPEN -> R.string.grab to onClaim
+        canFinish -> R.string.done to onComplete
+        else -> null
+    }
+
+    Box {
+        Card(modifier = Modifier.fillMaxWidth().clickable { menu = true }) {
+            Row(
+                Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                ItemIcon(chore.template.icon, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(chore.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    if (line.isNotEmpty()) ChoreMeta(person, line, late = overdueDays > 0 && !urgent)
-                }
-                Box {
-                    IconButton(onClick = { menu = true }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more))
-                    }
-                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        if (chore.status == ChoreStatus.OPEN && canFinish) {
-                            DropdownMenuItem(text = { Text(stringResource(R.string.done_already)) }, onClick = { menu = false; onComplete() })
-                        }
-                        if (claimedByMe) {
-                            DropdownMenuItem(text = { Text(stringResource(R.string.let_go)) }, onClick = { menu = false; onUnclaim() })
-                        }
-                        if (state.isParent && state.kids.isNotEmpty()) {
-                            DropdownMenuItem(text = { Text(stringResource(R.string.done_by)) }, onClick = { menu = false; onDoneBy() })
-                        }
-                        DropdownMenuItem(
-                            text = { Text(stringResource(if (reminder == null) R.string.remind_me else R.string.change_reminder)) },
-                            leadingIcon = { ItemIcon(CoreUiR.drawable.ic_alarm, Modifier.size(20.dp)) },
-                            onClick = { menu = false; onRemind() },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.add_to_calendar)) },
-                            leadingIcon = { ItemIcon(CoreUiR.drawable.ic_calendar_add_on, Modifier.size(20.dp)) },
-                            onClick = { menu = false; onCalendar() },
-                        )
-                        if (state.isParent) {
-                            DropdownMenuItem(text = { Text(stringResource(R.string.edit_chore)) }, onClick = { menu = false; onEdit() })
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (chore.urgent) UrgentTag()
+                        if (line.isNotEmpty()) {
+                            Text(
+                                line,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         }
                     }
                 }
-            }
-            // The one thing to do next.
-            val main = when {
-                chore.status == ChoreStatus.OPEN -> R.string.grab to onClaim
-                canFinish -> R.string.done to onComplete
-                else -> null
-            }
-            if (main != null) {
-                Button(
-                    onClick = main.second,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-                    shape = MaterialTheme.shapes.small,
-                    colors = if (urgent) {
-                        ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError)
-                    } else if (main.first == R.string.done) {
-                        ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary, contentColor = MaterialTheme.colorScheme.onSecondary)
+                if (main != null) {
+                    if (chore.urgent) {
+                        Button(onClick = main.second, shape = MaterialTheme.shapes.small, contentPadding = SmallButtonPadding) {
+                            Text(stringResource(main.first))
+                        }
                     } else {
-                        ButtonDefaults.buttonColors()
-                    },
-                ) { Text(stringResource(main.first), style = MaterialTheme.typography.labelLarge.copy(fontSize = 15.sp)) }
+                        OutlinedButton(
+                            onClick = main.second,
+                            shape = MaterialTheme.shapes.small,
+                            contentPadding = SmallButtonPadding,
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        ) { Text(stringResource(main.first)) }
+                    }
+                }
+            }
+        }
+        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+            if (chore.status == ChoreStatus.OPEN && canFinish) {
+                DropdownMenuItem(text = { Text(stringResource(R.string.done_already)) }, onClick = { menu = false; onComplete() })
+            }
+            if (claimedByMe) {
+                DropdownMenuItem(text = { Text(stringResource(R.string.let_go)) }, onClick = { menu = false; onUnclaim() })
+            }
+            if (state.isParent && state.kids.isNotEmpty()) {
+                DropdownMenuItem(text = { Text(stringResource(R.string.done_by)) }, onClick = { menu = false; onDoneBy() })
+            }
+            DropdownMenuItem(
+                text = { Text(stringResource(if (reminder == null) R.string.remind_me else R.string.change_reminder)) },
+                onClick = { menu = false; onRemind() },
+            )
+            DropdownMenuItem(text = { Text(stringResource(R.string.add_to_calendar)) }, onClick = { menu = false; onCalendar() })
+            if (state.isParent) {
+                DropdownMenuItem(text = { Text(stringResource(R.string.edit_chore)) }, onClick = { menu = false; onEdit() })
             }
         }
     }
 }
 
+private val SmallButtonPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
+
 @Composable
 internal fun AwaitingCard(chore: Chore, state: ChoresUiState, onApprove: () -> Unit, onReject: () -> Unit) {
     val who = state.nameOf(chore.completedBy) ?: stringResource(R.string.someone)
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                IconBubble(
-                    chore.template.icon,
-                    container = MaterialTheme.colorScheme.surfaceContainerLowest,
-                    tint = MaterialTheme.colorScheme.secondary,
-                )
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                ItemIcon(chore.template.icon, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(chore.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    ChoreMeta(state.members[chore.completedBy], stringResource(R.string.finished_by, who), late = false)
+                    Text(
+                        stringResource(R.string.finished_by, who),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
             if (state.isParent) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(
-                        onClick = onApprove,
-                        modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(start = 36.dp)) {
+                    Button(onClick = onApprove, shape = MaterialTheme.shapes.small) { Text(stringResource(CoreUiR.string.approve)) }
+                    OutlinedButton(
+                        onClick = onReject,
                         shape = MaterialTheme.shapes.small,
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                    ) { Text(stringResource(CoreUiR.string.approve)) }
-                    OutlinedButton(onClick = onReject, modifier = Modifier.heightIn(min = 48.dp), shape = MaterialTheme.shapes.small) {
-                        Text(stringResource(R.string.not_yet))
-                    }
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    ) { Text(stringResource(R.string.not_yet)) }
                 }
             } else {
-                Text(stringResource(R.string.waiting_for_parent), style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    stringResource(R.string.waiting_for_parent),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 36.dp),
+                )
             }
+        }
+    }
+}
+
+/** Short rows inside one white card ("Coming up", "Done today"). */
+@Composable
+internal fun CompactList(rows: List<Chore>, trailing: @Composable (Chore) -> String, onClick: (Chore) -> Unit, done: Boolean = false) {
+    Card(Modifier.fillMaxWidth()) {
+        rows.forEachIndexed { index, chore ->
+            if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+            CompactRow(chore, trailing(chore), onClick = { onClick(chore) }, done = done)
         }
     }
 }
@@ -538,17 +502,15 @@ internal fun AwaitingCard(chore: Chore, state: ChoresUiState, onApprove: () -> U
 @Composable
 internal fun CompactRow(chore: Chore, trailing: String, onClick: () -> Unit, done: Boolean = false) {
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 10.dp, horizontal = 4.dp),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ItemIcon(
-            if (done) CoreUiR.drawable.ic_check_circle else chore.template.icon,
-            Modifier.size(22.dp),
-            tint = MaterialTheme.colorScheme.secondary,
-        )
-        Spacer(Modifier.width(12.dp))
+        if (done) {
+            ItemIcon(CoreUiR.drawable.ic_check_circle, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.width(12.dp))
+        }
         Text(chore.title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(trailing, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(trailing, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

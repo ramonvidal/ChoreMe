@@ -61,7 +61,7 @@ class ChoreCardsScreenshotTest {
             }
         }
         compose.onNodeWithText("Wash the dishes").assertExists()
-        compose.onNodeWithText("URGENT").assertExists()
+        compose.onNodeWithText("Urgent").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-cards.png")
     }
 }

@@ -79,7 +79,8 @@ The UI tests also save screenshots of the screens; every CI run uploads them as 
 ## Icons
 
 Chore and grocery pictures come from [Tabler Icons](https://tabler.io/icons) (MIT) and
-app controls from [Material Symbols](https://fonts.google.com/icons) (Apache 2.0). Their
+app controls from [Material Symbols](https://fonts.google.com/icons) (Apache 2.0); the font is
+[Figtree](https://fonts.google.com/specimen/Figtree) (SIL Open Font License). Their
 licenses ship with the app in `core/ui/src/main/assets/licenses`.
 
 ## Project layout
