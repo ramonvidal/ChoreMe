@@ -4,6 +4,7 @@ import com.choreme.core.ui.R as CoreUiR
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
@@ -70,6 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.choreme.core.model.grocery.CategoryGroup
+import com.choreme.core.model.grocery.FamilyLists
 import com.choreme.core.model.grocery.GroceryCategory
 import com.choreme.core.model.grocery.GroceryIcons
 import com.choreme.core.model.grocery.GroceryItem
@@ -86,7 +90,9 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var editing by remember { mutableStateOf<GroceryItem?>(null) }
-    var shopping by rememberSaveable { mutableStateOf(false) }
+    val shopping = state.shopping
+    var newList by rememberSaveable { mutableStateOf(false) }
+    var deletingList by rememberSaveable { mutableStateOf(false) }
 
     // In the shop, the screen shouldn't go dark between items.
     val view = LocalView.current
@@ -124,6 +130,28 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
+            item(key = "lists") {
+                ListPicker(
+                    state = state,
+                    onSelect = viewModel::selectList,
+                    onNew = { newList = true },
+                    onDelete = { deletingList = true },
+                )
+            }
+            if (state.othersShopping.isNotEmpty()) {
+                item(key = "others-shopping") {
+                    Card(Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            ItemIcon(CoreUiR.drawable.ic_shopping_cart, tint = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.width(12.dp))
+                            Text(
+                                stringResource(R.string.shopping_now, state.othersShopping.joinToString(", ")),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                    }
+                }
+            }
             item(key = "quick-add") {
                 QuickAddField(query = query, onQueryChange = viewModel::onQueryChange, onSubmit = ::submit)
             }
@@ -147,7 +175,14 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
                         CircularProgressIndicator()
                     }
                 }
-                state.catalog.isEmpty() -> item(key = "empty") { EmptyCatalog(onAddStarter = viewModel::addStarterItems) }
+                state.catalog.isEmpty() && state.isGroceries -> item(key = "empty") { EmptyCatalog(onAddStarter = viewModel::addStarterItems) }
+                state.catalog.isEmpty() -> item(key = "empty-list") {
+                    Text(
+                        stringResource(R.string.list_empty),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(vertical = 16.dp),
+                    )
+                }
                 else -> {
                     item(key = "to-buy-header") {
                         Row(
@@ -169,7 +204,7 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
                     item(key = "shopping-toggle") {
                         FilterChip(
                             selected = shopping,
-                            onClick = { shopping = !shopping },
+                            onClick = { viewModel.setShopping(!shopping) },
                             leadingIcon = { ItemIcon(CoreUiR.drawable.ic_shopping_cart, Modifier.size(FilterChipDefaults.IconSize)) },
                             label = { Text(stringResource(if (shopping) R.string.grocery_shopping_on else R.string.grocery_shopping_off)) },
                         )
@@ -211,6 +246,30 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
         SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter))
     }
 
+    if (newList) {
+        NewListDialog(
+            onCreate = {
+                viewModel.createList(it)
+                newList = false
+            },
+            onDismiss = { newList = false },
+        )
+    }
+    if (deletingList) {
+        AlertDialog(
+            onDismissRequest = { deletingList = false },
+            title = { Text(stringResource(R.string.list_delete_title, state.listName.orEmpty())) },
+            text = { Text(stringResource(R.string.list_delete_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteShownList()
+                    deletingList = false
+                }) { Text(stringResource(CoreUiR.string.remove), color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { TextButton(onClick = { deletingList = false }) { Text(stringResource(CoreUiR.string.cancel)) } },
+        )
+    }
+
     editing?.let { item ->
         EditItemDialog(
             item = item,
@@ -225,6 +284,52 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
             onDismiss = { editing = null },
         )
     }
+}
+
+/** Groceries first, then the family's other lists, then "New list". Long-press a list to remove it. */
+@Composable
+private fun ListPicker(state: GroceriesUiState, onSelect: (String?) -> Unit, onNew: () -> Unit, onDelete: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(bottom = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        FilterChip(selected = state.isGroceries, onClick = { onSelect(null) }, label = { Text(stringResource(R.string.list_groceries)) })
+        state.lists.forEach { list ->
+            FilterChip(selected = state.listId == list.id, onClick = { onSelect(list.id) }, label = { Text(list.name) })
+        }
+        AssistChip(
+            onClick = onNew,
+            label = { Text(stringResource(R.string.list_new)) },
+            leadingIcon = { Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(AssistChipDefaults.IconSize)) },
+        )
+        if (state.canDeleteList) {
+            TextButton(onClick = onDelete) { Text(stringResource(R.string.list_delete), color = MaterialTheme.colorScheme.error) }
+        }
+    }
+}
+
+@Composable
+private fun NewListDialog(onCreate: (String) -> Unit, onDismiss: () -> Unit) {
+    var name by rememberSaveable { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.list_new_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.list_new_hint), style = MaterialTheme.typography.bodySmall)
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { if (it.length <= FamilyLists.MAX_NAME) name = it },
+                    placeholder = { Text(stringResource(R.string.list_new_placeholder)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                )
+            }
+        },
+        confirmButton = { TextButton(onClick = { onCreate(name) }, enabled = name.isNotBlank()) { Text(stringResource(CoreUiR.string.add)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(CoreUiR.string.cancel)) } },
+    )
 }
 
 @Composable

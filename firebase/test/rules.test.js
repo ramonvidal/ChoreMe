@@ -418,3 +418,66 @@ describe('user pointers', () => {
     await assertFails(getDoc(doc(parent('bob'), 'users', 'alice')));
   });
 });
+
+describe('family news, notes, lists, chore log and away', () => {
+  const fam = (db, ...path) => doc(db, 'families', FAMILY, ...path);
+
+  beforeEach(async () => {
+    await createFamilyBatch(parent('alice'), 'alice');
+    for (const kid of ['kid1', 'kid2']) {
+      await setDoc(doc(kidDevice(kid), 'families', FAMILY, 'joinRequests', kid), joinRequest('KID'));
+      await approveKidBatch(parent('alice'), kid, `member-${kid}`);
+    }
+  });
+
+  test('"at the shop" and "on my way": only in your own name, one per kind', async () => {
+    const kid = kidDevice('kid1');
+    await assertSucceeds(setDoc(fam(kid, 'announcements', 'member-kid1_ON_MY_WAY'), { memberId: 'member-kid1', kind: 'ON_MY_WAY', at: 1 }));
+    await assertFails(setDoc(fam(kid, 'announcements', 'member-kid2_ON_MY_WAY'), { memberId: 'member-kid2', kind: 'ON_MY_WAY', at: 1 }));
+    await assertFails(setDoc(fam(kid, 'announcements', 'random'), { memberId: 'member-kid1', kind: 'ON_MY_WAY', at: 1 }));
+    await assertFails(setDoc(fam(kid, 'announcements', 'member-kid1_PARTY'), { memberId: 'member-kid1', kind: 'PARTY', at: 1 }));
+    await assertSucceeds(getDocs(collection(kidDevice('kid2'), 'families', FAMILY, 'announcements')));
+    await assertFails(deleteDoc(fam(kidDevice('kid2'), 'announcements', 'member-kid1_ON_MY_WAY')));
+    await assertSucceeds(deleteDoc(fam(kid, 'announcements', 'member-kid1_ON_MY_WAY')));
+    await assertFails(getDocs(collection(parent('mallory'), 'families', FAMILY, 'announcements')));
+  });
+
+  test('notes: anyone writes; the writer or a parent edits and removes', async () => {
+    const note = { text: 'Wi-Fi: hunter2', createdBy: 'member-kid1', updatedAt: 1 };
+    await assertSucceeds(setDoc(fam(kidDevice('kid1'), 'notes', 'wifi'), note));
+    await assertFails(setDoc(fam(kidDevice('kid1'), 'notes', 'fake'), { ...note, createdBy: 'alice' }));
+    await assertFails(setDoc(fam(kidDevice('kid1'), 'notes', 'long'), { ...note, text: 'x'.repeat(301) }));
+    await assertFails(updateDoc(fam(kidDevice('kid2'), 'notes', 'wifi'), { text: 'mine now', updatedAt: 2 }));
+    await assertFails(deleteDoc(fam(kidDevice('kid2'), 'notes', 'wifi')));
+    await assertSucceeds(updateDoc(fam(kidDevice('kid1'), 'notes', 'wifi'), { text: 'Wi-Fi: hunter3', updatedAt: 2 }));
+    await assertFails(updateDoc(fam(parent('alice'), 'notes', 'wifi'), { createdBy: 'alice' }));
+    await assertSucceeds(deleteDoc(fam(parent('alice'), 'notes', 'wifi')));
+  });
+
+  test('lists: anyone makes one; items can be on it', async () => {
+    await assertSucceeds(setDoc(fam(kidDevice('kid1'), 'lists', 'pharmacy'), { name: 'Pharmacy', createdBy: 'member-kid1' }));
+    await assertFails(setDoc(fam(kidDevice('kid1'), 'lists', 'x'), { name: '', createdBy: 'member-kid1' }));
+    const item = { name: 'Toothpaste', category: 'PERSONAL_CARE', isNeeded: true, isStaple: false, listId: 'pharmacy' };
+    await assertSucceeds(setDoc(fam(kidDevice('kid2'), 'groceryItems', 'pharmacy--toothpaste'), item));
+    await assertFails(setDoc(fam(kidDevice('kid2'), 'groceryItems', 'bad'), { ...item, listId: 7 }));
+    await assertFails(deleteDoc(fam(kidDevice('kid2'), 'lists', 'pharmacy')));
+    await assertSucceeds(deleteDoc(fam(kidDevice('kid1'), 'lists', 'pharmacy')));
+  });
+
+  test('the chore log is written by parents, read by everyone', async () => {
+    const entry = { choreId: 'dishes', title: 'Dishes', doneBy: 'member-kid1', on: '2026-10-26', at: 1 };
+    await assertFails(setDoc(fam(kidDevice('kid1'), 'choreLog', 'e1'), entry));
+    await assertSucceeds(setDoc(fam(parent('alice'), 'choreLog', 'e1'), entry));
+    await assertSucceeds(getDocs(collection(kidDevice('kid1'), 'families', FAMILY, 'choreLog')));
+    await assertFails(setDoc(fam(parent('alice'), 'choreLog', 'e2'), { ...entry, on: 'Monday' }));
+  });
+
+  test('away: you mark yourself, parents mark anyone, kids not each other', async () => {
+    await assertSucceeds(updateDoc(fam(kidDevice('kid1'), 'members', 'member-kid1'), { awayUntil: '2026-11-02' }));
+    await assertSucceeds(updateDoc(fam(kidDevice('kid1'), 'members', 'member-kid1'), { awayUntil: null }));
+    await assertFails(updateDoc(fam(kidDevice('kid1'), 'members', 'member-kid1'), { awayUntil: 'soon' }));
+    await assertFails(updateDoc(fam(kidDevice('kid1'), 'members', 'member-kid1'), { awayUntil: '2026-11-02', role: 'PARENT' }));
+    await assertFails(updateDoc(fam(kidDevice('kid1'), 'members', 'member-kid2'), { awayUntil: '2026-11-02' }));
+    await assertSucceeds(updateDoc(fam(parent('alice'), 'members', 'member-kid2'), { awayUntil: '2026-11-02' }));
+  });
+});

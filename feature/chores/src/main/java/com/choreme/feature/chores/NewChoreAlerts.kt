@@ -110,6 +110,12 @@ internal class NewChoreWorker @AssistedInject constructor(
             return Result.success()
         }
         return try {
+            // Away (a trip): no chore alerts on this phone until back; what happened meanwhile isn't replayed.
+            val me = families.observeMembers(session.familyId).first().firstOrNull { it.id == session.memberId }
+            if (me?.isAway(java.time.LocalDate.now()) == true) {
+                prefs.edit().putLong(KEY_CHECKED, now.toEpochMilli()).apply()
+                return Result.success()
+            }
             val shown = prefs.getStringSet(KEY_SHOWN, emptySet()).orEmpty()
             // Look back a little: a chore added offline reaches the server later than it was made.
             val recent = chores.reportedSince(session.familyId, since.minus(LOOK_BACK))

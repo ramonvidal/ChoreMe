@@ -1,6 +1,7 @@
 package com.choreme.core.data
 
 import android.os.Build
+import android.util.Log
 import com.choreme.core.data.remote.FirestoreSchema
 import com.choreme.core.data.remote.FirestoreSchema.COLOR
 import com.choreme.core.data.remote.FirestoreSchema.CREATED_AT
@@ -47,6 +48,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -98,6 +100,12 @@ class FamilyRepository @Inject constructor(
         members(familyId).documentsFlow().map { docs ->
             docs.map { it.toMember() }.sortedWith(compareBy({ it.role != Role.PARENT }, { it.name.lowercase() }))
         }
+
+    /** Away until [until] (inclusive), or back home with null. Fire-and-forget, like other small edits. */
+    fun setAway(familyId: String, memberId: String, until: LocalDate?) {
+        members(familyId).document(memberId).update(FirestoreSchema.AWAY_UNTIL, until?.toString())
+            .addOnFailureListener { Log.w("ChoreMe", "Couldn't save away", it) }
+    }
 
     fun observeJoinRequests(familyId: String): Flow<List<JoinRequest>> =
         joinRequests(familyId).documentsFlow().map { docs -> docs.map { it.toJoinRequest() } }
@@ -256,6 +264,10 @@ class FamilyRepository @Inject constructor(
 
         // memberUids last among these, so this parent can still delete the rest.
         val FAMILY_COLLECTIONS = listOf(
+            FirestoreSchema.ANNOUNCEMENTS,
+            FirestoreSchema.NOTES,
+            FirestoreSchema.CHORE_LOG,
+            FirestoreSchema.LISTS,
             FirestoreSchema.CHORES,
             FirestoreSchema.CHORE_TEMPLATES,
             FirestoreSchema.GROCERY_ITEMS,

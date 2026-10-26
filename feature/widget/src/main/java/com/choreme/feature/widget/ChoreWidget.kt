@@ -37,6 +37,7 @@ import com.choreme.core.data.ChoreRepository
 import com.choreme.core.data.FamilyRepository
 import com.choreme.core.data.FirebaseAvailability
 import com.choreme.core.data.GroceryRepository
+import com.choreme.core.model.grocery.groceriesToBuy
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.buildTodayBoard
 import com.choreme.core.model.session.SessionState
@@ -79,7 +80,7 @@ internal class ChoreWidget : GlanceAppWidget() {
             as? SessionState.InFamily ?: return WidgetData(false, emptyList(), 0)
         val chores = withTimeoutOrNull(TIMEOUT_MS) { deps.chores().observeChores(session.familyId).first() }.orEmpty()
         val items = withTimeoutOrNull(TIMEOUT_MS) { deps.groceries().observeItems(session.familyId).first() }.orEmpty()
-        return WidgetData(true, buildTodayBoard(chores, LocalDate.now()).toDo, items.count { it.isNeeded })
+        return WidgetData(true, buildTodayBoard(chores, LocalDate.now()).toDo, items.groceriesToBuy())
     }
 
     private companion object {

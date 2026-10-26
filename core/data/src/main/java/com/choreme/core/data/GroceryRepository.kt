@@ -3,13 +3,17 @@ package com.choreme.core.data
 import android.util.Log
 import com.choreme.core.data.remote.FirestoreSchema
 import com.choreme.core.data.remote.FirestoreSchema.CATEGORY
+import com.choreme.core.data.remote.FirestoreSchema.CREATED_BY
 import com.choreme.core.data.remote.FirestoreSchema.IS_NEEDED
 import com.choreme.core.data.remote.FirestoreSchema.IS_STAPLE
+import com.choreme.core.data.remote.FirestoreSchema.LIST_ID
 import com.choreme.core.data.remote.FirestoreSchema.NAME
 import com.choreme.core.data.remote.FirestoreSchema.UPDATED_AT
 import com.choreme.core.data.remote.FirestoreSchema.UPDATED_BY
 import com.choreme.core.data.remote.documentsFlow
 import com.choreme.core.data.remote.toGroceryItem
+import com.choreme.core.model.grocery.FamilyList
+import com.choreme.core.model.grocery.FamilyLists
 import com.choreme.core.model.grocery.GroceryCategory
 import com.choreme.core.model.grocery.GroceryItem
 import com.choreme.core.model.grocery.GroceryNames
@@ -36,13 +40,49 @@ class GroceryRepository @Inject constructor(
         .collection(FirestoreSchema.FAMILIES).document(familyId)
         .collection(FirestoreSchema.GROCERY_ITEMS)
 
+    private fun lists(familyId: String) = firestore.get()
+        .collection(FirestoreSchema.FAMILIES).document(familyId)
+        .collection(FirestoreSchema.LISTS)
+
+    /** Items on every list; each item's [GroceryItem.listId] says which (null for groceries). */
     fun observeItems(familyId: String): Flow<List<GroceryItem>> =
         items(familyId).documentsFlow().map { docs -> docs.map { it.toGroceryItem() } }
 
-    fun add(familyId: String, memberId: String, name: String, category: GroceryCategory, isNeeded: Boolean = true) {
+    /** [listId] null puts it on the grocery list. */
+    fun add(
+        familyId: String,
+        memberId: String,
+        name: String,
+        category: GroceryCategory,
+        isNeeded: Boolean = true,
+        listId: String? = null,
+    ) {
         val collection = items(familyId)
-        val ref = GroceryNames.documentId(name)?.let(collection::document) ?: collection.document()
-        ref.set(itemData(name, category, isNeeded, isStaple = false, memberId), SetOptions.merge()).logFailure()
+        val ref = FamilyLists.itemDocumentId(listId, name)?.let(collection::document) ?: collection.document()
+        ref.set(itemData(name, category, isNeeded, isStaple = false, memberId, listId), SetOptions.merge()).logFailure()
+    }
+
+    /** The family's other lists (pharmacy, packing...), by name. */
+    fun observeLists(familyId: String): Flow<List<FamilyList>> =
+        lists(familyId).documentsFlow().map { docs ->
+            docs.mapNotNull { doc ->
+                FamilyList(doc.id, doc.getString(NAME) ?: return@mapNotNull null, doc.getString(CREATED_BY).orEmpty())
+            }.sortedBy { it.name.lowercase() }
+        }
+
+    /** Returns the new list's id, so it can be shown straight away. */
+    fun createList(familyId: String, memberId: String, name: String): String {
+        val ref = lists(familyId).document()
+        ref.set(mapOf(NAME to name.trim(), CREATED_BY to memberId)).logFailure()
+        return ref.id
+    }
+
+    /** The list and everything on it. */
+    fun deleteList(familyId: String, listId: String, catalog: List<GroceryItem>) {
+        val batch = firestore.get().batch()
+        catalog.filter { it.listId == listId }.forEach { batch.delete(items(familyId).document(it.id)) }
+        batch.delete(lists(familyId).document(listId))
+        batch.commit().logFailure()
     }
 
     fun setNeeded(familyId: String, memberId: String, itemId: String, isNeeded: Boolean) {
@@ -88,15 +128,22 @@ class GroceryRepository @Inject constructor(
         batch.commit().logFailure()
     }
 
-    private fun itemData(name: String, category: GroceryCategory, isNeeded: Boolean, isStaple: Boolean, memberId: String) =
-        mapOf(
-            NAME to name,
-            CATEGORY to category.name,
-            IS_NEEDED to isNeeded,
-            IS_STAPLE to isStaple,
-            UPDATED_AT to FieldValue.serverTimestamp(),
-            UPDATED_BY to memberId,
-        )
+    private fun itemData(
+        name: String,
+        category: GroceryCategory,
+        isNeeded: Boolean,
+        isStaple: Boolean,
+        memberId: String,
+        listId: String? = null,
+    ) = mapOf(
+        NAME to name,
+        CATEGORY to category.name,
+        IS_NEEDED to isNeeded,
+        IS_STAPLE to isStaple,
+        LIST_ID to listId,
+        UPDATED_AT to FieldValue.serverTimestamp(),
+        UPDATED_BY to memberId,
+    )
 
     private fun change(memberId: String, vararg fields: Pair<String, Any>): Map<String, Any> =
         mapOf(*fields, UPDATED_AT to FieldValue.serverTimestamp(), UPDATED_BY to memberId)

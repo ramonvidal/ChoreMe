@@ -38,6 +38,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,6 +65,11 @@ import com.choreme.core.model.chore.ChoreStatus
 import com.choreme.core.model.chore.Recurrence
 import com.choreme.core.ui.ItemIcon
 import com.choreme.core.ui.icon
+import java.time.Instant
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
 
@@ -72,6 +79,8 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
     var editing by remember { mutableStateOf<Chore?>(null) }
     var adding by remember { mutableStateOf(false) }
     var doneByFor by remember { mutableStateOf<Chore?>(null) }
+    var remindFor by remember { mutableStateOf<Chore?>(null) }
+    val reminders by viewModel.reminders.collectAsStateWithLifecycle()
 
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -127,6 +136,8 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
                             onComplete = { viewModel.complete(chore) },
                             onDoneBy = { doneByFor = chore },
                             onEdit = { editing = chore },
+                            reminder = reminders[chore.id],
+                            onRemind = { remindFor = chore },
                             onCalendar = {
                                 scope.launch {
                                     when (val result = viewModel.addToCalendar(chore)) {
@@ -209,6 +220,21 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
             onDismiss = { editing = null },
         )
     }
+    remindFor?.let { chore ->
+        RemindDialog(
+            hasReminder = chore.id in reminders,
+            onSet = { time ->
+                val at = viewModel.remind(chore, time)
+                remindFor = null
+                scope.launch { snackbar.showSnackbar(context.getString(R.string.reminder_set, at.format(SHORT_TIME))) }
+            },
+            onRemove = {
+                viewModel.cancelReminder(chore)
+                remindFor = null
+            },
+            onDismiss = { remindFor = null },
+        )
+    }
     doneByFor?.let { chore ->
         DoneByDialog(
             kids = state.kids,
@@ -220,6 +246,33 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
         )
     }
 }
+
+/** "Remind me at…": a time today (or tomorrow, if it's passed), on this phone only. */
+@Composable
+private fun RemindDialog(hasReminder: Boolean, onSet: (LocalTime) -> Unit, onRemove: () -> Unit, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val inAnHour = LocalTime.now().plusHours(1)
+    val picker = rememberTimePickerState(inAnHour.hour, 0, android.text.format.DateFormat.is24HourFormat(context))
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.remind_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.remind_hint), style = MaterialTheme.typography.bodySmall)
+                TimePicker(state = picker)
+            }
+        },
+        confirmButton = { TextButton(onClick = { onSet(LocalTime.of(picker.hour, picker.minute)) }) { Text(stringResource(CoreUiR.string.save)) } },
+        dismissButton = {
+            Row {
+                if (hasReminder) TextButton(onClick = onRemove) { Text(stringResource(CoreUiR.string.remove)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(CoreUiR.string.cancel)) }
+            }
+        },
+    )
+}
+
+private val SHORT_TIME: DateTimeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
 
 /** Reminders need the notification permission from Android 13 on; asked once, the first time Today opens. */
 @Composable
@@ -293,6 +346,8 @@ internal fun ChoreCard(
     onDoneBy: () -> Unit,
     onEdit: () -> Unit,
     onCalendar: () -> Unit,
+    reminder: Instant? = null,
+    onRemind: () -> Unit = {},
 ) {
     val me = state.me ?: return
     val overdueDays = ChronoUnit.DAYS.between(chore.dueDate, state.today).toInt()
@@ -330,6 +385,17 @@ internal fun ChoreCard(
                 if (canFinish) Button(onClick = onComplete) { Text(stringResource(R.string.done)) }
                 if (claimedByMe) TextButton(onClick = onUnclaim) { Text(stringResource(R.string.let_go)) }
                 if (state.isParent && state.kids.isNotEmpty()) TextButton(onClick = onDoneBy) { Text(stringResource(R.string.done_by)) }
+                TextButton(onClick = onRemind) {
+                    ItemIcon(CoreUiR.drawable.ic_alarm, Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        if (reminder == null) {
+                            stringResource(R.string.remind_me)
+                        } else {
+                            stringResource(R.string.reminder_at, reminder.atZone(ZoneId.systemDefault()).format(SHORT_TIME))
+                        },
+                    )
+                }
                 TextButton(onClick = onCalendar) {
                     ItemIcon(CoreUiR.drawable.ic_calendar_add_on, Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))

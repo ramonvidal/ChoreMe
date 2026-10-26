@@ -31,6 +31,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -60,6 +61,7 @@ import com.choreme.core.model.JoinRequest
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
 import com.choreme.core.ui.ErrorText
+import com.choreme.core.ui.ItemIcon
 import com.choreme.core.ui.theme.memberColor
 
 @Composable
@@ -71,6 +73,7 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
     var memberToRemove by remember { mutableStateOf<Member?>(null) }
     var confirmLeave by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
+    var awayFor by remember { mutableStateOf<Member?>(null) }
     val context = LocalContext.current
 
     LazyColumn(
@@ -93,6 +96,18 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
             }
         }
 
+        item { SectionTitle(stringResource(R.string.notes_title)) }
+        item(key = "notes") {
+            NotesSection(
+                notes = state.notes,
+                members = state.members,
+                me = state.meMember,
+                onAdd = viewModel::addNote,
+                onEdit = viewModel::editNote,
+                onDelete = viewModel::deleteNote,
+            )
+        }
+
         item { SectionTitle(stringResource(R.string.family_members_title)) }
         items(state.members, key = { "member-${it.id}" }) { member ->
             MemberRow(
@@ -100,6 +115,8 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
                 isMe = member.id == state.me?.memberId,
                 canRemove = state.isParent && member.id != state.me?.memberId,
                 onRemove = { memberToRemove = member },
+                away = awayLabel(member, state.today),
+                onAway = if (state.canSetAway(member)) ({ awayFor = member }) else null,
             )
         }
 
@@ -113,6 +130,11 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
                     Text(stringResource(R.string.family_add_kid))
                 }
             }
+        }
+
+        if (state.isParent && state.week.isNotEmpty()) {
+            item { SectionTitle(stringResource(R.string.week_title)) }
+            item(key = "week") { WeekSection(state.week) }
         }
 
         item { SectionTitle(stringResource(R.string.this_phone_title)) }
@@ -179,6 +201,17 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
         )
     }
 
+    awayFor?.let { member ->
+        AwayDialog(
+            member = member,
+            today = state.today,
+            onSet = { until ->
+                viewModel.setAway(member, until)
+                awayFor = null
+            },
+            onDismiss = { awayFor = null },
+        )
+    }
     memberToRemove?.let { member ->
         ConfirmDialog(
             text = stringResource(R.string.family_remove_confirm, member.name),
@@ -296,7 +329,14 @@ private fun ProfileOption(label: String, selected: Boolean, onSelect: () -> Unit
 }
 
 @Composable
-private fun MemberRow(member: Member, isMe: Boolean, canRemove: Boolean, onRemove: () -> Unit) {
+private fun MemberRow(
+    member: Member,
+    isMe: Boolean,
+    canRemove: Boolean,
+    onRemove: () -> Unit,
+    away: String? = null,
+    onAway: (() -> Unit)? = null,
+) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -326,6 +366,12 @@ private fun MemberRow(member: Member, isMe: Boolean, canRemove: Boolean, onRemov
                 pluralStringResource(R.plurals.member_devices, member.uids.size, member.uids.size)
             }
             Text("$role · $devices", style = MaterialTheme.typography.bodySmall)
+            if (away != null) Text(away, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary)
+        }
+        if (onAway != null) {
+            IconButton(onClick = onAway) {
+                ItemIcon(CoreUiR.drawable.ic_flight, tint = if (away != null) MaterialTheme.colorScheme.tertiary else LocalContentColor.current)
+            }
         }
         if (canRemove) {
             IconButton(onClick = onRemove) {

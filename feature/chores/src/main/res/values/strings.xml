@@ -116,4 +116,13 @@
     <string name="urgent_channel">Urgent chores</string>
     <string name="urgent_channel_description">When someone adds something that needs doing as soon as possible</string>
     <string name="urgent_title">Urgent: %1$s</string>
+    <string name="remind_me">Remind me</string>
+    <string name="reminder_at">Reminder %1$s</string>
+    <string name="remind_title">Remind me at</string>
+    <string name="remind_hint">A reminder on this phone only. If the time has passed today, it\'s for tomorrow.</string>
+    <string name="reminder_set">I\'ll remind you at %1$s</string>
+    <string name="timed_channel">Your reminders</string>
+    <string name="timed_channel_description">Chores you asked to be reminded of at a time</string>
+    <string name="timed_title">Reminder: %1$s</string>
+    <string name="timed_body">You asked to be reminded about this.</string>
 </resources>

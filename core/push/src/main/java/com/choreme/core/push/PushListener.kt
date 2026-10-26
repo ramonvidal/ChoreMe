@@ -24,4 +24,10 @@ object PushKinds {
 
     /** Someone asked to join the family; parents need to let them in. */
     const val JOIN_REQUEST = "join-request"
+
+    /** Someone is at the shop: anything missing can still go on the list. */
+    const val SHOPPING = "shopping"
+
+    /** Someone is on the way home. */
+    const val ON_MY_WAY = "on-my-way"
 }

@@ -52,6 +52,10 @@
     <string name="alert_join_requests_hint">When someone asks to join the family (parents)</string>
     <string name="alert_arrivals">Arrivals and departures</string>
     <string name="alert_arrivals_hint">When someone arrives at or leaves a saved place</string>
+    <string name="alert_on_my_way">On the way home</string>
+    <string name="alert_on_my_way_hint">When someone taps \"On my way home\" (needs ntfy)</string>
+    <string name="alert_shopping">At the shop</string>
+    <string name="alert_shopping_hint">When someone starts shopping, so you can add what\'s missing (needs ntfy)</string>
     <string name="alert_morning">Morning summary</string>
     <string name="alert_morning_hint">At 8:00, what needs doing today</string>
     <string name="quiet_section">Quiet hours</string>
@@ -69,4 +73,23 @@
     <string name="updates_found">ChoreMe %1$s is ready: tap Install at the top of the screen.</string>
     <string name="updates_failed">Couldn\'t reach the update page. Check the connection and try again.</string>
     <string name="ok">OK</string>
+    <!-- Family board -->
+    <string name="notes_title">Notes</string>
+    <string name="notes_empty">Things everyone should know: the Wi-Fi password, who picks up whom, when grandma arrives.</string>
+    <string name="notes_add">Add a note</string>
+    <string name="notes_new">New note</string>
+    <string name="notes_edit">Edit note</string>
+    <string name="notes_placeholder">e.g. Grandma arrives Friday at 18:00</string>
+    <!-- This week -->
+    <string name="week_title">This week</string>
+    <plurals name="week_count">
+        <item quantity="one">%d chore</item>
+        <item quantity="other">%d chores</item>
+    </plurals>
+    <!-- Away -->
+    <string name="away_until">Away until %1$s</string>
+    <string name="away_title">%1$s is away until…</string>
+    <string name="away_hint">While away: no chore reminders on their phone, and they\'re not offered for \"done by\".</string>
+    <string name="away_set">Set</string>
+    <string name="away_back">Back home</string>
 </resources>

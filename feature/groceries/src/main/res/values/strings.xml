@@ -29,4 +29,19 @@
     <string name="category_household">Household &amp; cleaning</string>
     <string name="category_personal_care">Personal care</string>
     <string name="category_other">Other</string>
+    <string name="shopping_channel">Someone\'s at the shop</string>
+    <string name="shopping_channel_description">When someone in the family is shopping, so you can add what\'s missing</string>
+    <string name="shopping_title">%1$s is at the shop</string>
+    <string name="shopping_someone">Someone</string>
+    <string name="shopping_body">Anything missing? Add it to the list now.</string>
+    <string name="shopping_now">%1$s is at the shop now: anything you add shows up on their phone.</string>
+    <string name="list_groceries">Groceries</string>
+    <string name="list_new">New list</string>
+    <string name="list_new_title">New list</string>
+    <string name="list_new_hint">For anything besides groceries: the pharmacy, the hardware store, packing for a trip.</string>
+    <string name="list_new_placeholder">e.g. Pharmacy</string>
+    <string name="list_delete">Remove list</string>
+    <string name="list_delete_title">Remove \"%1$s\"?</string>
+    <string name="list_delete_body">The list and everything on it are removed for the whole family.</string>
+    <string name="list_empty">Nothing on this list yet. Type above to add something.</string>
 </resources>

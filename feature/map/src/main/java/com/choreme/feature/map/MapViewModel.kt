@@ -4,7 +4,13 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.choreme.core.data.AnnouncementRepository
 import com.choreme.core.data.FamilyRepository
+import com.choreme.core.data.PushEndpointRepository
+import com.choreme.core.model.AnnouncementKind
+import com.choreme.core.model.currentFromOthers
+import com.choreme.core.push.PushKinds
+import com.choreme.core.push.PushSender
 import com.choreme.core.data.LocationRepository
 import com.choreme.core.location.DeviceFix
 import com.choreme.core.location.DeviceLocation
@@ -72,6 +78,9 @@ private data class Settings(
     val instant: InstantAlerts,
 )
 
+/** "On my way home": whether this phone's person said so, and who else is on the way (name, since when). */
+data class OnMyWay(val mine: Boolean = false, val others: List<Pair<String, Instant>> = emptyList())
+
 /** Instant alerts through a UnifiedPush app such as ntfy. */
 data class InstantAlerts(val hasApp: Boolean, val connected: Boolean)
 
@@ -86,6 +95,9 @@ class MapViewModel @Inject internal constructor(
     private val presence: PresenceStore,
     private val push: PushRegistration,
     private val notifications: NotificationSettings,
+    private val announcements: AnnouncementRepository,
+    private val endpoints: PushEndpointRepository,
+    private val sender: PushSender,
 ) : ViewModel() {
     private val hasPushApp = MutableStateFlow(push.hasDistributor())
     private val permissions = MutableStateFlow(device.hasPermission() to device.hasBackgroundPermission())
@@ -122,6 +134,39 @@ class MapViewModel @Inject internal constructor(
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MapUiState())
+
+    val onMyWay: StateFlow<OnMyWay> = families.session
+        .filterIsInstance<SessionState.InFamily>()
+        .flatMapLatest { s ->
+            combine(announcements.observeCurrent(s.familyId), families.observeMembers(s.familyId)) { (news, now), members ->
+                val names = members.associate { it.id to it.name }
+                OnMyWay(
+                    mine = news.any { it.memberId == s.memberId && it.kind == AnnouncementKind.ON_MY_WAY && it.isCurrent(now) },
+                    others = news.currentFromOthers(AnnouncementKind.ON_MY_WAY, s.memberId, now)
+                        .mapNotNull { a -> names[a.memberId]?.let { it to a.at } },
+                )
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), OnMyWay())
+
+    /** One tap tells the family "on my way home"; tapping again ("I'm home") takes it back. */
+    fun setOnMyWay(on: Boolean) {
+        val state = uiState.value
+        val familyId = state.familyId ?: return
+        val memberId = state.me?.id ?: return
+        if (on) {
+            announcements.announce(familyId, memberId, AnnouncementKind.ON_MY_WAY)
+            viewModelScope.launch {
+                try {
+                    sender.ping(endpoints.othersThan(familyId, memberId), PushKinds.ON_MY_WAY)
+                } catch (e: Exception) {
+                    Log.w("ChoreMe", "Couldn't ping the family", e)
+                }
+            }
+        } else {
+            announcements.clear(familyId, memberId, AnnouncementKind.ON_MY_WAY)
+        }
+    }
 
     private val _actionState = MutableStateFlow(ActionState())
     val actionState: StateFlow<ActionState> = _actionState

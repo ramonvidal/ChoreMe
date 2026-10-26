@@ -55,4 +55,11 @@
     <string name="instant_install">Get ntfy (free)</string>
     <string name="instant_connecting">ntfy is installed; connecting…</string>
     <string name="osm_credit">© OpenStreetMap contributors</string>
+    <string name="on_my_way_button">On my way home</string>
+    <string name="on_my_way_sent">The family knows you\'re on the way home.</string>
+    <string name="on_my_way_home_now">I\'m home</string>
+    <string name="on_my_way_other">%1$s is on the way home (since %2$s)</string>
+    <string name="on_my_way_channel">On the way home</string>
+    <string name="on_my_way_channel_description">When someone in the family is on the way home</string>
+    <string name="on_my_way_title">%1$s is on the way home</string>
 </resources>

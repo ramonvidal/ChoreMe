@@ -12,6 +12,12 @@
 | Urgent chores | An **Urgent** switch when adding or editing a chore. Urgent ones go to the top of Today whatever their date, on a **red card** with an "URGENT" label, and the family gets a pop-up notification (its own "Urgent chores" channel). Red is kept for urgent only: overdue chores show "2 days late" in red text instead. Anyone can flag a new chore urgent; only parents change it later. It clears itself once the chore is done |
 | Settings | No separate screen: the **Family** tab ends with **This phone**, folded rows for notifications, quiet hours, instant alerts and app updates |
 | Agenda | The family calendar plus only **scheduled** chores: repeating ones and one-offs planned for a later day. Everyday "needs doing" chores stay in the Chores tab |
+| Family news | **"I'm at the shop"** (turning on shopping mode) and **"On my way home"** (Map tab): one tap, shown on the others' screens and as a notification on phones with ntfy. Each lasts a while (2 h, 1 h) and can be taken back |
+| Reminders at a time | "Remind me" on a chore: a notification at that time on **this phone only**; skipped if the chore is done by then |
+| More lists | Besides groceries: pharmacy, hardware store, packing... Same list behaviour, picked at the top of the Groceries tab. Anyone makes one; its maker or a parent removes it |
+| Notes board | Short notes on the Family tab everyone sees. The writer or a parent edits them |
+| This week | Parents see how many chores each person finished in the last 7 days. For fairness, not points |
+| Away | Anyone marks themselves away until a date (parents can mark anyone): no chore alerts on their phone, not offered as "done by" |
 | Tab names | Chores, Groceries, Agenda, Map, Family |
 | Chore assignment | **Whoever grabs it**: chores are open to everyone, and one tap claims one |
 | Kids | Kids are members with the `KID` role. Chores they complete go to a parent for **approval** before counting as done; a rejected chore goes back to the same kid |

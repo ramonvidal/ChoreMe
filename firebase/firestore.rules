@@ -45,7 +45,18 @@ service cloud.firestore {
       return item.name is string && item.name.size() > 0 && item.name.size() <= 60
         && item.category is string && item.category.size() <= 30
         && item.isNeeded is bool
-        && item.isStaple is bool;
+        && item.isStaple is bool
+        && (!('listId' in item) || item.listId == null || (item.listId is string && item.listId.size() <= 40));
+    }
+
+    // "Away until" is a day (yyyy-MM-dd) or nothing.
+    function validAway(d) {
+      return !('awayUntil' in d) || d.awayUntil == null || (d.awayUntil is string && d.awayUntil.size() == 10);
+    }
+
+    function validNote(d, f) {
+      return d.text is string && d.text.size() > 0 && d.text.size() <= 300
+        && d.updatedAt is int;
     }
 
     function myMemberId(f) {
@@ -142,8 +153,12 @@ service cloud.firestore {
         allow create: if (isParent(f) || (isCreatingFamily(f) && memberId == request.auth.uid))
           && request.resource.data.role in ['PARENT', 'KID']
           && validName(request.resource.data.name);
-        allow update: if (isParent(f) && validName(request.resource.data.name))
-          || isLeavingOwnProfile(f, memberId);
+        allow update: if (isParent(f) && validName(request.resource.data.name) && validAway(request.resource.data))
+          || isLeavingOwnProfile(f, memberId)
+          // Anyone can mark themselves away (or back); parents can do it for anyone above.
+          || (isMember(f) && myMemberId(f) == memberId
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['awayUntil'])
+              && validAway(request.resource.data));
         allow delete: if isParent(f) || (isMember(f) && myMemberId(f) == memberId);
       }
 
@@ -215,6 +230,49 @@ service cloud.firestore {
         allow create, update: if isMember(f) && request.resource.data.createdBy == myMemberId(f)
           && request.resource.data.title is string
           && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 60;
+        allow delete: if isParent(f) || (isMember(f) && resource.data.createdBy == myMemberId(f));
+      }
+
+      // "Mom is at the shop", "Leo is on the way home": one document per person and kind,
+      // named memberId_kind, so sharing again overwrites instead of piling up.
+      match /announcements/{announcementId} {
+        allow read: if isMember(f);
+        allow create, update: if isMember(f)
+          && request.resource.data.memberId == myMemberId(f)
+          && request.resource.data.kind in ['SHOPPING', 'ON_MY_WAY']
+          && announcementId == request.resource.data.memberId + '_' + request.resource.data.kind
+          && request.resource.data.at is int;
+        allow delete: if isMember(f) && (resource.data.memberId == myMemberId(f) || isParent(f));
+      }
+
+      // The family board. Anyone writes a note; the writer or a parent changes or removes it.
+      match /notes/{noteId} {
+        allow read: if isMember(f);
+        allow create: if isMember(f) && request.resource.data.createdBy == myMemberId(f) && validNote(request.resource.data, f);
+        allow update: if isMember(f) && validNote(request.resource.data, f)
+          && request.resource.data.createdBy == resource.data.createdBy
+          && (resource.data.createdBy == myMemberId(f) || isParent(f));
+        allow delete: if isParent(f) || (isMember(f) && resource.data.createdBy == myMemberId(f));
+      }
+
+      // Each time a chore is finished, for "who did what this week". Finishing is a
+      // parent's step (kids' chores are approved), so only parents write it.
+      match /choreLog/{entryId} {
+        allow read: if isMember(f);
+        allow create: if isParent(f)
+          && request.resource.data.choreId is string
+          && request.resource.data.title is string && request.resource.data.title.size() <= 60
+          && request.resource.data.doneBy is string
+          && request.resource.data.on is string && request.resource.data.on.size() == 10;
+        allow delete: if isParent(f);
+      }
+
+      // Lists besides groceries (pharmacy, packing...). Their items are groceryItems with a listId.
+      match /lists/{listId} {
+        allow read: if isMember(f);
+        allow create: if isMember(f) && request.resource.data.createdBy == myMemberId(f) && validName(request.resource.data.name);
+        allow update: if isMember(f) && validName(request.resource.data.name)
+          && request.resource.data.createdBy == resource.data.createdBy;
         allow delete: if isParent(f) || (isMember(f) && resource.data.createdBy == myMemberId(f));
       }
 

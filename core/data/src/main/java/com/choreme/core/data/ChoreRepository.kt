@@ -2,8 +2,12 @@ package com.choreme.core.data
 
 import android.util.Log
 import com.choreme.core.data.remote.FirestoreSchema
+import com.choreme.core.data.remote.FirestoreSchema.AT
+import com.choreme.core.data.remote.FirestoreSchema.CHORE_ID
 import com.choreme.core.data.remote.FirestoreSchema.CREATED_AT
 import com.choreme.core.data.remote.FirestoreSchema.CREATED_BY
+import com.choreme.core.data.remote.FirestoreSchema.DONE_BY
+import com.choreme.core.data.remote.FirestoreSchema.ON
 import com.choreme.core.data.remote.FirestoreSchema.TITLE
 import com.choreme.core.data.remote.FirestoreSchema.UPDATED_AT
 import com.choreme.core.data.remote.FirestoreSchema.UPDATED_BY
@@ -12,6 +16,7 @@ import com.choreme.core.data.remote.toChore
 import com.choreme.core.data.remote.toFields
 import com.choreme.core.model.NameKeys
 import com.choreme.core.model.chore.Chore
+import com.choreme.core.model.chore.ChoreDone
 import com.choreme.core.model.chore.SavedChore
 import com.google.firebase.Timestamp
 import com.google.android.gms.tasks.Task
@@ -22,6 +27,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import java.time.Instant
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -37,6 +43,7 @@ class ChoreRepository @Inject constructor(
     private fun family(familyId: String) = firestore.get().collection(FirestoreSchema.FAMILIES).document(familyId)
     private fun chores(familyId: String) = family(familyId).collection(FirestoreSchema.CHORES)
     private fun savedChores(familyId: String) = family(familyId).collection(FirestoreSchema.CHORE_TEMPLATES)
+    private fun log(familyId: String) = family(familyId).collection(FirestoreSchema.CHORE_LOG)
 
     fun observeChores(familyId: String): Flow<List<Chore>> =
         chores(familyId).documentsFlow().map { docs -> docs.mapNotNull { it.toChore() } }
@@ -76,6 +83,34 @@ class ChoreRepository @Inject constructor(
             .await()
             .documents
             .mapNotNull { it.toChore() }
+
+    /** Notes down a finished chore for "who did what this week" (parents only, see firestore.rules). */
+    fun logDone(familyId: String, done: ChoreDone) {
+        log(familyId).document()
+            .set(
+                mapOf(
+                    CHORE_ID to done.choreId,
+                    TITLE to done.title,
+                    DONE_BY to done.doneBy,
+                    ON to done.on.toString(),
+                    AT to Instant.now().toEpochMilli(),
+                ),
+            )
+            .logFailure()
+    }
+
+    /** Chores finished on [since] or later. */
+    fun observeLog(familyId: String, since: LocalDate): Flow<List<ChoreDone>> =
+        log(familyId).whereGreaterThanOrEqualTo(ON, since.toString()).documentsFlow().map { docs ->
+            docs.mapNotNull { doc ->
+                ChoreDone(
+                    choreId = doc.getString(CHORE_ID).orEmpty(),
+                    title = doc.getString(TITLE).orEmpty(),
+                    doneBy = doc.getString(DONE_BY) ?: return@mapNotNull null,
+                    on = doc.getString(ON)?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return@mapNotNull null,
+                )
+            }
+        }
 
     fun observeSavedChores(familyId: String): Flow<List<SavedChore>> =
         savedChores(familyId).documentsFlow().map { docs ->

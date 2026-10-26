@@ -26,4 +26,9 @@ data class GroceryItem(
     val isNeeded: Boolean,
     /** Bought most weeks; "Restock usuals" puts all of these on the list at once. */
     val isStaple: Boolean,
+    /** Which list it's on; null for the grocery list. */
+    val listId: String? = null,
 )
+
+/** What's left to buy on the grocery list itself (the other lists don't count here). */
+fun List<GroceryItem>.groceriesToBuy(): Int = count { it.listId == null && it.isNeeded }

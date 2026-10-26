@@ -46,6 +46,10 @@ internal class ChoreReminderWorker @AssistedInject constructor(
             ?: return Result.retry()
 
         val today = LocalDate.now()
+        // Away (a trip): no "what needs doing today" on this phone.
+        val me = withTimeoutOrNull(TIMEOUT_MS) { families.observeMembers(session.familyId).first() }
+            ?.firstOrNull { it.id == session.memberId }
+        if (me?.isAway(today) == true) return Result.success()
         reminderFor(buildTodayBoard(allChores, today), session.role, today)?.let(::show)
         return Result.success()
     }

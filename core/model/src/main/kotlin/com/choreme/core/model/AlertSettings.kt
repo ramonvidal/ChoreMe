@@ -10,6 +10,10 @@ enum class AlertKind {
     JOIN_REQUESTS,
     ARRIVALS,
     MORNING_SUMMARY,
+    /** "Mom is at the shop": add anything that's missing. */
+    SHOPPING,
+    /** "Leo is on the way home". */
+    ON_MY_WAY,
 }
 
 /** A nightly window when notifications arrive silently, e.g. 22:00 to 07:00. */

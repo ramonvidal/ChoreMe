@@ -14,6 +14,7 @@ import com.choreme.core.model.Member
 import com.choreme.core.model.Role
 import com.choreme.core.model.agenda.NewEvent
 import com.choreme.core.model.agenda.calendarForChores
+import com.choreme.core.model.grocery.groceriesToBuy
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreStatus
 import com.choreme.core.model.chore.ChoreTemplate
@@ -43,6 +44,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import com.choreme.core.model.chore.choreDone
+import com.choreme.core.model.chore.nextReminderTime
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
 import javax.inject.Inject
 
 data class ChoresUiState(
@@ -59,7 +66,8 @@ data class ChoresUiState(
 ) {
     val isParent get() = me?.role == Role.PARENT
     val hasChores get() = chores.isNotEmpty()
-    val kids get() = members.values.filter { it.role == Role.KID }.sortedBy { it.name.lowercase() }
+    /** Kids at home, for "done by" (someone away can't have done it). */
+    val kids get() = members.values.filter { it.role == Role.KID && !it.isAway(today) }.sortedBy { it.name.lowercase() }
     fun nameOf(memberId: String?): String? = memberId?.let { members[it]?.name }
 
     /** Parents tidy up any saved chore; others only their own. */
@@ -82,7 +90,7 @@ sealed interface CalendarResult {
 }
 
 @HiltViewModel
-class ChoresViewModel @Inject constructor(
+class ChoresViewModel @Inject internal constructor(
     families: FamilyRepository,
     private val chores: ChoreRepository,
     groceries: GroceryRepository,
@@ -90,7 +98,20 @@ class ChoresViewModel @Inject constructor(
     private val push: PushSender,
     private val calendar: CalendarRepository,
     private val calendarChoice: CalendarChoice,
+    private val timedReminders: TimedReminders,
 ) : ViewModel() {
+    /** This phone's "remind me at" times, by chore id. */
+    val reminders: StateFlow<Map<String, Instant>> = timedReminders.all
+
+    /** Returns when it'll go off: the next [at], today or tomorrow. */
+    fun remind(chore: Chore, at: LocalTime): LocalDateTime {
+        val time = nextReminderTime(LocalDateTime.now(), at)
+        timedReminders.set(chore.id, chore.title, time.atZone(ZoneId.systemDefault()).toInstant())
+        return time
+    }
+
+    fun cancelReminder(chore: Chore) = timedReminders.cancel(chore.id)
+
     val uiState: StateFlow<ChoresUiState> = families.session
         .filterIsInstance<SessionState.InFamily>()
         .flatMapLatest { session ->
@@ -110,7 +131,7 @@ class ChoresViewModel @Inject constructor(
                     board = buildTodayBoard(allChores, today),
                     chores = allChores,
                     members = members.associateBy { it.id },
-                    groceriesToBuy = groceryItems.count { it.isNeeded },
+                    groceriesToBuy = groceryItems.groceriesToBuy(),
                     savedChores = saved,
                 )
             }
@@ -218,6 +239,8 @@ class ChoresViewModel @Inject constructor(
             return
         }
         chores.save(familyId, me.id, chore, updated)
+        // For "who did what this week"; finishing is always a parent's step (kids' chores get approved).
+        if (me.role == Role.PARENT) choreDone(chore, updated)?.let { chores.logDone(familyId, it) }
         if (updated.notifyWhenDone && updated.wasJustFinished(chore)) {
             pingInBackground(PushKinds.CHORE_DONE) { endpoints.othersThan(familyId, me.id) }
         }

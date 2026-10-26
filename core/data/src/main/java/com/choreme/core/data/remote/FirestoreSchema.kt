@@ -9,6 +9,7 @@ import com.choreme.core.model.Role
 import com.choreme.core.model.session.FamilyPointer
 import com.choreme.core.model.session.Membership
 import com.google.firebase.firestore.DocumentSnapshot
+import java.time.LocalDate
 
 /** Collection and field names; must match firebase/firestore.rules. */
 object FirestoreSchema {
@@ -25,6 +26,10 @@ object FirestoreSchema {
     const val PLACES = "places"
     const val PLACE_EVENTS = "placeEvents"
     const val PUSH_ENDPOINTS = "pushEndpoints"
+    const val ANNOUNCEMENTS = "announcements"
+    const val NOTES = "notes"
+    const val CHORE_LOG = "choreLog"
+    const val LISTS = "lists"
 
     const val FAMILY_ID = "familyId"
     const val FAMILY_NAME = "familyName"
@@ -42,6 +47,13 @@ object FirestoreSchema {
     const val IS_STAPLE = "isStaple"
     const val UPDATED_AT = "updatedAt"
     const val UPDATED_BY = "updatedBy"
+    const val AWAY_UNTIL = "awayUntil"
+    const val LIST_ID = "listId"
+    const val KIND = "kind"
+    const val TEXT = "text"
+    const val CHORE_ID = "choreId"
+    const val DONE_BY = "doneBy"
+    const val ON = "on"
 
     // Chores
     const val TITLE = "title"
@@ -96,6 +108,7 @@ fun DocumentSnapshot.toMember() = Member(
     role = role(),
     color = getLong(FirestoreSchema.COLOR)?.toInt() ?: 0,
     uids = (get(FirestoreSchema.UIDS) as? List<*>)?.filterIsInstance<String>().orEmpty(),
+    awayUntil = getString(FirestoreSchema.AWAY_UNTIL)?.let { runCatching { LocalDate.parse(it) }.getOrNull() },
 )
 
 fun DocumentSnapshot.toJoinRequest() = JoinRequest(
@@ -112,4 +125,5 @@ fun DocumentSnapshot.toGroceryItem() = GroceryItem(
         .getOrDefault(GroceryCategory.OTHER),
     isNeeded = getBoolean(FirestoreSchema.IS_NEEDED) ?: false,
     isStaple = getBoolean(FirestoreSchema.IS_STAPLE) ?: false,
+    listId = getString(FirestoreSchema.LIST_ID),
 )

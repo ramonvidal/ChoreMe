@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
@@ -67,10 +68,14 @@ import com.choreme.core.ui.ErrorText
 import com.choreme.core.ui.ItemIcon
 import com.choreme.core.ui.theme.memberColor
 import java.time.Duration
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @Composable
 internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val onMyWay by viewModel.onMyWay.collectAsStateWithLifecycle()
     val actionState by viewModel.actionState.collectAsStateWithLifecycle()
     var focus by remember { mutableStateOf<GeoPoint?>(null) }
     var explainBackground by rememberSaveable { mutableStateOf(false) }
@@ -148,6 +153,9 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            item(key = "on-my-way") {
+                OnMyWayCard(onMyWay, onChange = viewModel::setOnMyWay)
+            }
             item(key = "share") {
                 SharingCard(
                     isSharing = state.isSharing,
@@ -237,6 +245,32 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
 @Composable
 private fun SectionTitle(text: String) {
     Text(text, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
+}
+
+/** "On my way home" with one tap, and who else is on the way. Works without sharing a location. */
+@Composable
+private fun OnMyWayCard(state: OnMyWay, onChange: (Boolean) -> Unit) {
+    val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            state.others.forEach { (name, since) ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ItemIcon(CoreUiR.drawable.ic_location_on, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        stringResource(R.string.on_my_way_other, name, since.atZone(ZoneId.systemDefault()).format(time)),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
+            if (state.mine) {
+                Text(stringResource(R.string.on_my_way_sent), style = MaterialTheme.typography.bodyMedium)
+                OutlinedButton(onClick = { onChange(false) }) { Text(stringResource(R.string.on_my_way_home_now)) }
+            } else {
+                Button(onClick = { onChange(true) }) { Text(stringResource(R.string.on_my_way_button)) }
+            }
+        }
+    }
 }
 
 @Composable
