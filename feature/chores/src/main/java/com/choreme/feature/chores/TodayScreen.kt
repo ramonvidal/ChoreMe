@@ -187,8 +187,10 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
         if (state.me != null) {
             ExtendedFloatingActionButton(
                 onClick = { adding = true },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
+                // Dark and round, so it never looks like a chore's own "I'll do it" button.
+                containerColor = MaterialTheme.colorScheme.inverseSurface,
+                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                shape = CircleShape,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                 text = { Text(stringResource(R.string.add_chore)) },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),

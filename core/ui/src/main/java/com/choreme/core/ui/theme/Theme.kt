@@ -55,6 +55,10 @@ private val LightColors = lightColorScheme(
     onError = Color.White,
     errorContainer = Color(0xFFFCE4DE),
     onErrorContainer = Color(0xFF5C1210),
+    // Warm charcoal for the one "add" button on a screen, apart from the colored ones.
+    inverseSurface = Color(0xFF2B2522),
+    inverseOnSurface = Color(0xFFFBF6EF),
+    inversePrimary = Color(0xFFF0A58E),
 )
 
 private val DarkColors = darkColorScheme(
@@ -87,6 +91,9 @@ private val DarkColors = darkColorScheme(
     onError = Color(0xFF690005),
     errorContainer = Color(0xFF6B1B16),
     onErrorContainer = Color(0xFFFFDAD5),
+    inverseSurface = Color(0xFFF1E7DE),
+    inverseOnSurface = Color(0xFF2B2522),
+    inversePrimary = Color(0xFFA8452D),
 )
 
 val Nunito = FontFamily(
