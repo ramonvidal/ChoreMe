@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 /**
  * "ChoreMe 0.31 is available – Install". Takes no room when there's nothing to offer.
- * This feature's only public entry point; :app shows it at the top of the screen.
+ * This feature's only public entry point; :app shows it under the top bar.
  */
 @Composable
 fun UpdateBanner(viewModel: UpdateViewModel = hiltViewModel()) {
@@ -39,7 +38,7 @@ fun UpdateBanner(viewModel: UpdateViewModel = hiltViewModel()) {
 
     Surface(color = MaterialTheme.colorScheme.tertiaryContainer, modifier = Modifier.fillMaxWidth()) {
         Column(
-            modifier = Modifier.statusBarsPadding().padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             when (val current = state) {

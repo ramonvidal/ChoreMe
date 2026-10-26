@@ -32,5 +32,4 @@
     <string name="leave_confirm">Leave the family? This phone loses access, and your location, ping address and arrival history are deleted. Chores and groceries you added stay for the family.</string>
     <string name="leave_last_confirm">You\'re the last one here. Leaving deletes the whole family: chores, groceries, places and everything else. This can\'t be undone.</string>
     <string name="delete_confirm">Leave the family and delete your ChoreMe account? If you\'re the last one, the whole family\'s data is deleted too. This can\'t be undone.</string>
-    <string name="phone_settings">This phone: notifications, quiet hours, updates</string>
 </resources>

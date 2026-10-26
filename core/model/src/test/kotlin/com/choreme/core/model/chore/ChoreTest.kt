@@ -64,6 +64,15 @@ class ChoreTest {
         assertEquals(today.plusDays(1), approved.dueDate)
     }
 
+    @Test
+    fun `an urgent chore is ordinary again once it's done`() {
+        val urgent = dishes.copy(urgent = true)
+        assertEquals(false, urgent.complete(mom, today).urgent)
+        val approved = urgent.complete(leo, today).also { assertEquals(true, it.urgent) }.approve(mom, today)
+        assertEquals(false, approved.urgent)
+        assertEquals(false, oneOff.copy(urgent = true).complete(mom, today).urgent)
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun `kids cannot approve chores`() {
         dishes.complete(leo, today).approve(mia, today)

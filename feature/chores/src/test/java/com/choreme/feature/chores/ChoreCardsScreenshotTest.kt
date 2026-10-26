@@ -25,7 +25,7 @@ import java.time.LocalDate
 
 /** The Today tab's cards, as a parent sees them; saved to build/outputs/roborazzi. */
 @RunWith(AndroidJUnit4::class)
-@Config(sdk = [34], qualifiers = "en-w411dp-h1000dp")
+@Config(sdk = [34], qualifiers = "en-w411dp-h1200dp")
 class ChoreCardsScreenshotTest {
     @get:Rule
     val compose = createComposeRule()
@@ -39,6 +39,7 @@ class ChoreCardsScreenshotTest {
     private val laundry = Chore("2", "Laundry", ChoreTemplate.LAUNDRY, dueDate = today.minusDays(2), status = ChoreStatus.CLAIMED, claimedBy = "leo")
     private val bathroom = Chore("3", "Clean the bathroom", ChoreTemplate.CLEAN_BATHROOM, dueDate = today, status = ChoreStatus.PENDING_APPROVAL, completedBy = "leo")
     private val trash = Chore("4", "Take out the trash", ChoreTemplate.TRASH, dueDate = today)
+    private val leak = Chore("5", "Water leak under the sink", ChoreTemplate.CLEAN_KITCHEN, dueDate = today, reportedBy = "leo", urgent = true)
 
     @Test
     fun cards() {
@@ -46,6 +47,7 @@ class ChoreCardsScreenshotTest {
             ChoreMeTheme(darkTheme = false, dynamicColor = false) {
                 Surface {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        ChoreCard(leak, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         AwaitingCard(bathroom, state, onApprove = {}, onReject = {})
                         ChoreCard(dishes, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         ChoreCard(laundry, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
@@ -56,6 +58,7 @@ class ChoreCardsScreenshotTest {
             }
         }
         compose.onNodeWithText("Wash the dishes").assertExists()
+        compose.onNodeWithText("URGENT").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-cards.png")
     }
 }

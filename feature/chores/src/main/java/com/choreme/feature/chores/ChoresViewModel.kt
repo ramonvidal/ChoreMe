@@ -73,6 +73,7 @@ data class ChoreDraft(
     val recurrence: Recurrence,
     val dueDate: LocalDate,
     val notifyWhenDone: Boolean = true,
+    val urgent: Boolean = false,
 )
 
 sealed interface CalendarResult {
@@ -125,7 +126,11 @@ class ChoresViewModel @Inject constructor(
 
     /** Adds the chore unless the same thing is already waiting to be done; returns that one if so. */
     fun create(draft: ChoreDraft): Chore? {
-        findOpenDuplicate(draft.title, uiState.value.chores)?.let { return it }
+        findOpenDuplicate(draft.title, uiState.value.chores)?.let { existing ->
+            // "It's already on the list, and now it's urgent": parents can raise it.
+            if (draft.urgent && !existing.urgent && uiState.value.isParent) change(existing) { _, _ -> copy(urgent = true) }
+            return existing
+        }
         val (familyId, me) = context() ?: return null
         chores.create(
             familyId,
@@ -137,6 +142,7 @@ class ChoresViewModel @Inject constructor(
                 recurrence = draft.recurrence,
                 dueDate = draft.dueDate,
                 notifyWhenDone = draft.notifyWhenDone,
+                urgent = draft.urgent,
             ),
         )
         // Something typed by hand becomes a quick pick for next time.
@@ -187,6 +193,7 @@ class ChoresViewModel @Inject constructor(
             recurrence = draft.recurrence,
             dueDate = draft.dueDate,
             notifyWhenDone = draft.notifyWhenDone,
+            urgent = draft.urgent,
         )
     }
 

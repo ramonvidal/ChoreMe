@@ -30,6 +30,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -83,6 +84,7 @@ internal fun ChoreEditorSheet(
     var dueDate by remember { mutableStateOf(chore?.dueDate ?: today) }
     var showRepeat by remember { mutableStateOf(initialRecurrence != Recurrence.Once) }
     var notifyWhenDone by remember { mutableStateOf(chore?.notifyWhenDone ?: true) }
+    var urgent by remember { mutableStateOf(chore?.urgent ?: false) }
 
     val templateTitles = ChoreTemplate.entries.associateWith { stringResource(it.title) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -150,6 +152,28 @@ internal fun ChoreEditorSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .toggleable(value = urgent, onValueChange = { urgent = it }, role = Role.Switch),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                ItemIcon(CoreUiR.drawable.ic_priority_high, tint = MaterialTheme.colorScheme.error)
+                Spacer(Modifier.width(8.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.editor_urgent))
+                    Text(stringResource(R.string.editor_urgent_hint), style = MaterialTheme.typography.bodySmall)
+                }
+                Switch(
+                    checked = urgent,
+                    onCheckedChange = null,
+                    colors = SwitchDefaults.colors(
+                        checkedTrackColor = MaterialTheme.colorScheme.error,
+                        checkedThumbColor = MaterialTheme.colorScheme.onError,
+                    ),
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
                     .toggleable(value = notifyWhenDone, onValueChange = { notifyWhenDone = it }, role = Role.Switch),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -196,7 +220,7 @@ internal fun ChoreEditorSheet(
                 Button(
                     onClick = {
                         val due = if (chore == null && recurrence == Recurrence.Once) today else dueDate
-                        onSave(ChoreDraft(title, template ?: ChoreTemplate.OTHER, checkNotNull(recurrence), due, notifyWhenDone))
+                        onSave(ChoreDraft(title, template ?: ChoreTemplate.OTHER, checkNotNull(recurrence), due, notifyWhenDone, urgent))
                     },
                     enabled = title.isNotBlank() && recurrence != null,
                 ) { Text(stringResource(CoreUiR.string.save)) }

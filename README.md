@@ -11,7 +11,7 @@ See [PLAN.md](PLAN.md) for the roadmap and design decisions.
 Download **[ChoreMe.apk](https://github.com/ramonvidal/ChoreMe/releases/latest/download/ChoreMe.apk)**
 on the phone and open it (allow installing from unknown sources). That link always
 points at the newest build and needs no GitHub account. Each build installs over the
-previous one. After that, ChoreMe checks for new builds itself (every few hours, or right away from **Family → This phone → Check for updates**) and offers
+previous one. After that, ChoreMe checks for new builds itself (every few hours, or right away from **the gear at the top → Check for updates**) and offers
 to install them: tap **Install** on the banner and confirm.
 
 ## Tech stack

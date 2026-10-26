@@ -60,11 +60,10 @@ import com.choreme.core.model.JoinRequest
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
 import com.choreme.core.ui.ErrorText
-import com.choreme.core.ui.ItemIcon
 import com.choreme.core.ui.theme.memberColor
 
 @Composable
-internal fun FamilyScreen(onOpenSettings: () -> Unit, viewModel: FamilyViewModel = hiltViewModel()) {
+internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val actionState by viewModel.actionState.collectAsStateWithLifecycle()
     var showAddKid by rememberSaveable { mutableStateOf(false) }
@@ -113,14 +112,6 @@ internal fun FamilyScreen(onOpenSettings: () -> Unit, viewModel: FamilyViewModel
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(R.string.family_add_kid))
                 }
-            }
-        }
-
-        item {
-            OutlinedButton(onClick = onOpenSettings, modifier = Modifier.fillMaxWidth()) {
-                ItemIcon(CoreUiR.drawable.ic_settings, Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.phone_settings))
             }
         }
 

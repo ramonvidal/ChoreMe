@@ -281,6 +281,15 @@ describe('chores', () => {
     await assertFails(updateDoc(ref(kidDevice('kid1')), { notifyWhenDone: true }));
   });
 
+  test('anyone can report something urgent, but only parents change it afterwards', async () => {
+    await assertSucceeds(setDoc(doc(kidDevice('kid1'), 'families', FAMILY, 'chores', 'leak'), {
+      ...chore, createdBy: 'member-kid1', urgent: true,
+    }));
+    await assertFails(setDoc(doc(parent('alice'), 'families', FAMILY, 'chores', 'bad'), { ...chore, urgent: 'very' }));
+    await assertFails(updateDoc(ref(kidDevice('kid1')), { urgent: true }));
+    await assertSucceeds(updateDoc(ref(parent('alice')), { urgent: true }));
+  });
+
   test('outsiders cannot see chores, and malformed chores are rejected', async () => {
     await assertFails(getDocs(collection(parent('mallory'), 'families', FAMILY, 'chores')));
     await assertFails(setDoc(doc(parent('alice'), 'families', FAMILY, 'chores', 'bad'), { ...chore, status: 'FINISHED' }));

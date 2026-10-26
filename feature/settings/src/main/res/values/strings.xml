@@ -1,5 +1,4 @@
 <resources>
-    <string name="settings_title">This phone</string>
     <string name="settings_hint">These choices are only for this phone.</string>
     <string name="alerts_section">Notifications</string>
     <string name="alert_new_chores">New chores</string>

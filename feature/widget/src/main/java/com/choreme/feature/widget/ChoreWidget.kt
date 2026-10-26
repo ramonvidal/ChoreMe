@@ -117,7 +117,7 @@ private fun Content(context: Context, data: WidgetData) {
                             provider = ImageProvider(chore.template.icon),
                             contentDescription = null,
                             modifier = GlanceModifier.size(16.dp),
-                            colorFilter = ColorFilter.tint(GlanceTheme.colors.primary),
+                            colorFilter = ColorFilter.tint(if (chore.urgent) GlanceTheme.colors.error else GlanceTheme.colors.primary),
                         )
                         Spacer(GlanceModifier.width(6.dp))
                         Text(

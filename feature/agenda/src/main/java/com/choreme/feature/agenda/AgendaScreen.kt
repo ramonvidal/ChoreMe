@@ -240,7 +240,11 @@ internal fun EventRow(event: CalendarEvent, onClick: () -> Unit) {
 @Composable
 internal fun ChoreRow(chore: Chore) {
     Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-        ItemIcon(chore.template.icon, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+        ItemIcon(
+            chore.template.icon,
+            Modifier.size(20.dp),
+            tint = if (chore.urgent) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+        )
         Spacer(Modifier.width(12.dp))
         Text(
             stringResource(R.string.chore_due),

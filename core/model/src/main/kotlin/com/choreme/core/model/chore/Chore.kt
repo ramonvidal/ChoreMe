@@ -51,6 +51,8 @@ data class Chore(
     val reportedBy: String? = null,
     /** "Let everyone know when it's done": the family gets "Leo did: Wash dishes". */
     val notifyWhenDone: Boolean = true,
+    /** Needs doing as soon as possible: shown first, in red, whatever its date. Cleared once it's done. */
+    val urgent: Boolean = false,
 ) {
     fun isOverdue(today: LocalDate) = isActive && dueDate < today
 
@@ -106,7 +108,14 @@ fun Chore.reject(by: Member): Chore {
 private fun Chore.finish(doneBy: String, approvedBy: String?, today: LocalDate): Chore {
     val next = recurrence.nextDueDate(previousDue = dueDate, doneOn = today)
     return if (next == null) {
-        copy(status = ChoreStatus.DONE, completedBy = doneBy, approvedBy = approvedBy, lastDoneBy = doneBy, lastDoneOn = today)
+        copy(
+            status = ChoreStatus.DONE,
+            completedBy = doneBy,
+            approvedBy = approvedBy,
+            lastDoneBy = doneBy,
+            lastDoneOn = today,
+            urgent = false,
+        )
     } else {
         copy(
             status = ChoreStatus.OPEN,
@@ -116,6 +125,8 @@ private fun Chore.finish(doneBy: String, approvedBy: String?, today: LocalDate):
             approvedBy = approvedBy,
             lastDoneBy = doneBy,
             lastDoneOn = today,
+            // The next time round is ordinary again.
+            urgent = false,
         )
     }
 }

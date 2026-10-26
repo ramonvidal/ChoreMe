@@ -58,10 +58,7 @@ internal fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        item {
-            Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineSmall)
-            Text(stringResource(R.string.settings_hint), style = MaterialTheme.typography.bodySmall)
-        }
+        item { Text(stringResource(R.string.settings_hint), style = MaterialTheme.typography.bodySmall) }
         item { Section(R.string.alerts_section) }
         ALERTS.forEach { (kind, title, hint) ->
             item(key = kind.name) {

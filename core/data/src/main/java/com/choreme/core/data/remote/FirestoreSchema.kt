@@ -57,6 +57,7 @@ object FirestoreSchema {
     const val LAST_DONE_BY = "lastDoneBy"
     const val LAST_DONE_ON = "lastDoneOn"
     const val NOTIFY_WHEN_DONE = "notifyWhenDone"
+    const val URGENT = "urgent"
 
     // Locations and places
     const val LATITUDE = "latitude"

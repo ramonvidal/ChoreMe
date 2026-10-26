@@ -111,4 +111,10 @@
         <item quantity="other">%d waiting for your OK</item>
     </plurals>
     <string name="reminder_body">Anyone can grab one in ChoreMe.</string>
+    <string name="editor_urgent">Urgent</string>
+    <string name="editor_urgent_hint">Needs doing as soon as possible: shown first, in red, and the family gets an alert.</string>
+    <string name="urgent">Urgent</string>
+    <string name="urgent_channel">Urgent chores</string>
+    <string name="urgent_channel_description">When someone adds something that needs doing as soon as possible</string>
+    <string name="urgent_title">Urgent: %1$s</string>
 </resources>

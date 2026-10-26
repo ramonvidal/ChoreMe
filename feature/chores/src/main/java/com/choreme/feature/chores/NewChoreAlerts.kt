@@ -202,14 +202,20 @@ internal class NewChoreWorker @AssistedInject constructor(
     @Suppress("MissingPermission") // Checked in canNotify().
     private fun show(chore: Chore, who: String?) {
         val context = applicationContext
-        context.getSystemService(NotificationManager::class.java).createNotificationChannel(
+        // Urgent ones get their own channel, which pops up on screen (people can tune each in Android's settings).
+        val channel = if (chore.urgent) {
+            NotificationChannel(URGENT_CHANNEL_ID, context.getString(R.string.urgent_channel), NotificationManager.IMPORTANCE_HIGH)
+                .apply { description = context.getString(R.string.urgent_channel_description) }
+        } else {
             NotificationChannel(CHANNEL_ID, context.getString(R.string.new_chore_channel), NotificationManager.IMPORTANCE_DEFAULT)
-                .apply { description = context.getString(R.string.new_chore_channel_description) },
-        )
+                .apply { description = context.getString(R.string.new_chore_channel_description) }
+        }
+        context.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, CHANNEL_ID))
+        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, channel.id))
             .setSmallIcon(R.drawable.ic_notification_chores)
-            .setContentTitle(chore.title)
+            .setContentTitle(if (chore.urgent) context.getString(R.string.urgent_title, chore.title) else chore.title)
+            .setPriority(if (chore.urgent) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT)
             .setContentText(context.getString(R.string.new_chore_body, who ?: context.getString(R.string.someone)))
             .setAutoCancel(true)
             .setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
@@ -219,6 +225,7 @@ internal class NewChoreWorker @AssistedInject constructor(
 
     private companion object {
         const val CHANNEL_ID = "new-chores"
+        const val URGENT_CHANNEL_ID = "urgent-chores"
         const val KEY_CHECKED = "checked_until"
         const val KEY_SHOWN = "shown"
         const val KEY_APPROVALS_SHOWN = "approvals_shown"

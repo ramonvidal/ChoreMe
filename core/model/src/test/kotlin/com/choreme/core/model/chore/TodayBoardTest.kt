@@ -28,4 +28,19 @@ class TodayBoardTest {
         assertEquals(listOf("Laundry", "Vacuum"), board.upcoming.map { it.title })
         assertEquals(listOf("Laundry"), board.doneToday.map { it.title })
     }
+
+    @Test
+    fun `urgent chores come first, even ones due later`() {
+        val board = buildTodayBoard(
+            listOf(
+                chore("Trash", today.minusDays(2)),
+                chore("Dishes", today),
+                chore("Leak under the sink", today.plusDays(3)).copy(urgent = true),
+                chore("Bathroom", today).copy(urgent = true),
+            ),
+            today,
+        )
+        assertEquals(listOf("Bathroom", "Leak under the sink", "Trash", "Dishes"), board.toDo.map { it.title })
+        assertEquals(emptyList<String>(), board.upcoming.map { it.title })
+    }
 }

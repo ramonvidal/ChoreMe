@@ -47,22 +47,24 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.choreme.core.ui.ItemIcon
-import com.choreme.core.ui.icon
 import com.choreme.core.model.Member
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreStatus
 import com.choreme.core.model.chore.Recurrence
-import kotlinx.coroutines.launch
+import com.choreme.core.ui.ItemIcon
+import com.choreme.core.ui.icon
 import java.time.temporal.ChronoUnit
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel = hiltViewModel()) {
@@ -248,14 +250,36 @@ private fun EmptyChores(isParent: Boolean) {
 }
 
 @Composable
-private fun ChoreHeading(chore: Chore, subtitle: String?) {
+private fun ChoreHeading(chore: Chore, subtitle: String?, late: Boolean = false) {
+    val accent = if (chore.urgent) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
     Row(verticalAlignment = Alignment.CenterVertically) {
-        ItemIcon(chore.template.icon, Modifier.size(28.dp), tint = MaterialTheme.colorScheme.primary)
+        ItemIcon(chore.template.icon, Modifier.size(28.dp), tint = accent)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
+            if (chore.urgent) UrgentLabel()
             Text(chore.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.bodySmall)
+            if (!subtitle.isNullOrEmpty()) {
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (late) MaterialTheme.colorScheme.error else Color.Unspecified,
+                )
+            }
         }
+    }
+}
+
+/** Red is kept for urgent chores only, so it always means "drop everything". */
+@Composable
+private fun UrgentLabel() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        ItemIcon(CoreUiR.drawable.ic_priority_high, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.error)
+        Text(
+            stringResource(R.string.urgent).uppercase(),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.error,
+        )
     }
 }
 
@@ -291,14 +315,14 @@ internal fun ChoreCard(
 
     Card(
         modifier = Modifier.fillMaxWidth().clickable(enabled = state.isParent, onClick = onEdit),
-        colors = if (overdueDays > 0) {
+        colors = if (chore.urgent) {
             CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
         } else {
             CardDefaults.cardColors()
         },
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            ChoreHeading(chore, details)
+            ChoreHeading(chore, details, late = overdueDays > 0)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 // Kids can only act on chores that are free or theirs; parents can always finish one.
                 val canFinish = !claimedByOther || state.isParent
