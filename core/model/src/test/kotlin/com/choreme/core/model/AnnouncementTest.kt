@@ -62,3 +62,13 @@ class NoteTest {
         assertEquals(listOf("2", "1"), listOf(note, newer).board().map { it.id })
     }
 }
+
+class GreetingTest {
+    @Test
+    fun `the greeting follows the time of day`() {
+        assertEquals(DayPart.MORNING, dayPart(java.time.LocalTime.of(7, 30)))
+        assertEquals(DayPart.AFTERNOON, dayPart(java.time.LocalTime.of(12, 0)))
+        assertEquals(DayPart.EVENING, dayPart(java.time.LocalTime.of(18, 0)))
+        assertEquals(DayPart.EVENING, dayPart(java.time.LocalTime.of(2, 0)))
+    }
+}

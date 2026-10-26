@@ -44,4 +44,8 @@
     <string name="list_delete_title">Remove \"%1$s\"?</string>
     <string name="list_delete_body">The list and everything on it are removed for the whole family.</string>
     <string name="list_empty">Nothing on this list yet. Type above to add something.</string>
+    <plurals name="grocery_to_buy_count">
+        <item quantity="one">%d to buy</item>
+        <item quantity="other">%d to buy</item>
+    </plurals>
 </resources>

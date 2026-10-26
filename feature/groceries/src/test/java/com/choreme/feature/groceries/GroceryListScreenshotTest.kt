@@ -57,7 +57,7 @@ class GroceryListScreenshotTest {
                         toBuy.forEach { ToBuyRow(it, large = false, onBought = {}, onEdit = {}) }
                         CategoryHeader(GroceryCategory.PANTRY)
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            atHome.forEach { ItemChip(it, onClick = {}, onLongClick = {}) }
+                            atHome.forEach { ItemTile(it, onClick = {}, onLongClick = {}) }
                         }
                     }
                 }

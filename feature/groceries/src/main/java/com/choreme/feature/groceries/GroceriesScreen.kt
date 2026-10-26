@@ -3,6 +3,7 @@ package com.choreme.feature.groceries
 import com.choreme.core.ui.R as CoreUiR
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +24,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -35,15 +37,17 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -65,10 +69,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -79,6 +86,7 @@ import com.choreme.core.model.grocery.GroceryIcons
 import com.choreme.core.model.grocery.GroceryItem
 import com.choreme.core.model.grocery.QuickAddResult
 import com.choreme.core.ui.ItemIcon
+import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.drawable
 import kotlinx.coroutines.launch
 
@@ -130,6 +138,13 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
+            item(key = "header") {
+                TabHeader(
+                    title = state.listName ?: stringResource(R.string.list_groceries),
+                    eyebrow = pluralStringResource(R.plurals.grocery_to_buy_count, state.toBuyCount, state.toBuyCount),
+                    modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
+                )
+            }
             item(key = "lists") {
                 ListPicker(
                     state = state,
@@ -140,7 +155,10 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
             }
             if (state.othersShopping.isNotEmpty()) {
                 item(key = "others-shopping") {
-                    Card(Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                    Card(
+                        Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+                    ) {
                         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                             ItemIcon(CoreUiR.drawable.ic_shopping_cart, tint = MaterialTheme.colorScheme.primary)
                             Spacer(Modifier.width(12.dp))
@@ -347,6 +365,12 @@ private fun QuickAddField(query: String, onQueryChange: (String) -> Unit, onSubm
             }
         },
         modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+        ),
     )
 }
 
@@ -376,9 +400,11 @@ internal fun ToBuyRow(item: GroceryItem, large: Boolean, onBought: () -> Unit, o
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = if (large) 64.dp else 48.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .combinedClickable(onClick = onBought, onLongClick = onEdit),
+            .heightIn(min = if (large) 64.dp else 54.dp)
+            .clip(MaterialTheme.shapes.small)
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+            .combinedClickable(onClick = onBought, onLongClick = onEdit)
+            .padding(end = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(checked = false, onCheckedChange = { onBought() })
@@ -399,19 +425,45 @@ private fun AtHomeGroup(group: CategoryGroup, viewModel: GroceriesViewModel, onE
         CategoryHeader(group.category)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             group.items.forEach { item ->
-                ItemChip(item, onClick = { viewModel.setNeeded(item, true) }, onLongClick = { onEdit(item) })
+                ItemTile(item, onClick = { viewModel.setNeeded(item, true) }, onLongClick = { onEdit(item) })
             }
         }
     }
 }
 
-/** At home: tap when it runs out. */
+/** At home: a big tile to tap when it runs out. Long-press to edit. */
+@Composable
+internal fun ItemTile(item: GroceryItem, onClick: () -> Unit, onLongClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .width(80.dp)
+            .heightIn(min = 84.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .padding(horizontal = 4.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
+    ) {
+        ItemIcon(item.icon, Modifier.size(28.dp), tint = MaterialTheme.colorScheme.secondary)
+        Text(
+            item.name,
+            style = MaterialTheme.typography.labelMedium,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+/** A suggestion while typing: tap to put it on the list. */
 @Composable
 internal fun ItemChip(item: GroceryItem, onClick: () -> Unit, onLongClick: () -> Unit) {
-    val shape = RoundedCornerShape(8.dp)
+    val shape = CircleShape
     Surface(
         shape = shape,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier.clip(shape).combinedClickable(onClick = onClick, onLongClick = onLongClick),
     ) {
         Row(

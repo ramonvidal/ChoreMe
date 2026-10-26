@@ -125,4 +125,16 @@
     <string name="timed_channel_description">Chores you asked to be reminded of at a time</string>
     <string name="timed_title">Reminder: %1$s</string>
     <string name="timed_body">You asked to be reminded about this.</string>
+    <string name="chores_title">Chores</string>
+    <string name="greeting_morning">Good morning, %1$s</string>
+    <string name="greeting_afternoon">Good afternoon, %1$s</string>
+    <string name="greeting_evening">Good evening, %1$s</string>
+    <plurals name="summary_to_do">
+        <item quantity="one">%d needs doing</item>
+        <item quantity="other">%d need doing</item>
+    </plurals>
+    <string name="you">You</string>
+    <string name="more">More</string>
+    <string name="done_already">Done already</string>
+    <string name="change_reminder">Change reminder</string>
 </resources>
