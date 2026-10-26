@@ -10,7 +10,9 @@
 | UI language | English |
 | Chores | **"Something needs doing"**: whoever notices it (kids too) adds it, and it's due now. Repeating is optional, folded away under "Repeat…". Adding something already open shows "already on the list" instead of a duplicate |
 | Urgent chores | An **Urgent** switch when adding or editing a chore. Urgent ones go to the top of Today whatever their date, on a **red card** with an "URGENT" label, and the family gets a pop-up notification (its own "Urgent chores" channel). Red is kept for urgent only: overdue chores show "2 days late" in red text instead. Anyone can flag a new chore urgent; only parents change it later. It clears itself once the chore is done |
-| Settings | One **Settings** screen per phone, opened from the gear at the top of every tab: notifications, quiet hours, instant alerts, app updates |
+| Settings | No separate screen: the **Family** tab ends with **This phone**, folded rows for notifications, quiet hours, instant alerts and app updates |
+| Agenda | The family calendar plus only **scheduled** chores: repeating ones and one-offs planned for a later day. Everyday "needs doing" chores stay in the Chores tab |
+| Tab names | Chores, Groceries, Agenda, Map, Family |
 | Chore assignment | **Whoever grabs it**: chores are open to everyone, and one tap claims one |
 | Kids | Kids are members with the `KID` role. Chores they complete go to a parent for **approval** before counting as done; a rejected chore goes back to the same kid |
 | Kids' sign-in | Kids **don't need a Google account**: a parent creates a kid profile, and a kid's device joins it with a parent's approval (see below) |

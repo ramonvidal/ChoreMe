@@ -31,9 +31,12 @@ class BuildMonthTest {
 
     @Test
     fun `late chores sit on today, future ones on their day`() {
-        val late = com.choreme.core.model.chore.Chore(id = "1", title = "Trash", dueDate = today.minusDays(3))
+        val late = com.choreme.core.model.chore.Chore(
+            id = "1", title = "Trash", dueDate = today.minusDays(3), recurrence = com.choreme.core.model.chore.Recurrence.EveryDays(7),
+        )
+        val now = com.choreme.core.model.chore.Chore(id = "3", title = "Dishes", dueDate = today)
         val soon = com.choreme.core.model.chore.Chore(id = "2", title = "Vacuum", dueDate = today.plusDays(4))
-        val month = buildMonth(emptyList(), listOf(late, soon), YearMonth.of(2026, 10), today, zone)
+        val month = buildMonth(emptyList(), listOf(late, soon, now), YearMonth.of(2026, 10), today, zone)
         assertEquals(listOf("Trash"), month[today]?.chores?.map { it.title })
         assertEquals(listOf("Vacuum"), month[today.plusDays(4)]?.chores?.map { it.title })
         assertEquals(null, month[today.minusDays(3)]?.chores?.takeIf { it.isNotEmpty() })

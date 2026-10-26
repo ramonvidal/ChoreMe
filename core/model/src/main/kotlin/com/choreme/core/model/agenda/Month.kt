@@ -39,7 +39,9 @@ fun buildMonth(
     firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
 ): Map<LocalDate, AgendaDay> {
     val (from, until) = monthGridRange(month, firstDayOfWeek)
-    val adjusted = chores.map { if (it.isActive && it.dueDate < today) it.copy(dueDate = today) else it }
+    val adjusted = chores
+        .filter { it.isScheduled(today) }
+        .map { if (it.isActive && it.dueDate < today) it.copy(dueDate = today) else it }
     val days = ChronoUnit.DAYS.between(from, until).toInt()
     return buildAgenda(events, adjusted.filter { it.dueDate >= from }, from, days, zone).associateBy { it.date }
 }

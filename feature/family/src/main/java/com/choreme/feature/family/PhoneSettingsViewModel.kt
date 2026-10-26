@@ -1,4 +1,4 @@
-package com.choreme.feature.settings
+package com.choreme.feature.family
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,8 +24,9 @@ sealed interface UpdateCheck {
     data object Failed : UpdateCheck
 }
 
+/** This phone's own choices, shown in the Family tab under "This phone". */
 @HiltViewModel
-class SettingsViewModel @Inject constructor(
+class PhoneSettingsViewModel @Inject constructor(
     private val notifications: NotificationSettings,
     private val push: PushRegistration,
     private val updates: UpdateRepository,

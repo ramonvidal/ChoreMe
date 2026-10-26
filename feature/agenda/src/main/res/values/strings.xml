@@ -4,7 +4,7 @@
     <string name="permission_title">Show your family calendar</string>
     <string name="permission_body">ChoreMe shows the calendars already on this phone, like a shared Google Calendar, next to your chores. Events you add here go to that calendar, and Google sends the alerts to everyone who shares it.</string>
     <string name="permission_allow">Allow calendar access</string>
-    <string name="no_calendars">There are no calendars on this phone. Add a Google account with the family calendar in the phone\'s settings to see it here. Chores still show below.</string>
+    <string name="no_calendars">There are no calendars on this phone. Add a Google account with the family calendar in the phone\'s settings to see it here. Repeating and planned chores still show below.</string>
 
     <string name="choose_title">Which calendars should the agenda show?</string>
     <string name="choose_hint">This choice is only for this phone.</string>

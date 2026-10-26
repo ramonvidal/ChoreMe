@@ -22,7 +22,7 @@ in the way and what you propose, before writing the code.
 | `:core:settings` | This phone's choices: which alerts it shows, quiet hours. Read by the features' workers | `:core:model` |
 | `:core:update` | Updating the app itself: checks the GitHub release page, downloads the APK, hands it to Android's installer | `:core:model` |
 | `:core:push` | Free instant wake-up pings between family phones (UnifiedPush, e.g. the ntfy app). Pings carry no family data; features react through `PushListener` | `:core:model` |
-| `:feature:<name>` | One tab or flow: `onboarding`, `chores`, `groceries`, `agenda`, `map`, `family`, `settings`, `widget`, `update` | `:core:*` only |
+| `:feature:<name>` | One tab or flow: `onboarding`, `chores`, `groceries`, `agenda`, `map`, `family` (with "This phone" settings), `widget`, `update` | `:core:*` only |
 | `:app` | Wires features together: activity, root screen, navigation | anything; nothing depends on it |
 
 - **Features never depend on each other.** What two features share moves down into

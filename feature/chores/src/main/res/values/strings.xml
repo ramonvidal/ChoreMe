@@ -1,5 +1,4 @@
 <resources>
-    <string name="today_title">Today</string>
 
     <!-- Sections -->
     <string name="section_awaiting">Waiting for a parent\'s OK</string>

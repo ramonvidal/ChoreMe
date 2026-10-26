@@ -1,4 +1,4 @@
-package com.choreme.feature.settings
+package com.choreme.feature.family
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -2,6 +2,7 @@ package com.choreme.core.model.agenda
 
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreStatus
+import com.choreme.core.model.chore.Recurrence
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.Instant
@@ -28,8 +29,8 @@ class AgendaTest {
         allDay = true, location = null, color = 0,
     )
 
-    private fun chore(title: String, due: LocalDate, status: ChoreStatus = ChoreStatus.OPEN) =
-        Chore(id = title, title = title, dueDate = due, status = status)
+    private fun chore(title: String, due: LocalDate, status: ChoreStatus = ChoreStatus.OPEN, repeats: Boolean = false) =
+        Chore(id = title, title = title, dueDate = due, status = status, recurrence = if (repeats) Recurrence.EveryDays(7) else Recurrence.Once)
 
     @Test
     fun `events show on every day they cover`() {
@@ -49,7 +50,10 @@ class AgendaTest {
                 timed("Long ago", today.minusDays(5), "10:00", "11:00"),
             ),
             chores = listOf(
-                chore("Late trash", today.minusDays(2)),
+                chore("Late trash", today.minusDays(2), repeats = true),
+                // A one-off "needs doing now" stays in the chores tab.
+                chore("Dishes", today),
+                chore("Leak", today.minusDays(1)),
                 chore("Vacuum", today.plusDays(2)),
                 chore("Old shelf", today.minusDays(1), ChoreStatus.DONE),
                 chore("Far away", today.plusDays(30)),

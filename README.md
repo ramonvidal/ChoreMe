@@ -11,7 +11,7 @@ See [PLAN.md](PLAN.md) for the roadmap and design decisions.
 Download **[ChoreMe.apk](https://github.com/ramonvidal/ChoreMe/releases/latest/download/ChoreMe.apk)**
 on the phone and open it (allow installing from unknown sources). That link always
 points at the newest build and needs no GitHub account. Each build installs over the
-previous one. After that, ChoreMe checks for new builds itself (every few hours, or right away from **the gear at the top → Check for updates**) and offers
+previous one. After that, ChoreMe checks for new builds itself (every few hours, or right away from **Family → This phone → App updates**) and offers
 to install them: tap **Install** on the banner and confirm.
 
 ## Tech stack
@@ -97,11 +97,11 @@ core/location/    The phone's position, location permissions, the "share my loca
 core/push/        Free instant pings between family phones (UnifiedPush, e.g. the ntfy app)
 feature/
   onboarding/     Sign in, create or join a family, wait for approval
-  chores/         Today tab
+  chores/         Chores tab
   groceries/      Grocery list
   agenda/         Family calendar and chores, day by day
   map/            Where everyone who shares is, on OpenStreetMap
-  family/         Members, invite code, join approvals
+  family/         Members, invite code, join approvals, and This phone settings
 build-logic/
   convention/     Shared Gradle setup for each kind of module
   rules/          The module structure check

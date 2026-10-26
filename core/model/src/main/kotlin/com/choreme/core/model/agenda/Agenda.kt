@@ -2,6 +2,7 @@ package com.choreme.core.model.agenda
 
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreStatus
+import com.choreme.core.model.chore.Recurrence
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -48,8 +49,15 @@ fun CalendarEvent.days(zone: ZoneId): List<LocalDate> {
 }
 
 /**
- * Calendar events and chores, day by day, from [from] for [days] days. Days with nothing
- * are left out, except [from] itself. Chores that are late show up on [from].
+ * Whether a chore belongs on the calendar: repeating ones ("trash, every Tuesday") and
+ * one-offs planned for a later day. Most chores are "this needs doing now" and only
+ * show in the chores tab.
+ */
+fun Chore.isScheduled(today: LocalDate): Boolean = recurrence != Recurrence.Once || dueDate > today
+
+/**
+ * Calendar events and scheduled chores (see [isScheduled]), day by day, from [from] for
+ * [days] days. Days with nothing are left out, except [from] itself. Late chores show up on [from].
  */
 fun buildAgenda(
     events: List<CalendarEvent>,
@@ -64,7 +72,7 @@ fun buildAgenda(
         .flatMap { event -> event.days(zone).filter(inWindow).map { it to event } }
         .groupBy({ it.first }, { it.second })
     val choresByDay = chores
-        .filter { it.isActive || it.status == ChoreStatus.PENDING_APPROVAL }
+        .filter { (it.isActive || it.status == ChoreStatus.PENDING_APPROVAL) && it.isScheduled(from) }
         .map { maxOf(it.dueDate, from) to it }
         .filter { inWindow(it.first) }
         .groupBy({ it.first }, { it.second })

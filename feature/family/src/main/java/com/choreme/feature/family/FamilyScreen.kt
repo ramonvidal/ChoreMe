@@ -115,6 +115,9 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
             }
         }
 
+        item { SectionTitle(stringResource(R.string.this_phone_title)) }
+        item(key = "this-phone") { PhoneSettings() }
+
         item {
             TextButton(
                 onClick = {
