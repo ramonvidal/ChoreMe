@@ -259,8 +259,6 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
     }
 }
 
-
-@Composable
 /** "Invite · ABC234": shares the code (the share sheet shows how to join). */
 @Composable
 private fun InviteButton(family: Family) {
