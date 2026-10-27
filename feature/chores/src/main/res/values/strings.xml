@@ -3,6 +3,7 @@
     <!-- Sections -->
     <string name="section_awaiting">Waiting for a parent\'s OK</string>
     <string name="section_to_do">Needs doing</string>
+    <string name="section_yours">Yours</string>
     <string name="section_upcoming">Coming up</string>
     <string name="section_done_today">Done today</string>
     <string name="nothing_to_do">Nothing needs doing right now</string>
@@ -128,6 +129,14 @@
     <string name="timed_title">Reminder: %1$s</string>
     <string name="timed_body">You asked to be reminded about this.</string>
     <string name="chores_title">Chores</string>
+    <plurals name="summary_yours">
+        <item quantity="one">%d is yours</item>
+        <item quantity="other">%d are yours</item>
+    </plurals>
+    <plurals name="reminder_mine">
+        <item quantity="one">You\'re on %d</item>
+        <item quantity="other">You\'re on %d</item>
+    </plurals>
     <plurals name="summary_to_do">
         <item quantity="one">%d needs doing</item>
         <item quantity="other">%d need doing</item>

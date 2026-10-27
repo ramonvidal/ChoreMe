@@ -26,4 +26,20 @@ class ChoreReminderTest {
         val board = buildTodayBoard(listOf(chore(today.plusDays(1)), chore(today, ChoreStatus.PENDING_APPROVAL)), today)
         assertNull(reminderFor(board, Role.KID, today))
     }
+
+    @Test
+    fun `chores someone took are theirs, even later in the week, and remind them`() {
+        val mine = Chore("m", "Laundry", dueDate = today.plusDays(2), status = ChoreStatus.CLAIMED, claimedBy = "mom")
+        val theirs = Chore("t", "Dishes", dueDate = today, status = ChoreStatus.CLAIMED, claimedBy = "leo")
+        val open = chore(today)
+        val board = buildTodayBoard(listOf(mine, theirs, open), today, memberId = "mom")
+        assertEquals(listOf(mine), board.mine)
+        assertEquals(setOf(theirs, open), board.toDo.toSet())
+        assertEquals(emptyList<Chore>(), board.upcoming)
+        assertEquals(ChoreReminder(toDo = 2, overdue = 0, awaitingApproval = 0, mine = 1), reminderFor(board, Role.PARENT, today))
+        // Nothing else due: still a reminder, for what you said you'd do.
+        assertEquals(1, reminderFor(buildTodayBoard(listOf(mine), today, "mom"), Role.KID, today)?.mine)
+        // Without a member, nothing is set apart.
+        assertEquals(emptyList<Chore>(), buildTodayBoard(listOf(mine), today).mine)
+    }
 }

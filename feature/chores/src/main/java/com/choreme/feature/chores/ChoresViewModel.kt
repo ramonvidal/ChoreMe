@@ -141,7 +141,7 @@ class ChoresViewModel @Inject internal constructor(
                     me = members.firstOrNull { it.id == session.memberId }
                         ?: Member(session.memberId, name = "", role = session.role),
                     today = today,
-                    board = buildTodayBoard(allChores, today),
+                    board = buildTodayBoard(allChores, today, session.memberId),
                     chores = allChores,
                     members = members.associateBy { it.id },
                     groceriesToBuy = groceryItems.groceriesToBuy(),

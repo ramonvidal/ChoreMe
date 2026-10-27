@@ -50,7 +50,7 @@ internal class ChoreReminderWorker @AssistedInject constructor(
         val me = withTimeoutOrNull(TIMEOUT_MS) { families.observeMembers(session.familyId).first() }
             ?.firstOrNull { it.id == session.memberId }
         if (me?.isAway(today) == true) return Result.success()
-        reminderFor(buildTodayBoard(allChores, today), session.role, today)?.let(::show)
+        reminderFor(buildTodayBoard(allChores, today, session.memberId), session.role, today)?.let(::show)
         return Result.success()
     }
 
@@ -69,6 +69,7 @@ internal class ChoreReminderWorker @AssistedInject constructor(
 
         val res = context.resources
         val title = buildList {
+            if (reminder.mine > 0) add(res.getQuantityString(R.plurals.reminder_mine, reminder.mine, reminder.mine))
             if (reminder.toDo > 0) add(res.getQuantityString(R.plurals.reminder_to_do, reminder.toDo, reminder.toDo))
             if (reminder.overdue > 0) add(res.getQuantityString(R.plurals.reminder_overdue, reminder.overdue, reminder.overdue))
             if (reminder.awaitingApproval > 0) {

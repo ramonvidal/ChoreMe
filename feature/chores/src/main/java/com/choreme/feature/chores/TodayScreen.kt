@@ -53,6 +53,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -111,25 +112,7 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
                 else -> {
                     item(key = "home") { HomeCard(state.scene, onClick = { showHome = true }) }
                     val board = state.board
-                    if (board.awaitingApproval.isNotEmpty()) {
-                        item(key = "awaiting-title") { SectionLabel(stringResource(R.string.section_awaiting)) }
-                        items(board.awaitingApproval, key = { "awaiting-${it.id}" }) { chore ->
-                            AwaitingCard(chore, state, onApprove = { viewModel.approve(chore) }, onReject = { viewModel.reject(chore) })
-                        }
-                    }
-
-                    item(key = "todo-title") { SectionLabel(stringResource(R.string.section_to_do)) }
-                    if (board.toDo.isEmpty()) {
-                        item(key = "todo-empty") {
-                            Text(
-                                stringResource(R.string.nothing_to_do),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(start = 4.dp),
-                            )
-                        }
-                    }
-                    items(board.toDo, key = { "todo-${it.id}" }) { chore ->
+                    val choreCard: @Composable (Chore, Boolean) -> Unit = { chore, mine ->
                         ChoreCard(
                             chore = chore,
                             state = state,
@@ -153,8 +136,35 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
                                     }
                                 }
                             },
+                            mine = mine,
                         )
                     }
+                    // What you said you'd do comes first, so it isn't forgotten.
+                    if (board.mine.isNotEmpty()) {
+                        item(key = "mine-title") { SectionLabel(stringResource(R.string.section_yours)) }
+                        items(board.mine, key = { "mine-${it.id}" }) { chore -> choreCard(chore, true) }
+                    }
+                    if (board.awaitingApproval.isNotEmpty()) {
+                        item(key = "awaiting-title") { SectionLabel(stringResource(R.string.section_awaiting)) }
+                        items(board.awaitingApproval, key = { "awaiting-${it.id}" }) { chore ->
+                            AwaitingCard(chore, state, onApprove = { viewModel.approve(chore) }, onReject = { viewModel.reject(chore) })
+                        }
+                    }
+
+                    if (board.toDo.isNotEmpty() || board.mine.isEmpty()) {
+                        item(key = "todo-title") { SectionLabel(stringResource(R.string.section_to_do)) }
+                    }
+                    if (board.toDo.isEmpty() && board.mine.isEmpty()) {
+                        item(key = "todo-empty") {
+                            Text(
+                                stringResource(R.string.nothing_to_do),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 4.dp),
+                            )
+                        }
+                    }
+                    items(board.toDo, key = { "todo-${it.id}" }) { chore -> choreCard(chore, false) }
 
                     if (board.upcoming.isNotEmpty()) {
                         item(key = "upcoming-title") { SectionLabel(stringResource(R.string.section_upcoming)) }
@@ -301,6 +311,15 @@ internal fun ChoresHeader(state: ChoresUiState, onOpenGroceries: () -> Unit) {
     TabHeader(title = stringResource(R.string.chores_title), modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)) {
         Row {
             HeaderLine(pluralStringResource(R.plurals.summary_to_do, toDo, toDo))
+            val mine = state.board.mine.size
+            if (mine > 0) {
+                HeaderLine(" · ")
+                Text(
+                    pluralStringResource(R.plurals.summary_yours, mine, mine),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
             if (state.groceriesToBuy > 0) {
                 HeaderLine(" · ")
                 HeaderLine(
@@ -355,6 +374,8 @@ internal fun ChoreCard(
     onCalendar: () -> Unit,
     reminder: Instant? = null,
     onRemind: () -> Unit = {},
+    /** One the person said they'd do: green edge and tint, so it stands out. */
+    mine: Boolean = false,
 ) {
     val me = state.me ?: return
     val overdueDays = ChronoUnit.DAYS.between(chore.dueDate, state.today).toInt()
@@ -372,6 +393,7 @@ internal fun ChoreCard(
             chore.reportedBy != null -> state.nameOf(chore.reportedBy)?.let { add(stringResource(R.string.reported_by, it)) }
         }
         if (overdueDays > 0) add(pluralStringResource(R.plurals.overdue_days, overdueDays, overdueDays))
+        if (overdueDays < 0) add(dayLabel(chore.dueDate, state.today))
         if (chore.recurrence != Recurrence.Once) add(recurrenceLabel(chore.recurrence))
         if (chore.points > 1) add(pluralStringResource(CoreUiR.plurals.points, chore.points, chore.points))
         if (reminder != null) add(stringResource(R.string.reminder_at, reminder.atZone(ZoneId.systemDefault()).format(SHORT_TIME)))
@@ -385,7 +407,15 @@ internal fun ChoreCard(
     }
 
     Box {
-        Card(modifier = Modifier.fillMaxWidth().clickable { menu = true }) {
+        Card(
+            modifier = Modifier.fillMaxWidth().clickable { menu = true },
+            colors = if (mine) {
+                CardDefaults.cardColors(containerColor = lerp(CardDefaults.cardColors().containerColor, MaterialTheme.colorScheme.primary, 0.08f))
+            } else {
+                CardDefaults.cardColors()
+            },
+            border = if (mine) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null,
+        ) {
             Row(
                 Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
