@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
@@ -73,7 +75,7 @@ class ChoreCardsScreenshotTest {
         compose.onNodeWithText("1 is yours").assertExists()
         compose.onNodeWithText("You and Mia are on it · Tomorrow").assertExists()
         compose.onNodeWithText("Leo and Mia are on it · 4 points").assertExists()
-        compose.onNodeWithText("Me too").assertExists()
+        compose.onAllNodesWithText("Me too").assertCountEquals(2) // Laundry and the garage
         compose.onNodeWithText("14 points in 7 days").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-cards.png")
     }

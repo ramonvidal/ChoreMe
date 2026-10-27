@@ -470,20 +470,18 @@ internal fun ChoreCard(
                         }
                     }
                 }
-                if (main != null) {
-                    if (chore.urgent) {
-                        Button(onClick = main.second, shape = MaterialTheme.shapes.small, contentPadding = SmallButtonPadding) {
-                            Text(stringResource(main.first))
-                        }
-                    } else {
-                        OutlinedButton(
-                            onClick = main.second,
-                            shape = MaterialTheme.shapes.small,
-                            contentPadding = SmallButtonPadding,
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                        ) { Text(stringResource(main.first)) }
+                if (chore.urgent) {
+                    Button(onClick = main.second, shape = MaterialTheme.shapes.small, contentPadding = SmallButtonPadding) {
+                        Text(stringResource(main.first))
                     }
+                } else {
+                    OutlinedButton(
+                        onClick = main.second,
+                        shape = MaterialTheme.shapes.small,
+                        contentPadding = SmallButtonPadding,
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    ) { Text(stringResource(main.first)) }
                 }
             }
         }
