@@ -93,4 +93,17 @@ class ChoreCardsScreenshotTest {
         compose.onNodeWithText("32 points in 7 days").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-garden.png")
     }
+
+    /** Dark mode: the picture keeps its own colours (a white house), only the card around it is dark. */
+    @Test
+    fun gardenDark() {
+        compose.setContent {
+            ChoreMeTheme(darkTheme = true, dynamicColor = false) {
+                Surface {
+                    Column(Modifier.padding(16.dp)) { HomeCard(homeScene(9, overdue = 0, urgent = 0, toDo = 2), onClick = {}) }
+                }
+            }
+        }
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-garden-dark.png")
+    }
 }

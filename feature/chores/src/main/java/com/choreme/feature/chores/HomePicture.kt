@@ -111,7 +111,6 @@ private fun homeMood(scene: HomeScene): Int = when {
  */
 @Composable
 internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
-    val colors = MaterialTheme.colorScheme
     val growth by animateFloatAsState(scene.growth, tween(1200), label = "growth")
     // Counted up and down smoothly, so a new flower grows in and a pulled weed shrinks away.
     val flowers by animateFloatAsState(scene.flowers.toFloat(), tween(900), label = "flowers")
@@ -139,10 +138,11 @@ internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
         label = "lightning",
     )
 
-    val green = colors.primary
+    // Its own colours, not the theme's: a picture looks the same in light and dark mode.
+    val green = Green
     val leaf = if (scene.tired) lerp(green, Tired, 0.5f) else green
     val sky = when {
-        gloom <= 1f -> lerp(lerp(colors.surfaceContainerLowest, Sky, 0.6f), Overcast, gloom)
+        gloom <= 1f -> lerp(Sky, Overcast, gloom)
         gloom <= 2f -> lerp(Overcast, Rainy, gloom - 1f)
         else -> lerp(Rainy, Stormy, gloom - 2f)
     }
@@ -153,7 +153,7 @@ internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
         val h = size.height
         val ground = h * 0.82f
         drawRect(sky, size = Size(w, ground))
-        val grass = lerp(colors.surfaceContainerLowest, green, 0.18f + 0.22f * growth)
+        val grass = lerp(Paper, green, 0.18f + 0.22f * growth)
         drawRect(lerp(grass, Mud, (gloom / 3f) * 0.5f), Offset(0f, ground), Size(w, h - ground))
 
         // The sun fades behind the clouds.
@@ -185,26 +185,26 @@ internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
         val houseH = h * 0.38f
         val left = w * 0.5f - houseW / 2
         val top = ground - houseH
-        drawRect(colors.surfaceContainerLowest, Offset(left, top), Size(houseW, houseH))
-        drawRect(colors.outline, Offset(left, top), Size(houseW, houseH), style = Stroke(1.5.dp.toPx()))
+        drawRect(Walls, Offset(left, top), Size(houseW, houseH))
+        drawRect(Line, Offset(left, top), Size(houseW, houseH), style = Stroke(1.5.dp.toPx()))
         val roof = Path().apply {
             moveTo(left - houseW * 0.1f, top)
             lineTo(left + houseW / 2, top - houseH * 0.72f)
             lineTo(left + houseW * 1.1f, top)
             close()
         }
-        drawPath(roof, colors.inverseSurface)
+        drawPath(roof, Roof)
         val door = Size(houseW * 0.2f, houseH * 0.52f)
         drawRoundRect(green, Offset(left + houseW / 2 - door.width / 2, ground - door.height), door, CornerRadius(2.dp.toPx()))
         val window = Size(houseW * 0.2f, houseH * 0.28f)
-        val windowColor = lerp(colors.surfaceVariant, Lamp, light)
+        val windowColor = lerp(DarkWindow, Lamp, light)
         listOf(left + houseW * 0.12f, left + houseW * 0.68f).forEach { x ->
             drawRect(windowColor, Offset(x, top + houseH * 0.22f), window)
-            drawRect(colors.outline, Offset(x, top + houseH * 0.22f), window, style = Stroke(1.dp.toPx()))
+            drawRect(Line, Offset(x, top + houseH * 0.22f), window, style = Stroke(1.dp.toPx()))
         }
 
         // A tree that grows from a sapling, bending in the storm.
-        tree(Offset(w * 0.2f, ground), h * (0.22f + 0.38f * growth), leaf, colors.outline, if (storm) sway * 4f + 3f else sway)
+        tree(Offset(w * 0.2f, ground), h * (0.22f + 0.38f * growth), leaf, Line, if (storm) sway * 4f + 3f else sway)
 
         // Flowers either side of the house, one per point (up to a dozen).
         val slots = flowerSlots(w, houseW)
@@ -315,7 +315,13 @@ private val CloudSpots = listOf(
     Triple(0.27f, 0.27f, 0.08f),
 )
 
-private val Sky = Color(0xFFDDEBF2)
+private val Sky = Color(0xFFE6EFF3)
+private val Paper = Color(0xFFFFFFFF)
+private val Walls = Color(0xFFFFFFFF)
+private val Line = Color(0xFF8E8E8A)
+private val Roof = Color(0xFF1C1C1C)
+private val DarkWindow = Color(0xFFE4E4E0)
+private val Green = Color(0xFF2E6B52)
 private val Overcast = Color(0xFFD3D8DC)
 private val Rainy = Color(0xFFAEB6BE)
 private val Stormy = Color(0xFF6B7480)
