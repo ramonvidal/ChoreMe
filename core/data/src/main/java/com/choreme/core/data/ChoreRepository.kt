@@ -7,12 +7,14 @@ import com.choreme.core.data.remote.FirestoreSchema.CHORE_ID
 import com.choreme.core.data.remote.FirestoreSchema.CREATED_AT
 import com.choreme.core.data.remote.FirestoreSchema.CREATED_BY
 import com.choreme.core.data.remote.FirestoreSchema.DONE_BY
+import com.choreme.core.data.remote.FirestoreSchema.HELPERS
 import com.choreme.core.data.remote.FirestoreSchema.ON
 import com.choreme.core.data.remote.FirestoreSchema.POINTS
 import com.choreme.core.data.remote.FirestoreSchema.TITLE
 import com.choreme.core.data.remote.FirestoreSchema.UPDATED_AT
 import com.choreme.core.data.remote.FirestoreSchema.UPDATED_BY
 import com.choreme.core.data.remote.documentsFlow
+import com.choreme.core.data.remote.people
 import com.choreme.core.data.remote.toChore
 import com.choreme.core.data.remote.toFields
 import com.choreme.core.model.NameKeys
@@ -98,6 +100,7 @@ class ChoreRepository @Inject constructor(
                     DONE_BY to done.doneBy,
                     ON to done.on.toString(),
                     POINTS to done.points.toLong(),
+                    HELPERS to done.helpers.sorted(),
                     AT to Instant.now().toEpochMilli(),
                 ),
             )
@@ -114,6 +117,7 @@ class ChoreRepository @Inject constructor(
                     doneBy = doc.getString(DONE_BY) ?: return@mapNotNull null,
                     on = doc.getString(ON)?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return@mapNotNull null,
                     points = doc.getLong(POINTS)?.toInt() ?: 1,
+                    helpers = doc.people(HELPERS),
                 )
             }
         }

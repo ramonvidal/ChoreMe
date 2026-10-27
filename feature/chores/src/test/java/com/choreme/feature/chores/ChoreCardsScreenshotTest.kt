@@ -42,7 +42,8 @@ class ChoreCardsScreenshotTest {
     private val laundry = Chore("2", "Laundry", ChoreTemplate.LAUNDRY, dueDate = today.minusDays(2), status = ChoreStatus.CLAIMED, claimedBy = "leo")
     private val bathroom = Chore("3", "Clean the bathroom", ChoreTemplate.CLEAN_BATHROOM, dueDate = today, status = ChoreStatus.PENDING_APPROVAL, completedBy = "leo")
     private val trash = Chore("4", "Take out the trash", ChoreTemplate.TRASH, dueDate = today, points = 2)
-    private val hoover = Chore("6", "Hoover the living room", ChoreTemplate.VACUUM, dueDate = today.plusDays(1), status = ChoreStatus.CLAIMED, claimedBy = "mom")
+    private val hoover = Chore("6", "Hoover the living room", ChoreTemplate.VACUUM, dueDate = today.plusDays(1), status = ChoreStatus.CLAIMED, claimedBy = "mom", helpers = setOf("mia"))
+    private val garage = Chore("7", "Tidy the garage", ChoreTemplate.OTHER, dueDate = today, status = ChoreStatus.CLAIMED, claimedBy = "leo", helpers = setOf("mia"), points = 4)
     private val leak = Chore("5", "Water leak under the sink", ChoreTemplate.CLEAN_KITCHEN, dueDate = today, reportedBy = "leo", urgent = true)
 
     @Test
@@ -55,6 +56,7 @@ class ChoreCardsScreenshotTest {
                         HomeCard(homeScene(14, overdue = 0, urgent = 0, toDo = 3), onClick = {})
                         ChoreCard(trash, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         ChoreCard(hoover, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {}, mine = true)
+                        ChoreCard(garage, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         ChoreCard(leak, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         AwaitingCard(bathroom, state, onApprove = {}, onReject = {})
                         ChoreCard(dishes, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
@@ -69,6 +71,9 @@ class ChoreCardsScreenshotTest {
         compose.onNodeWithText("Urgent").assertExists()
         compose.onNodeWithText("2 points").assertExists()
         compose.onNodeWithText("1 is yours").assertExists()
+        compose.onNodeWithText("You and Mia are on it · Tomorrow").assertExists()
+        compose.onNodeWithText("Leo and Mia are on it · 4 points").assertExists()
+        compose.onNodeWithText("Me too").assertExists()
         compose.onNodeWithText("14 points in 7 days").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-cards.png")
     }

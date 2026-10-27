@@ -21,6 +21,14 @@
     <string name="no_calendar_app">No calendar app on this phone</string>
     <string name="done_by">Done by…</string>
     <string name="done_by_title">Who did it?</string>
+    <string name="done_by_hint">Pick everyone who did it. Each of them gets the points.</string>
+    <string name="who_does">Who\'s doing it…</string>
+    <string name="who_does_title">Who\'s doing it?</string>
+    <string name="who_does_hint">Pick everyone doing it together. Nobody picked: free for anyone to grab.</string>
+    <string name="join">Me too</string>
+    <string name="on_it_many">%1$s are on it</string>
+    <string name="you_and_on_it">You and %1$s are on it</string>
+    <string name="names_and">%1$s and %2$s</string>
     <string name="not_yet">Not yet</string>
     <string name="on_it">%1$s is on it</string>
     <string name="you_are_on_it">You\'re on it</string>

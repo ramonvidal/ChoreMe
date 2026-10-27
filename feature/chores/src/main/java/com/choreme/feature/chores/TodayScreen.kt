@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -30,6 +31,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -57,6 +59,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -69,6 +72,7 @@ import com.choreme.core.model.chore.Recurrence
 import com.choreme.core.ui.HeaderLine
 import com.choreme.core.ui.SectionLabel
 import com.choreme.core.ui.ItemIcon
+import com.choreme.core.ui.MemberAvatar
 import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.icon
 import java.time.Instant
@@ -85,6 +89,7 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
     var editing by remember { mutableStateOf<Chore?>(null) }
     var adding by remember { mutableStateOf(false) }
     var doneByFor by remember { mutableStateOf<Chore?>(null) }
+    var assigning by remember { mutableStateOf<Chore?>(null) }
     var remindFor by remember { mutableStateOf<Chore?>(null) }
     var showHome by remember { mutableStateOf(false) }
     val reminders by viewModel.reminders.collectAsStateWithLifecycle()
@@ -120,6 +125,8 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
                             onUnclaim = { viewModel.unclaim(chore) },
                             onComplete = { viewModel.complete(chore) },
                             onDoneBy = { doneByFor = chore },
+                            onJoin = { viewModel.join(chore) },
+                            onAssign = { assigning = chore },
                             onEdit = { editing = chore },
                             reminder = reminders[chore.id],
                             onRemind = { remindFor = chore },
@@ -178,7 +185,10 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
                         item(key = "done-today") {
                             CompactList(
                                 board.doneToday,
-                                trailing = { state.nameOf(it.lastDoneBy) ?: stringResource(R.string.someone) },
+                                trailing = {
+                                    namesLabel((listOfNotNull(it.lastDoneBy) + it.lastHelpers.sorted()).mapNotNull(state::nameOf))
+                                        .ifEmpty { stringResource(R.string.someone) }
+                                },
                                 onClick = { if (state.isParent) editing = it },
                                 done = true,
                             )
@@ -253,13 +263,31 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
     }
     if (showHome) HomeDialog(state.scene, state.week, onDismiss = { showHome = false })
     doneByFor?.let { chore ->
-        DoneByDialog(
-            kids = state.kids,
-            onPick = { kid ->
-                viewModel.completeFor(chore, kid)
+        PeopleDialog(
+            title = stringResource(R.string.done_by_title),
+            hint = stringResource(R.string.done_by_hint),
+            people = state.atHome,
+            initial = chore.team,
+            allowNone = false,
+            onConfirm = { people ->
+                viewModel.completeFor(chore, people)
                 doneByFor = null
             },
             onDismiss = { doneByFor = null },
+        )
+    }
+    assigning?.let { chore ->
+        PeopleDialog(
+            title = stringResource(R.string.who_does_title),
+            hint = stringResource(R.string.who_does_hint),
+            people = state.atHome,
+            initial = chore.team,
+            allowNone = true,
+            onConfirm = { people ->
+                viewModel.assign(chore, people)
+                assigning = null
+            },
+            onDismiss = { assigning = null },
         )
     }
 }
@@ -372,6 +400,8 @@ internal fun ChoreCard(
     onDoneBy: () -> Unit,
     onEdit: () -> Unit,
     onCalendar: () -> Unit,
+    onJoin: () -> Unit = {},
+    onAssign: () -> Unit = {},
     reminder: Instant? = null,
     onRemind: () -> Unit = {},
     /** One the person said they'd do: green edge and tint, so it stands out. */
@@ -379,16 +409,19 @@ internal fun ChoreCard(
 ) {
     val me = state.me ?: return
     val overdueDays = ChronoUnit.DAYS.between(chore.dueDate, state.today).toInt()
-    val claimedByMe = chore.claimedBy == me.id
-    val claimedByOther = chore.status == ChoreStatus.CLAIMED && !claimedByMe
-    // Kids can only act on chores that are free or theirs; parents can always finish one.
-    val canFinish = !claimedByOther || state.isParent
+    val onIt = me.id in chore.team
+    val takenByOthers = chore.status == ChoreStatus.CLAIMED && !onIt
+    val others = state.teamNames(chore, me.id)
     var menu by remember { mutableStateOf(false) }
 
     val line = buildList {
         when {
-            claimedByMe -> add(stringResource(R.string.you_are_on_it))
-            claimedByOther -> add(stringResource(R.string.on_it, state.nameOf(chore.claimedBy) ?: stringResource(R.string.someone)))
+            onIt && others.isEmpty() -> add(stringResource(R.string.you_are_on_it))
+            onIt -> add(stringResource(R.string.you_and_on_it, namesLabel(others)))
+            takenByOthers -> add(
+                if (others.size > 1) stringResource(R.string.on_it_many, namesLabel(others))
+                else stringResource(R.string.on_it, others.firstOrNull() ?: stringResource(R.string.someone)),
+            )
             chore.reportedBy == me.id -> add(stringResource(R.string.reported_by_you))
             chore.reportedBy != null -> state.nameOf(chore.reportedBy)?.let { add(stringResource(R.string.reported_by, it)) }
         }
@@ -399,11 +432,11 @@ internal fun ChoreCard(
         if (reminder != null) add(stringResource(R.string.reminder_at, reminder.atZone(ZoneId.systemDefault()).format(SHORT_TIME)))
     }.joinToString(" · ")
 
-    // The one thing to do next; green when urgent, plain otherwise.
+    // The one thing to do next; green when urgent, plain otherwise. "Me too" joins whoever's on it.
     val main = when {
         chore.status == ChoreStatus.OPEN -> R.string.grab to onClaim
-        canFinish -> R.string.done to onComplete
-        else -> null
+        onIt -> R.string.done to onComplete
+        else -> R.string.join to onJoin
     }
 
     Box {
@@ -455,13 +488,15 @@ internal fun ChoreCard(
             }
         }
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-            if (chore.status == ChoreStatus.OPEN && canFinish) {
+            // Parents can always finish one; kids only one that's free or theirs.
+            if (chore.status == ChoreStatus.OPEN || (takenByOthers && state.isParent)) {
                 DropdownMenuItem(text = { Text(stringResource(R.string.done_already)) }, onClick = { menu = false; onComplete() })
             }
-            if (claimedByMe) {
+            if (onIt) {
                 DropdownMenuItem(text = { Text(stringResource(R.string.let_go)) }, onClick = { menu = false; onUnclaim() })
             }
-            if (state.isParent && state.kids.isNotEmpty()) {
+            if (state.isParent && state.atHome.size > 1) {
+                DropdownMenuItem(text = { Text(stringResource(R.string.who_does)) }, onClick = { menu = false; onAssign() })
                 DropdownMenuItem(text = { Text(stringResource(R.string.done_by)) }, onClick = { menu = false; onDoneBy() })
             }
             DropdownMenuItem(
@@ -542,20 +577,58 @@ internal fun CompactRow(chore: Chore, trailing: String, onClick: () -> Unit, don
     }
 }
 
-/** For kids without a phone: a parent records which kid did it. */
+/**
+ * Pick several people: who's doing a chore together, or who did it (e.g. kids without a
+ * phone). Everyone picked gets the chore's points.
+ */
 @Composable
-private fun DoneByDialog(kids: List<Member>, onPick: (Member) -> Unit, onDismiss: () -> Unit) {
+private fun PeopleDialog(
+    title: String,
+    hint: String,
+    people: List<Member>,
+    initial: Set<String>,
+    allowNone: Boolean,
+    onConfirm: (Set<String>) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var picked by remember { mutableStateOf(initial.filter { id -> people.any { it.id == id } }.toSet()) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.done_by_title)) },
+        title = { Text(title) },
         text = {
             Column {
-                kids.forEach { kid ->
-                    TextButton(onClick = { onPick(kid) }, modifier = Modifier.fillMaxWidth()) { Text(kid.name) }
+                Text(hint, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(bottom = 8.dp))
+                people.forEach { person ->
+                    val checked = person.id in picked
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .toggleable(value = checked, role = Role.Checkbox) { picked = if (it) picked + person.id else picked - person.id }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Checkbox(checked = checked, onCheckedChange = null)
+                        Spacer(Modifier.width(12.dp))
+                        MemberAvatar(person, size = 28.dp)
+                        Spacer(Modifier.width(12.dp))
+                        Text(person.name, style = MaterialTheme.typography.bodyLarge)
+                    }
                 }
             }
         },
-        confirmButton = {},
+        confirmButton = {
+            TextButton(onClick = { onConfirm(picked) }, enabled = allowNone || picked.isNotEmpty()) {
+                Text(stringResource(CoreUiR.string.save))
+            }
+        },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(CoreUiR.string.cancel)) } },
     )
+}
+
+/** "Leo", "Leo and Mia", "Leo, Mia and Ana". */
+@Composable
+internal fun namesLabel(names: List<String>): String = when (names.size) {
+    0 -> ""
+    1 -> names.single()
+    else -> stringResource(R.string.names_and, names.dropLast(1).joinToString(", "), names.last())
 }

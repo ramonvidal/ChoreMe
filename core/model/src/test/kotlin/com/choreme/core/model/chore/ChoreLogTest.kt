@@ -42,8 +42,17 @@ class ChoreLogTest {
         )
         val week = weeklySummary(log, listOf(mia, leo), today)
         assertEquals(listOf("Mia" to 5, "Leo" to 2), week.map { it.member.name to it.points })
-        assertEquals(WeekRecap(7, 3, listOf("Mia" to 5, "Leo" to 2)), weekRecap(week))
-        assertEquals(null, weekRecap(weeklySummary(emptyList(), listOf(mia), today)))
+        assertEquals(WeekRecap(7, 3, listOf("Mia" to 5, "Leo" to 2)), weekRecap(log, listOf(mia, leo), today))
+        assertEquals(null, weekRecap(emptyList(), listOf(mia), today))
+    }
+
+    @Test
+    fun `a chore done together gives each the points but counts once for the family`() {
+        val log = listOf(ChoreDone("1", "Clean the garage", "leo", today, points = 4, helpers = setOf("mia")))
+        val week = weeklySummary(log, listOf(mia, leo), today)
+        assertEquals(listOf(4, 4), week.map { it.points })
+        assertEquals(4, familyPoints(log, today))
+        assertEquals(WeekRecap(4, 1, listOf("Leo" to 4, "Mia" to 4)), weekRecap(log, listOf(mia, leo), today))
     }
 
     @Test

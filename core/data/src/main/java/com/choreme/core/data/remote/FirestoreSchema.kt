@@ -74,6 +74,9 @@ object FirestoreSchema {
     const val URGENT = "urgent"
     const val POINTS = "points"
     const val DONE_COUNT = "doneCount"
+    /** Member ids doing a chore together with claimedBy (chores and the chore log). */
+    const val HELPERS = "helpers"
+    const val LAST_HELPERS = "lastHelpers"
 
     // Locations and places
     const val LATITUDE = "latitude"

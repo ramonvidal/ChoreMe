@@ -21,7 +21,6 @@ import com.choreme.core.model.chore.WeekRecap
 import com.choreme.core.model.chore.completeLog
 import com.choreme.core.model.chore.weekRecap
 import com.choreme.core.model.chore.weekStart
-import com.choreme.core.model.chore.weeklySummary
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.settings.NotificationSettings
 import dagger.assisted.Assisted
@@ -55,7 +54,7 @@ internal class WeeklySummaryWorker @AssistedInject constructor(
         val from = weekStart(today)
         val log = withTimeoutOrNull(TIMEOUT_MS) { chores.observeLog(session.familyId, from).first() } ?: return Result.retry()
         val allChores = withTimeoutOrNull(TIMEOUT_MS) { chores.observeChores(session.familyId).first() } ?: return Result.retry()
-        weekRecap(weeklySummary(completeLog(log, allChores), members, today))?.let(::show)
+        weekRecap(completeLog(log, allChores), members, today)?.let(::show)
         return Result.success()
     }
 

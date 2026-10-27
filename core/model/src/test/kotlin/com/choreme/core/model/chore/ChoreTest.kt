@@ -88,10 +88,46 @@ class ChoreTest {
 
     @Test
     fun `a parent can record a chore done by a kid without a phone`() {
-        val done = oneOff.completeFor(mia, by = mom, today)
+        val done = oneOff.completeFor(setOf("mia"), by = mom, today)
         assertEquals(ChoreStatus.DONE, done.status)
         assertEquals("mia", done.lastDoneBy)
         assertEquals("mom", done.approvedBy)
+    }
+
+    @Test
+    fun `chores can be done together`() {
+        val team = dishes.claim(leo).join(mia)
+        assertEquals(setOf("leo", "mia"), team.team)
+        // Either kid can say it's done; approving credits both.
+        val approved = team.complete(mia, today).approve(mom, today)
+        assertEquals("mia", approved.lastDoneBy)
+        assertEquals(setOf("leo"), approved.lastHelpers)
+        assertEquals(emptySet<String>(), approved.helpers) // the next time round starts fresh
+        assertEquals(setOf("leo", "mia"), choreDone(team.complete(mia, today), approved)?.people)
+        // A parent on it finishes for everyone.
+        val withMom = oneOff.claim(mom).join(leo).complete(mom, today)
+        assertEquals("mom", withMom.lastDoneBy)
+        assertEquals(setOf("leo"), withMom.lastHelpers)
+    }
+
+    @Test
+    fun `letting go of a shared chore hands it on`() {
+        val team = dishes.claim(leo).join(mia)
+        assertEquals(dishes.claim(leo), team.unclaim(mia)) // a helper just leaves
+        val handed = team.unclaim(leo)
+        assertEquals("mia", handed.claimedBy)
+        assertEquals(emptySet<String>(), handed.helpers)
+        assertEquals(ChoreStatus.OPEN, team.unclaim(mom).status) // a parent not on it frees it
+    }
+
+    @Test
+    fun `parents say who does it, or who did it`() {
+        val assigned = oneOff.assign(setOf("mia", "leo"), mom)
+        assertEquals(ChoreStatus.CLAIMED, assigned.status)
+        assertEquals(setOf("leo", "mia"), assigned.team)
+        assertEquals(ChoreStatus.OPEN, assigned.assign(emptySet(), mom).status)
+        val done = oneOff.completeFor(setOf("mia", "leo"), mom, today)
+        assertEquals(setOf("leo", "mia"), setOfNotNull(done.lastDoneBy) + done.lastHelpers)
     }
 }
 

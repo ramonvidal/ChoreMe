@@ -6,6 +6,8 @@ import com.choreme.core.data.remote.FirestoreSchema.COMPLETED_BY
 import com.choreme.core.data.remote.FirestoreSchema.CREATED_BY
 import com.choreme.core.data.remote.FirestoreSchema.DUE_DATE
 import com.choreme.core.data.remote.FirestoreSchema.EVERY_DAYS
+import com.choreme.core.data.remote.FirestoreSchema.HELPERS
+import com.choreme.core.data.remote.FirestoreSchema.LAST_HELPERS
 import com.choreme.core.data.remote.FirestoreSchema.LAST_DONE_BY
 import com.choreme.core.data.remote.FirestoreSchema.LAST_DONE_ON
 import com.choreme.core.data.remote.FirestoreSchema.NOTIFY_WHEN_DONE
@@ -43,10 +45,12 @@ internal fun Chore.toFields(): Map<String, Any?> = mapOf(
     DUE_DATE to dueDate.toString(),
     STATUS to status.name,
     CLAIMED_BY to claimedBy,
+    HELPERS to helpers.sorted(),
     COMPLETED_BY to completedBy,
     APPROVED_BY to approvedBy,
     LAST_DONE_BY to lastDoneBy,
     LAST_DONE_ON to lastDoneOn?.toString(),
+    LAST_HELPERS to lastHelpers.sorted(),
     NOTIFY_WHEN_DONE to notifyWhenDone,
     URGENT to urgent,
     POINTS to points.toLong(),
@@ -70,10 +74,12 @@ internal fun DocumentSnapshot.toChore(): Chore? = runCatching {
         dueDate = LocalDate.parse(getString(DUE_DATE)),
         status = ChoreStatus.valueOf(getString(STATUS).orEmpty()),
         claimedBy = getString(CLAIMED_BY),
+        helpers = people(HELPERS),
         completedBy = getString(COMPLETED_BY),
         approvedBy = getString(APPROVED_BY),
         lastDoneBy = getString(LAST_DONE_BY),
         lastDoneOn = getString(LAST_DONE_ON)?.let(LocalDate::parse),
+        lastHelpers = people(LAST_HELPERS),
         // Written once when the chore is reported, never changed afterwards.
         reportedBy = getString(CREATED_BY),
         // Chores from before this option existed announce too.
@@ -83,3 +89,7 @@ internal fun DocumentSnapshot.toChore(): Chore? = runCatching {
         doneCount = getLong(DONE_COUNT)?.toInt() ?: 0,
     )
 }.getOrNull()
+
+/** A list of member ids; empty when missing (documents from before chores were shared). */
+internal fun DocumentSnapshot.people(field: String): Set<String> =
+    (get(field) as? List<*>).orEmpty().filterIsInstance<String>().toSet()

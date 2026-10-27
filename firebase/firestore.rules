@@ -75,7 +75,17 @@ service cloud.firestore {
         && (!('notifyWhenDone' in c) || c.notifyWhenDone is bool)
         && (!('urgent' in c) || c.urgent is bool)
         && validPoints(c)
-        && (!('doneCount' in c) || (c.doneCount is int && c.doneCount >= 0));
+        && (!('doneCount' in c) || (c.doneCount is int && c.doneCount >= 0))
+        && validPeople(c, 'helpers') && validPeople(c, 'lastHelpers');
+    }
+
+    // Member ids of people doing a chore together (besides claimedBy / lastDoneBy).
+    function validPeople(d, field) {
+      return !(field in d) || (d[field] is list && d[field].size() <= 10);
+    }
+
+    function helpersOf(d) {
+      return d.get('helpers', []).toSet();
     }
 
     // What a chore is worth: 1 for a quick job up to 5 for a big one.
@@ -86,22 +96,34 @@ service cloud.firestore {
     function isFreshChore(c) {
       return c.status == 'OPEN' && c.claimedBy == null && c.completedBy == null
         && c.approvedBy == null && c.lastDoneBy == null
+        && helpersOf(c).size() == 0
         // Kids report chores at the usual worth; parents decide what bigger jobs count.
         && (!('points' in c) || c.points == 1);
     }
 
-    // Kids can grab an open chore, let go of one they hold, or say they finished it.
-    // Finishing only ever sends it to a parent; kids never mark chores done themselves.
+    // Kids can grab an open chore, join or leave one someone is doing, let go of one they
+    // hold (handing it to a helper, if any), or say they finished it. Kids only ever add or
+    // remove themselves. Finishing only sends it to a parent; kids never mark chores done.
     function isKidChoreStep(f) {
       let before = resource.data;
       let after = request.resource.data;
       let me = myMemberId(f);
-      return after.diff(before).affectedKeys().hasOnly(['status', 'claimedBy', 'completedBy', 'updatedAt', 'updatedBy'])
+      let was = helpersOf(before);
+      let now = helpersOf(after);
+      return after.diff(before).affectedKeys().hasOnly(['status', 'claimedBy', 'completedBy', 'helpers', 'updatedAt', 'updatedBy'])
         && (
-          (before.status == 'OPEN' && after.status == 'CLAIMED' && after.claimedBy == me)
-          || (before.status == 'CLAIMED' && before.claimedBy == me && after.status == 'OPEN' && after.claimedBy == null)
-          || (before.status in ['OPEN', 'CLAIMED'] && (before.claimedBy == null || before.claimedBy == me)
-              && after.status == 'PENDING_APPROVAL' && after.claimedBy == me && after.completedBy == me)
+          (before.status == 'OPEN' && after.status == 'CLAIMED' && after.claimedBy == me && now.size() == 0)
+          // Joining ("me too") or leaving as a helper.
+          || (before.status == 'CLAIMED' && after.status == 'CLAIMED' && after.claimedBy == before.claimedBy
+              && ((me in was && now == was.difference([me].toSet()))
+                  || (!(me in was) && before.claimedBy != me && now == was.union([me].toSet()))))
+          // Letting go of one I grabbed: free again, or handed to someone doing it with me.
+          || (before.status == 'CLAIMED' && before.claimedBy == me
+              && ((after.status == 'OPEN' && after.claimedBy == null && now.size() == 0)
+                  || (after.status == 'CLAIMED' && after.claimedBy in was && now == was.difference([after.claimedBy].toSet()))))
+          || (before.status in ['OPEN', 'CLAIMED'] && (before.claimedBy == null || before.claimedBy == me || me in was)
+              && after.status == 'PENDING_APPROVAL' && after.completedBy == me && now == was
+              && after.claimedBy == (before.claimedBy == null ? me : before.claimedBy))
         );
     }
 
@@ -292,7 +314,8 @@ service cloud.firestore {
           && request.resource.data.title is string && request.resource.data.title.size() <= 60
           && request.resource.data.doneBy is string
           && request.resource.data.on is string && request.resource.data.on.size() == 10
-          && validPoints(request.resource.data);
+          && validPoints(request.resource.data)
+          && validPeople(request.resource.data, 'helpers');
         allow delete: if isParent(f);
       }
 

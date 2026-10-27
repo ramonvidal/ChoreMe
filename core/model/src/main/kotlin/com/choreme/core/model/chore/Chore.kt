@@ -43,10 +43,14 @@ data class Chore(
     val status: ChoreStatus = ChoreStatus.OPEN,
     /** Member ids, not device uids, so a kid with two tablets is still one person. */
     val claimedBy: String? = null,
+    /** Others doing it together with [claimedBy] (never including them). */
+    val helpers: Set<String> = emptySet(),
     val completedBy: String? = null,
     val approvedBy: String? = null,
     val lastDoneBy: String? = null,
     val lastDoneOn: LocalDate? = null,
+    /** Who did it together with [lastDoneBy] that time; each of them gets the points too. */
+    val lastHelpers: Set<String> = emptySet(),
     /** Who noticed it needed doing. */
     val reportedBy: String? = null,
     /** "Let everyone know when it's done": the family gets "Leo did: Wash dishes". */
@@ -59,6 +63,9 @@ data class Chore(
     val doneCount: Int = 0,
 ) {
     fun isOverdue(today: LocalDate) = isActive && dueDate < today
+
+    /** Everyone on it: whoever grabbed it and those who joined. */
+    val team: Set<String> get() = setOfNotNull(claimedBy) + helpers
 
     companion object {
         /** The points a chore can be worth: 1 for a quick job, up to 5 for a big one. */
@@ -75,35 +82,65 @@ fun Chore.claim(by: Member): Chore {
     return copy(status = ChoreStatus.CLAIMED, claimedBy = by.id)
 }
 
-/** Lets go of a grabbed chore, so someone else can take it. */
+/** "Me too": joins whoever is already doing it, for chores done together. */
+fun Chore.join(by: Member): Chore {
+    if (status == ChoreStatus.OPEN) return claim(by)
+    check(status == ChoreStatus.CLAIMED) { "Only chores someone is doing can be joined" }
+    check(by.id !in team) { "Already on it" }
+    return copy(helpers = helpers + by.id)
+}
+
+/**
+ * Lets go of a chore. A helper just leaves; whoever grabbed it hands it to a helper, if
+ * there is one, or frees it. A parent who isn't on it frees it for everyone.
+ */
 fun Chore.unclaim(by: Member): Chore {
     check(status == ChoreStatus.CLAIMED) { "Chore isn't grabbed" }
+    if (by.id in helpers) return copy(helpers = helpers - by.id)
     require(claimedBy == by.id || by.role == Role.PARENT) { "Only whoever grabbed it, or a parent, can let it go" }
-    return copy(status = ChoreStatus.OPEN, claimedBy = null)
+    val next = if (claimedBy == by.id) helpers.minOrNull() else null
+    return if (next == null) {
+        copy(status = ChoreStatus.OPEN, claimedBy = null, helpers = emptySet())
+    } else {
+        copy(claimedBy = next, helpers = helpers - next)
+    }
+}
+
+/** A parent decides who's doing it; nobody frees it again. */
+fun Chore.assign(people: Set<String>, by: Member): Chore {
+    require(by.role == Role.PARENT) { "Only parents can say who does a chore" }
+    check(isActive) { "Chore is already finished" }
+    if (people.isEmpty()) return copy(status = ChoreStatus.OPEN, claimedBy = null, helpers = emptySet())
+    val lead = claimedBy?.takeIf { it in people } ?: people.min()
+    return copy(status = ChoreStatus.CLAIMED, claimedBy = lead, helpers = people - lead)
 }
 
 /** Parents' work counts straight away; kids' work goes to a parent for approval. */
 fun Chore.complete(by: Member, today: LocalDate): Chore {
     check(isActive) { "Chore is already finished" }
-    require(claimedBy == null || claimedBy == by.id || by.role == Role.PARENT) { "Someone else grabbed this chore" }
+    require(claimedBy == null || by.id in team || by.role == Role.PARENT) { "Someone else grabbed this chore" }
     return if (by.role == Role.KID) {
-        copy(status = ChoreStatus.PENDING_APPROVAL, claimedBy = by.id, completedBy = by.id)
+        copy(status = ChoreStatus.PENDING_APPROVAL, claimedBy = claimedBy ?: by.id, completedBy = by.id)
     } else {
-        finish(doneBy = by.id, approvedBy = null, today = today)
+        // Done together: everyone on it gets the credit. A parent finishing someone else's gets it alone.
+        finish(doneBy = by.id, together = if (by.id in team) team - by.id else emptySet(), approvedBy = null, today = today)
     }
 }
 
-/** A parent records that a kid did it, e.g. a kid without a phone. Counts as approved. */
-fun Chore.completeFor(kid: Member, by: Member, today: LocalDate): Chore {
+/** A parent records who did it (one person or several together), e.g. kids without a phone. Counts as approved. */
+fun Chore.completeFor(people: Set<String>, by: Member, today: LocalDate): Chore {
     require(by.role == Role.PARENT) { "Only parents can mark chores done for someone else" }
+    require(people.isNotEmpty()) { "Someone has to have done it" }
     check(isActive) { "Chore is already finished" }
-    return finish(doneBy = kid.id, approvedBy = by.id, today = today)
+    val lead = people.min()
+    return finish(doneBy = lead, together = people - lead, approvedBy = by.id, today = today)
 }
 
 fun Chore.approve(by: Member, today: LocalDate): Chore {
     require(by.role == Role.PARENT) { "Only parents can approve chores" }
     check(status == ChoreStatus.PENDING_APPROVAL) { "Chore is not waiting for approval" }
-    return finish(doneBy = checkNotNull(completedBy), approvedBy = by.id, today = today)
+    val doneBy = checkNotNull(completedBy)
+    return finish(doneBy = doneBy, together = team - doneBy, approvedBy = by.id, today = today)
 }
 
 /** Sends the chore back to the kid who did it, so they can redo it. */
@@ -114,7 +151,7 @@ fun Chore.reject(by: Member): Chore {
 }
 
 /** One-off chores end as DONE; recurring ones reopen, free for anyone, on their next date. */
-private fun Chore.finish(doneBy: String, approvedBy: String?, today: LocalDate): Chore {
+private fun Chore.finish(doneBy: String, together: Set<String>, approvedBy: String?, today: LocalDate): Chore {
     val next = recurrence.nextDueDate(previousDue = dueDate, doneOn = today)
     return if (next == null) {
         copy(
@@ -123,6 +160,7 @@ private fun Chore.finish(doneBy: String, approvedBy: String?, today: LocalDate):
             approvedBy = approvedBy,
             lastDoneBy = doneBy,
             lastDoneOn = today,
+            lastHelpers = together,
             urgent = false,
             doneCount = doneCount + 1,
         )
@@ -131,10 +169,12 @@ private fun Chore.finish(doneBy: String, approvedBy: String?, today: LocalDate):
             status = ChoreStatus.OPEN,
             dueDate = next,
             claimedBy = null,
+            helpers = emptySet(),
             completedBy = null,
             approvedBy = approvedBy,
             lastDoneBy = doneBy,
             lastDoneOn = today,
+            lastHelpers = together,
             // The next time round is ordinary again.
             urgent = false,
             doneCount = doneCount + 1,

@@ -257,6 +257,34 @@ describe('chores', () => {
     await assertFails(updateDoc(ref(kidDevice('kid1')), { status: 'PENDING_APPROVAL', claimedBy: 'member-kid1', completedBy: 'member-kid1' }));
   });
 
+  test('kids join or leave a chore done together, only ever in their own name', async () => {
+    const leo = kidDevice('kid1');
+    const mia = kidDevice('kid2');
+    await updateDoc(ref(leo), { status: 'CLAIMED', claimedBy: 'member-kid1' });
+    await assertFails(updateDoc(ref(leo), { helpers: ['member-kid2'] })); // can't sign up a sibling
+    await assertSucceeds(updateDoc(ref(mia), { helpers: ['member-kid2'] }));
+    await assertFails(updateDoc(ref(mia), { claimedBy: 'member-kid2', helpers: [] })); // can't take it over
+    await assertSucceeds(updateDoc(ref(mia), { helpers: [] }));
+    await assertSucceeds(updateDoc(ref(mia), { helpers: ['member-kid2'] }));
+    // Either can say it's done, and nobody is dropped on the way.
+    await assertFails(updateDoc(ref(mia), { status: 'PENDING_APPROVAL', completedBy: 'member-kid2', helpers: [] }));
+    await assertSucceeds(updateDoc(ref(mia), { status: 'PENDING_APPROVAL', completedBy: 'member-kid2' }));
+  });
+
+  test('a kid letting go hands a shared chore to whoever is doing it with them', async () => {
+    const leo = kidDevice('kid1');
+    await updateDoc(ref(leo), { status: 'CLAIMED', claimedBy: 'member-kid1' });
+    await updateDoc(ref(kidDevice('kid2')), { helpers: ['member-kid2'] });
+    await assertFails(updateDoc(ref(leo), { status: 'OPEN', claimedBy: null })); // the helper is still on it
+    await assertSucceeds(updateDoc(ref(leo), { claimedBy: 'member-kid2', helpers: [] }));
+  });
+
+  test('parents say who does a chore, several people at once', async () => {
+    await assertSucceeds(updateDoc(ref(parent('alice')), { status: 'CLAIMED', claimedBy: 'member-kid1', helpers: ['member-kid2'] }));
+    await assertFails(updateDoc(ref(parent('alice')), { helpers: 'member-kid2' }));
+    await assertFails(setDoc(doc(kidDevice('kid1'), 'families', FAMILY, 'chores', 'new'), { ...chore, createdBy: 'member-kid1', helpers: ['member-kid2'] }));
+  });
+
   test('a kid cannot skip approval or edit the chore', async () => {
     const db = kidDevice('kid1');
     await assertFails(updateDoc(ref(db), { status: 'DONE', completedBy: 'member-kid1' }));

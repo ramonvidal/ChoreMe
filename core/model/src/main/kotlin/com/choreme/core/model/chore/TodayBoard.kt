@@ -10,7 +10,7 @@ data class TodayBoard(
     /** Due in the next [UPCOMING_DAYS] days, soonest first. */
     val upcoming: List<Chore>,
     val doneToday: List<Chore>,
-    /** Chores the person looking said they'd do ("I'll do it"), whatever their day; not in [toDo] or [upcoming]. */
+    /** Chores the person looking said they'd do ("I'll do it", or joined), whatever their day; not in [toDo] or [upcoming]. */
     val mine: List<Chore> = emptyList(),
 ) {
     companion object {
@@ -21,7 +21,7 @@ data class TodayBoard(
 /** With [memberId], the chores they took move to [TodayBoard.mine], so they stand out. */
 fun buildTodayBoard(chores: List<Chore>, today: LocalDate, memberId: String? = null): TodayBoard {
     val byTitle = compareBy<Chore> { it.title.lowercase() }
-    val mine = chores.filter { memberId != null && it.status == ChoreStatus.CLAIMED && it.claimedBy == memberId }
+    val mine = chores.filter { memberId != null && it.status == ChoreStatus.CLAIMED && memberId in it.team }
     val others = chores - mine.toSet()
     return TodayBoard(
         mine = mine.sortedWith(compareByDescending<Chore> { it.urgent }.thenBy { it.dueDate }.then(byTitle)),

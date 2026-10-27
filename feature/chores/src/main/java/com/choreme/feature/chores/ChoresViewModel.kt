@@ -26,6 +26,9 @@ import com.choreme.core.model.chore.homeScene
 import com.choreme.core.model.chore.savedChoreToUpdate
 import com.choreme.core.model.chore.weekStart
 import com.choreme.core.model.chore.weeklySummary
+import com.choreme.core.model.chore.familyPoints
+import com.choreme.core.model.chore.join
+import com.choreme.core.model.chore.assign
 import com.choreme.core.model.chore.TodayBoard
 import com.choreme.core.model.chore.approve
 import com.choreme.core.model.chore.buildTodayBoard
@@ -72,17 +75,23 @@ data class ChoresUiState(
     val savedChores: List<SavedChore> = emptyList(),
     /** Everyone's finishes in the last 7 days, for the garden. */
     val week: List<MemberWeek> = emptyList(),
+    /** The family's points in the last 7 days; a chore done together counts once. */
+    val weekPoints: Int = 0,
 ) {
     val isParent get() = me?.role == Role.PARENT
     val hasChores get() = chores.isNotEmpty()
-    /** Kids at home, for "done by" (someone away can't have done it). */
-    val kids get() = members.values.filter { it.role == Role.KID && !it.isAway(today) }.sortedBy { it.name.lowercase() }
+    /** Everyone at home, for "who's doing it" and "who did it" (someone away can't have). */
+    val atHome get() = members.values.filter { !it.isAway(today) }.sortedBy { it.name.lowercase() }
+
+    /** "Leo", "Leo and Mia", "Leo, Mia and Ana": everyone on a chore but [me], whoever grabbed it first. */
+    fun teamNames(chore: Chore, me: String?): List<String> =
+        (listOfNotNull(chore.claimedBy) + chore.helpers.sorted()).filter { it != me }.mapNotNull { members[it]?.name }
     fun nameOf(memberId: String?): String? = memberId?.let { members[it]?.name }
 
     /** Parents tidy up any saved chore; others only their own. */
     fun canRemove(saved: SavedChore) = isParent || saved.createdBy == me?.id
 
-    val scene: HomeScene get() = homeScene(week.sumOf { it.points }, chores, today)
+    val scene: HomeScene get() = homeScene(weekPoints, chores, today)
 }
 
 /** What the person typed in the chore editor. */
@@ -147,6 +156,7 @@ class ChoresViewModel @Inject internal constructor(
                     groceriesToBuy = groceryItems.groceriesToBuy(),
                     savedChores = saved,
                     week = weeklySummary(finished, members, today),
+                    weekPoints = familyPoints(finished, today),
                 )
             }
         }
@@ -155,7 +165,9 @@ class ChoresViewModel @Inject internal constructor(
     fun claim(chore: Chore) = change(chore) { me, _ -> claim(me) }
     fun unclaim(chore: Chore) = change(chore) { me, _ -> unclaim(me) }
     fun complete(chore: Chore) = change(chore) { me, today -> complete(me, today) }
-    fun completeFor(chore: Chore, kid: Member) = change(chore) { me, today -> completeFor(kid, me, today) }
+    fun join(chore: Chore) = change(chore) { me, _ -> join(me) }
+    fun assign(chore: Chore, people: Set<String>) = change(chore) { me, _ -> assign(people, me) }
+    fun completeFor(chore: Chore, people: Set<String>) = change(chore) { me, today -> completeFor(people, me, today) }
     fun approve(chore: Chore) = change(chore) { me, today -> approve(me, today) }
     fun reject(chore: Chore) = change(chore) { me, _ -> reject(me) }
 
