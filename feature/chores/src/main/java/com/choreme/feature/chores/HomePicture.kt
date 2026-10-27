@@ -212,14 +212,21 @@ private fun DrawScope.flower(base: Offset, stem: Float, leaf: Color, petal: Colo
     }
 }
 
-/** A small tuft of three blades. */
+/** A small tuft of grass: three pointed blades, the outer ones leaning out. */
 private fun DrawScope.weed(base: Offset, height: Float, sway: Float) {
     if (height <= 0f) return
-    val stroke = 1.5.dp.toPx()
-    listOf(-28f, 0f, 28f).forEach { angle ->
-        rotate(angle + sway * 3f, pivot = base) {
-            drawLine(Weed, base, Offset(base.x, base.y - height * if (angle == 0f) 1f else 0.75f), strokeWidth = stroke)
+    val half = 1.6.dp.toPx()
+    val spread = 3.dp.toPx()
+    listOf(-1, 0, 1).forEach { side ->
+        val foot = base.x + side * spread
+        val tip = Offset(foot + side * spread * 1.2f + sway * half, base.y - height * if (side == 0) 1f else 0.7f)
+        val blade = Path().apply {
+            moveTo(foot - half, base.y)
+            quadraticTo(foot, base.y - height * 0.4f, tip.x, tip.y)
+            quadraticTo(foot, base.y - height * 0.4f, foot + half, base.y)
+            close()
         }
+        drawPath(blade, Weed)
     }
 }
 
