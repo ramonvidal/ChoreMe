@@ -140,14 +140,16 @@
         <item quantity="one">%d point in 7 days</item>
         <item quantity="other">%d points in 7 days</item>
     </plurals>
-    <string name="home_hint">Each chore to do is a weed in the grass. Finishing it pulls the weed and grows flowers, more for harder chores. Points count over the last 7 days, so the garden never resets. The lights stay on while nothing is overdue.</string>
+    <string name="home_hint">Each chore to do is a weed in the grass. Finishing it pulls the weed and grows flowers, more for harder chores. The more chores wait, the worse the weather: clouds, then rain, then a storm. Points count over the last 7 days, so the garden never resets. The lights stay on while nothing is overdue.</string>
     <string name="home_close">Close</string>
     <string name="home_mood_start">A quiet garden. The next chore done plants the first flower.</string>
     <string name="home_mood_growing">The garden is growing. Nice work, everyone.</string>
     <string name="home_mood_bloom">Full bloom! The house is in great shape this week.</string>
     <string name="home_mood_overdue">Something is overdue, so the lights are off for now.</string>
     <string name="home_mood_tired">The garden looks a bit tired: a few chores are piling up.</string>
-    <string name="home_mood_urgent">A cloud over the house: something urgent needs doing.</string>
+    <string name="home_mood_cloudy">Clouds are gathering: a few chores are waiting.</string>
+    <string name="home_mood_rain">It\'s raining on the garden: lots of chores to do.</string>
+    <string name="home_mood_storm">A storm! Chores are piling up. Every one finished clears the sky a bit.</string>
     <!-- Sunday evening summary -->
     <string name="weekly_channel">Week in review</string>
     <string name="weekly_channel_description">Sunday evening: the points everyone earned this week</string>

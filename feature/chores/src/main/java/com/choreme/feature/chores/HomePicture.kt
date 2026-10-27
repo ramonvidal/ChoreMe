@@ -5,6 +5,7 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -38,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.choreme.core.model.chore.HomeScene
 import com.choreme.core.model.chore.MemberWeek
+import com.choreme.core.model.chore.Weather
 import kotlin.math.ceil
 import com.choreme.core.ui.R as CoreUiR
 
@@ -91,8 +93,10 @@ internal fun HomeDialog(scene: HomeScene, week: List<MemberWeek>, onDismiss: () 
 }
 
 private fun homeMood(scene: HomeScene): Int = when {
-    scene.cloud -> R.string.home_mood_urgent
+    scene.weather == Weather.STORM -> R.string.home_mood_storm
+    scene.weather == Weather.RAIN -> R.string.home_mood_rain
     scene.tired -> R.string.home_mood_tired
+    scene.weather == Weather.CLOUDY -> R.string.home_mood_cloudy
     scene.fullBloom -> R.string.home_mood_bloom
     scene.points == 0 -> R.string.home_mood_start
     !scene.lightsOn -> R.string.home_mood_overdue
@@ -101,9 +105,9 @@ private fun homeMood(scene: HomeScene): Int = when {
 
 /**
  * A small house with a tree and flowers, drawn in the app's few colours. Each chore to do is a
- * weed in the grass; finishing one pulls it and grows flowers in, so the picture changes with
- * every chore. The lights are on while nothing is overdue; a cloud passes while something is
- * urgent; with chores piling up the flowers droop a little.
+ * scruffy weed in the grass (bigger once it's overdue); finishing one pulls it and grows flowers
+ * in, so the picture changes with every chore. The more that waits, the worse the weather:
+ * clouds, then rain, then a storm with lightning. The lights are on while nothing is overdue.
  */
 @Composable
 internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
@@ -113,26 +117,67 @@ internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
     val flowers by animateFloatAsState(scene.flowers.toFloat(), tween(900), label = "flowers")
     val weeds by animateFloatAsState(scene.weeds.toFloat(), tween(700), label = "weeds")
     val light by animateFloatAsState(if (scene.lightsOn) 1f else 0f, tween(800), label = "light")
+    // 0 sunny, 1 cloudy, 2 rain, 3 storm; eased so the sky darkens and clears gradually.
+    val gloom by animateFloatAsState(scene.weather.ordinal.toFloat(), tween(1500), label = "gloom")
     val motion = rememberInfiniteTransition(label = "garden")
     val sway by motion.animateFloat(-1f, 1f, infiniteRepeatable(tween(2600), RepeatMode.Reverse), label = "sway")
     val drift by motion.animateFloat(0f, 1f, infiniteRepeatable(tween(9000, easing = LinearEasing), RepeatMode.Reverse), label = "drift")
+    val fall by motion.animateFloat(0f, 1f, infiniteRepeatable(tween(650, easing = LinearEasing)), label = "rain")
+    val flash by motion.animateFloat(
+        0f,
+        0f,
+        infiniteRepeatable(
+            keyframes {
+                durationMillis = 4200
+                0f at 3000
+                1f at 3060
+                0f at 3200
+                0.8f at 3300
+                0f at 3450
+            },
+        ),
+        label = "lightning",
+    )
 
     val green = colors.primary
     val leaf = if (scene.tired) lerp(green, Tired, 0.5f) else green
-    val sky = lerp(colors.surfaceContainerLowest, Sky, if (scene.cloud) 0.25f else 0.6f)
+    val sky = when {
+        gloom <= 1f -> lerp(lerp(colors.surfaceContainerLowest, Sky, 0.6f), Overcast, gloom)
+        gloom <= 2f -> lerp(Overcast, Rainy, gloom - 1f)
+        else -> lerp(Rainy, Stormy, gloom - 2f)
+    }
+    val storm = scene.weather == Weather.STORM
 
     Canvas(modifier) {
         val w = size.width
         val h = size.height
         val ground = h * 0.82f
         drawRect(sky, size = Size(w, ground))
-        drawRect(lerp(colors.surfaceContainerLowest, green, 0.18f + 0.22f * growth), Offset(0f, ground), Size(w, h - ground))
+        val grass = lerp(colors.surfaceContainerLowest, green, 0.18f + 0.22f * growth)
+        drawRect(lerp(grass, Mud, (gloom / 3f) * 0.5f), Offset(0f, ground), Size(w, h - ground))
 
-        // Sun, or a cloud drifting over the house while something's urgent.
-        if (scene.cloud) {
-            cloud(Offset(w * (0.36f + 0.12f * drift), h * 0.2f), h * 0.11f, CloudGrey)
-        } else {
-            drawCircle(Sun, radius = h * 0.09f, center = Offset(w * 0.86f, h * 0.2f))
+        // The sun fades behind the clouds.
+        val sunAlpha = (1f - gloom / 1.5f).coerceIn(0f, 1f)
+        if (sunAlpha > 0f) drawCircle(Sun, radius = h * 0.09f, center = Offset(w * 0.86f, h * 0.2f), alpha = sunAlpha)
+
+        // Clouds: two when cloudy, more and darker with rain and storm. Each fades in as it arrives.
+        val cloudColor = lerp(CloudGrey, StormCloud, ((gloom - 1f) / 2f).coerceIn(0f, 1f))
+        CloudSpots.forEachIndexed { i, (x, y, r) ->
+            val alpha = (gloom * CloudSpots.size / 3f - i).coerceIn(0f, 1f)
+            if (alpha > 0f) {
+                val dx = (if (i % 2 == 0) drift else 1f - drift) * w * 0.06f
+                cloud(Offset(w * x + dx, h * y), h * r, cloudColor, alpha)
+            }
+        }
+
+        // Rain from under the clouds, heavier in a storm.
+        val rain = ((gloom - 1f).coerceIn(0f, 2f) * 12f).toInt()
+        val drop = h * 0.07f
+        repeat(rain) { i ->
+            val x = w * (0.08f + 0.84f * ((i * 0.618f) % 1f))
+            val t = (fall + i * 0.37f) % 1f
+            val y = h * 0.3f + t * (ground - h * 0.3f)
+            drawLine(Rain, Offset(x, y), Offset(x - drop * 0.3f, y + drop), strokeWidth = 1.2.dp.toPx(), alpha = 0.8f)
         }
 
         // The house, in the middle.
@@ -158,8 +203,8 @@ internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
             drawRect(colors.outline, Offset(x, top + houseH * 0.22f), window, style = Stroke(1.dp.toPx()))
         }
 
-        // A tree that grows from a sapling.
-        tree(Offset(w * 0.2f, ground), h * (0.22f + 0.38f * growth), leaf, colors.outline, sway)
+        // A tree that grows from a sapling, bending in the storm.
+        tree(Offset(w * 0.2f, ground), h * (0.22f + 0.38f * growth), leaf, colors.outline, if (storm) sway * 4f + 3f else sway)
 
         // Flowers either side of the house, one per point (up to a dozen).
         val slots = flowerSlots(w, houseW)
@@ -169,14 +214,28 @@ internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
             flower(Offset(x, ground), stem, leaf, Petals[i % Petals.size], if (scene.tired) 24f else sway * 4f, scene.tired, grown)
         }
 
-        // Weeds in the grass in front: one per chore waiting to be done today.
-        val weedBase = ground + (h - ground) * 0.8f
+        // Weeds in front, one per chore waiting today; the overdue ones are overgrown.
         val weedGap = w / HomeScene.MAX_WEEDS
+        val strip = h - ground
         repeat(ceil(weeds).toInt()) { i ->
             val grown = (weeds - i).coerceIn(0f, 1f)
-            // Spread out from the middle: 4, 5, 3, 6, 2, ...
+            // Spread out from the middle: 5, 4, 6, 3, 7, ...
             val slot = HomeScene.MAX_WEEDS / 2 + if (i % 2 == 0) i / 2 else -(i / 2 + 1)
-            weed(Offset(weedGap * (slot + 0.5f), weedBase), (h - ground) * 0.75f * grown, sway)
+            val overgrown = i < scene.overgrown
+            weed(Offset(weedGap * (slot + 0.5f), h), strip * (if (overgrown) 2.4f else 1.6f) * grown, i, overgrown, sway)
+        }
+
+        // Lightning: a bolt and a flash of the whole picture, every few seconds in a storm.
+        if (storm && flash > 0f) {
+            val bolt = Path().apply {
+                val x = w * 0.66f
+                moveTo(x, h * 0.28f)
+                lineTo(x - h * 0.05f, h * 0.46f)
+                lineTo(x + h * 0.01f, h * 0.46f)
+                lineTo(x - h * 0.04f, h * 0.66f)
+            }
+            drawPath(bolt, Lamp, alpha = flash, style = Stroke(2.5.dp.toPx()))
+            drawRect(Color.White, alpha = flash * 0.35f)
         }
     }
 }
@@ -212,35 +271,62 @@ private fun DrawScope.flower(base: Offset, stem: Float, leaf: Color, petal: Colo
     }
 }
 
-/** A small tuft of grass: three pointed blades, the outer ones leaning out. */
-private fun DrawScope.weed(base: Offset, height: Float, sway: Float) {
+/**
+ * A scruffy weed: five uneven blades leaning every which way, a dull olive. Overgrown ones are
+ * darker, with a couple of brown seed heads.
+ */
+private fun DrawScope.weed(base: Offset, height: Float, seed: Int, overgrown: Boolean, sway: Float) {
     if (height <= 0f) return
-    val half = 1.6.dp.toPx()
-    val spread = 3.dp.toPx()
-    listOf(-1, 0, 1).forEach { side ->
-        val foot = base.x + side * spread
-        val tip = Offset(foot + side * spread * 1.2f + sway * half, base.y - height * if (side == 0) 1f else 0.7f)
+    val color = if (overgrown) WeedDark else Weed
+    val half = 1.8.dp.toPx()
+    val spread = 3.5.dp.toPx()
+    for (b in -2..2) {
+        // Same shape every time for the same weed: lengths and leans from its index.
+        val jitter = ((seed * 31 + b * 17) % 7 + 7) % 7 / 6f
+        val foot = base.x + b * spread * 0.8f
+        val length = height * (0.55f + 0.45f * jitter) * if (b == 0) 1f else 0.85f
+        val lean = b * spread * (0.8f + jitter) + sway * half * 1.5f
+        val tip = Offset(foot + lean, base.y - length)
         val blade = Path().apply {
             moveTo(foot - half, base.y)
-            quadraticTo(foot, base.y - height * 0.4f, tip.x, tip.y)
-            quadraticTo(foot, base.y - height * 0.4f, foot + half, base.y)
+            quadraticTo(foot + lean * 0.2f, base.y - length * 0.5f, tip.x, tip.y)
+            quadraticTo(foot + lean * 0.4f, base.y - length * 0.45f, foot + half, base.y)
             close()
         }
-        drawPath(blade, Weed)
+        drawPath(blade, color)
+        if (overgrown && (b == 0 || b == 2)) drawCircle(Seed, half * 1.3f, tip)
     }
 }
 
-private fun DrawScope.cloud(center: Offset, r: Float, color: Color) {
-    drawCircle(color, r, center)
-    drawCircle(color, r * 0.75f, center + Offset(-r * 1.0f, r * 0.25f))
-    drawCircle(color, r * 0.8f, center + Offset(r * 1.0f, r * 0.2f))
-    drawRoundRect(color, center + Offset(-r * 1.6f, r * 0.1f), Size(r * 3.2f, r * 0.9f), CornerRadius(r * 0.45f))
+private fun DrawScope.cloud(center: Offset, r: Float, color: Color, alpha: Float) {
+    drawCircle(color, r, center, alpha = alpha)
+    drawCircle(color, r * 0.75f, center + Offset(-r * 1.0f, r * 0.25f), alpha = alpha)
+    drawCircle(color, r * 0.8f, center + Offset(r * 1.0f, r * 0.2f), alpha = alpha)
+    drawRoundRect(color, center + Offset(-r * 1.6f, r * 0.1f), Size(r * 3.2f, r * 0.9f), CornerRadius(r * 0.45f), alpha = alpha)
 }
 
+/** Where clouds gather, in arrival order: (x, y) as parts of the picture, and radius. */
+private val CloudSpots = listOf(
+    Triple(0.4f, 0.18f, 0.11f),
+    Triple(0.78f, 0.16f, 0.1f),
+    Triple(0.14f, 0.14f, 0.09f),
+    Triple(0.6f, 0.1f, 0.12f),
+    Triple(0.93f, 0.26f, 0.08f),
+    Triple(0.27f, 0.27f, 0.08f),
+)
+
 private val Sky = Color(0xFFDDEBF2)
+private val Overcast = Color(0xFFD3D8DC)
+private val Rainy = Color(0xFFAEB6BE)
+private val Stormy = Color(0xFF6B7480)
 private val Sun = Color(0xFFF2C14E)
 private val Lamp = Color(0xFFF6D77A)
 private val CloudGrey = Color(0xFFB9BEC4)
+private val StormCloud = Color(0xFF4A515B)
+private val Rain = Color(0xFF6F8FAA)
+private val Mud = Color(0xFF8C8466)
 private val Tired = Color(0xFFB8AE92)
-private val Weed = Color(0xFF8A8B5C)
+private val Weed = Color(0xFF76703A)
+private val WeedDark = Color(0xFF59532A)
+private val Seed = Color(0xFF8A6B3E)
 private val Petals = listOf(Color(0xFFE38B7A), Color(0xFFF0F0EC), Color(0xFFC9A0DC), Color(0xFFF2C14E))

@@ -67,12 +67,12 @@ class ChoreLogTest {
 
     @Test
     fun `the garden grows with the week and shows what's waiting`() {
-        assertEquals(HomeScene(0, 0f, 0, lightsOn = true, cloud = false, tired = false), homeScene(0, overdue = 0, urgent = 0))
+        assertEquals(HomeScene(0, 0f, 0, lightsOn = true, tired = false), homeScene(0, overdue = 0, urgent = 0))
         val busy = homeScene(45, overdue = 4, urgent = 1)
         assertEquals(true, busy.fullBloom)
         assertEquals(HomeScene.MAX_FLOWERS, busy.flowers)
         assertEquals(false, busy.lightsOn)
-        assertEquals(true, busy.cloud)
+        assertEquals(Weather.CLOUDY, busy.weather)
         assertEquals(true, busy.tired)
     }
 
@@ -83,9 +83,21 @@ class ChoreLogTest {
         val doneUrgent = Chore("3", "Fuse", dueDate = today, urgent = true, status = ChoreStatus.DONE)
         val scene = homeScene(5, listOf(late, urgent, doneUrgent), today)
         assertEquals(false, scene.lightsOn)
-        assertEquals(true, scene.cloud)
+        assertEquals(Weather.CLOUDY, scene.weather)
+        assertEquals(1, scene.overgrown)
         assertEquals(false, scene.tired)
         assertEquals(2, scene.weeds) // the done one isn't waiting any more
+    }
+
+    @Test
+    fun `the weather worsens as chores pile up`() {
+        assertEquals(Weather.SUNNY, weatherFor(toDo = 2, overdue = 0, urgent = 0))
+        assertEquals(Weather.CLOUDY, weatherFor(toDo = 1, overdue = 0, urgent = 1))
+        assertEquals(Weather.CLOUDY, weatherFor(toDo = 3, overdue = 0, urgent = 0))
+        assertEquals(Weather.RAIN, weatherFor(toDo = 4, overdue = 2, urgent = 0))
+        assertEquals(Weather.STORM, weatherFor(toDo = 6, overdue = 3, urgent = 1))
+        // Finishing chores clears it again.
+        assertEquals(Weather.SUNNY, homeScene(10, listOf(Chore("1", "Dishes", dueDate = today, status = ChoreStatus.DONE)), today).weather)
     }
 
     @Test

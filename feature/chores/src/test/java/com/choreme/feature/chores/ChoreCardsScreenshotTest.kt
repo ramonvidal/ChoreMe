@@ -70,15 +70,16 @@ class ChoreCardsScreenshotTest {
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-cards.png")
     }
 
-    /** The garden in each mood: quiet, growing with chores to do, full bloom, piling up, something urgent. */
+    /** The garden in each mood: quiet, cloudy with chores to do, full bloom, urgent, rain, storm. */
     @Test
     fun garden() {
         val scenes = listOf(
             homeScene(0, overdue = 0, urgent = 0),
             homeScene(9, overdue = 1, urgent = 0, toDo = 3),
             homeScene(32, overdue = 0, urgent = 0),
-            homeScene(6, overdue = 4, urgent = 0, toDo = 8),
             homeScene(12, overdue = 0, urgent = 1, toDo = 1),
+            homeScene(8, overdue = 1, urgent = 0, toDo = 5),
+            homeScene(6, overdue = 4, urgent = 1, toDo = 9),
         )
         compose.setContent {
             ChoreMeTheme(darkTheme = false, dynamicColor = false) {
