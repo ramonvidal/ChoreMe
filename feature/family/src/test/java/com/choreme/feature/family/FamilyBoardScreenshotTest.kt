@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.choreme.core.model.FamilyMessage
 import com.choreme.core.model.Member
 import com.choreme.core.model.Note
 import com.choreme.core.model.Role
@@ -27,7 +28,7 @@ import java.time.LocalDate
 
 /** Notes, "this week" and an away label; saved to build/outputs/roborazzi. */
 @RunWith(AndroidJUnit4::class)
-@Config(sdk = [34], qualifiers = "en-w411dp-h900dp")
+@Config(sdk = [34], qualifiers = "en-w411dp-h1200dp")
 class FamilyBoardScreenshotTest {
     @get:Rule
     val compose = createComposeRule()
@@ -52,6 +53,16 @@ class FamilyBoardScreenshotTest {
             ChoreMeTheme(darkTheme = false, dynamicColor = false) {
                 Surface {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        FamilyMessages(
+                            messages = listOf(
+                                FamilyMessage("m2", "Dinner's ready!", "mom", Instant.now().minusSeconds(120)),
+                                FamilyMessage("m1", "I'll be 20 minutes late, start without me", "leo", Instant.now().minusSeconds(3600)),
+                            ),
+                            members = listOf(mom, leo, mia),
+                            me = mom,
+                            onSend = {},
+                            onDelete = {},
+                        )
                         NotesSection(notes, listOf(mom, leo, mia), me = mom, onAdd = {}, onEdit = { _, _ -> }, onDelete = {})
                         WeekSection(weeklySummary(log, listOf(mom, leo, mia), today))
                         awayLabel(leo, today)?.let { Text(it) }
@@ -60,6 +71,7 @@ class FamilyBoardScreenshotTest {
             }
         }
         compose.onNodeWithText("Grandma arrives Friday at 18:00").assertExists()
+        compose.onNodeWithText("Dinner's ready!").assertExists()
         compose.onNodeWithText("2 chores").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/family-board.png")
     }

@@ -83,6 +83,7 @@ import com.choreme.core.model.grocery.GroceryItem
 import com.choreme.core.model.grocery.QuickAddResult
 import com.choreme.core.ui.ItemIcon
 import com.choreme.core.ui.HeaderLine
+import com.choreme.core.ui.PillTab
 import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.drawable
 import kotlinx.coroutines.launch
@@ -303,28 +304,13 @@ private fun ListPicker(state: GroceriesUiState, onSelect: (String?) -> Unit, onN
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ListTab(stringResource(R.string.list_groceries), state.isGroceries) { onSelect(null) }
-        state.lists.forEach { list -> ListTab(list.name, state.listId == list.id) { onSelect(list.id) } }
-        ListTab("+ " + stringResource(R.string.list_new), selected = false, onClick = onNew)
+        PillTab(stringResource(R.string.list_groceries), state.isGroceries, onClick = { onSelect(null) })
+        state.lists.forEach { list -> PillTab(list.name, state.listId == list.id, onClick = { onSelect(list.id) }) }
+        PillTab("+ " + stringResource(R.string.list_new), selected = false, onClick = onNew)
         if (state.canDeleteList) {
             TextButton(onClick = onDelete) { Text(stringResource(R.string.list_delete), color = MaterialTheme.colorScheme.error) }
         }
     }
-}
-
-/** The shown list in black, the others plain white. */
-@Composable
-private fun ListTab(label: String, selected: Boolean, onClick: () -> Unit) {
-    Text(
-        label,
-        style = MaterialTheme.typography.labelLarge,
-        color = if (selected) MaterialTheme.colorScheme.inverseOnSurface else MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier
-            .clip(MaterialTheme.shapes.small)
-            .background(if (selected) MaterialTheme.colorScheme.inverseSurface else MaterialTheme.colorScheme.surfaceContainerLowest)
-            .selectable(selected = selected, onClick = onClick, role = Role.Tab)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-    )
 }
 
 @Composable

@@ -14,6 +14,8 @@ enum class AlertKind {
     SHOPPING,
     /** "Leo is on the way home". */
     ON_MY_WAY,
+    /** A message someone sent to the whole family. */
+    MESSAGES,
 }
 
 /** A nightly window when notifications arrive silently, e.g. 22:00 to 07:00. */

@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.choreme.core.ui.SectionLabel
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -52,7 +53,7 @@ internal fun MonthView(
     modifier: Modifier = Modifier,
 ) {
     val day = state.selectedDayEntries
-    LazyColumn(modifier = modifier, contentPadding = PaddingValues(start = 12.dp, end = 12.dp, bottom = 96.dp)) {
+    LazyColumn(modifier = modifier, contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp)) {
         item(key = "header") {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 IconButton(onClick = { onMonth(state.month.minusMonths(1)) }) {
@@ -70,7 +71,7 @@ internal fun MonthView(
             }
         }
         item(key = "weekdays") {
-            Row(Modifier.fillMaxWidth()) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
                 DayOfWeek.entries.forEach { weekday ->
                     Text(
                         weekday.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
@@ -83,7 +84,13 @@ internal fun MonthView(
             }
         }
         item(key = "grid") {
-            Column {
+            Column(
+                Modifier
+                    .padding(top = 4.dp)
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                    .padding(8.dp),
+            ) {
                 monthGrid(state.month).forEach { week ->
                     Row(Modifier.fillMaxWidth()) {
                         week.forEach { date ->
@@ -102,26 +109,8 @@ internal fun MonthView(
                 }
             }
         }
-        item(key = "selected-day") {
-            Text(
-                state.selectedDay.format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.getDefault())).replaceFirstChar { it.uppercase() },
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 4.dp, top = 16.dp, bottom = 4.dp),
-            )
-        }
-        if (day == null || (day.events.isEmpty() && day.chores.isEmpty())) {
-            item(key = "empty") {
-                Text(
-                    stringResource(R.string.nothing_this_day),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(4.dp),
-                )
-            }
-        } else {
-            items(day.events, key = { "e-${it.id}-${it.start}" }) { event -> EventRow(event, onClick = { onOpenEvent(event) }) }
-            items(day.chores, key = { "c-${it.id}" }) { chore -> ChoreRow(chore) }
-        }
+        item(key = "selected-day") { SectionLabel(dayLabel(state.selectedDay, state.today)) }
+        item(key = "selected-entries") { DayCard(day, emptyText = stringResource(R.string.nothing_this_day), onOpenEvent = onOpenEvent) }
     }
 }
 
@@ -142,8 +131,8 @@ private fun DayCell(
             .aspectRatio(1f)
             .padding(2.dp)
             .clip(shape)
-            .then(if (isSelected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
-            .background(if (isToday) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
+            // The picked day is black; today is green text.
+            .background(if (isSelected) MaterialTheme.colorScheme.inverseSurface else Color.Transparent)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.TopCenter,
     ) {
@@ -151,12 +140,17 @@ private fun DayCell(
             Text(
                 date.dayOfMonth.toString(),
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-                color = if (inMonth) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline,
+                fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal,
+                color = when {
+                    isSelected -> MaterialTheme.colorScheme.inverseOnSurface
+                    isToday -> MaterialTheme.colorScheme.primary
+                    inMonth -> MaterialTheme.colorScheme.onSurface
+                    else -> MaterialTheme.colorScheme.outline
+                },
             )
             Row(horizontalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.padding(top = 2.dp)) {
                 eventColors.take(MAX_DOTS).forEach { Dot(Color(it)) }
-                if (hasChores) Dot(MaterialTheme.colorScheme.secondary)
+                if (hasChores) Dot(if (isSelected) MaterialTheme.colorScheme.inverseOnSurface else MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

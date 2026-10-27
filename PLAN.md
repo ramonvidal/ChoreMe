@@ -15,6 +15,7 @@
 | Family news | **"I'm at the shop"** (turning on shopping mode) and **"On my way home"** (Map tab): one tap, shown on the others' screens and as a notification on phones with ntfy. Each lasts a while (2 h, 1 h) and can be taken back |
 | Reminders at a time | "Remind me" on a chore: a notification at that time on **this phone only**; skipped if the chore is done by then |
 | More lists | Besides groceries: pharmacy, hardware store, packing... Same list behaviour, picked at the top of the Groceries tab. Anyone makes one; its maker or a parent removes it |
+| Family messages | "Message everyone" at the top of the Family tab: one line ("Dinner's ready!") that pops up on every phone (instantly with ntfy, otherwise within about 30 minutes once that phone has opened the Family tab). Kept a week; the sender or a parent removes it |
 | Notes board | Short notes on the Family tab everyone sees. The writer or a parent edits them |
 | This week | Parents see how many chores each person finished in the last 7 days. For fairness, not points |
 | Away | Anyone marks themselves away until a date (parents can mark anyone): no chore alerts on their phone, not offered as "done by" |

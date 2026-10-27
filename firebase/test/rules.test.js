@@ -442,6 +442,18 @@ describe('family news, notes, lists, chore log and away', () => {
     await assertFails(getDocs(collection(parent('mallory'), 'families', FAMILY, 'announcements')));
   });
 
+  test('messages: anyone sends one in their own name; nobody edits them', async () => {
+    const msg = { text: "Dinner's ready!", from: 'member-kid1', at: 1 };
+    await assertSucceeds(setDoc(fam(kidDevice('kid1'), 'messages', 'm1'), msg));
+    await assertFails(setDoc(fam(kidDevice('kid1'), 'messages', 'm2'), { ...msg, from: 'alice' }));
+    await assertFails(setDoc(fam(kidDevice('kid1'), 'messages', 'm3'), { ...msg, text: 'x'.repeat(201) }));
+    await assertSucceeds(getDocs(collection(kidDevice('kid2'), 'families', FAMILY, 'messages')));
+    await assertFails(updateDoc(fam(kidDevice('kid1'), 'messages', 'm1'), { text: 'changed' }));
+    await assertFails(deleteDoc(fam(kidDevice('kid2'), 'messages', 'm1')));
+    await assertSucceeds(deleteDoc(fam(kidDevice('kid1'), 'messages', 'm1')));
+    await assertFails(getDocs(collection(parent('mallory'), 'families', FAMILY, 'messages')));
+  });
+
   test('notes: anyone writes; the writer or a parent edits and removes', async () => {
     const note = { text: 'Wi-Fi: hunter2', createdBy: 'member-kid1', updatedAt: 1 };
     await assertSucceeds(setDoc(fam(kidDevice('kid1'), 'notes', 'wifi'), note));

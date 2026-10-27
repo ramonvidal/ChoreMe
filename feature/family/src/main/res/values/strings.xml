@@ -92,4 +92,24 @@
     <string name="away_hint">While away: no chore reminders on their phone, and they\'re not offered for \"done by\".</string>
     <string name="away_set">Set</string>
     <string name="away_back">Back home</string>
+    <!-- Family header and invite -->
+    <string name="family_title">Family</string>
+    <plurals name="family_member_count">
+        <item quantity="one">%d member</item>
+        <item quantity="other">%d members</item>
+    </plurals>
+    <string name="family_invite_button">Invite · %1$s</string>
+    <!-- Messages to everyone -->
+    <string name="message_title">Message everyone</string>
+    <string name="message_placeholder">e.g. Dinner\'s ready!</string>
+    <string name="message_send">Send</string>
+    <string name="message_you">You</string>
+    <string name="message_someone">Someone</string>
+    <string name="message_show_all">Show all</string>
+    <string name="message_show_less">Show less</string>
+    <string name="message_remove_confirm">Remove this message for everyone?</string>
+    <string name="message_channel">Family messages</string>
+    <string name="message_channel_description">When someone sends a message to the whole family</string>
+    <string name="alert_messages">Family messages</string>
+    <string name="alert_messages_hint">When someone sends a message to everyone</string>
 </resources>

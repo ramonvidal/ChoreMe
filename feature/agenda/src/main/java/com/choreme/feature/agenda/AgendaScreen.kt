@@ -19,8 +19,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -28,6 +28,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -50,11 +51,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.choreme.core.calendar.CalendarRepository
+import com.choreme.core.model.agenda.AgendaDay
 import com.choreme.core.model.agenda.CalendarEvent
 import com.choreme.core.model.agenda.FamilyCalendar
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.ui.ErrorText
+import com.choreme.core.ui.HeaderLine
 import com.choreme.core.ui.ItemIcon
+import com.choreme.core.ui.PillTab
+import com.choreme.core.ui.SectionLabel
+import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.icon
 import java.time.LocalDate
 import java.time.ZoneId
@@ -95,20 +101,23 @@ internal fun AgendaScreen(viewModel: AgendaViewModel = hiltViewModel()) {
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
-        ) {
-            FilterChip(
-                selected = state.view == AgendaView.LIST,
-                onClick = { viewModel.showView(AgendaView.LIST) },
-                label = { Text(stringResource(R.string.view_list)) },
-            )
-            FilterChip(
-                selected = state.view == AgendaView.MONTH,
-                onClick = { viewModel.showView(AgendaView.MONTH) },
-                label = { Text(stringResource(R.string.view_month)) },
-            )
+        Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            TabHeader(stringResource(R.string.agenda_title)) {
+                if (state.hasPermission && state.calendars.isNotEmpty()) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        HeaderLine(
+                            state.selected.orEmpty().mapNotNull(state::calendarName).joinToString(),
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        HeaderLine(" · ")
+                        HeaderLine(stringResource(R.string.change_calendars), modifier = Modifier.clickable { choosing = true })
+                    }
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PillTab(stringResource(R.string.view_list), state.view == AgendaView.LIST, onClick = { viewModel.showView(AgendaView.LIST) })
+                PillTab(stringResource(R.string.view_month), state.view == AgendaView.MONTH, onClick = { viewModel.showView(AgendaView.MONTH) })
+            }
         }
         if (state.view == AgendaView.MONTH && state.hasPermission) {
             MonthView(
@@ -135,50 +144,34 @@ internal fun AgendaScreen(viewModel: AgendaViewModel = hiltViewModel()) {
                     }
                 }
                 state.calendars.isEmpty() -> item(key = "no-calendars") {
-                    Text(stringResource(R.string.no_calendars), modifier = Modifier.padding(vertical = 8.dp))
+                    Text(
+                        stringResource(R.string.no_calendars),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(4.dp),
+                    )
                 }
-                else -> item(key = "calendars") {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            state.selected.orEmpty().mapNotNull(state::calendarName).joinToString(),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.weight(1f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        TextButton(onClick = { choosing = true }) { Text(stringResource(R.string.change_calendars)) }
-                    }
-                }
+                else -> Unit
             }
 
             state.days.forEach { day ->
-                item(key = "day-${day.date}") { DayHeader(day.date, state.today) }
-                if (day.events.isEmpty() && day.chores.isEmpty()) {
-                    item(key = "empty-${day.date}") {
-                        Text(
-                            stringResource(R.string.nothing_today),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(vertical = 8.dp),
-                        )
-                    }
+                item(key = "day-${day.date}") { SectionLabel(dayLabel(day.date, state.today)) }
+                item(key = "entries-${day.date}") {
+                    DayCard(day, emptyText = stringResource(R.string.nothing_today), onOpenEvent = ::open)
                 }
-                items(day.events, key = { "event-${day.date}-${it.id}-${it.start}" }) { event ->
-                    EventRow(event, onClick = { open(event) })
-                }
-                items(day.chores, key = { "chore-${day.date}-${it.id}" }) { chore -> ChoreRow(chore) }
             }
             item(key = "error") { ErrorText(actionState.error) }
         }
         }
 
         if (state.writableSelected.isNotEmpty()) {
-            ExtendedFloatingActionButton(
+            // Black, like the add button on every tab.
+            FloatingActionButton(
                 onClick = { adding = true },
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.add_event)) },
+                containerColor = MaterialTheme.colorScheme.inverseSurface,
+                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-            )
+            ) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_event)) }
         }
     }
 
@@ -197,15 +190,33 @@ internal fun AgendaScreen(viewModel: AgendaViewModel = hiltViewModel()) {
 }
 
 @Composable
-private fun DayHeader(date: LocalDate, today: LocalDate) {
-    val label = when (date) {
-        today -> stringResource(R.string.today)
-        today.plusDays(1) -> stringResource(R.string.tomorrow)
-        else -> date.format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.getDefault())).replaceFirstChar { it.uppercase() }
+internal fun dayLabel(date: LocalDate, today: LocalDate): String = when (date) {
+    today -> stringResource(R.string.today)
+    today.plusDays(1) -> stringResource(R.string.tomorrow)
+    else -> date.format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.getDefault())).replaceFirstChar { it.uppercase() }
+}
+
+/** A day's events and chores as rows in one white card, or a grey line when there's nothing. */
+@Composable
+internal fun DayCard(day: AgendaDay?, emptyText: String, onOpenEvent: (CalendarEvent) -> Unit) {
+    if (day == null || (day.events.isEmpty() && day.chores.isEmpty())) {
+        Text(
+            emptyText,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
+        )
+        return
     }
-    Column(Modifier.padding(top = 16.dp, bottom = 4.dp)) {
-        Text(label, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-        HorizontalDivider(Modifier.padding(top = 4.dp))
+    Card(Modifier.fillMaxWidth()) {
+        day.events.forEachIndexed { index, event ->
+            if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+            EventRow(event, onClick = { onOpenEvent(event) })
+        }
+        day.chores.forEachIndexed { index, chore ->
+            if (index > 0 || day.events.isNotEmpty()) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+            ChoreRow(chore)
+        }
     }
 }
 
@@ -214,45 +225,43 @@ internal fun EventRow(event: CalendarEvent, onClick: () -> Unit) {
     val zone = ZoneId.systemDefault()
     val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 10.dp),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(12.dp).background(Color(event.color), CircleShape))
+        // The calendar's own color, small: it tells calendars apart.
+        Box(Modifier.size(8.dp).background(Color(event.color), CircleShape))
         Spacer(Modifier.width(12.dp))
-        Text(
-            if (event.allDay) {
-                stringResource(R.string.all_day)
-            } else {
-                stringResource(R.string.time_range, event.start.atZone(zone).format(time), event.end.atZone(zone).format(time))
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.width(112.dp),
-        )
-        Column(Modifier.weight(1f)) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(event.title, style = MaterialTheme.typography.bodyLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            event.location?.let {
-                Text(it, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
+            val details = listOfNotNull(
+                if (event.allDay) {
+                    stringResource(R.string.all_day)
+                } else {
+                    stringResource(R.string.time_range, event.start.atZone(zone).format(time), event.end.atZone(zone).format(time))
+                },
+                event.location,
+            ).joinToString(" · ")
+            Text(
+                details,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }
 
 @Composable
 internal fun ChoreRow(chore: Chore) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-        ItemIcon(
-            chore.template.icon,
-            Modifier.size(20.dp),
-            tint = if (chore.urgent) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-        )
-        Spacer(Modifier.width(12.dp))
-        Text(
-            stringResource(R.string.chore_due),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(100.dp),
-        )
-        Text(chore.title, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        ItemIcon(chore.template.icon, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(chore.title, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        Text(stringResource(R.string.chore_due), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

@@ -62,3 +62,21 @@ class NoteTest {
         assertEquals(listOf("2", "1"), listOf(note, newer).board().map { it.id })
     }
 }
+
+class FamilyMessageTest {
+    private val now = Instant.parse("2026-10-27T19:00:00Z")
+    private fun message(id: String, from: String, hoursAgo: Long) = FamilyMessage(id, "Dinner!", from, now.minus(Duration.ofHours(hoursAgo)))
+
+    @Test
+    fun `the board keeps a week, newest first`() {
+        val list = listOf(message("old", "mom", 24 * 8), message("a", "mom", 30), message("b", "leo", 1))
+        assertEquals(listOf("b", "a"), list.recent(now).map { it.id })
+    }
+
+    @Test
+    fun `a phone pops up fresh messages from others, once`() {
+        val list = listOf(message("mine", "me", 1), message("a", "mom", 2), message("b", "leo", 1), message("stale", "mom", 20))
+        assertEquals(listOf("a", "b"), list.toNotify("me", now, shown = emptySet()).map { it.id })
+        assertEquals(listOf("b"), list.toNotify("me", now, shown = setOf("a")).map { it.id })
+    }
+}

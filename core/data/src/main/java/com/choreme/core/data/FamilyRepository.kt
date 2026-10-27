@@ -265,6 +265,7 @@ class FamilyRepository @Inject constructor(
         // memberUids last among these, so this parent can still delete the rest.
         val FAMILY_COLLECTIONS = listOf(
             FirestoreSchema.ANNOUNCEMENTS,
+            FirestoreSchema.MESSAGES,
             FirestoreSchema.NOTES,
             FirestoreSchema.CHORE_LOG,
             FirestoreSchema.LISTS,

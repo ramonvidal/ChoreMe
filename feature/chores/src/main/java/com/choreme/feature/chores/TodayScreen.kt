@@ -66,6 +66,7 @@ import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreStatus
 import com.choreme.core.model.chore.Recurrence
 import com.choreme.core.ui.HeaderLine
+import com.choreme.core.ui.SectionLabel
 import com.choreme.core.ui.ItemIcon
 import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.icon
@@ -109,13 +110,13 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
                 else -> {
                     val board = state.board
                     if (board.awaitingApproval.isNotEmpty()) {
-                        item(key = "awaiting-title") { SectionTitle(stringResource(R.string.section_awaiting)) }
+                        item(key = "awaiting-title") { SectionLabel(stringResource(R.string.section_awaiting)) }
                         items(board.awaitingApproval, key = { "awaiting-${it.id}" }) { chore ->
                             AwaitingCard(chore, state, onApprove = { viewModel.approve(chore) }, onReject = { viewModel.reject(chore) })
                         }
                     }
 
-                    item(key = "todo-title") { SectionTitle(stringResource(R.string.section_to_do)) }
+                    item(key = "todo-title") { SectionLabel(stringResource(R.string.section_to_do)) }
                     if (board.toDo.isEmpty()) {
                         item(key = "todo-empty") {
                             Text(
@@ -154,14 +155,14 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
                     }
 
                     if (board.upcoming.isNotEmpty()) {
-                        item(key = "upcoming-title") { SectionTitle(stringResource(R.string.section_upcoming)) }
+                        item(key = "upcoming-title") { SectionLabel(stringResource(R.string.section_upcoming)) }
                         item(key = "upcoming") {
                             CompactList(board.upcoming, trailing = { dayLabel(it.dueDate, state.today) }, onClick = { if (state.isParent) editing = it })
                         }
                     }
 
                     if (board.doneToday.isNotEmpty()) {
-                        item(key = "done-title") { SectionTitle(stringResource(R.string.section_done_today)) }
+                        item(key = "done-title") { SectionLabel(stringResource(R.string.section_done_today)) }
                         item(key = "done-today") {
                             CompactList(
                                 board.doneToday,
@@ -306,15 +307,6 @@ internal fun ChoresHeader(state: ChoresUiState, onOpenGroceries: () -> Unit) {
     }
 }
 
-@Composable
-private fun SectionTitle(text: String) {
-    Text(
-        text,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 4.dp, top = 16.dp, bottom = 4.dp),
-    )
-}
 
 @Composable
 private fun EmptyChores(isParent: Boolean) {

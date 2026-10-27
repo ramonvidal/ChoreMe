@@ -30,6 +30,7 @@ object FirestoreSchema {
     const val NOTES = "notes"
     const val CHORE_LOG = "choreLog"
     const val LISTS = "lists"
+    const val MESSAGES = "messages"
 
     const val FAMILY_ID = "familyId"
     const val FAMILY_NAME = "familyName"
@@ -54,6 +55,7 @@ object FirestoreSchema {
     const val CHORE_ID = "choreId"
     const val DONE_BY = "doneBy"
     const val ON = "on"
+    const val FROM = "from"
 
     // Chores
     const val TITLE = "title"

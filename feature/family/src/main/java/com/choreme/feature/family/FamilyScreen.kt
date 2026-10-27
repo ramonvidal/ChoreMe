@@ -3,9 +3,8 @@ package com.choreme.feature.family
 import com.choreme.core.ui.R as CoreUiR
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,20 +17,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -50,7 +46,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role as SemanticsRole
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -61,8 +56,11 @@ import com.choreme.core.model.JoinRequest
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
 import com.choreme.core.ui.ErrorText
+import com.choreme.core.ui.HeaderLine
 import com.choreme.core.ui.ItemIcon
-import com.choreme.core.ui.theme.memberColor
+import com.choreme.core.ui.MemberAvatar
+import com.choreme.core.ui.SectionLabel
+import com.choreme.core.ui.TabHeader
 
 @Composable
 internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
@@ -81,10 +79,25 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        state.family?.let { family -> item { InviteCard(family) } }
+        item(key = "header") {
+            TabHeader(state.family?.name ?: stringResource(R.string.family_title), Modifier.padding(top = 4.dp)) {
+                HeaderLine(pluralStringResource(R.plurals.family_member_count, state.members.size, state.members.size))
+            }
+        }
+
+        item { SectionLabel(stringResource(R.string.message_title)) }
+        item(key = "messages") {
+            FamilyMessages(
+                messages = state.messages,
+                members = state.members,
+                me = state.meMember,
+                onSend = viewModel::sendMessage,
+                onDelete = viewModel::deleteMessage,
+            )
+        }
 
         if (state.joinRequests.isNotEmpty()) {
-            item { SectionTitle(stringResource(R.string.family_requests_title)) }
+            item { SectionLabel(stringResource(R.string.family_requests_title)) }
             items(state.joinRequests, key = { "request-${it.uid}" }) { request ->
                 JoinRequestCard(
                     request = request,
@@ -96,7 +109,7 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
             }
         }
 
-        item { SectionTitle(stringResource(R.string.notes_title)) }
+        item { SectionLabel(stringResource(R.string.notes_title)) }
         item(key = "notes") {
             NotesSection(
                 notes = state.notes,
@@ -108,36 +121,45 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
             )
         }
 
-        item { SectionTitle(stringResource(R.string.family_members_title)) }
-        items(state.members, key = { "member-${it.id}" }) { member ->
-            MemberRow(
-                member = member,
-                isMe = member.id == state.me?.memberId,
-                canRemove = state.isParent && member.id != state.me?.memberId,
-                onRemove = { memberToRemove = member },
-                away = awayLabel(member, state.today),
-                onAway = if (state.canSetAway(member)) ({ awayFor = member }) else null,
-            )
+        item { SectionLabel(stringResource(R.string.family_members_title)) }
+        item(key = "members") {
+            Card(Modifier.fillMaxWidth()) {
+                state.members.forEachIndexed { index, member ->
+                    if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                    MemberRow(
+                        member = member,
+                        isMe = member.id == state.me?.memberId,
+                        canRemove = state.isParent && member.id != state.me?.memberId,
+                        onRemove = { memberToRemove = member },
+                        away = awayLabel(member, state.today),
+                        onAway = if (state.canSetAway(member)) ({ awayFor = member }) else null,
+                    )
+                }
+            }
         }
 
         item { ErrorText(actionState.error) }
 
-        if (state.isParent) {
-            item {
-                OutlinedButton(onClick = { showAddKid = true }, modifier = Modifier.fillMaxWidth()) {
-                    Icon(Icons.Filled.Add, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.family_add_kid))
+        item(key = "invite-actions") {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                state.family?.let { family -> InviteButton(family) }
+                if (state.isParent) {
+                    OutlinedButton(
+                        onClick = { showAddKid = true },
+                        shape = MaterialTheme.shapes.small,
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    ) { Text(stringResource(R.string.family_add_kid)) }
                 }
             }
         }
 
         if (state.isParent && state.week.isNotEmpty()) {
-            item { SectionTitle(stringResource(R.string.week_title)) }
+            item { SectionLabel(stringResource(R.string.week_title)) }
             item(key = "week") { WeekSection(state.week) }
         }
 
-        item { SectionTitle(stringResource(R.string.this_phone_title)) }
+        item { SectionLabel(stringResource(R.string.this_phone_title)) }
         item(key = "this-phone") { PhoneSettings() }
 
         item {
@@ -237,33 +259,21 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
     }
 }
 
-@Composable
-private fun SectionTitle(text: String) {
-    Text(text, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
-}
 
 @Composable
-private fun InviteCard(family: Family) {
+/** "Invite · ABC234": shares the code (the share sheet shows how to join). */
+@Composable
+private fun InviteButton(family: Family) {
     val context = LocalContext.current
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+    OutlinedButton(
+        onClick = { shareInvite(context, family) },
+        shape = MaterialTheme.shapes.small,
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(family.name, style = MaterialTheme.typography.headlineSmall)
-            Text(stringResource(R.string.family_invite_hint), style = MaterialTheme.typography.bodyMedium)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    family.inviteCode,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontFamily = FontFamily.Monospace,
-                    modifier = Modifier.weight(1f),
-                )
-                IconButton(onClick = { shareInvite(context, family) }) {
-                    Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.family_share_invite))
-                }
-            }
-        }
+        Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(8.dp))
+        Text(stringResource(R.string.family_invite_button, family.inviteCode))
     }
 }
 
@@ -338,21 +348,10 @@ private fun MemberRow(
     onAway: (() -> Unit)? = null,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            Modifier
-                .size(36.dp)
-                .background(memberColor(member.color), CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                member.name.take(1).uppercase(),
-                color = MaterialTheme.colorScheme.surface,
-                style = MaterialTheme.typography.titleMedium,
-            )
-        }
+        MemberAvatar(member, size = 36.dp)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(
@@ -365,12 +364,15 @@ private fun MemberRow(
             } else {
                 pluralStringResource(R.plurals.member_devices, member.uids.size, member.uids.size)
             }
-            Text("$role · $devices", style = MaterialTheme.typography.bodySmall)
-            if (away != null) Text(away, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary)
+            Text("$role · $devices", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (away != null) Text(away, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
         }
         if (onAway != null) {
             IconButton(onClick = onAway) {
-                ItemIcon(CoreUiR.drawable.ic_flight, tint = if (away != null) MaterialTheme.colorScheme.tertiary else LocalContentColor.current)
+                ItemIcon(
+                    CoreUiR.drawable.ic_flight,
+                    tint = if (away != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
         if (canRemove) {

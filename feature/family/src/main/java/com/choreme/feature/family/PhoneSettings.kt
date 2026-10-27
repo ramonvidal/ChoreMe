@@ -198,6 +198,7 @@ private val ALERTS = listOf(
     Triple(AlertKind.APPROVALS, R.string.alert_approvals, R.string.alert_approvals_hint),
     Triple(AlertKind.JOIN_REQUESTS, R.string.alert_join_requests, R.string.alert_join_requests_hint),
     Triple(AlertKind.ARRIVALS, R.string.alert_arrivals, R.string.alert_arrivals_hint),
+    Triple(AlertKind.MESSAGES, R.string.alert_messages, R.string.alert_messages_hint),
     Triple(AlertKind.ON_MY_WAY, R.string.alert_on_my_way, R.string.alert_on_my_way_hint),
     Triple(AlertKind.SHOPPING, R.string.alert_shopping, R.string.alert_shopping_hint),
     Triple(AlertKind.MORNING_SUMMARY, R.string.alert_morning, R.string.alert_morning_hint),

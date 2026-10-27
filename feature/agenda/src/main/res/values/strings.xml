@@ -9,7 +9,7 @@
     <string name="choose_title">Which calendars should the agenda show?</string>
     <string name="choose_hint">This choice is only for this phone.</string>
     <string name="choose_save">Show these</string>
-    <string name="change_calendars">Calendars</string>
+    <string name="change_calendars">Change</string>
     <string name="read_only">read only</string>
 
     <string name="all_day">All day</string>

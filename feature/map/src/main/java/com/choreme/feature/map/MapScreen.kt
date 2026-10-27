@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,10 +25,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
@@ -66,6 +70,8 @@ import com.choreme.core.model.location.Place
 import com.choreme.core.push.PushRegistration
 import com.choreme.core.ui.ErrorText
 import com.choreme.core.ui.ItemIcon
+import com.choreme.core.ui.MemberAvatar
+import com.choreme.core.ui.SectionLabel
 import com.choreme.core.ui.theme.memberColor
 import java.time.Duration
 import java.time.ZoneId
@@ -127,12 +133,18 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
                     viewModel.refresh()
                     state.myFix?.let { focus = it.point }
                 },
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.align(Alignment.TopEnd).padding(12.dp),
             ) { Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.refresh)) }
             if (state.isParent && state.myFix != null) {
+                // Black, like the add button on every tab.
                 ExtendedFloatingActionButton(
                     onClick = { addingPlace = true },
-                    icon = { ItemIcon(CoreUiR.drawable.ic_location_on) },
+                    containerColor = MaterialTheme.colorScheme.inverseSurface,
+                    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                    shape = MaterialTheme.shapes.medium,
+                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                     text = { Text(stringResource(R.string.save_place)) },
                     modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
                 )
@@ -179,16 +191,12 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
                             Text(stringResource(R.string.alerts_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                             Switch(checked = state.alertsEnabled, onCheckedChange = viewModel::setAlertsEnabled)
                         }
-                        Text(stringResource(R.string.alerts_body), style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.alerts_body), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         when {
-                            state.instant.connected -> Row(verticalAlignment = Alignment.CenterVertically) {
-                                ItemIcon(CoreUiR.drawable.ic_bolt, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
-                                Spacer(Modifier.width(4.dp))
-                                Text(stringResource(R.string.instant_on), style = MaterialTheme.typography.bodyMedium)
-                            }
-                            state.instant.hasApp -> Text(stringResource(R.string.instant_connecting), style = MaterialTheme.typography.bodySmall)
+                            state.instant.connected -> GreyText(stringResource(R.string.instant_on))
+                            state.instant.hasApp -> GreyText(stringResource(R.string.instant_connecting))
                             else -> {
-                                Text(stringResource(R.string.instant_off), style = MaterialTheme.typography.bodySmall)
+                                GreyText(stringResource(R.string.instant_off))
                                 TextButton(onClick = {
                                     context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PushRegistration.NTFY_PLAY_STORE_URL)))
                                 }) { Text(stringResource(R.string.instant_install)) }
@@ -198,19 +206,28 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
                 }
             }
 
-            item(key = "family-title") { SectionTitle(stringResource(R.string.family_title)) }
-            items(state.members, key = { "member-${it.member.id}" }) { m ->
-                MemberRow(m, onClick = { (m.status as? LocationStatus.Known)?.let { focus = it.location.point } })
-            }
-
-            item(key = "places-title") {
-                Column {
-                    SectionTitle(stringResource(R.string.places_title))
-                    if (state.places.isEmpty()) Text(stringResource(R.string.places_hint), style = MaterialTheme.typography.bodySmall)
+            item(key = "family-title") { SectionLabel(stringResource(R.string.family_title)) }
+            item(key = "members") {
+                Card(Modifier.fillMaxWidth()) {
+                    state.members.forEachIndexed { index, m ->
+                        if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                        MemberRow(m, onClick = { (m.status as? LocationStatus.Known)?.let { focus = it.location.point } })
+                    }
                 }
             }
-            items(state.places, key = { "place-${it.id}" }) { place ->
-                PlaceRow(place, canDelete = state.isParent, onClick = { focus = place.center }, onDelete = { viewModel.deletePlace(place) })
+
+            item(key = "places-title") { SectionLabel(stringResource(R.string.places_title)) }
+            item(key = "places") {
+                if (state.places.isEmpty()) {
+                    GreyText(stringResource(R.string.places_hint), Modifier.padding(horizontal = 4.dp))
+                } else {
+                    Card(Modifier.fillMaxWidth()) {
+                        state.places.forEachIndexed { index, place ->
+                            if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                            PlaceRow(place, canDelete = state.isParent, onClick = { focus = place.center }, onDelete = { viewModel.deletePlace(place) })
+                        }
+                    }
+                }
             }
             item(key = "error") { ErrorText(actionState.error) }
         }
@@ -243,8 +260,8 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
 }
 
 @Composable
-private fun SectionTitle(text: String) {
-    Text(text, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
+private fun GreyText(text: String, modifier: Modifier = Modifier) {
+    Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = modifier)
 }
 
 /** "On my way home" with one tap, and who else is on the way. Works without sharing a location. */
@@ -254,20 +271,26 @@ private fun OnMyWayCard(state: OnMyWay, onChange: (Boolean) -> Unit) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             state.others.forEach { (name, since) ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    ItemIcon(CoreUiR.drawable.ic_location_on, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        stringResource(R.string.on_my_way_other, name, since.atZone(ZoneId.systemDefault()).format(time)),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
+                Text(
+                    stringResource(R.string.on_my_way_other, name, since.atZone(ZoneId.systemDefault()).format(time)),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
             }
-            if (state.mine) {
-                Text(stringResource(R.string.on_my_way_sent), style = MaterialTheme.typography.bodyMedium)
-                OutlinedButton(onClick = { onChange(false) }) { Text(stringResource(R.string.on_my_way_home_now)) }
-            } else {
-                Button(onClick = { onChange(true) }) { Text(stringResource(R.string.on_my_way_button)) }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                GreyText(
+                    stringResource(if (state.mine) R.string.on_my_way_sent else R.string.on_my_way_hint),
+                    Modifier.weight(1f).padding(end = 12.dp),
+                )
+                if (state.mine) {
+                    OutlinedButton(
+                        onClick = { onChange(false) },
+                        shape = MaterialTheme.shapes.small,
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    ) { Text(stringResource(R.string.on_my_way_home_now)) }
+                } else {
+                    Button(onClick = { onChange(true) }, shape = MaterialTheme.shapes.small) { Text(stringResource(R.string.on_my_way_button)) }
+                }
             }
         }
     }
@@ -281,12 +304,9 @@ private fun SharingCard(isSharing: Boolean, needsBackground: Boolean, onToggle: 
                 Text(stringResource(R.string.share_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 Switch(checked = isSharing, onCheckedChange = onToggle)
             }
-            Text(
-                stringResource(if (isSharing) R.string.share_body_on else R.string.share_body_off),
-                style = MaterialTheme.typography.bodyMedium,
-            )
+            GreyText(stringResource(if (isSharing) R.string.share_body_on else R.string.share_body_off))
             if (needsBackground) {
-                Text(stringResource(R.string.share_needs_background), style = MaterialTheme.typography.bodySmall)
+                GreyText(stringResource(R.string.share_needs_background))
                 TextButton(onClick = onAllowBackground) { Text(stringResource(R.string.share_allow_background)) }
             }
         }
@@ -296,16 +316,15 @@ private fun SharingCard(isSharing: Boolean, needsBackground: Boolean, onToggle: 
 @Composable
 private fun MemberRow(m: MemberOnMap, onClick: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 6.dp),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(32.dp).background(memberColor(m.member.color), CircleShape), contentAlignment = Alignment.Center) {
-            Text(m.member.name.take(1).uppercase(), color = MaterialTheme.colorScheme.surface)
-        }
+        // Their color matches their dot on the map.
+        MemberAvatar(m.member, size = 32.dp)
         Spacer(Modifier.width(12.dp))
         Column {
             Text(m.member.name, style = MaterialTheme.typography.bodyLarge)
-            Text(statusText(m.status), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            GreyText(statusText(m.status))
         }
     }
 }
@@ -330,18 +349,24 @@ private fun ageText(age: Duration): String = when {
 
 @Composable
 private fun PlaceRow(place: Place, canDelete: Boolean, onClick: () -> Unit, onDelete: () -> Unit) {
-    Row(Modifier.fillMaxWidth().clickable(onClick = onClick), verticalAlignment = Alignment.CenterVertically) {
-        ItemIcon(CoreUiR.drawable.ic_location_on, tint = MaterialTheme.colorScheme.primary)
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onClick).heightIn(min = 52.dp).padding(start = 16.dp, end = if (canDelete) 4.dp else 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ItemIcon(CoreUiR.drawable.ic_location_on, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.width(12.dp))
         Text(place.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        Text(stringResource(R.string.radius_meters, place.radiusMeters), style = MaterialTheme.typography.bodySmall)
+        GreyText(stringResource(R.string.radius_meters, place.radiusMeters))
         if (canDelete) {
             IconButton(onClick = onDelete) {
-                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete_place, place.name))
+                Icon(
+                    Icons.Filled.Delete,
+                    contentDescription = stringResource(R.string.delete_place, place.name),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }
-    HorizontalDivider()
 }
 
 @Composable

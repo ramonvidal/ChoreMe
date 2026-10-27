@@ -30,4 +30,7 @@ object PushKinds {
 
     /** Someone is on the way home. */
     const val ON_MY_WAY = "on-my-way"
+
+    /** Someone sent a message to the whole family. */
+    const val MESSAGE = "message"
 }

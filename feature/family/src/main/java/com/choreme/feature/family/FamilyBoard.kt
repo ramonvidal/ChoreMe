@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.MaterialTheme
@@ -54,16 +57,23 @@ internal fun NotesSection(notes: List<Note>, members: List<Member>, me: Member?,
             val editable = me != null && note.canEdit(me)
             Card(Modifier.fillMaxWidth().clickable(enabled = editable) { editing = note.id }) {
                 Row(Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
-                    ItemIcon(CoreUiR.drawable.ic_sticky_note_2, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+                    ItemIcon(CoreUiR.drawable.ic_sticky_note_2, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.width(12.dp))
                     Column {
                         Text(note.text, style = MaterialTheme.typography.bodyLarge)
-                        names[note.createdBy]?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+                        names[note.createdBy]?.let {
+                            Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                 }
             }
         }
-        OutlinedButton(onClick = { editing = "" }) { Text(stringResource(R.string.notes_add)) }
+        OutlinedButton(
+            onClick = { editing = "" },
+            shape = MaterialTheme.shapes.small,
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        ) { Text(stringResource(R.string.notes_add)) }
     }
 
     val id = editing ?: return
@@ -109,9 +119,10 @@ private fun NoteDialog(initial: String, onSave: (String) -> Unit, onDelete: (() 
 /** For parents: how many chores each person finished in the last 7 days, to keep things fair. */
 @Composable
 internal fun WeekSection(week: List<MemberWeek>) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        week.forEach { (member, done) ->
-            Column {
+    Card(Modifier.fillMaxWidth()) {
+        week.forEachIndexed { index, (member, done) ->
+            if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+            Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(member.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                     Text(pluralStringResource(R.plurals.week_count, done.size, done.size), style = MaterialTheme.typography.bodyMedium)

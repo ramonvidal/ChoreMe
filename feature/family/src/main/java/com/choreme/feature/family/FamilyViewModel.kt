@@ -1,12 +1,23 @@
 package com.choreme.feature.family
 
+import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.choreme.core.data.AuthRepository
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import com.choreme.core.data.ChoreRepository
 import com.choreme.core.data.FamilyRepository
+import com.choreme.core.data.MessageRepository
 import com.choreme.core.data.NoteRepository
+import com.choreme.core.data.PushEndpointRepository
+import com.choreme.core.model.FamilyMessage
+import com.choreme.core.model.recent
+import com.choreme.core.push.PushKinds
+import com.choreme.core.push.PushSender
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.launch
+import java.time.Instant
 import com.choreme.core.model.DomainError
 import com.choreme.core.model.DomainException
 import com.choreme.core.model.Family
@@ -40,6 +51,8 @@ data class FamilyUiState(
     val joinRequests: List<JoinRequest> = emptyList(),
     /** The family board, newest first. */
     val notes: List<Note> = emptyList(),
+    /** Messages to everyone from the last week, newest first. */
+    val messages: List<FamilyMessage> = emptyList(),
     /** Who did what in the last 7 days; shown to parents. */
     val week: List<MemberWeek> = emptyList(),
     val today: LocalDate = LocalDate.now(),
@@ -54,11 +67,20 @@ data class FamilyUiState(
 
 @HiltViewModel
 class FamilyViewModel @Inject constructor(
+    @ApplicationContext context: Context,
     private val auth: AuthRepository,
     private val families: FamilyRepository,
     private val noteRepository: NoteRepository,
     private val chores: ChoreRepository,
+    private val messageRepository: MessageRepository,
+    private val endpoints: PushEndpointRepository,
+    private val push: PushSender,
 ) : ViewModel() {
+    init {
+        // From now on this phone also checks for family messages in the background.
+        MessageAlerts.schedule(context)
+    }
+
     val uiState: StateFlow<FamilyUiState> = families.session
         .filterIsInstance<SessionState.InFamily>()
         .flatMapLatest { me ->
@@ -67,13 +89,45 @@ class FamilyViewModel @Inject constructor(
                 families.observeFamily(me.familyId),
                 families.observeMembers(me.familyId),
                 if (me.role == Role.PARENT) families.observeJoinRequests(me.familyId) else flowOf(emptyList()),
-                noteRepository.observe(me.familyId).onStart { emit(emptyList()) },
+                combine(
+                    noteRepository.observe(me.familyId).onStart { emit(emptyList()) },
+                    messageRepository.observe(me.familyId).onStart { emit(emptyList()) },
+                    ::Pair,
+                ),
                 if (me.role == Role.PARENT) chores.observeLog(me.familyId, weekStart(today)).onStart { emit(emptyList()) } else flowOf(emptyList()),
-            ) { family, members, requests, notes, log ->
-                FamilyUiState(me, family, members, requests, notes, weeklySummary(log, members, today), today)
+            ) { family, members, requests, (notes, messages), log ->
+                FamilyUiState(
+                    me = me,
+                    family = family,
+                    members = members,
+                    joinRequests = requests,
+                    notes = notes,
+                    messages = messages.recent(Instant.now()),
+                    week = weeklySummary(log, members, today),
+                    today = today,
+                )
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FamilyUiState())
+
+    /** Sends a message to everyone, and pings their phones so it shows at once (with ntfy). */
+    fun sendMessage(text: String) {
+        val me = uiState.value.me ?: return
+        val message = text.trim().take(FamilyMessage.MAX_LENGTH).takeIf { it.isNotEmpty() } ?: return
+        messageRepository.send(me.familyId, me.memberId, message)
+        viewModelScope.launch {
+            try {
+                push.ping(endpoints.othersThan(me.familyId, me.memberId), PushKinds.MESSAGE)
+            } catch (e: Exception) {
+                Log.w("ChoreMe", "Couldn't ping the family", e)
+            }
+        }
+    }
+
+    fun deleteMessage(message: FamilyMessage) {
+        val familyId = uiState.value.me?.familyId ?: return
+        messageRepository.delete(familyId, message.id)
+    }
 
     fun addNote(text: String) {
         val me = uiState.value.me ?: return

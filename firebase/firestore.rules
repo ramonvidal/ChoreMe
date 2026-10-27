@@ -245,6 +245,18 @@ service cloud.firestore {
         allow delete: if isMember(f) && (resource.data.memberId == myMemberId(f) || isParent(f));
       }
 
+      // "Dinner's ready!": a message to everyone, sent in your own name. The sender tidies up
+      // their old ones; parents can remove any.
+      match /messages/{messageId} {
+        allow read: if isMember(f);
+        allow create: if isMember(f)
+          && request.resource.data.from == myMemberId(f)
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 200
+          && request.resource.data.at is int;
+        allow delete: if isParent(f) || (isMember(f) && resource.data.from == myMemberId(f));
+      }
+
       // The family board. Anyone writes a note; the writer or a parent changes or removes it.
       match /notes/{noteId} {
         allow read: if isMember(f);

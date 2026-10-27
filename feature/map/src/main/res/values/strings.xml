@@ -62,4 +62,5 @@
     <string name="on_my_way_channel">On the way home</string>
     <string name="on_my_way_channel_description">When someone in the family is on the way home</string>
     <string name="on_my_way_title">%1$s is on the way home</string>
+    <string name="on_my_way_hint">Let the family know you\'re heading home.</string>
 </resources>
