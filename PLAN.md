@@ -17,7 +17,9 @@
 | More lists | Besides groceries: pharmacy, hardware store, packing... Same list behaviour, picked at the top of the Groceries tab. Anyone makes one; its maker or a parent removes it |
 | Family messages | "Message everyone" at the top of the Family tab: one line ("Dinner's ready!") that pops up on every phone (instantly with ntfy, otherwise within about 30 minutes once that phone has opened the Family tab). Kept a week; the sender or a parent removes it |
 | Notes board | Short notes on the Family tab everyone sees. The writer or a parent edits them |
-| This week | Parents see how many chores each person finished in the last 7 days. For fairness, not points |
+| This week | Parents see the points each person earned in the last 7 days. Each chore is worth 1 to 5 points, set by a parent when creating or editing it and kept on the chore (and its saved quick pick) for every repeat; kids' reports start at 1. The count includes chores finished before the log existed (their last finish) and every finish, even twice a day |
+| Our home | A small drawn house and garden at the top of the Chores tab, shared by the whole family (cooperative, not a ranking): it grows with the week's points (full bloom at 30), the lights are on while nothing is overdue, a cloud passes while something is urgent, and the flowers droop (never anything sad) from 3 overdue chores. Tap for everyone's points |
+| Week in review | Sunday at 19:00 each phone posts "This week: 23 points" with each person's points. Can be turned off under This phone |
 | Away | Anyone marks themselves away until a date (parents can mark anyone): no chore alerts on their phone, not offered as "done by" |
 | Tab names | Chores, Groceries, Agenda, Map, Family |
 | Chore assignment | **Whoever grabs it**: chores are open to everyone, and one tap claims one |
@@ -148,7 +150,7 @@ rules let kids make only the grab / let go / "I finished" steps, in their own na
       Android asks to confirm. No store or extra app needed (only the very first
       install is from the link). Modules `:core:update` and `:feature:update`.
 - [ ] **Extras.** Home-screen widget ("Out of…" and today's chores), weekly
-      scoreboard or points for kids (not needed for now), dark mode polish.
+      dark mode polish.
 
 ## Open questions
 

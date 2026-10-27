@@ -8,6 +8,7 @@ import com.choreme.core.data.remote.FirestoreSchema.CREATED_AT
 import com.choreme.core.data.remote.FirestoreSchema.CREATED_BY
 import com.choreme.core.data.remote.FirestoreSchema.DONE_BY
 import com.choreme.core.data.remote.FirestoreSchema.ON
+import com.choreme.core.data.remote.FirestoreSchema.POINTS
 import com.choreme.core.data.remote.FirestoreSchema.TITLE
 import com.choreme.core.data.remote.FirestoreSchema.UPDATED_AT
 import com.choreme.core.data.remote.FirestoreSchema.UPDATED_BY
@@ -18,13 +19,16 @@ import com.choreme.core.model.NameKeys
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreDone
 import com.choreme.core.model.chore.SavedChore
+import com.choreme.core.model.chore.completeLog
 import com.google.firebase.Timestamp
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Lazy
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.tasks.await
 import java.time.Instant
 import java.time.LocalDate
@@ -93,6 +97,7 @@ class ChoreRepository @Inject constructor(
                     TITLE to done.title,
                     DONE_BY to done.doneBy,
                     ON to done.on.toString(),
+                    POINTS to done.points.toLong(),
                     AT to Instant.now().toEpochMilli(),
                 ),
             )
@@ -108,22 +113,37 @@ class ChoreRepository @Inject constructor(
                     title = doc.getString(TITLE).orEmpty(),
                     doneBy = doc.getString(DONE_BY) ?: return@mapNotNull null,
                     on = doc.getString(ON)?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return@mapNotNull null,
+                    points = doc.getLong(POINTS)?.toInt() ?: 1,
                 )
             }
+        }
+
+    /**
+     * Finishes on [since] or later, including chores' own last finish when the log missed it
+     * (finished before the log existed, or on a phone with an older app). See [completeLog].
+     */
+    fun observeFinished(familyId: String, since: LocalDate): Flow<List<ChoreDone>> =
+        combine(observeLog(familyId, since).onStart { emit(emptyList()) }, observeChores(familyId)) { log, chores ->
+            completeLog(log, chores).filter { !it.on.isBefore(since) }
         }
 
     fun observeSavedChores(familyId: String): Flow<List<SavedChore>> =
         savedChores(familyId).documentsFlow().map { docs ->
             docs.mapNotNull { doc ->
                 val title = doc.getString(TITLE) ?: return@mapNotNull null
-                SavedChore(doc.id, title, doc.getString(CREATED_BY).orEmpty())
+                SavedChore(doc.id, title, doc.getString(CREATED_BY).orEmpty(), doc.getLong(POINTS)?.toInt() ?: 1)
             }.sortedBy { it.title.lowercase() }
         }
 
     /** Keeps a hand-typed chore for next time; saving the same name twice keeps one. */
-    fun saveForLater(familyId: String, memberId: String, title: String) {
+    fun saveForLater(familyId: String, memberId: String, title: String, points: Int = 1) {
         val ref = NameKeys.documentId(title)?.let(savedChores(familyId)::document) ?: return
-        ref.set(mapOf(TITLE to title.trim(), CREATED_BY to memberId)).logFailure()
+        ref.set(mapOf(TITLE to title.trim(), CREATED_BY to memberId, POINTS to points.toLong())).logFailure()
+    }
+
+    /** A saved chore picked with other points keeps them for next time. */
+    fun setSavedPoints(familyId: String, savedId: String, points: Int) {
+        savedChores(familyId).document(savedId).update(POINTS, points.toLong()).logFailure()
     }
 
     fun deleteSaved(familyId: String, savedId: String) {

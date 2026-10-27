@@ -111,6 +111,8 @@
     </plurals>
     <string name="reminder_body">Anyone can grab one in ChoreMe.</string>
     <string name="editor_urgent">Urgent</string>
+    <string name="editor_points">Points</string>
+    <string name="editor_points_hint">Harder chores are worth more. Kept for next time it repeats.</string>
     <string name="editor_urgent_hint">Needs doing as soon as possible: shown first, in red, and the family gets an alert.</string>
     <string name="urgent">Urgent</string>
     <string name="urgent_channel">Urgent chores</string>
@@ -132,4 +134,26 @@
     </plurals>
     <string name="done_already">Done already</string>
     <string name="change_reminder">Change reminder</string>
+    <!-- Our home: the garden that grows with the week's chores -->
+    <string name="home_title">Our home</string>
+    <plurals name="home_points">
+        <item quantity="one">%d point this week</item>
+        <item quantity="other">%d points this week</item>
+    </plurals>
+    <string name="home_hint">Every chore anyone finishes grows the garden, harder ones more. The lights stay on while nothing is overdue.</string>
+    <string name="home_close">Close</string>
+    <string name="home_mood_start">A new week. The first chore plants the first flower.</string>
+    <string name="home_mood_growing">The garden is growing. Nice work, everyone.</string>
+    <string name="home_mood_bloom">Full bloom! The house is in great shape this week.</string>
+    <string name="home_mood_overdue">Something is overdue, so the lights are off for now.</string>
+    <string name="home_mood_tired">The garden looks a bit tired: a few chores are piling up.</string>
+    <string name="home_mood_urgent">A cloud over the house: something urgent needs doing.</string>
+    <!-- Sunday evening summary -->
+    <string name="weekly_channel">Week in review</string>
+    <string name="weekly_channel_description">Sunday evening: the points everyone earned this week</string>
+    <plurals name="weekly_title">
+        <item quantity="one">This week: %d point</item>
+        <item quantity="other">This week: %d points</item>
+    </plurals>
+    <string name="weekly_person">%1$s %2$d</string>
 </resources>

@@ -72,6 +72,8 @@ internal fun ChoreEditorSheet(
     savedChores: List<SavedChore> = emptyList(),
     canRemoveSaved: (SavedChore) -> Boolean = { false },
     onRemoveSaved: (SavedChore) -> Unit = {},
+    /** Parents choose what a chore is worth; kids' reports are worth [Chore.POINTS] first. */
+    canSetPoints: Boolean = false,
 ) {
     var removing by remember { mutableStateOf<SavedChore?>(null) }
     val initialRecurrence = chore?.recurrence ?: Recurrence.Once
@@ -85,6 +87,7 @@ internal fun ChoreEditorSheet(
     var showRepeat by remember { mutableStateOf(initialRecurrence != Recurrence.Once) }
     var notifyWhenDone by remember { mutableStateOf(chore?.notifyWhenDone ?: true) }
     var urgent by remember { mutableStateOf(chore?.urgent ?: false) }
+    var points by remember { mutableIntStateOf(chore?.points ?: Chore.POINTS.first) }
 
     val templateTitles = ChoreTemplate.entries.associateWith { stringResource(it.title) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -133,6 +136,7 @@ internal fun ChoreEditorSheet(
                                 template = ChoreTemplate.OTHER
                                 title = saved.title
                                 titleFromTemplate = saved.title
+                                if (canSetPoints) points = saved.points
                             },
                             onLongClick = { if (canRemoveSaved(saved)) removing = saved },
                         )
@@ -148,6 +152,8 @@ internal fun ChoreEditorSheet(
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                 modifier = Modifier.fillMaxWidth(),
             )
+
+            if (canSetPoints) PointsRow(points, onPoints = { points = it })
 
             Row(
                 modifier = Modifier
@@ -220,7 +226,7 @@ internal fun ChoreEditorSheet(
                 Button(
                     onClick = {
                         val due = if (chore == null && recurrence == Recurrence.Once) today else dueDate
-                        onSave(ChoreDraft(title, template ?: ChoreTemplate.OTHER, checkNotNull(recurrence), due, notifyWhenDone, urgent))
+                        onSave(ChoreDraft(title, template ?: ChoreTemplate.OTHER, checkNotNull(recurrence), due, notifyWhenDone, urgent, points))
                     },
                     enabled = title.isNotBlank() && recurrence != null,
                 ) { Text(stringResource(CoreUiR.string.save)) }
@@ -240,6 +246,26 @@ internal fun ChoreEditorSheet(
             },
             dismissButton = { TextButton(onClick = { removing = null }) { Text(stringResource(CoreUiR.string.cancel)) } },
         )
+    }
+}
+
+/** "Points: 1 2 3 4 5": harder chores are worth more in the week's score and the garden. */
+@Composable
+private fun PointsRow(points: Int, onPoints: (Int) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            ItemIcon(CoreUiR.drawable.ic_star, tint = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.width(8.dp))
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.editor_points))
+                Text(stringResource(R.string.editor_points_hint), style = MaterialTheme.typography.bodySmall)
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(start = 32.dp)) {
+            Chore.POINTS.forEach { value ->
+                FilterChip(selected = points == value, onClick = { onPoints(value) }, label = { Text(value.toString()) })
+            }
+        }
     }
 }
 

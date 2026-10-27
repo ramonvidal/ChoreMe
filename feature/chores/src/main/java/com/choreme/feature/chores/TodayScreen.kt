@@ -85,6 +85,7 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
     var adding by remember { mutableStateOf(false) }
     var doneByFor by remember { mutableStateOf<Chore?>(null) }
     var remindFor by remember { mutableStateOf<Chore?>(null) }
+    var showHome by remember { mutableStateOf(false) }
     val reminders by viewModel.reminders.collectAsStateWithLifecycle()
 
     val snackbar = remember { SnackbarHostState() }
@@ -108,6 +109,7 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
                 }
                 !state.hasChores -> item(key = "empty") { EmptyChores(state.isParent) }
                 else -> {
+                    item(key = "home") { HomeCard(state.scene, onClick = { showHome = true }) }
                     val board = state.board
                     if (board.awaitingApproval.isNotEmpty()) {
                         item(key = "awaiting-title") { SectionLabel(stringResource(R.string.section_awaiting)) }
@@ -197,6 +199,7 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
             savedChores = state.savedChores,
             canRemoveSaved = state::canRemove,
             onRemoveSaved = viewModel::removeSaved,
+            canSetPoints = state.isParent,
             onSave = { draft ->
                 adding = false
                 viewModel.create(draft)?.let { existing ->
@@ -215,6 +218,7 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
                 viewModel.update(chore, it)
                 editing = null
             },
+            canSetPoints = state.isParent,
             onDelete = {
                 viewModel.delete(chore)
                 editing = null
@@ -237,6 +241,7 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
             onDismiss = { remindFor = null },
         )
     }
+    if (showHome) HomeDialog(state.scene, state.week, onDismiss = { showHome = false })
     doneByFor?.let { chore ->
         DoneByDialog(
             kids = state.kids,
@@ -368,6 +373,7 @@ internal fun ChoreCard(
         }
         if (overdueDays > 0) add(pluralStringResource(R.plurals.overdue_days, overdueDays, overdueDays))
         if (chore.recurrence != Recurrence.Once) add(recurrenceLabel(chore.recurrence))
+        if (chore.points > 1) add(pluralStringResource(CoreUiR.plurals.points, chore.points, chore.points))
         if (reminder != null) add(stringResource(R.string.reminder_at, reminder.atZone(ZoneId.systemDefault()).format(SHORT_TIME)))
     }.joinToString(" · ")
 

@@ -94,7 +94,7 @@ class FamilyViewModel @Inject constructor(
                     messageRepository.observe(me.familyId).onStart { emit(emptyList()) },
                     ::Pair,
                 ),
-                if (me.role == Role.PARENT) chores.observeLog(me.familyId, weekStart(today)).onStart { emit(emptyList()) } else flowOf(emptyList()),
+                if (me.role == Role.PARENT) chores.observeFinished(me.familyId, weekStart(today)).onStart { emit(emptyList()) } else flowOf(emptyList()),
             ) { family, members, requests, (notes, messages), log ->
                 FamilyUiState(
                     me = me,

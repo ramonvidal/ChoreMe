@@ -16,6 +16,7 @@ import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreStatus
 import com.choreme.core.model.chore.ChoreTemplate
 import com.choreme.core.model.chore.buildTodayBoard
+import com.choreme.core.model.chore.homeScene
 import com.choreme.core.ui.theme.ChoreMeTheme
 import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.Rule
@@ -40,7 +41,7 @@ class ChoreCardsScreenshotTest {
     private val dishes = Chore("1", "Wash the dishes", ChoreTemplate.DISHES, dueDate = today, reportedBy = "leo")
     private val laundry = Chore("2", "Laundry", ChoreTemplate.LAUNDRY, dueDate = today.minusDays(2), status = ChoreStatus.CLAIMED, claimedBy = "leo")
     private val bathroom = Chore("3", "Clean the bathroom", ChoreTemplate.CLEAN_BATHROOM, dueDate = today, status = ChoreStatus.PENDING_APPROVAL, completedBy = "leo")
-    private val trash = Chore("4", "Take out the trash", ChoreTemplate.TRASH, dueDate = today)
+    private val trash = Chore("4", "Take out the trash", ChoreTemplate.TRASH, dueDate = today, points = 2)
     private val leak = Chore("5", "Water leak under the sink", ChoreTemplate.CLEAN_KITCHEN, dueDate = today, reportedBy = "leo", urgent = true)
 
     @Test
@@ -50,6 +51,8 @@ class ChoreCardsScreenshotTest {
                 Surface {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         ChoresHeader(state.copy(chores = listOf(leak, dishes, laundry), board = buildTodayBoard(listOf(leak, dishes, laundry), today), groceriesToBuy = 5), onOpenGroceries = {})
+                        HomeCard(homeScene(14, overdue = 0, urgent = 0), onClick = {})
+                        ChoreCard(trash, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         ChoreCard(leak, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         AwaitingCard(bathroom, state, onApprove = {}, onReject = {})
                         ChoreCard(dishes, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
@@ -62,6 +65,31 @@ class ChoreCardsScreenshotTest {
         }
         compose.onNodeWithText("Wash the dishes").assertExists()
         compose.onNodeWithText("Urgent").assertExists()
+        compose.onNodeWithText("2 points").assertExists()
+        compose.onNodeWithText("14 points this week").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-cards.png")
+    }
+
+    /** The garden in each mood: a new week, growing, full bloom, piling up, something urgent. */
+    @Test
+    fun garden() {
+        val scenes = listOf(
+            homeScene(0, overdue = 0, urgent = 0),
+            homeScene(9, overdue = 1, urgent = 0),
+            homeScene(32, overdue = 0, urgent = 0),
+            homeScene(6, overdue = 4, urgent = 0),
+            homeScene(12, overdue = 0, urgent = 1),
+        )
+        compose.setContent {
+            ChoreMeTheme(darkTheme = false, dynamicColor = false) {
+                Surface {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        scenes.forEach { HomeCard(it, onClick = {}) }
+                    }
+                }
+            }
+        }
+        compose.onNodeWithText("32 points this week").assertExists()
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-garden.png")
     }
 }

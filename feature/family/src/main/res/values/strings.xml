@@ -58,6 +58,8 @@
     <string name="alert_shopping_hint">When someone starts shopping, so you can add what\'s missing (needs ntfy)</string>
     <string name="alert_morning">Morning summary</string>
     <string name="alert_morning_hint">At 8:00, what needs doing today</string>
+    <string name="alert_weekly">Week in review</string>
+    <string name="alert_weekly_hint">Sunday evening, the week\'s points for everyone</string>
     <string name="quiet_section">Quiet hours</string>
     <string name="quiet_hint">Notifications still arrive, just without sound or vibration.</string>
     <string name="quiet_from">From %1$s</string>
@@ -82,10 +84,6 @@
     <string name="notes_placeholder">e.g. Grandma arrives Friday at 18:00</string>
     <!-- This week -->
     <string name="week_title">This week</string>
-    <plurals name="week_count">
-        <item quantity="one">%d chore</item>
-        <item quantity="other">%d chores</item>
-    </plurals>
     <!-- Away -->
     <string name="away_until">Away until %1$s</string>
     <string name="away_title">%1$s is away until…</string>

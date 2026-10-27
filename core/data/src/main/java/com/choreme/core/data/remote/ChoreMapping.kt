@@ -13,6 +13,8 @@ import com.choreme.core.data.remote.FirestoreSchema.RECURRENCE_TYPE
 import com.choreme.core.data.remote.FirestoreSchema.STATUS
 import com.choreme.core.data.remote.FirestoreSchema.TEMPLATE
 import com.choreme.core.data.remote.FirestoreSchema.TITLE
+import com.choreme.core.data.remote.FirestoreSchema.DONE_COUNT
+import com.choreme.core.data.remote.FirestoreSchema.POINTS
 import com.choreme.core.data.remote.FirestoreSchema.URGENT
 import com.choreme.core.data.remote.FirestoreSchema.WEEK_DAYS
 import com.choreme.core.model.chore.Chore
@@ -47,6 +49,8 @@ internal fun Chore.toFields(): Map<String, Any?> = mapOf(
     LAST_DONE_ON to lastDoneOn?.toString(),
     NOTIFY_WHEN_DONE to notifyWhenDone,
     URGENT to urgent,
+    POINTS to points.toLong(),
+    DONE_COUNT to doneCount.toLong(),
 )
 
 /** Null for documents that can't be read as a chore, so one bad document doesn't hide the rest. */
@@ -75,5 +79,7 @@ internal fun DocumentSnapshot.toChore(): Chore? = runCatching {
         // Chores from before this option existed announce too.
         notifyWhenDone = getBoolean(NOTIFY_WHEN_DONE) ?: true,
         urgent = getBoolean(URGENT) ?: false,
+        points = getLong(POINTS)?.toInt()?.coerceIn(Chore.POINTS) ?: 1,
+        doneCount = getLong(DONE_COUNT)?.toInt() ?: 0,
     )
 }.getOrNull()

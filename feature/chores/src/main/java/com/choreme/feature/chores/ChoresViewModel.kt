@@ -20,6 +20,12 @@ import com.choreme.core.model.chore.ChoreStatus
 import com.choreme.core.model.chore.ChoreTemplate
 import com.choreme.core.model.chore.Recurrence
 import com.choreme.core.model.chore.SavedChore
+import com.choreme.core.model.chore.HomeScene
+import com.choreme.core.model.chore.MemberWeek
+import com.choreme.core.model.chore.homeScene
+import com.choreme.core.model.chore.savedChoreToUpdate
+import com.choreme.core.model.chore.weekStart
+import com.choreme.core.model.chore.weeklySummary
 import com.choreme.core.model.chore.TodayBoard
 import com.choreme.core.model.chore.approve
 import com.choreme.core.model.chore.buildTodayBoard
@@ -41,6 +47,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -63,6 +70,8 @@ data class ChoresUiState(
     val groceriesToBuy: Int = 0,
     /** Hand-typed chores kept as quick picks. */
     val savedChores: List<SavedChore> = emptyList(),
+    /** Everyone's finishes in the last 7 days, for the garden. */
+    val week: List<MemberWeek> = emptyList(),
 ) {
     val isParent get() = me?.role == Role.PARENT
     val hasChores get() = chores.isNotEmpty()
@@ -72,6 +81,8 @@ data class ChoresUiState(
 
     /** Parents tidy up any saved chore; others only their own. */
     fun canRemove(saved: SavedChore) = isParent || saved.createdBy == me?.id
+
+    val scene: HomeScene get() = homeScene(week.sumOf { it.points }, chores, today)
 }
 
 /** What the person typed in the chore editor. */
@@ -82,6 +93,7 @@ data class ChoreDraft(
     val dueDate: LocalDate,
     val notifyWhenDone: Boolean = true,
     val urgent: Boolean = false,
+    val points: Int = 1,
 )
 
 sealed interface CalendarResult {
@@ -120,7 +132,8 @@ class ChoresViewModel @Inject internal constructor(
                 families.observeMembers(session.familyId),
                 groceries.observeItems(session.familyId),
                 chores.observeSavedChores(session.familyId),
-            ) { allChores, members, groceryItems, saved ->
+                chores.observeFinished(session.familyId, weekStart(LocalDate.now())).onStart { emit(emptyList()) },
+            ) { allChores, members, groceryItems, saved, finished ->
                 val today = LocalDate.now()
                 ChoresUiState(
                     loading = false,
@@ -133,6 +146,7 @@ class ChoresViewModel @Inject internal constructor(
                     members = members.associateBy { it.id },
                     groceriesToBuy = groceryItems.groceriesToBuy(),
                     savedChores = saved,
+                    week = weeklySummary(finished, members, today),
                 )
             }
         }
@@ -153,6 +167,8 @@ class ChoresViewModel @Inject internal constructor(
             return existing
         }
         val (familyId, me) = context() ?: return null
+        // Kids report at the starting worth; a parent can raise it (see firestore.rules).
+        val points = if (me.role == Role.PARENT) draft.points.coerceIn(Chore.POINTS) else Chore.POINTS.first
         chores.create(
             familyId,
             me.id,
@@ -164,11 +180,15 @@ class ChoresViewModel @Inject internal constructor(
                 dueDate = draft.dueDate,
                 notifyWhenDone = draft.notifyWhenDone,
                 urgent = draft.urgent,
+                points = points,
             ),
         )
         // Something typed by hand becomes a quick pick for next time.
         if (shouldSaveForLater(draft.template, draft.title, uiState.value.savedChores)) {
-            chores.saveForLater(familyId, me.id, draft.title)
+            chores.saveForLater(familyId, me.id, draft.title, points)
+        } else if (me.role == Role.PARENT) {
+            // A saved chore picked with other points keeps them for next time.
+            savedChoreToUpdate(draft.title, points, uiState.value.savedChores)?.let { chores.setSavedPoints(familyId, it.id, it.points) }
         }
         // Let the rest of the family know right away (phones with ntfy).
         pingInBackground(PushKinds.CHORE_ADDED) { endpoints.othersThan(familyId, me.id) }
@@ -207,8 +227,9 @@ class ChoresViewModel @Inject internal constructor(
 
 
 
-    fun update(chore: Chore, draft: ChoreDraft) = change(chore) { _, _ ->
+    fun update(chore: Chore, draft: ChoreDraft) = change(chore) { me, _ ->
         copy(
+            points = if (me.role == Role.PARENT) draft.points.coerceIn(Chore.POINTS) else points,
             title = draft.title.trim(),
             template = draft.template,
             recurrence = draft.recurrence,

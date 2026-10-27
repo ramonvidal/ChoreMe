@@ -202,4 +202,5 @@ private val ALERTS = listOf(
     Triple(AlertKind.ON_MY_WAY, R.string.alert_on_my_way, R.string.alert_on_my_way_hint),
     Triple(AlertKind.SHOPPING, R.string.alert_shopping, R.string.alert_shopping_hint),
     Triple(AlertKind.MORNING_SUMMARY, R.string.alert_morning, R.string.alert_morning_hint),
+    Triple(AlertKind.WEEKLY_SUMMARY, R.string.alert_weekly, R.string.alert_weekly_hint),
 )

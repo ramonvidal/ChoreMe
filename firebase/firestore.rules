@@ -59,6 +59,10 @@ service cloud.firestore {
         && d.updatedAt is int;
     }
 
+    function validSavedChore(d) {
+      return d.title is string && d.title.size() > 0 && d.title.size() <= 60 && validPoints(d);
+    }
+
     function myMemberId(f) {
       return get(membershipPath(f)).data.memberId;
     }
@@ -69,12 +73,21 @@ service cloud.firestore {
         && c.recurrenceType in ['ONCE', 'EVERY_DAYS', 'WEEKLY']
         && c.dueDate is string && c.dueDate.size() == 10
         && (!('notifyWhenDone' in c) || c.notifyWhenDone is bool)
-        && (!('urgent' in c) || c.urgent is bool);
+        && (!('urgent' in c) || c.urgent is bool)
+        && validPoints(c)
+        && (!('doneCount' in c) || (c.doneCount is int && c.doneCount >= 0));
+    }
+
+    // What a chore is worth: 1 for a quick job up to 5 for a big one.
+    function validPoints(d) {
+      return !('points' in d) || (d.points is int && d.points >= 1 && d.points <= 5);
     }
 
     function isFreshChore(c) {
       return c.status == 'OPEN' && c.claimedBy == null && c.completedBy == null
-        && c.approvedBy == null && c.lastDoneBy == null;
+        && c.approvedBy == null && c.lastDoneBy == null
+        // Kids report chores at the usual worth; parents decide what bigger jobs count.
+        && (!('points' in c) || c.points == 1);
     }
 
     // Kids can grab an open chore, let go of one they hold, or say they finished it.
@@ -227,9 +240,12 @@ service cloud.firestore {
       // Chores someone typed by hand, kept as quick picks for next time.
       match /choreTemplates/{templateId} {
         allow read: if isMember(f);
-        allow create, update: if isMember(f) && request.resource.data.createdBy == myMemberId(f)
-          && request.resource.data.title is string
-          && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 60;
+        allow create: if isMember(f) && request.resource.data.createdBy == myMemberId(f)
+          && validSavedChore(request.resource.data);
+        // Whoever saved it, or a parent, can change its points.
+        allow update: if isMember(f) && validSavedChore(request.resource.data)
+          && request.resource.data.createdBy == resource.data.createdBy
+          && (resource.data.createdBy == myMemberId(f) || isParent(f));
         allow delete: if isParent(f) || (isMember(f) && resource.data.createdBy == myMemberId(f));
       }
 
@@ -275,7 +291,8 @@ service cloud.firestore {
           && request.resource.data.choreId is string
           && request.resource.data.title is string && request.resource.data.title.size() <= 60
           && request.resource.data.doneBy is string
-          && request.resource.data.on is string && request.resource.data.on.size() == 10;
+          && request.resource.data.on is string && request.resource.data.on.size() == 10
+          && validPoints(request.resource.data);
         allow delete: if isParent(f);
       }
 

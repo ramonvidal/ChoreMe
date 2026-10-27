@@ -290,6 +290,25 @@ describe('chores', () => {
     await assertSucceeds(updateDoc(ref(parent('alice')), { urgent: true }));
   });
 
+  test('points: parents set what a chore is worth; kids report at the usual worth', async () => {
+    await assertSucceeds(updateDoc(ref(parent('alice')), { points: 5 }));
+    await assertFails(updateDoc(ref(parent('alice')), { points: 9 }));
+    await assertFails(updateDoc(ref(parent('alice')), { points: 'lots' }));
+    await assertFails(updateDoc(ref(kidDevice('kid1')), { points: 3 }));
+    const kid = kidDevice('kid1');
+    await assertSucceeds(setDoc(doc(kid, 'families', FAMILY, 'chores', 'k1'), { ...chore, createdBy: 'member-kid1', points: 1 }));
+    await assertFails(setDoc(doc(kid, 'families', FAMILY, 'chores', 'k2'), { ...chore, createdBy: 'member-kid1', points: 5 }));
+    await assertSucceeds(updateDoc(ref(parent('alice')), { doneCount: 2 }));
+  });
+
+  test('saved chores keep their points; the saver or a parent changes them', async () => {
+    const saved = doc(kidDevice('kid1'), 'families', FAMILY, 'choreTemplates', 'garage');
+    await assertSucceeds(setDoc(saved, { title: 'Clean the garage', createdBy: 'member-kid1', points: 3 }));
+    await assertFails(updateDoc(doc(kidDevice('kid2'), 'families', FAMILY, 'choreTemplates', 'garage'), { points: 5 }));
+    await assertSucceeds(updateDoc(doc(parent('alice'), 'families', FAMILY, 'choreTemplates', 'garage'), { points: 5 }));
+    await assertFails(updateDoc(doc(parent('alice'), 'families', FAMILY, 'choreTemplates', 'garage'), { points: 0 }));
+  });
+
   test('outsiders cannot see chores, and malformed chores are rejected', async () => {
     await assertFails(getDocs(collection(parent('mallory'), 'families', FAMILY, 'chores')));
     await assertFails(setDoc(doc(parent('alice'), 'families', FAMILY, 'chores', 'bad'), { ...chore, status: 'FINISHED' }));

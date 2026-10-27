@@ -16,6 +16,8 @@ enum class AlertKind {
     ON_MY_WAY,
     /** A message someone sent to the whole family. */
     MESSAGES,
+    /** Sunday evening: the week's points, by person. */
+    WEEKLY_SUMMARY,
 }
 
 /** A nightly window when notifications arrive silently, e.g. 22:00 to 07:00. */

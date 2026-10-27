@@ -116,7 +116,7 @@ private fun NoteDialog(initial: String, onSave: (String) -> Unit, onDelete: (() 
     )
 }
 
-/** For parents: how many chores each person finished in the last 7 days, to keep things fair. */
+/** For parents: the points each person earned in the last 7 days, to keep things fair. */
 @Composable
 internal fun WeekSection(week: List<MemberWeek>) {
     Card(Modifier.fillMaxWidth()) {
@@ -125,7 +125,8 @@ internal fun WeekSection(week: List<MemberWeek>) {
             Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(member.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                    Text(pluralStringResource(R.plurals.week_count, done.size, done.size), style = MaterialTheme.typography.bodyMedium)
+                    val points = done.sumOf { it.points }
+                    Text(pluralStringResource(CoreUiR.plurals.points, points, points), style = MaterialTheme.typography.titleSmall)
                 }
                 if (done.isNotEmpty()) {
                     val titles = done.map { it.title }.distinct()

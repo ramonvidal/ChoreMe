@@ -16,4 +16,9 @@
     <string name="error_invite_code_not_found">No family has that invite code. Check it with a parent.</string>
     <string name="error_last_parent">You\'re the only parent. Let another parent join first, so someone can still approve chores and let people in.</string>
     <string name="error_recent_sign_in">Your family data is deleted. To also delete your Google sign-in, sign in again and choose \"Delete my data\" once more.</string>
+    <!-- Chore points, set per chore (1 to 5) -->
+    <plurals name="points">
+        <item quantity="one">%d point</item>
+        <item quantity="other">%d points</item>
+    </plurals>
 </resources>

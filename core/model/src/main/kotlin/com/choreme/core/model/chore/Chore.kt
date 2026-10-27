@@ -53,8 +53,17 @@ data class Chore(
     val notifyWhenDone: Boolean = true,
     /** Needs doing as soon as possible: shown first, in red, whatever its date. Cleared once it's done. */
     val urgent: Boolean = false,
+    /** What finishing it is worth: bigger jobs count more. Set when it's added; kept every time round. */
+    val points: Int = 1,
+    /** How many times it has been finished, so finishing the same chore twice in a day counts twice. */
+    val doneCount: Int = 0,
 ) {
     fun isOverdue(today: LocalDate) = isActive && dueDate < today
+
+    companion object {
+        /** The points a chore can be worth: 1 for a quick job, up to 5 for a big one. */
+        val POINTS = 1..5
+    }
 
     /** Still to be done (as opposed to waiting for approval or finished). */
     val isActive get() = status == ChoreStatus.OPEN || status == ChoreStatus.CLAIMED
@@ -115,6 +124,7 @@ private fun Chore.finish(doneBy: String, approvedBy: String?, today: LocalDate):
             lastDoneBy = doneBy,
             lastDoneOn = today,
             urgent = false,
+            doneCount = doneCount + 1,
         )
     } else {
         copy(
@@ -127,6 +137,7 @@ private fun Chore.finish(doneBy: String, approvedBy: String?, today: LocalDate):
             lastDoneOn = today,
             // The next time round is ordinary again.
             urgent = false,
+            doneCount = doneCount + 1,
         )
     }
 }
@@ -136,15 +147,20 @@ private fun Chore.finish(doneBy: String, approvedBy: String?, today: LocalDate):
  * finishing it, or approving a kid's). A kid saying "done" doesn't count until approved.
  */
 fun Chore.wasJustFinished(before: Chore): Boolean =
-    lastDoneBy != null && (lastDoneOn != before.lastDoneOn || lastDoneBy != before.lastDoneBy)
+    lastDoneBy != null &&
+        (doneCount > before.doneCount || lastDoneOn != before.lastDoneOn || lastDoneBy != before.lastDoneBy)
 
 /** A chore someone typed by hand, kept as a quick pick for next time. */
-data class SavedChore(val id: String, val title: String, val createdBy: String)
+data class SavedChore(val id: String, val title: String, val createdBy: String, val points: Int = 1)
 
 /** A hand-typed chore (not one of the built-in templates) is saved unless it already is. */
 fun shouldSaveForLater(template: ChoreTemplate, title: String, saved: List<SavedChore>): Boolean =
     template == ChoreTemplate.OTHER && title.isNotBlank() &&
         saved.none { NameKeys.key(it.title) == NameKeys.key(title) }
+
+/** A saved chore picked again with other points: those become its points from now on. */
+fun savedChoreToUpdate(title: String, points: Int, saved: List<SavedChore>): SavedChore? =
+    saved.firstOrNull { NameKeys.key(it.title) == NameKeys.key(title) && it.points != points }?.copy(points = points)
 
 /**
  * A chore with the same name that still needs doing, if there is one, so two people

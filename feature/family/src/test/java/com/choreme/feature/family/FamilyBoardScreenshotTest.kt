@@ -45,8 +45,8 @@ class FamilyBoardScreenshotTest {
             Note("2", "Wi-Fi: ChoreMe-Home / hunter2", "leo", Instant.parse("2026-10-20T09:00:00Z")),
         )
         val log = listOf(
-            ChoreDone("1", "Wash the dishes", "mia", today),
-            ChoreDone("1", "Wash the dishes", "mia", today.minusDays(2)),
+            ChoreDone("1", "Wash the dishes", "mia", today, points = 2),
+            ChoreDone("1", "Wash the dishes", "mia", today.minusDays(2), points = 2),
             ChoreDone("2", "Take out the trash", "leo", today.minusDays(1)),
         )
         compose.setContent {
@@ -72,7 +72,7 @@ class FamilyBoardScreenshotTest {
         }
         compose.onNodeWithText("Grandma arrives Friday at 18:00").assertExists()
         compose.onNodeWithText("Dinner's ready!").assertExists()
-        compose.onNodeWithText("2 chores").assertExists()
+        compose.onNodeWithText("4 points").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/family-board.png")
     }
 }
