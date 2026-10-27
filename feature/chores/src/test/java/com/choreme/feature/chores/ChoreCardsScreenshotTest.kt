@@ -51,7 +51,7 @@ class ChoreCardsScreenshotTest {
                 Surface {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         ChoresHeader(state.copy(chores = listOf(leak, dishes, laundry), board = buildTodayBoard(listOf(leak, dishes, laundry), today), groceriesToBuy = 5), onOpenGroceries = {})
-                        HomeCard(homeScene(14, overdue = 0, urgent = 0), onClick = {})
+                        HomeCard(homeScene(14, overdue = 0, urgent = 0, toDo = 3), onClick = {})
                         ChoreCard(trash, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         ChoreCard(leak, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         AwaitingCard(bathroom, state, onApprove = {}, onReject = {})
@@ -66,19 +66,19 @@ class ChoreCardsScreenshotTest {
         compose.onNodeWithText("Wash the dishes").assertExists()
         compose.onNodeWithText("Urgent").assertExists()
         compose.onNodeWithText("2 points").assertExists()
-        compose.onNodeWithText("14 points this week").assertExists()
+        compose.onNodeWithText("14 points in 7 days").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-cards.png")
     }
 
-    /** The garden in each mood: a new week, growing, full bloom, piling up, something urgent. */
+    /** The garden in each mood: quiet, growing with chores to do, full bloom, piling up, something urgent. */
     @Test
     fun garden() {
         val scenes = listOf(
             homeScene(0, overdue = 0, urgent = 0),
-            homeScene(9, overdue = 1, urgent = 0),
+            homeScene(9, overdue = 1, urgent = 0, toDo = 3),
             homeScene(32, overdue = 0, urgent = 0),
-            homeScene(6, overdue = 4, urgent = 0),
-            homeScene(12, overdue = 0, urgent = 1),
+            homeScene(6, overdue = 4, urgent = 0, toDo = 8),
+            homeScene(12, overdue = 0, urgent = 1, toDo = 1),
         )
         compose.setContent {
             ChoreMeTheme(darkTheme = false, dynamicColor = false) {
@@ -89,7 +89,7 @@ class ChoreCardsScreenshotTest {
                 }
             }
         }
-        compose.onNodeWithText("32 points this week").assertExists()
+        compose.onNodeWithText("32 points in 7 days").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-garden.png")
     }
 }

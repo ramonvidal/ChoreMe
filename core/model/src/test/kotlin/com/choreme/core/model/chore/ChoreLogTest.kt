@@ -85,6 +85,19 @@ class ChoreLogTest {
         assertEquals(false, scene.lightsOn)
         assertEquals(true, scene.cloud)
         assertEquals(false, scene.tired)
+        assertEquals(2, scene.weeds) // the done one isn't waiting any more
+    }
+
+    @Test
+    fun `adding a chore adds a weed and finishing it turns it into flowers`() {
+        val dishes = Chore("1", "Dishes", dueDate = today, points = 2)
+        val before = homeScene(3, listOf(dishes), today)
+        val after = homeScene(3 + dishes.points, listOf(dishes.copy(status = ChoreStatus.DONE)), today)
+        assertEquals(1, before.weeds)
+        assertEquals(0, after.weeds)
+        assertEquals(before.flowers + 2, after.flowers)
+        val tomorrow = Chore("2", "Bins", dueDate = today.plusDays(1))
+        assertEquals(0, homeScene(0, listOf(tomorrow), today).weeds) // not due yet
     }
 
     @Test

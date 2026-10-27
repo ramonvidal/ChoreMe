@@ -38,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.choreme.core.model.chore.HomeScene
 import com.choreme.core.model.chore.MemberWeek
+import kotlin.math.ceil
 import com.choreme.core.ui.R as CoreUiR
 
 /** "Our home" at the top of the Chores tab: the picture and one line. Tap for the week's points. */
@@ -99,14 +100,18 @@ private fun homeMood(scene: HomeScene): Int = when {
 }
 
 /**
- * A small house with a tree and flowers, drawn in the app's few colours. The garden grows with
- * the week's points; the lights are on while nothing is overdue; a cloud passes while something
- * is urgent; with chores piling up the flowers droop a little.
+ * A small house with a tree and flowers, drawn in the app's few colours. Each chore to do is a
+ * weed in the grass; finishing one pulls it and grows flowers in, so the picture changes with
+ * every chore. The lights are on while nothing is overdue; a cloud passes while something is
+ * urgent; with chores piling up the flowers droop a little.
  */
 @Composable
 internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
     val growth by animateFloatAsState(scene.growth, tween(1200), label = "growth")
+    // Counted up and down smoothly, so a new flower grows in and a pulled weed shrinks away.
+    val flowers by animateFloatAsState(scene.flowers.toFloat(), tween(900), label = "flowers")
+    val weeds by animateFloatAsState(scene.weeds.toFloat(), tween(700), label = "weeds")
     val light by animateFloatAsState(if (scene.lightsOn) 1f else 0f, tween(800), label = "light")
     val motion = rememberInfiniteTransition(label = "garden")
     val sway by motion.animateFloat(-1f, 1f, infiniteRepeatable(tween(2600), RepeatMode.Reverse), label = "sway")
@@ -158,9 +163,20 @@ internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
 
         // Flowers either side of the house, one per point (up to a dozen).
         val slots = flowerSlots(w, houseW)
-        slots.take(scene.flowers).forEachIndexed { i, x ->
+        slots.take(ceil(flowers).toInt()).forEachIndexed { i, x ->
+            val grown = (flowers - i).coerceIn(0f, 1f)
             val stem = h * (0.1f + 0.06f * ((i * 7) % 3) / 2f) * (0.6f + 0.4f * growth)
-            flower(Offset(x, ground), stem, leaf, Petals[i % Petals.size], if (scene.tired) 24f else sway * 4f, scene.tired)
+            flower(Offset(x, ground), stem, leaf, Petals[i % Petals.size], if (scene.tired) 24f else sway * 4f, scene.tired, grown)
+        }
+
+        // Weeds in the grass in front: one per chore waiting to be done today.
+        val weedBase = ground + (h - ground) * 0.8f
+        val weedGap = w / HomeScene.MAX_WEEDS
+        repeat(ceil(weeds).toInt()) { i ->
+            val grown = (weeds - i).coerceIn(0f, 1f)
+            // Spread out from the middle: 4, 5, 3, 6, 2, ...
+            val slot = HomeScene.MAX_WEEDS / 2 + if (i % 2 == 0) i / 2 else -(i / 2 + 1)
+            weed(Offset(weedGap * (slot + 0.5f), weedBase), (h - ground) * 0.75f * grown, sway)
         }
     }
 }
@@ -184,14 +200,26 @@ private fun DrawScope.tree(base: Offset, height: Float, leaf: Color, trunk: Colo
     }
 }
 
-private fun DrawScope.flower(base: Offset, stem: Float, leaf: Color, petal: Color, tilt: Float, tired: Boolean) {
+private fun DrawScope.flower(base: Offset, stem: Float, leaf: Color, petal: Color, tilt: Float, tired: Boolean, grown: Float) {
+    if (grown <= 0f) return
     rotate(tilt, pivot = base) {
-        val head = Offset(base.x, base.y - stem)
+        val head = Offset(base.x, base.y - stem * grown)
         drawLine(leaf, base, head, strokeWidth = 1.5.dp.toPx())
-        val r = 3.dp.toPx()
+        val r = 3.dp.toPx() * grown
         val color = if (tired) lerp(petal, Tired, 0.45f) else petal
         listOf(Offset(r, 0f), Offset(-r, 0f), Offset(0f, r), Offset(0f, -r)).forEach { drawCircle(color, r * 0.85f, head + it) }
         drawCircle(Sun, r * 0.6f, head)
+    }
+}
+
+/** A small tuft of three blades. */
+private fun DrawScope.weed(base: Offset, height: Float, sway: Float) {
+    if (height <= 0f) return
+    val stroke = 1.5.dp.toPx()
+    listOf(-28f, 0f, 28f).forEach { angle ->
+        rotate(angle + sway * 3f, pivot = base) {
+            drawLine(Weed, base, Offset(base.x, base.y - height * if (angle == 0f) 1f else 0.75f), strokeWidth = stroke)
+        }
     }
 }
 
@@ -207,4 +235,5 @@ private val Sun = Color(0xFFF2C14E)
 private val Lamp = Color(0xFFF6D77A)
 private val CloudGrey = Color(0xFFB9BEC4)
 private val Tired = Color(0xFFB8AE92)
+private val Weed = Color(0xFF8A8B5C)
 private val Petals = listOf(Color(0xFFE38B7A), Color(0xFFF0F0EC), Color(0xFFC9A0DC), Color(0xFFF2C14E))

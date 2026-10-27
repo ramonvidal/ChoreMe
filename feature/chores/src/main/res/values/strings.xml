@@ -137,12 +137,12 @@
     <!-- Our home: the garden that grows with the week's chores -->
     <string name="home_title">Our home</string>
     <plurals name="home_points">
-        <item quantity="one">%d point this week</item>
-        <item quantity="other">%d points this week</item>
+        <item quantity="one">%d point in 7 days</item>
+        <item quantity="other">%d points in 7 days</item>
     </plurals>
-    <string name="home_hint">Every chore anyone finishes grows the garden, harder ones more. The lights stay on while nothing is overdue.</string>
+    <string name="home_hint">Each chore to do is a weed in the grass. Finishing it pulls the weed and grows flowers, more for harder chores. Points count over the last 7 days, so the garden never resets. The lights stay on while nothing is overdue.</string>
     <string name="home_close">Close</string>
-    <string name="home_mood_start">A new week. The first chore plants the first flower.</string>
+    <string name="home_mood_start">A quiet garden. The next chore done plants the first flower.</string>
     <string name="home_mood_growing">The garden is growing. Nice work, everyone.</string>
     <string name="home_mood_bloom">Full bloom! The house is in great shape this week.</string>
     <string name="home_mood_overdue">Something is overdue, so the lights are off for now.</string>

@@ -3,15 +3,18 @@ package com.choreme.core.model.chore
 import java.time.LocalDate
 
 /**
- * The "our home" picture on the Chores tab: a house and garden that grows with the points the
- * family earned this week. Cooperative on purpose: everyone's chores grow the same garden.
+ * The "our home" picture on the Chores tab: a house and garden that changes with every chore.
+ * Adding one puts a weed in the grass; finishing it pulls the weed and grows flowers (its points,
+ * over the last 7 days, so there's no Monday reset). Cooperative on purpose: one garden for all.
  */
 data class HomeScene(
     val points: Int,
-    /** 0 (bare) to 1 (full bloom), from this week's points. */
+    /** 0 (bare) to 1 (full bloom), from the last 7 days' points. */
     val growth: Float,
     /** Flowers in the garden, one per point up to [MAX_FLOWERS]. */
     val flowers: Int,
+    /** One per chore waiting to be done today (up to [MAX_WEEDS]). */
+    val weeds: Int = 0,
     /** The windows are lit when nothing is overdue. */
     val lightsOn: Boolean,
     /** A small cloud over the house while something is urgent. */
@@ -25,14 +28,16 @@ data class HomeScene(
         /** Points in a week for full bloom: about four chores a day for a family. */
         const val FULL_BLOOM_POINTS = 30
         const val MAX_FLOWERS = 12
+        const val MAX_WEEDS = 8
         const val TIRED_AT_OVERDUE = 3
     }
 }
 
-fun homeScene(weekPoints: Int, overdue: Int, urgent: Int): HomeScene = HomeScene(
+fun homeScene(weekPoints: Int, overdue: Int, urgent: Int, toDo: Int = 0): HomeScene = HomeScene(
     points = weekPoints,
     growth = (weekPoints.toFloat() / HomeScene.FULL_BLOOM_POINTS).coerceIn(0f, 1f),
     flowers = weekPoints.coerceIn(0, HomeScene.MAX_FLOWERS),
+    weeds = toDo.coerceIn(0, HomeScene.MAX_WEEDS),
     lightsOn = overdue == 0,
     cloud = urgent > 0,
     tired = overdue >= HomeScene.TIRED_AT_OVERDUE,
@@ -43,4 +48,5 @@ fun homeScene(weekPoints: Int, chores: List<Chore>, today: LocalDate): HomeScene
     weekPoints = weekPoints,
     overdue = chores.count { it.isOverdue(today) },
     urgent = chores.count { it.urgent && it.isActive },
+    toDo = chores.count { it.isActive && !it.dueDate.isAfter(today) },
 )
