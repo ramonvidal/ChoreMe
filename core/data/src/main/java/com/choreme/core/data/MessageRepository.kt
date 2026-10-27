@@ -52,9 +52,8 @@ class MessageRepository @Inject constructor(
         messages(familyId).whereGreaterThan(AT, after.toEpochMilli()).get().await().documents.mapNotNull { it.toMessage() }
 }
 
-private fun DocumentSnapshot.toMessage(): FamilyMessage? = FamilyMessage(
-    id = id,
-    text = getString(TEXT) ?: return null,
-    from = getString(FROM).orEmpty(),
-    at = Instant.ofEpochMilli(getLong(AT) ?: return null),
-)
+private fun DocumentSnapshot.toMessage(): FamilyMessage? {
+    val text = getString(TEXT) ?: return null
+    val at = getLong(AT) ?: return null
+    return FamilyMessage(id = id, text = text, from = getString(FROM).orEmpty(), at = Instant.ofEpochMilli(at))
+}
