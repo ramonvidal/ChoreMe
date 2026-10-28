@@ -42,4 +42,14 @@ class ChoreReminderTest {
         // Without a member, nothing is set apart.
         assertEquals(emptyList<Chore>(), buildTodayBoard(listOf(mine), today).mine)
     }
+
+    @Test
+    fun `the tab badge counts what needs you`() {
+        val mine = Chore("m", "Laundry", dueDate = today, status = ChoreStatus.CLAIMED, claimedBy = "leo", helpers = setOf("mom"))
+        val later = Chore("l", "Bins", dueDate = today.plusDays(1), status = ChoreStatus.CLAIMED, claimedBy = "mom")
+        val toCheck = Chore("c", "Bath", dueDate = today, status = ChoreStatus.PENDING_APPROVAL, completedBy = "mia")
+        val chores = listOf(mine, later, toCheck, chore(today))
+        assertEquals(2, choresBadge(chores, today, "mom", Role.PARENT))
+        assertEquals(1, choresBadge(chores, today, "leo", Role.KID))
+    }
 }

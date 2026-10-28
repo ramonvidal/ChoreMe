@@ -8,7 +8,10 @@ import com.choreme.core.data.FamilyRepository
 import com.choreme.core.data.FirebaseAvailability
 import com.choreme.core.data.PushEndpointRepository
 import com.choreme.core.model.Role
-import com.choreme.core.model.chore.ChoreStatus
+import com.choreme.core.data.GroceryRepository
+import com.choreme.core.model.chore.choresBadge
+import com.choreme.core.model.grocery.groceriesToBuy
+import java.time.LocalDate
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.push.PushRegistration
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +29,7 @@ class RootViewModel @Inject constructor(
     availability: FirebaseAvailability,
     families: FamilyRepository,
     chores: ChoreRepository,
+    groceries: GroceryRepository,
     push: PushRegistration,
     private val endpoints: PushEndpointRepository,
 ) : ViewModel() {
@@ -44,14 +48,21 @@ class RootViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
-    /** Shown as a badge on the Today tab: kids' chores a parent needs to check. */
-    val pendingApprovals: StateFlow<Int> = session
+    /** Shown as a badge on the Chores tab: your chores due by today, and for parents, kids' chores to check. */
+    val choresBadge: StateFlow<Int> = session
         .flatMapLatest { state ->
-            if (state is SessionState.InFamily && state.role == Role.PARENT) {
-                chores.observeChores(state.familyId).map { list -> list.count { it.status == ChoreStatus.PENDING_APPROVAL } }
+            if (state is SessionState.InFamily) {
+                chores.observeChores(state.familyId).map { list -> choresBadge(list, LocalDate.now(), state.memberId, state.role) }
             } else {
                 flowOf(0)
             }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
+
+    /** Shown as a badge on the Groceries tab: what's on the list to buy. */
+    val groceriesToBuy: StateFlow<Int> = session
+        .flatMapLatest { state ->
+            if (state is SessionState.InFamily) groceries.observeItems(state.familyId).map { it.groceriesToBuy() } else flowOf(0)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 

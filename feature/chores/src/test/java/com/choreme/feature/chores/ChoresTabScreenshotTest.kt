@@ -2,7 +2,10 @@ package com.choreme.feature.chores
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -70,12 +73,14 @@ class ChoresTabScreenshotTest {
         weekPoints = familyPoints(log, today),
     )
 
-    private fun shoot(name: String, me: Member, dark: Boolean) {
+    private fun shoot(name: String, me: Member, dark: Boolean, fontScale: Float = 1f) {
         compose.setContent {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
+                CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
                 Surface(Modifier.fillMaxSize()) {
                     ChoresContent(state(me), reminders = emptyMap(), onOpenGroceries = {}, actions = ChoresActions())
                 }
+            }
             }
         }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")
@@ -92,4 +97,25 @@ class ChoresTabScreenshotTest {
 
     @Test
     fun kid() = shoot("tab-chores-kid", mia, dark = false)
+
+    @Test
+    fun empty() {
+        compose.setContent {
+            ChoreMeTheme(darkTheme = false, dynamicColor = false) {
+                Surface(Modifier.fillMaxSize()) {
+                    ChoresContent(ChoresUiState(loading = false, me = mom, today = today), reminders = emptyMap(), onOpenGroceries = {}, actions = ChoresActions())
+                }
+            }
+        }
+        compose.onNodeWithText("Nothing needs doing").assertExists()
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/tab-chores-empty.png")
+    }
+
+    /** The phone's text size turned up to the largest step: nothing should be cut off. */
+    @Test
+    fun largeText() {
+        shoot("tab-chores-large-text", mom, dark = false, fontScale = LARGE_TEXT)
+    }
 }
+
+private const val LARGE_TEXT = 1.5f

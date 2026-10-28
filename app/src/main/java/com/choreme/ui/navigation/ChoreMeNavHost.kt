@@ -54,9 +54,12 @@ enum class TopLevelDestination(
     Family(FAMILY_ROUTE, R.string.nav_family, Icons.Filled.Person),
 }
 
-/** The signed-in app. The counts badge the Family and Today tabs for parents. */
+/**
+ * The signed-in app. Counts on the tabs: chores that need you, groceries to buy, and (for
+ * parents) people waiting to join. Groceries' count is grey: a list, not a to-do.
+ */
 @Composable
-fun ChoreMeNavHost(pendingJoinRequests: Int = 0, pendingApprovals: Int = 0) {
+fun ChoreMeNavHost(pendingJoinRequests: Int = 0, choresBadge: Int = 0, groceriesToBuy: Int = 0) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
@@ -73,10 +76,21 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0, pendingApprovals: Int = 0) {
                         icon = {
                             val badgeCount = when (destination) {
                                 TopLevelDestination.Family -> pendingJoinRequests
-                                TopLevelDestination.Today -> pendingApprovals
+                                TopLevelDestination.Today -> choresBadge
+                                TopLevelDestination.Groceries -> groceriesToBuy
                                 else -> 0
                             }
-                            BadgedBox(badge = { if (badgeCount > 0) Badge { Text(badgeCount.toString()) } }) {
+                            val quiet = destination == TopLevelDestination.Groceries
+                            BadgedBox(
+                                badge = {
+                                    if (badgeCount > 0) {
+                                        Badge(
+                                            containerColor = if (quiet) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.error,
+                                            contentColor = if (quiet) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onError,
+                                        ) { Text(if (badgeCount > MAX_BADGE) "$MAX_BADGE+" else badgeCount.toString()) }
+                                    }
+                                },
+                            ) {
                                 Icon(destination.icon, contentDescription = null)
                             }
                         },
@@ -114,3 +128,5 @@ private fun NavHostController.navigateToTab(route: String) {
         restoreState = true
     }
 }
+
+private const val MAX_BADGE = 99

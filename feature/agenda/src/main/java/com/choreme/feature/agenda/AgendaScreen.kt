@@ -56,6 +56,7 @@ import com.choreme.core.model.agenda.CalendarEvent
 import com.choreme.core.model.agenda.FamilyCalendar
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.agenda.NewEvent
+import com.choreme.core.ui.EmptyState
 import com.choreme.core.ui.ErrorText
 import com.choreme.core.ui.HeaderLine
 import com.choreme.core.ui.ItemIcon
@@ -173,13 +174,7 @@ internal fun AgendaContent(state: AgendaUiState, error: Int?, actions: AgendaAct
                         }
                     }
                 }
-                state.calendars.isEmpty() -> item(key = "no-calendars") {
-                    Text(
-                        stringResource(R.string.no_calendars),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(4.dp),
-                    )
-                }
+                state.calendars.isEmpty() -> item(key = "no-calendars") { EmptyState(title = stringResource(R.string.no_calendars)) }
                 else -> Unit
             }
 

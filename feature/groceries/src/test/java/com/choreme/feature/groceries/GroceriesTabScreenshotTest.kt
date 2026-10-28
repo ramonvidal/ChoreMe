@@ -2,7 +2,10 @@ package com.choreme.feature.groceries
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -47,10 +50,12 @@ class GroceriesTabScreenshotTest {
         atHome = groupByCategory(catalog.filter { !it.isNeeded }),
     )
 
-    private fun shoot(name: String, state: GroceriesUiState, dark: Boolean) {
+    private fun shoot(name: String, state: GroceriesUiState, dark: Boolean, fontScale: Float = 1f) {
         compose.setContent {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
+                CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
                 Surface(Modifier.fillMaxSize()) { GroceriesContent(state, query = "", actions = GroceriesActions()) }
+            }
             }
         }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")
@@ -64,6 +69,14 @@ class GroceriesTabScreenshotTest {
 
     @Test
     fun atHomeDark() = shoot("tab-groceries-dark", state, dark = true)
+
+    @Test
+    fun largeText() {
+        shoot("tab-groceries-large-text", state, dark = false, fontScale = 1.5f)
+    }
+
+    @Test
+    fun nothingToBuy() = shoot("tab-groceries-nothing-to-buy", state.copy(toBuy = emptyList()), dark = false)
 
     @Test
     fun shopping() = shoot("tab-groceries-shopping", state.copy(shopping = true, othersShopping = listOf("Leo")), dark = false)

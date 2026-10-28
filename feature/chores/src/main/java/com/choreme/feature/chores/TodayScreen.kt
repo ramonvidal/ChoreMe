@@ -56,6 +56,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import com.choreme.core.ui.AvatarStack
+import com.choreme.core.ui.EmptyState
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -242,14 +243,7 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
                         item(key = "todo-title") { SectionLabel(stringResource(R.string.section_to_do)) }
                     }
                     if (board.toDo.isEmpty() && board.mine.isEmpty()) {
-                        item(key = "todo-empty") {
-                            Text(
-                                stringResource(R.string.nothing_to_do),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(start = 4.dp),
-                            )
-                        }
+                        item(key = "todo-empty") { EmptyState(title = stringResource(R.string.nothing_to_do), body = stringResource(R.string.nothing_to_do_body)) }
                     }
                     items(board.toDo, key = { "todo-${it.id}" }) { chore -> choreCard(chore, false) }
 
@@ -487,15 +481,10 @@ internal fun ChoresHeader(state: ChoresUiState, onOpenGroceries: () -> Unit) {
 
 @Composable
 private fun EmptyChores(isParent: Boolean) {
-    Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(R.string.empty_title), style = MaterialTheme.typography.titleMedium)
-            Text(
-                stringResource(if (isParent) R.string.empty_body_parent else R.string.empty_body_kid),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
+    EmptyState(
+        title = stringResource(R.string.empty_title),
+        body = stringResource(if (isParent) R.string.empty_body_parent else R.string.empty_body_kid),
+    )
 }
 
 /** Red is kept for urgent chores only: a small tag. */

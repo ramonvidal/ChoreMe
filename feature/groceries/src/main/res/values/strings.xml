@@ -15,6 +15,7 @@
     <string name="grocery_shopping_on">Shopping: screen stays on</string>
     <string name="grocery_item_name">Name</string>
     <string name="grocery_staple">A usual</string>
+    <string name="grocery_usual_tag">usual</string>
     <string name="grocery_staple_hint">Bought most weeks. \"Restock usuals\" adds all of these at once.</string>
     <string name="grocery_category">Aisle</string>
     <string name="grocery_delete">Delete from the list for good</string>

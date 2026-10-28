@@ -54,6 +54,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.key
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.foundation.border
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -81,6 +87,7 @@ import com.choreme.core.model.grocery.GroceryCategory
 import com.choreme.core.model.grocery.GroceryIcons
 import com.choreme.core.model.grocery.GroceryItem
 import com.choreme.core.model.grocery.QuickAddResult
+import com.choreme.core.ui.EmptyState
 import com.choreme.core.ui.ItemIcon
 import com.choreme.core.ui.HeaderLine
 import com.choreme.core.ui.PillTab
@@ -225,13 +232,7 @@ internal fun GroceriesContent(state: GroceriesUiState, query: String, actions: G
                     }
                 }
                 state.catalog.isEmpty() && state.isGroceries -> item(key = "empty") { EmptyCatalog(onAddStarter = actions.addStarterItems) }
-                state.catalog.isEmpty() -> item(key = "empty-list") {
-                    Text(
-                        stringResource(R.string.list_empty),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(vertical = 16.dp),
-                    )
-                }
+                state.catalog.isEmpty() -> item(key = "empty-list") { EmptyState(title = stringResource(R.string.list_empty)) }
                 else -> {
                     item(key = "to-buy-header") {
                         Row(
@@ -259,18 +260,22 @@ internal fun GroceriesContent(state: GroceriesUiState, query: String, actions: G
                         )
                     }
                     if (state.toBuy.isEmpty()) {
-                        item(key = "to-buy-empty") {
-                            Text(
-                                stringResource(R.string.grocery_nothing_to_buy),
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(vertical = 8.dp),
-                            )
-                        }
+                        item(key = "to-buy-empty") { EmptyState(title = stringResource(R.string.grocery_nothing_to_buy)) }
                     }
+                    // One white card per aisle, rows split by thin lines, like the rest of the app.
                     state.toBuy.forEach { group ->
                         item(key = "to-buy-${group.category}") { CategoryHeader(group.category) }
-                        items(group.items, key = { "need-${it.id}" }) { item ->
-                            ToBuyRow(item, large = shopping, onBought = { markBought(item) }, onEdit = { editing = item })
+                        item(key = "to-buy-card-${group.category}") {
+                            Card(Modifier.fillMaxWidth()) {
+                                group.items.forEachIndexed { index, item ->
+                                    key(item.id) {
+                                        if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.padding(start = 56.dp))
+                                        SwipeToBuy(onBought = { markBought(item) }) {
+                                            ToBuyRow(item, large = shopping, onBought = { markBought(item) }, onEdit = { editing = item })
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -401,12 +406,8 @@ private fun QuickAddField(query: String, onQueryChange: (String) -> Unit, onSubm
 
 @Composable
 private fun EmptyCatalog(onAddStarter: () -> Unit) {
-    Card(Modifier.fillMaxWidth().padding(top = 16.dp)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(stringResource(R.string.grocery_empty_title), style = MaterialTheme.typography.titleMedium)
-            Text(stringResource(R.string.grocery_empty_body), style = MaterialTheme.typography.bodyMedium)
-            Button(onClick = onAddStarter) { Text(stringResource(R.string.grocery_add_starter)) }
-        }
+    EmptyState(title = stringResource(R.string.grocery_empty_title), body = stringResource(R.string.grocery_empty_body)) {
+        Button(onClick = onAddStarter) { Text(stringResource(R.string.grocery_add_starter)) }
     }
 }
 
@@ -420,29 +421,84 @@ internal fun CategoryHeader(category: GroceryCategory) {
     )
 }
 
-/** In the store: tick it once it's in the cart. Long-press to edit. */
+/**
+ * In the store: the item's picture, its name, and a round tick to tap once it's in the cart.
+ * Long-press to edit. Rows sit together in one card per aisle.
+ */
 @Composable
 internal fun ToBuyRow(item: GroceryItem, large: Boolean, onBought: () -> Unit, onEdit: () -> Unit) {
+    var ticked by remember(item.id) { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = if (large) 64.dp else 54.dp)
-            .clip(MaterialTheme.shapes.small)
             .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-            .combinedClickable(onClick = onBought, onLongClick = onEdit)
-            .padding(end = 12.dp),
+            .heightIn(min = if (large) 64.dp else 54.dp)
+            .combinedClickable(onClick = { ticked = true; onBought() }, onLongClick = onEdit)
+            .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Checkbox(checked = false, onCheckedChange = { onBought() })
+        ItemIcon(item.icon, Modifier.size(if (large) 26.dp else 22.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.width(18.dp))
         Text(
             item.name,
             style = if (large) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f, fill = false),
         )
-        if (item.isStaple) StapleIcon()
-        Spacer(Modifier.width(8.dp))
-        ItemIcon(item.icon, Modifier.size(if (large) 26.dp else 20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        if (item.isStaple) {
+            Spacer(Modifier.width(8.dp))
+            UsualTag()
+        }
+        Spacer(Modifier.weight(1f))
+        TickCircle(ticked, large)
     }
+}
+
+/** An empty ring that fills green with a tick when tapped. */
+@Composable
+private fun TickCircle(ticked: Boolean, large: Boolean) {
+    val size = if (large) 30.dp else 26.dp
+    if (ticked) {
+        ItemIcon(CoreUiR.drawable.ic_check_circle, Modifier.size(size), tint = MaterialTheme.colorScheme.primary)
+    } else {
+        Box(Modifier.size(size).padding(2.dp).border(2.dp, MaterialTheme.colorScheme.outline, CircleShape))
+    }
+}
+
+/** Swipe a row either way to tick it off (with Undo, like a tap). */
+@Composable
+private fun SwipeToBuy(onBought: () -> Unit, content: @Composable () -> Unit) {
+    val bought by rememberUpdatedState(onBought)
+    val state = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value != SwipeToDismissBoxValue.Settled) bought()
+            value != SwipeToDismissBoxValue.Settled
+        },
+        positionalThreshold = { it * 0.35f },
+    )
+    SwipeToDismissBox(
+        state = state,
+        backgroundContent = {
+            Box(
+                Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary).padding(horizontal = 20.dp),
+                contentAlignment = if (state.dismissDirection == SwipeToDismissBoxValue.EndToStart) Alignment.CenterEnd else Alignment.CenterStart,
+            ) {
+                ItemIcon(CoreUiR.drawable.ic_check_circle, tint = MaterialTheme.colorScheme.onPrimary)
+            }
+        },
+    ) { content() }
+}
+
+/** "usual": bought most weeks, so "Restock usuals" puts it back. Words, not a star nobody can read. */
+@Composable
+private fun UsualTag() {
+    Text(
+        stringResource(R.string.grocery_usual_tag),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.extraSmall)
+            .padding(horizontal = 6.dp, vertical = 1.dp),
+    )
 }
 
 @Composable
@@ -492,21 +548,11 @@ internal fun ItemChip(item: GroceryItem, onClick: () -> Unit, onLongClick: () ->
             Spacer(Modifier.width(6.dp))
             Text(item.name, style = MaterialTheme.typography.bodyMedium)
             if (item.isStaple) {
-                Spacer(Modifier.width(4.dp))
-                StapleIcon()
+                Spacer(Modifier.width(6.dp))
+                UsualTag()
             }
         }
     }
-}
-
-@Composable
-private fun StapleIcon() {
-    Icon(
-        Icons.Filled.Star,
-        contentDescription = stringResource(R.string.grocery_staple),
-        tint = MaterialTheme.colorScheme.secondary,
-        modifier = Modifier.size(16.dp),
-    )
 }
 
 @Composable

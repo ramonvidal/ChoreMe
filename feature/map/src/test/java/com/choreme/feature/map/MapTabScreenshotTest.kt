@@ -9,7 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.choreme.core.model.Member
@@ -80,7 +81,7 @@ class MapTabScreenshotTest {
     @Test
     fun parent() {
         shoot("tab-map", dark = false)
-        compose.onNodeWithText("School").assertExists()
+        compose.onAllNodesWithText("School", substring = true).onFirst().assertExists() // the place, and Leo there
     }
 
     @Test

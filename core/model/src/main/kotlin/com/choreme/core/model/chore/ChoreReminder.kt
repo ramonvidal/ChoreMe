@@ -13,6 +13,16 @@ data class ChoreReminder(
     val mine: Int = 0,
 )
 
+/**
+ * The number on the Chores tab: chores you said you'd do that are due by today, plus, for
+ * parents, kids' chores waiting to be checked. What needs you, not everything.
+ */
+fun choresBadge(chores: List<Chore>, today: LocalDate, memberId: String, role: Role): Int {
+    val mine = chores.count { it.status == ChoreStatus.CLAIMED && memberId in it.team && !it.dueDate.isAfter(today) }
+    val toCheck = if (role == Role.PARENT) chores.count { it.status == ChoreStatus.PENDING_APPROVAL } else 0
+    return mine + toCheck
+}
+
 fun reminderFor(board: TodayBoard, role: Role, today: LocalDate): ChoreReminder? {
     val reminder = ChoreReminder(
         toDo = board.toDo.size,

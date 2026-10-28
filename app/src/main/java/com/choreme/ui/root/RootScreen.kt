@@ -21,7 +21,8 @@ import com.choreme.ui.navigation.ChoreMeNavHost
 fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
     val session by viewModel.session.collectAsStateWithLifecycle()
     val pendingJoinRequests by viewModel.pendingJoinRequests.collectAsStateWithLifecycle()
-    val pendingApprovals by viewModel.pendingApprovals.collectAsStateWithLifecycle()
+    val choresBadge by viewModel.choresBadge.collectAsStateWithLifecycle()
+    val groceriesToBuy by viewModel.groceriesToBuy.collectAsStateWithLifecycle()
     val pushEndpoint by viewModel.pushEndpoint.collectAsStateWithLifecycle()
 
     LaunchedEffect(session, pushEndpoint) { viewModel.registerForPings(session, pushEndpoint) }
@@ -34,6 +35,6 @@ fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
         SessionState.SignedOut -> SignInScreen()
         is SessionState.NoFamily -> OnboardingScreen(state)
         is SessionState.AwaitingApproval -> AwaitingApprovalScreen(state)
-        is SessionState.InFamily -> ChoreMeNavHost(pendingJoinRequests = pendingJoinRequests, pendingApprovals = pendingApprovals)
+        is SessionState.InFamily -> ChoreMeNavHost(pendingJoinRequests = pendingJoinRequests, choresBadge = choresBadge, groceriesToBuy = groceriesToBuy)
     }
 }

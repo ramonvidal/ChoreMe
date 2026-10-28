@@ -3,7 +3,10 @@ package com.choreme.feature.family
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -61,14 +64,16 @@ class FamilyTabScreenshotTest {
         today = today,
     )
 
-    private fun shoot(name: String, dark: Boolean) {
+    private fun shoot(name: String, dark: Boolean, fontScale: Float = 1f) {
         compose.setContent {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
+                CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
                 Surface(Modifier.fillMaxSize()) {
                     FamilyContent(state, ActionState(), signOutNeedsApprovalAgain = false, actions = FamilyActions()) {
                         Text("(This phone's settings)")
                     }
                 }
+            }
             }
         }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")
@@ -82,4 +87,10 @@ class FamilyTabScreenshotTest {
 
     @Test
     fun parentDark() = shoot("tab-family-dark", dark = true)
+
+    /** The phone's text size turned up to the largest step: nothing should be cut off. */
+    @Test
+    fun largeText() {
+        shoot("tab-family-large-text", dark = false, fontScale = 1.5f)
+    }
 }
