@@ -2,6 +2,16 @@ package com.choreme.feature.family
 
 import com.choreme.core.ui.R as CoreUiR
 import androidx.compose.foundation.clickable
+import com.choreme.core.ui.MemberAvatar
+import androidx.compose.material3.Icon
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.material3.IconButton
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -62,24 +72,38 @@ internal fun FamilyMessages(
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
+        // One slim rounded line with a send arrow inside it, like a chat app.
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .background(MaterialTheme.colorScheme.surfaceContainerLowest, CircleShape)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                .padding(start = 18.dp, end = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            BasicTextField(
                 value = text,
                 onValueChange = { if (it.length <= FamilyMessage.MAX_LENGTH) text = it },
-                placeholder = { Text(stringResource(R.string.message_placeholder)) },
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Send),
                 keyboardActions = KeyboardActions(onSend = { send() }),
                 maxLines = 3,
-                shape = MaterialTheme.shapes.medium,
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                ),
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).padding(vertical = 12.dp),
+                decorationBox = { field ->
+                    if (text.isEmpty()) {
+                        Text(stringResource(R.string.message_placeholder), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    field()
+                },
             )
-            Button(onClick = ::send, enabled = text.isNotBlank(), shape = MaterialTheme.shapes.small) {
-                Text(stringResource(R.string.message_send))
+            IconButton(onClick = ::send, enabled = text.isNotBlank()) {
+                Icon(
+                    painterResource(CoreUiR.drawable.ic_send),
+                    contentDescription = stringResource(R.string.message_send),
+                    tint = if (text.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                )
             }
         }
 
@@ -89,13 +113,16 @@ internal fun FamilyMessages(
                 shown.forEachIndexed { index, message ->
                     if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                     val canRemove = me != null && (message.from == me.id || me.role == Role.PARENT)
-                    Column(
+                    val sender = members.firstOrNull { it.id == message.from }
+                    Row(
                         Modifier
                             .fillMaxWidth()
                             .clickable(enabled = canRemove) { removing = message }
                             .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
+                    if (sender != null) MemberAvatar(sender, size = 32.dp)
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Row {
                             Text(
                                 if (message.from == me?.id) stringResource(R.string.message_you) else names[message.from] ?: stringResource(R.string.message_someone),
@@ -109,6 +136,7 @@ internal fun FamilyMessages(
                             )
                         }
                         Text(message.text, style = MaterialTheme.typography.bodyLarge)
+                    }
                     }
                 }
             }

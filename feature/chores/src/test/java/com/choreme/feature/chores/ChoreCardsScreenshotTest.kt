@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
@@ -74,7 +75,8 @@ class ChoreCardsScreenshotTest {
         compose.onNodeWithText("2 points").assertExists()
         compose.onNodeWithText("1 is yours").assertExists()
         compose.onNodeWithText("You and Mia are on it · Tomorrow").assertExists()
-        compose.onNodeWithText("Leo and Mia are on it · 4 points").assertExists()
+        compose.onNodeWithText("On it · 4 points").assertExists()
+        compose.onNodeWithContentDescription("Leo and Mia are on it").assertExists() // their avatars
         compose.onAllNodesWithText("Me too").assertCountEquals(2) // Laundry and the garage
         compose.onNodeWithText("14 points in 7 days").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-cards.png")
@@ -102,6 +104,25 @@ class ChoreCardsScreenshotTest {
         }
         compose.onNodeWithText("32 points in 7 days").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-garden.png")
+    }
+
+    /** The "well done" after finishing a chore, caught mid-way. */
+    @Test
+    fun cheer() {
+        compose.mainClock.autoAdvance = false
+        compose.setContent {
+            ChoreMeTheme(darkTheme = false, dynamicColor = false) {
+                Surface {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        CheerBubble(Cheer(points = 3, waiting = false, at = 1), onGone = {})
+                        CheerBubble(Cheer(points = 1, waiting = true, at = 2), onGone = {})
+                    }
+                }
+            }
+        }
+        compose.mainClock.advanceTimeBy(600)
+        compose.onNodeWithText("Well done! +3 points").assertExists()
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-cheer.png")
     }
 
     /** Dark mode: the picture keeps its own colours (a white house), only the card around it is dark. */

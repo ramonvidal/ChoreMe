@@ -7,6 +7,18 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Surface
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,6 +55,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import com.choreme.core.ui.AvatarStack
+import androidx.compose.ui.draw.clip
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
@@ -51,6 +68,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -137,6 +155,13 @@ internal class ChoresActions(
 /** The whole tab, drawn from [state] alone, so it can be screenshotted without Firebase. */
 @Composable
 internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>, onOpenGroceries: () -> Unit, actions: ChoresActions) {
+    var cheer by remember { mutableStateOf<Cheer?>(null) }
+    val haptics = LocalHapticFeedback.current
+    // A small "well done" each time a chore is finished: a tick, the points, a little buzz.
+    fun finished(chore: Chore, approved: Boolean = false) {
+        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+        cheer = Cheer(chore.points, waiting = !approved && !state.isParent, at = System.nanoTime())
+    }
     var editing by remember { mutableStateOf<Chore?>(null) }
     var adding by remember { mutableStateOf(false) }
     var doneByFor by remember { mutableStateOf<Chore?>(null) }
@@ -171,7 +196,10 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
                             state = state,
                             onClaim = { actions.claim(chore) },
                             onUnclaim = { actions.unclaim(chore) },
-                            onComplete = { actions.complete(chore) },
+                            onComplete = {
+                                actions.complete(chore)
+                                finished(chore)
+                            },
                             onDoneBy = { doneByFor = chore },
                             onJoin = { actions.join(chore) },
                             onAssign = { assigning = chore },
@@ -203,7 +231,10 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
                     if (board.awaitingApproval.isNotEmpty()) {
                         item(key = "awaiting-title") { SectionLabel(stringResource(R.string.section_awaiting)) }
                         items(board.awaitingApproval, key = { "awaiting-${it.id}" }) { chore ->
-                            AwaitingCard(chore, state, onApprove = { actions.approve(chore) }, onReject = { actions.reject(chore) })
+                            AwaitingCard(chore, state, onApprove = {
+                                    actions.approve(chore)
+                                    finished(chore, approved = true)
+                                }, onReject = { actions.reject(chore) })
                         }
                     }
 
@@ -259,6 +290,7 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
             ) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_chore)) }
         }
         SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp))
+        CheerBubble(cheer, onGone = { cheer = null }, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 88.dp))
     }
 
     if (adding) {
@@ -340,6 +372,50 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
         )
     }
 }
+
+/** Finishing a chore: its points, or, for a kid, that it's gone to a parent. [at] tells two apart. */
+internal data class Cheer(val points: Int, val waiting: Boolean, val at: Long)
+
+/** A dark pill that pops up with a bouncing tick for a moment, then fades. */
+@Composable
+internal fun CheerBubble(cheer: Cheer?, onGone: () -> Unit, modifier: Modifier = Modifier) {
+    var shown by remember { mutableStateOf(cheer) }
+    if (cheer != null) shown = cheer
+    LaunchedEffect(cheer) {
+        if (cheer != null) {
+            delay(CHEER_MILLIS)
+            onGone()
+        }
+    }
+    AnimatedVisibility(
+        visible = cheer != null,
+        enter = scaleIn(spring(dampingRatio = 0.5f, stiffness = 400f)) + fadeIn(),
+        exit = fadeOut(),
+        modifier = modifier,
+    ) {
+        val current = shown ?: return@AnimatedVisibility
+        val tick = remember(current.at) { Animatable(0f) }
+        LaunchedEffect(current.at) { tick.animateTo(1f, spring(dampingRatio = 0.35f, stiffness = 300f)) }
+        Surface(shape = CircleShape, color = MaterialTheme.colorScheme.inverseSurface, shadowElevation = 6.dp) {
+            Row(Modifier.padding(horizontal = 18.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                ItemIcon(
+                    CoreUiR.drawable.ic_check_circle,
+                    Modifier.size(22.dp).graphicsLayer { scaleX = tick.value; scaleY = tick.value },
+                    tint = MaterialTheme.colorScheme.inversePrimary,
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    if (current.waiting) stringResource(R.string.cheer_waiting)
+                    else pluralStringResource(R.plurals.cheer_points, current.points, current.points),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                )
+            }
+        }
+    }
+}
+
+private const val CHEER_MILLIS = 1_800L
 
 /** "Remind me at…": a time today (or tomorrow, if it's passed), on this phone only. */
 @Composable
@@ -436,8 +512,9 @@ private fun UrgentTag() {
 }
 
 /**
- * One chore on a white card: grey icon, title, one grey line, and one small button. Tapping the
- * card opens everything else (done by, reminders, calendar, edit).
+ * One chore on a white card: grey icon, title, one grey line, and one small button. Who's on it
+ * shows as their avatars. Colour means one thing each: a green edge is yours, a red edge urgent.
+ * Swipe right for the button's action, left (or tap) for everything else.
  */
 @Composable
 internal fun ChoreCard(
@@ -461,16 +538,20 @@ internal fun ChoreCard(
     val onIt = me.id in chore.team
     val takenByOthers = chore.status == ChoreStatus.CLAIMED && !onIt
     val others = state.teamNames(chore, me.id)
+    val team = (listOfNotNull(chore.claimedBy) + chore.helpers.sorted()).mapNotNull { state.members[it] }
     var menu by remember { mutableStateOf(false) }
 
+    val teamText = when {
+        onIt && others.isEmpty() -> stringResource(R.string.you_are_on_it)
+        onIt -> stringResource(R.string.you_and_on_it, namesLabel(others))
+        others.size > 1 -> stringResource(R.string.on_it_many, namesLabel(others))
+        takenByOthers -> stringResource(R.string.on_it, others.firstOrNull() ?: stringResource(R.string.someone))
+        else -> null
+    }
     val line = buildList {
         when {
-            onIt && others.isEmpty() -> add(stringResource(R.string.you_are_on_it))
-            onIt -> add(stringResource(R.string.you_and_on_it, namesLabel(others)))
-            takenByOthers -> add(
-                if (others.size > 1) stringResource(R.string.on_it_many, namesLabel(others))
-                else stringResource(R.string.on_it, others.firstOrNull() ?: stringResource(R.string.someone)),
-            )
+            // With avatars, "Leo is on it" needs no name: they're in the circles.
+            teamText != null -> add(if (onIt) teamText else stringResource(R.string.on_it_short))
             chore.reportedBy == me.id -> add(stringResource(R.string.reported_by_you))
             chore.reportedBy != null -> state.nameOf(chore.reportedBy)?.let { add(stringResource(R.string.reported_by, it)) }
         }
@@ -481,55 +562,78 @@ internal fun ChoreCard(
         if (reminder != null) add(stringResource(R.string.reminder_at, reminder.atZone(ZoneId.systemDefault()).format(SHORT_TIME)))
     }.joinToString(" · ")
 
-    // The one thing to do next; green when urgent, plain otherwise. "Me too" joins whoever's on it.
+    // The one thing to do next. "Me too" joins whoever's on it.
     val main = when {
         chore.status == ChoreStatus.OPEN -> R.string.grab to onClaim
         onIt -> R.string.done to onComplete
         else -> R.string.join to onJoin
     }
+    val colors = MaterialTheme.colorScheme
+    val cardColor = when {
+        chore.urgent -> lerp(CardDefaults.cardColors().containerColor, colors.error, 0.06f)
+        mine -> lerp(CardDefaults.cardColors().containerColor, colors.primary, 0.08f)
+        else -> CardDefaults.cardColors().containerColor
+    }
+    val edge = when {
+        chore.urgent -> BorderStroke(1.5.dp, colors.error)
+        mine -> BorderStroke(1.5.dp, colors.primary)
+        else -> null
+    }
+
+    // Swiping only ever triggers; the card springs back and the list updates from the data.
+    // The swipe state outlives a change of status, so it reads the current action.
+    val action by rememberUpdatedState(main.second)
+    val swipe = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            when (value) {
+                SwipeToDismissBoxValue.StartToEnd -> action()
+                SwipeToDismissBoxValue.EndToStart -> menu = true
+                SwipeToDismissBoxValue.Settled -> Unit
+            }
+            false
+        },
+        positionalThreshold = { it * 0.35f },
+    )
 
     Box {
-        Card(
-            modifier = Modifier.fillMaxWidth().clickable { menu = true },
-            colors = if (mine) {
-                CardDefaults.cardColors(containerColor = lerp(CardDefaults.cardColors().containerColor, MaterialTheme.colorScheme.primary, 0.08f))
-            } else {
-                CardDefaults.cardColors()
-            },
-            border = if (mine) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null,
+        SwipeToDismissBox(
+            state = swipe,
+            backgroundContent = { SwipeHint(swipe.dismissDirection, stringResource(main.first)) },
         ) {
-            Row(
-                Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
+            Card(
+                modifier = Modifier.fillMaxWidth().clickable { menu = true },
+                colors = CardDefaults.cardColors(containerColor = cardColor),
+                border = edge,
             ) {
-                ItemIcon(chore.template.icon, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(chore.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (chore.urgent) UrgentTag()
-                        if (line.isNotEmpty()) {
-                            Text(
-                                line,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                            )
+                Row(
+                    Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                ) {
+                    ItemIcon(chore.template.icon, Modifier.size(22.dp), tint = colors.onSurfaceVariant)
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(chore.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (chore.urgent) UrgentTag()
+                            if (team.isNotEmpty() && teamText != null) AvatarStack(team, teamText, ring = cardColor)
+                            if (line.isNotEmpty()) {
+                                Text(
+                                    line,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = colors.onSurfaceVariant,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
                         }
                     }
-                }
-                if (chore.urgent) {
-                    Button(onClick = main.second, shape = MaterialTheme.shapes.small, contentPadding = SmallButtonPadding) {
-                        Text(stringResource(main.first))
-                    }
-                } else {
+                    // Plain for every chore: green is for yours (the edge), red for urgent (the edge and tag).
                     OutlinedButton(
                         onClick = main.second,
                         shape = MaterialTheme.shapes.small,
                         contentPadding = SmallButtonPadding,
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.onSurface),
+                        border = BorderStroke(1.dp, colors.outline),
                     ) { Text(stringResource(main.first)) }
                 }
             }
@@ -555,6 +659,28 @@ internal fun ChoreCard(
                 DropdownMenuItem(text = { Text(stringResource(R.string.edit_chore)) }, onClick = { menu = false; onEdit() })
             }
         }
+    }
+}
+
+/** Behind a card being swiped: its button's action on the left, "More" on the right. */
+@Composable
+private fun SwipeHint(direction: SwipeToDismissBoxValue, action: String) {
+    val colors = MaterialTheme.colorScheme
+    val right = direction == SwipeToDismissBoxValue.StartToEnd
+    if (direction == SwipeToDismissBoxValue.Settled) return
+    Box(
+        Modifier
+            .fillMaxSize()
+            .clip(MaterialTheme.shapes.medium)
+            .background(if (right) colors.primary else colors.surfaceVariant)
+            .padding(horizontal = 20.dp),
+        contentAlignment = if (right) Alignment.CenterStart else Alignment.CenterEnd,
+    ) {
+        Text(
+            if (right) action else stringResource(R.string.swipe_more),
+            style = MaterialTheme.typography.titleSmall,
+            color = if (right) colors.onPrimary else colors.onSurface,
+        )
     }
 }
 

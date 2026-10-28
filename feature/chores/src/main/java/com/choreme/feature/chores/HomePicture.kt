@@ -5,6 +5,7 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -113,7 +114,8 @@ private fun homeMood(scene: HomeScene): Int = when {
 internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
     val growth by animateFloatAsState(scene.growth, tween(1200), label = "growth")
     // Counted up and down smoothly, so a new flower grows in and a pulled weed shrinks away.
-    val flowers by animateFloatAsState(scene.flowers.toFloat(), tween(900), label = "flowers")
+    // A springy count: a newly earned flower overshoots a little, so it visibly pops in.
+    val flowers by animateFloatAsState(scene.flowers.toFloat(), spring(dampingRatio = 0.4f, stiffness = 120f), label = "flowers")
     val weeds by animateFloatAsState(scene.weeds.toFloat(), tween(700), label = "weeds")
     val light by animateFloatAsState(if (scene.lightsOn) 1f else 0f, tween(800), label = "light")
     // 0 sunny, 1 cloudy, 2 rain, 3 storm; eased so the sky darkens and clears gradually.
@@ -209,7 +211,7 @@ internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
         // Flowers either side of the house, one per point (up to a dozen).
         val slots = flowerSlots(w, houseW)
         slots.take(ceil(flowers).toInt()).forEachIndexed { i, x ->
-            val grown = (flowers - i).coerceIn(0f, 1f)
+            val grown = (flowers - i).coerceIn(0f, 1.25f)
             val stem = h * (0.1f + 0.06f * ((i * 7) % 3) / 2f) * (0.6f + 0.4f * growth)
             flower(Offset(x, ground), stem, leaf, Petals[i % Petals.size], if (scene.tired) 24f else sway * 4f, scene.tired, grown)
         }

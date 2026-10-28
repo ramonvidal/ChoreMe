@@ -28,6 +28,8 @@
     <string name="join">Me too</string>
     <string name="on_it_many">%1$s are on it</string>
     <string name="you_and_on_it">You and %1$s are on it</string>
+    <string name="on_it_short">On it</string>
+    <string name="swipe_more">More</string>
     <string name="names_and">%1$s and %2$s</string>
     <string name="not_yet">Not yet</string>
     <string name="on_it">%1$s is on it</string>
@@ -175,4 +177,10 @@
         <item quantity="other">This week: %d points</item>
     </plurals>
     <string name="weekly_person">%1$s %2$d</string>
+    <!-- The little "well done" after finishing a chore -->
+    <plurals name="cheer_points">
+        <item quantity="one">Well done! +%d point</item>
+        <item quantity="other">Well done! +%d points</item>
+    </plurals>
+    <string name="cheer_waiting">Well done! A parent will check it</string>
 </resources>

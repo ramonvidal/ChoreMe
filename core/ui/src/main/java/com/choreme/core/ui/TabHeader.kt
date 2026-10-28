@@ -1,6 +1,10 @@
 package com.choreme.core.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.border
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +41,22 @@ fun MemberAvatar(member: Member, modifier: Modifier = Modifier, size: Dp = 40.dp
             fontWeight = FontWeight.Bold,
             fontSize = (size.value * 0.42f).sp,
         )
+    }
+}
+
+/**
+ * Several people as overlapping avatars ("Leo and Mia are on it" at a glance), each ringed in
+ * [ring], the color behind them, so they stay apart. [description] is read out instead.
+ */
+@Composable
+fun AvatarStack(members: List<Member>, description: String, ring: Color, modifier: Modifier = Modifier, size: Dp = 22.dp) {
+    Row(
+        modifier.semantics(mergeDescendants = true) { contentDescription = description },
+        horizontalArrangement = Arrangement.spacedBy(-(size * 0.3f)),
+    ) {
+        members.forEach { member ->
+            MemberAvatar(member, Modifier.border(1.5.dp, ring, CircleShape), size = size)
+        }
     }
 }
 

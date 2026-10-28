@@ -4,6 +4,7 @@ import com.choreme.core.ui.R as CoreUiR
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -389,6 +390,21 @@ private fun ProfileOption(label: String, selected: Boolean, onSelect: () -> Unit
     }
 }
 
+/** "Away until 30 Oct" as a small grey tag beside the name. */
+@Composable
+internal fun AwayTag(text: String) {
+    Row(
+        Modifier
+            .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.extraSmall)
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ItemIcon(CoreUiR.drawable.ic_flight, Modifier.size(12.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.width(4.dp))
+        Text(text, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+    }
+}
+
 @Composable
 private fun MemberRow(
     member: Member,
@@ -405,10 +421,14 @@ private fun MemberRow(
         MemberAvatar(member, size = 36.dp)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Text(
-                if (isMe) stringResource(R.string.member_me, member.name) else member.name,
-                style = MaterialTheme.typography.bodyLarge,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    if (isMe) stringResource(R.string.member_me, member.name) else member.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                if (away != null) AwayTag(away)
+            }
             val role = stringResource(if (member.role == Role.PARENT) R.string.role_parent else R.string.role_kid)
             val devices = if (member.uids.isEmpty()) {
                 stringResource(R.string.member_no_device)
@@ -416,7 +436,6 @@ private fun MemberRow(
                 pluralStringResource(R.plurals.member_devices, member.uids.size, member.uids.size)
             }
             Text("$role · $devices", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            if (away != null) Text(away, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
         }
         if (onAway != null) {
             IconButton(onClick = onAway) {

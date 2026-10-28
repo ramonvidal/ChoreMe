@@ -2,6 +2,12 @@ package com.choreme.feature.family
 
 import com.choreme.core.ui.R as CoreUiR
 import androidx.compose.foundation.clickable
+import com.choreme.core.ui.theme.memberColor
+import com.choreme.core.ui.MemberAvatar
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -116,25 +122,45 @@ private fun NoteDialog(initial: String, onSave: (String) -> Unit, onDelete: (() 
     )
 }
 
-/** For parents: the points each person earned in the last 7 days, to keep things fair. */
+/** For parents: the points each person earned in the last 7 days, as bars, to keep things fair. */
 @Composable
 internal fun WeekSection(week: List<MemberWeek>) {
+    val most = week.maxOfOrNull { it.points }?.coerceAtLeast(1) ?: 1
     Card(Modifier.fillMaxWidth()) {
-        week.forEachIndexed { index, (member, done) ->
-            if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-            Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(member.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                    val points = done.sumOf { it.points }
-                    Text(pluralStringResource(CoreUiR.plurals.points, points, points), style = MaterialTheme.typography.titleSmall)
-                }
-                if (done.isNotEmpty()) {
-                    val titles = done.map { it.title }.distinct()
-                    Text(
-                        titles.take(MAX_TITLES).joinToString(", ") + if (titles.size > MAX_TITLES) "…" else "",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            week.forEach { person ->
+                val points = person.points
+                Row(Modifier.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    MemberAvatar(person.member, size = 32.dp)
+                    Spacer(Modifier.width(12.dp))
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(person.member.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                            Text(pluralStringResource(CoreUiR.plurals.points, points, points), style = MaterialTheme.typography.titleSmall)
+                        }
+                        // A bar against whoever did most; a sliver even at 0, so everyone has a row.
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(6.dp)
+                                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
+                        ) {
+                            Box(
+                                Modifier
+                                    .fillMaxWidth((points.toFloat() / most).coerceIn(0.02f, 1f))
+                                    .height(6.dp)
+                                    .background(memberColor(person.member.color), CircleShape),
+                            )
+                        }
+                        if (person.done.isNotEmpty()) {
+                            val titles = person.done.map { it.title }.distinct()
+                            Text(
+                                titles.take(MAX_TITLES).joinToString(", ") + if (titles.size > MAX_TITLES) "…" else "",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -147,7 +173,8 @@ private const val MAX_TITLES = 4
 @Composable
 internal fun awayLabel(member: Member, today: LocalDate): String? {
     if (!member.isAway(today)) return null
-    val until = checkNotNull(member.awayUntil).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+    // Short, for a tag beside the name: "30 Oct".
+    val until = checkNotNull(member.awayUntil).format(DateTimeFormatter.ofPattern("d MMM"))
     return stringResource(R.string.away_until, until)
 }
 
