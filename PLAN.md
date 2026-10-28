@@ -33,6 +33,8 @@
 | Cost | **Everything free**: Firebase Spark plan, OpenStreetMap, the phone's own calendar, GitHub Actions, and UnifiedPush through the free ntfy app for instant pings. No paid plan, no server of our own |
 | Notifications | Each phone posts a **morning summary** (WorkManager) and the app shows badges. **Instant pings** between phones go through UnifiedPush: each phone with the free **ntfy** app installed gets a contentless wake-up ping and reads the details from Firestore. Phones without it fall back to checking every ~15 minutes |
 | Look | **"Soft cards"**: a light grey page, white cards, black and grey text, and **one green** only for the main action and the selected tab; red only for urgent. Font: Figtree. Simple on purpose: chosen over warmer, more colorful options |
+| Colour rules | A green edge means a chore is yours, a red edge that it's urgent; chore buttons stay plain. People show as their coloured avatar. Swipe a chore right for its button, left for its options; swipe a grocery to tick it off. Finishing a chore shows "Well done! +2 points" with a tick and a buzz |
+| Screenshots | Every tab (light, dark, the largest text size, empty) is drawn from its state alone (`XxxContent`) and screenshotted on each release (`screenshots.zip`) |
 | Pictures | **No emoji.** Chores and grocery items use line drawings from **Tabler Icons** (MIT); app controls use Google's **Material Symbols** (Apache 2.0). Only the drawings in use are copied into `:core:ui`, so nothing is downloaded and they follow light/dark mode |
 | Offline | Firestore's built-in offline cache; no separate local database. Writes show up at once and sync when there's signal |
 
