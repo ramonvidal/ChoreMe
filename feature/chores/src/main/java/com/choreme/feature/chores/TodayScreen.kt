@@ -77,6 +77,8 @@ import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.icon
 import java.time.Instant
 import java.time.LocalTime
+import com.choreme.core.model.chore.SavedChore
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -86,19 +88,65 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val reminders by viewModel.reminders.collectAsStateWithLifecycle()
+    AskForNotificationPermission()
+    ChoresContent(
+        state = state,
+        reminders = reminders,
+        onOpenGroceries = onOpenGroceries,
+        actions = ChoresActions(
+            claim = { viewModel.claim(it) },
+            unclaim = { viewModel.unclaim(it) },
+            complete = { viewModel.complete(it) },
+            join = { viewModel.join(it) },
+            assign = { chore, people -> viewModel.assign(chore, people) },
+            completeFor = { chore, people -> viewModel.completeFor(chore, people) },
+            approve = { viewModel.approve(it) },
+            reject = { viewModel.reject(it) },
+            create = { viewModel.create(it) },
+            update = { chore, draft -> viewModel.update(chore, draft) },
+            delete = { viewModel.delete(it) },
+            removeSaved = { viewModel.removeSaved(it) },
+            remind = { chore, time -> viewModel.remind(chore, time) },
+            cancelReminder = { viewModel.cancelReminder(it) },
+            addToCalendar = { viewModel.addToCalendar(it) },
+        ),
+    )
+}
+
+/** What the Chores tab can ask for; [TodayScreen] passes the view model's, tests pass their own. */
+internal class ChoresActions(
+    val claim: (Chore) -> Unit = {},
+    val unclaim: (Chore) -> Unit = {},
+    val complete: (Chore) -> Unit = {},
+    val join: (Chore) -> Unit = {},
+    val assign: (Chore, Set<String>) -> Unit = { _, _ -> },
+    val completeFor: (Chore, Set<String>) -> Unit = { _, _ -> },
+    val approve: (Chore) -> Unit = {},
+    val reject: (Chore) -> Unit = {},
+    /** Returns the chore already on the list with that name, if any. */
+    val create: (ChoreDraft) -> Chore? = { null },
+    val update: (Chore, ChoreDraft) -> Unit = { _, _ -> },
+    val delete: (Chore) -> Unit = {},
+    val removeSaved: (SavedChore) -> Unit = {},
+    val remind: (Chore, LocalTime) -> LocalDateTime = { _, time -> LocalDateTime.now().with(time) },
+    val cancelReminder: (Chore) -> Unit = {},
+    val addToCalendar: suspend (Chore) -> CalendarResult? = { null },
+)
+
+/** The whole tab, drawn from [state] alone, so it can be screenshotted without Firebase. */
+@Composable
+internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>, onOpenGroceries: () -> Unit, actions: ChoresActions) {
     var editing by remember { mutableStateOf<Chore?>(null) }
     var adding by remember { mutableStateOf(false) }
     var doneByFor by remember { mutableStateOf<Chore?>(null) }
     var assigning by remember { mutableStateOf<Chore?>(null) }
     var remindFor by remember { mutableStateOf<Chore?>(null) }
     var showHome by remember { mutableStateOf(false) }
-    val reminders by viewModel.reminders.collectAsStateWithLifecycle()
 
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-
-    AskForNotificationPermission()
 
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
@@ -121,18 +169,18 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
                         ChoreCard(
                             chore = chore,
                             state = state,
-                            onClaim = { viewModel.claim(chore) },
-                            onUnclaim = { viewModel.unclaim(chore) },
-                            onComplete = { viewModel.complete(chore) },
+                            onClaim = { actions.claim(chore) },
+                            onUnclaim = { actions.unclaim(chore) },
+                            onComplete = { actions.complete(chore) },
                             onDoneBy = { doneByFor = chore },
-                            onJoin = { viewModel.join(chore) },
+                            onJoin = { actions.join(chore) },
                             onAssign = { assigning = chore },
                             onEdit = { editing = chore },
                             reminder = reminders[chore.id],
                             onRemind = { remindFor = chore },
                             onCalendar = {
                                 scope.launch {
-                                    when (val result = viewModel.addToCalendar(chore)) {
+                                    when (val result = actions.addToCalendar(chore)) {
                                         is CalendarResult.Added ->
                                             snackbar.showSnackbar(context.getString(R.string.added_to_calendar, result.calendarName))
                                         is CalendarResult.OpenApp -> try {
@@ -140,6 +188,7 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
                                         } catch (e: ActivityNotFoundException) {
                                             snackbar.showSnackbar(context.getString(R.string.no_calendar_app))
                                         }
+                                        null -> Unit
                                     }
                                 }
                             },
@@ -154,7 +203,7 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
                     if (board.awaitingApproval.isNotEmpty()) {
                         item(key = "awaiting-title") { SectionLabel(stringResource(R.string.section_awaiting)) }
                         items(board.awaitingApproval, key = { "awaiting-${it.id}" }) { chore ->
-                            AwaitingCard(chore, state, onApprove = { viewModel.approve(chore) }, onReject = { viewModel.reject(chore) })
+                            AwaitingCard(chore, state, onApprove = { actions.approve(chore) }, onReject = { actions.reject(chore) })
                         }
                     }
 
@@ -218,11 +267,11 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
             today = state.today,
             savedChores = state.savedChores,
             canRemoveSaved = state::canRemove,
-            onRemoveSaved = viewModel::removeSaved,
+            onRemoveSaved = actions.removeSaved,
             canSetPoints = state.isParent,
             onSave = { draft ->
                 adding = false
-                viewModel.create(draft)?.let { existing ->
+                actions.create(draft)?.let { existing ->
                     scope.launch { snackbar.showSnackbar(context.getString(R.string.already_on_list, existing.title)) }
                 }
             },
@@ -235,12 +284,12 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
             chore = chore,
             today = state.today,
             onSave = {
-                viewModel.update(chore, it)
+                actions.update(chore, it)
                 editing = null
             },
             canSetPoints = state.isParent,
             onDelete = {
-                viewModel.delete(chore)
+                actions.delete(chore)
                 editing = null
             },
             onDismiss = { editing = null },
@@ -250,12 +299,12 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
         RemindDialog(
             hasReminder = chore.id in reminders,
             onSet = { time ->
-                val at = viewModel.remind(chore, time)
+                val at = actions.remind(chore, time)
                 remindFor = null
                 scope.launch { snackbar.showSnackbar(context.getString(R.string.reminder_set, at.format(SHORT_TIME))) }
             },
             onRemove = {
-                viewModel.cancelReminder(chore)
+                actions.cancelReminder(chore)
                 remindFor = null
             },
             onDismiss = { remindFor = null },
@@ -270,7 +319,7 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
             initial = chore.team,
             allowNone = false,
             onConfirm = { people ->
-                viewModel.completeFor(chore, people)
+                actions.completeFor(chore, people)
                 doneByFor = null
             },
             onDismiss = { doneByFor = null },
@@ -284,7 +333,7 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
             initial = chore.team,
             allowNone = true,
             onConfirm = { people ->
-                viewModel.assign(chore, people)
+                actions.assign(chore, people)
                 assigning = null
             },
             onDismiss = { assigning = null },

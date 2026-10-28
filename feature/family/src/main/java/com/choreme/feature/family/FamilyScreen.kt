@@ -55,24 +55,77 @@ import com.choreme.core.model.Family
 import com.choreme.core.model.JoinRequest
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
+import com.choreme.core.ui.ActionState
 import com.choreme.core.ui.ErrorText
 import com.choreme.core.ui.HeaderLine
 import com.choreme.core.ui.ItemIcon
 import com.choreme.core.ui.MemberAvatar
 import com.choreme.core.ui.SectionLabel
 import com.choreme.core.ui.TabHeader
+import java.time.LocalDate
+import com.choreme.core.model.Note
+import com.choreme.core.model.FamilyMessage
 
 @Composable
 internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val actionState by viewModel.actionState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    FamilyContent(
+        state = state,
+        actionState = actionState,
+        signOutNeedsApprovalAgain = viewModel.signOutNeedsApprovalAgain,
+        actions = FamilyActions(
+            sendMessage = { viewModel.sendMessage(it) },
+            deleteMessage = { viewModel.deleteMessage(it) },
+            approve = { request, linkTo -> viewModel.approve(request, linkTo) },
+            decline = { viewModel.decline(it) },
+            addNote = { viewModel.addNote(it) },
+            editNote = { note, text -> viewModel.editNote(note, text) },
+            deleteNote = { viewModel.deleteNote(it) },
+            addKidProfile = { viewModel.addKidProfile(it) },
+            setAway = { member, until -> viewModel.setAway(member, until) },
+            remove = { viewModel.remove(it) },
+            signOut = { viewModel.signOut() },
+            leave = { viewModel.leave() },
+            deleteMyData = { viewModel.deleteMyData { requestGoogleIdToken(context) } },
+        ),
+        phoneSettings = { PhoneSettings() },
+    )
+}
+
+/** What the Family tab can ask for; [FamilyScreen] passes the view model's, tests pass their own. */
+internal class FamilyActions(
+    val sendMessage: (String) -> Unit = {},
+    val deleteMessage: (FamilyMessage) -> Unit = {},
+    val approve: (JoinRequest, String?) -> Unit = { _, _ -> },
+    val decline: (JoinRequest) -> Unit = {},
+    val addNote: (String) -> Unit = {},
+    val editNote: (Note, String) -> Unit = { _, _ -> },
+    val deleteNote: (Note) -> Unit = {},
+    val addKidProfile: (String) -> Unit = {},
+    val setAway: (Member, LocalDate?) -> Unit = { _, _ -> },
+    val remove: (Member) -> Unit = {},
+    val signOut: () -> Unit = {},
+    val leave: () -> Unit = {},
+    val deleteMyData: () -> Unit = {},
+)
+
+/** The whole tab, drawn from [state] alone; [phoneSettings] is "This phone", which has its own view model. */
+@Composable
+internal fun FamilyContent(
+    state: FamilyUiState,
+    actionState: ActionState,
+    signOutNeedsApprovalAgain: Boolean,
+    actions: FamilyActions,
+    phoneSettings: @Composable () -> Unit,
+) {
     var showAddKid by rememberSaveable { mutableStateOf(false) }
     var confirmSignOut by rememberSaveable { mutableStateOf(false) }
     var memberToRemove by remember { mutableStateOf<Member?>(null) }
     var confirmLeave by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     var awayFor by remember { mutableStateOf<Member?>(null) }
-    val context = LocalContext.current
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -91,8 +144,8 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
                 messages = state.messages,
                 members = state.members,
                 me = state.meMember,
-                onSend = viewModel::sendMessage,
-                onDelete = viewModel::deleteMessage,
+                onSend = actions.sendMessage,
+                onDelete = actions.deleteMessage,
             )
         }
 
@@ -103,8 +156,8 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
                     request = request,
                     kidProfiles = state.kidProfiles,
                     enabled = !actionState.busy,
-                    onApprove = { linkTo -> viewModel.approve(request, linkTo) },
-                    onDecline = { viewModel.decline(request) },
+                    onApprove = { linkTo -> actions.approve(request, linkTo) },
+                    onDecline = { actions.decline(request) },
                 )
             }
         }
@@ -115,9 +168,9 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
                 notes = state.notes,
                 members = state.members,
                 me = state.meMember,
-                onAdd = viewModel::addNote,
-                onEdit = viewModel::editNote,
-                onDelete = viewModel::deleteNote,
+                onAdd = actions.addNote,
+                onEdit = actions.editNote,
+                onDelete = actions.deleteNote,
             )
         }
 
@@ -160,12 +213,12 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
         }
 
         item { SectionLabel(stringResource(R.string.this_phone_title)) }
-        item(key = "this-phone") { PhoneSettings() }
+        item(key = "this-phone") { phoneSettings() }
 
         item {
             TextButton(
                 onClick = {
-                    if (viewModel.signOutNeedsApprovalAgain) confirmSignOut = true else viewModel.signOut()
+                    if (signOutNeedsApprovalAgain) confirmSignOut = true else actions.signOut()
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(R.string.sign_out)) }
@@ -195,7 +248,7 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
             confirmLabel = stringResource(R.string.leave_family),
             onConfirm = {
                 confirmLeave = false
-                viewModel.leave()
+                actions.leave()
             },
             onDismiss = { confirmLeave = false },
         )
@@ -207,7 +260,7 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
             confirmLabel = stringResource(R.string.delete_my_data),
             onConfirm = {
                 confirmDelete = false
-                viewModel.deleteMyData { requestGoogleIdToken(context) }
+                actions.deleteMyData()
             },
             onDismiss = { confirmDelete = false },
         )
@@ -216,7 +269,7 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
     if (showAddKid) {
         AddKidDialog(
             onAdd = { name ->
-                viewModel.addKidProfile(name)
+                actions.addKidProfile(name)
                 showAddKid = false
             },
             onDismiss = { showAddKid = false },
@@ -228,7 +281,7 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
             member = member,
             today = state.today,
             onSet = { until ->
-                viewModel.setAway(member, until)
+                actions.setAway(member, until)
                 awayFor = null
             },
             onDismiss = { awayFor = null },
@@ -239,7 +292,7 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
             text = stringResource(R.string.family_remove_confirm, member.name),
             confirmLabel = stringResource(CoreUiR.string.remove),
             onConfirm = {
-                viewModel.remove(member)
+                actions.remove(member)
                 memberToRemove = null
             },
             onDismiss = { memberToRemove = null },
@@ -252,7 +305,7 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
             confirmLabel = stringResource(R.string.sign_out),
             onConfirm = {
                 confirmSignOut = false
-                viewModel.signOut()
+                actions.signOut()
             },
             onDismiss = { confirmSignOut = false },
         )

@@ -101,6 +101,9 @@ class AndroidComposeTestsConventionPlugin : Plugin<Project> {
                 it.systemProperty("robolectric.graphicsMode", "NATIVE")
                 it.systemProperty("robolectric.pixelCopyRenderMode", "hardware")
                 it.systemProperty("roborazzi.test.record", "true")
+                // Declared, so a test run restored from the build cache brings its pictures back
+                // too, and every release has every screen's screenshots.
+                it.outputs.dir(layout.buildDirectory.dir("outputs/roborazzi"))
             }
         }
         dependencies {

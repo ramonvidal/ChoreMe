@@ -92,6 +92,52 @@ import kotlinx.coroutines.launch
 internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val query by viewModel.query.collectAsStateWithLifecycle()
+
+    // In the shop, the screen shouldn't go dark between items.
+    val view = LocalView.current
+    DisposableEffect(state.shopping) {
+        view.keepScreenOn = state.shopping
+        onDispose { view.keepScreenOn = false }
+    }
+    GroceriesContent(
+        state = state,
+        query = query,
+        actions = GroceriesActions(
+            setNeeded = { item, needed -> viewModel.setNeeded(item, needed) },
+            onQueryChange = { viewModel.onQueryChange(it) },
+            submitQuery = { viewModel.submitQuery() },
+            selectList = { viewModel.selectList(it) },
+            pickSuggestion = { viewModel.pickSuggestion(it) },
+            addStarterItems = { viewModel.addStarterItems() },
+            restockStaples = { viewModel.restockStaples() },
+            setShopping = { viewModel.setShopping(it) },
+            createList = { viewModel.createList(it) },
+            deleteShownList = { viewModel.deleteShownList() },
+            save = { viewModel.save(it) },
+            delete = { viewModel.delete(it) },
+        ),
+    )
+}
+
+/** What the Groceries tab can ask for; [GroceriesScreen] passes the view model's, tests pass their own. */
+internal class GroceriesActions(
+    val setNeeded: (GroceryItem, Boolean) -> Unit = { _, _ -> },
+    val onQueryChange: (String) -> Unit = {},
+    val submitQuery: () -> QuickAddResult? = { null },
+    val selectList: (String?) -> Unit = {},
+    val pickSuggestion: (GroceryItem) -> Unit = {},
+    val addStarterItems: () -> Unit = {},
+    val restockStaples: () -> Unit = {},
+    val setShopping: (Boolean) -> Unit = {},
+    val createList: (String) -> Unit = {},
+    val deleteShownList: () -> Unit = {},
+    val save: (GroceryItem) -> Unit = {},
+    val delete: (GroceryItem) -> Unit = {},
+)
+
+/** The whole tab, drawn from [state] alone, so it can be screenshotted without Firebase. */
+@Composable
+internal fun GroceriesContent(state: GroceriesUiState, query: String, actions: GroceriesActions) {
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -100,15 +146,8 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
     var newList by rememberSaveable { mutableStateOf(false) }
     var deletingList by rememberSaveable { mutableStateOf(false) }
 
-    // In the shop, the screen shouldn't go dark between items.
-    val view = LocalView.current
-    DisposableEffect(shopping) {
-        view.keepScreenOn = shopping
-        onDispose { view.keepScreenOn = false }
-    }
-
     fun markBought(item: GroceryItem) {
-        viewModel.setNeeded(item, false)
+        actions.setNeeded(item, false)
         scope.launch {
             snackbar.currentSnackbarData?.dismiss()
             val result = snackbar.showSnackbar(
@@ -116,12 +155,12 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
                 actionLabel = context.getString(CoreUiR.string.undo),
                 duration = SnackbarDuration.Short,
             )
-            if (result == SnackbarResult.ActionPerformed) viewModel.setNeeded(item, true)
+            if (result == SnackbarResult.ActionPerformed) actions.setNeeded(item, true)
         }
     }
 
     fun submit() {
-        val result = viewModel.submitQuery()
+        val result = actions.submitQuery()
         if (result is QuickAddResult.AlreadyNeeded) {
             scope.launch {
                 snackbar.currentSnackbarData?.dismiss()
@@ -145,7 +184,7 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
             item(key = "lists") {
                 ListPicker(
                     state = state,
-                    onSelect = viewModel::selectList,
+                    onSelect = actions.selectList,
                     onNew = { newList = true },
                     onDelete = { deletingList = true },
                 )
@@ -163,7 +202,7 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
                 }
             }
             item(key = "quick-add") {
-                QuickAddField(query = query, onQueryChange = viewModel::onQueryChange, onSubmit = ::submit)
+                QuickAddField(query = query, onQueryChange = actions.onQueryChange, onSubmit = ::submit)
             }
             if (state.suggestions.isNotEmpty()) {
                 item(key = "suggestions") {
@@ -173,7 +212,7 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
                         modifier = Modifier.padding(vertical = 8.dp),
                     ) {
                         state.suggestions.forEach { item ->
-                            ItemChip(item, onClick = { viewModel.pickSuggestion(item) }, onLongClick = { editing = item })
+                            ItemChip(item, onClick = { actions.pickSuggestion(item) }, onLongClick = { editing = item })
                         }
                     }
                 }
@@ -185,7 +224,7 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
                         CircularProgressIndicator()
                     }
                 }
-                state.catalog.isEmpty() && state.isGroceries -> item(key = "empty") { EmptyCatalog(onAddStarter = viewModel::addStarterItems) }
+                state.catalog.isEmpty() && state.isGroceries -> item(key = "empty") { EmptyCatalog(onAddStarter = actions.addStarterItems) }
                 state.catalog.isEmpty() -> item(key = "empty-list") {
                     Text(
                         stringResource(R.string.list_empty),
@@ -205,7 +244,7 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
                                 modifier = Modifier.weight(1f),
                             )
                             if (!shopping) {
-                                TextButton(onClick = viewModel::restockStaples, enabled = state.staplesAtHome > 0) {
+                                TextButton(onClick = actions.restockStaples, enabled = state.staplesAtHome > 0) {
                                     Text(stringResource(R.string.grocery_restock, state.staplesAtHome))
                                 }
                             }
@@ -214,7 +253,7 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
                     item(key = "shopping-toggle") {
                         FilterChip(
                             selected = shopping,
-                            onClick = { viewModel.setShopping(!shopping) },
+                            onClick = { actions.setShopping(!shopping) },
                             leadingIcon = { ItemIcon(CoreUiR.drawable.ic_shopping_cart, Modifier.size(FilterChipDefaults.IconSize)) },
                             label = { Text(stringResource(if (shopping) R.string.grocery_shopping_on else R.string.grocery_shopping_off)) },
                         )
@@ -248,7 +287,7 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
                                 Text(stringResource(R.string.grocery_at_home_hint), style = MaterialTheme.typography.bodySmall)
                             }
                         }
-                        state.atHome.forEach { group -> item(key = "home-${group.category}") { AtHomeGroup(group, viewModel, onEdit = { editing = it }) } }
+                        state.atHome.forEach { group -> item(key = "home-${group.category}") { AtHomeGroup(group, onNeeded = { actions.setNeeded(it, true) }, onEdit = { editing = it }) } }
                     }
                 }
             }
@@ -259,7 +298,7 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
     if (newList) {
         NewListDialog(
             onCreate = {
-                viewModel.createList(it)
+                actions.createList(it)
                 newList = false
             },
             onDismiss = { newList = false },
@@ -272,7 +311,7 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
             text = { Text(stringResource(R.string.list_delete_body)) },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.deleteShownList()
+                    actions.deleteShownList()
                     deletingList = false
                 }) { Text(stringResource(CoreUiR.string.remove), color = MaterialTheme.colorScheme.error) }
             },
@@ -284,11 +323,11 @@ internal fun GroceriesScreen(viewModel: GroceriesViewModel = hiltViewModel()) {
         EditItemDialog(
             item = item,
             onSave = {
-                viewModel.save(it)
+                actions.save(it)
                 editing = null
             },
             onDelete = {
-                viewModel.delete(item)
+                actions.delete(item)
                 editing = null
             },
             onDismiss = { editing = null },
@@ -407,12 +446,12 @@ internal fun ToBuyRow(item: GroceryItem, large: Boolean, onBought: () -> Unit, o
 }
 
 @Composable
-private fun AtHomeGroup(group: CategoryGroup, viewModel: GroceriesViewModel, onEdit: (GroceryItem) -> Unit) {
+private fun AtHomeGroup(group: CategoryGroup, onNeeded: (GroceryItem) -> Unit, onEdit: (GroceryItem) -> Unit) {
     Column {
         CategoryHeader(group.category)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             group.items.forEach { item ->
-                ItemTile(item, onClick = { viewModel.setNeeded(item, true) }, onLongClick = { onEdit(item) })
+                ItemTile(item, onClick = { onNeeded(item) }, onLongClick = { onEdit(item) })
             }
         }
     }

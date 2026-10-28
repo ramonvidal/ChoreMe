@@ -83,9 +83,7 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val onMyWay by viewModel.onMyWay.collectAsStateWithLifecycle()
     val actionState by viewModel.actionState.collectAsStateWithLifecycle()
-    var focus by remember { mutableStateOf<GeoPoint?>(null) }
     var explainBackground by rememberSaveable { mutableStateOf(false) }
-    var addingPlace by rememberSaveable { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
 
@@ -119,18 +117,76 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
         onPauseOrDispose { }
     }
 
-    Column(Modifier.fillMaxSize()) {
-        Box(Modifier.fillMaxWidth().weight(1f)) {
+    MapContent(
+        state = state,
+        onMyWay = onMyWay,
+        error = actionState.error,
+        snackbar = snackbar,
+        explainBackground = explainBackground,
+        onExplainBackground = { explainBackground = it },
+        actions = MapActions(
+            refresh = { viewModel.refresh() },
+            setOnMyWay = { viewModel.setOnMyWay(it) },
+            setSharing = { on ->
+                if (on && !state.hasPermission) {
+                    foregroundLauncher.launch(DeviceLocation.FOREGROUND_PERMISSIONS)
+                } else {
+                    viewModel.setSharing(on)
+                }
+            },
+            allowBackground = { backgroundLauncher.launch(DeviceLocation.BACKGROUND_PERMISSION) },
+            setAlertsEnabled = { viewModel.setAlertsEnabled(it) },
+            installNtfy = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PushRegistration.NTFY_PLAY_STORE_URL))) },
+            deletePlace = { viewModel.deletePlace(it) },
+            addPlace = { name, radius -> viewModel.addPlace(name, radius) },
+        ),
+        map = { focus, modifier ->
             FamilyMap(
                 members = state.members,
                 places = state.places,
                 me = state.me?.let { me -> state.myFix?.let { fix -> me to fix.point } },
                 focus = focus,
-                modifier = Modifier.fillMaxSize(),
+                modifier = modifier,
             )
+        },
+    )
+}
+
+/** What the Map tab can ask for; [MapScreen] passes the view model's (and Android's permission prompts). */
+internal class MapActions(
+    val refresh: () -> Unit = {},
+    val setOnMyWay: (Boolean) -> Unit = {},
+    val setSharing: (Boolean) -> Unit = {},
+    val allowBackground: () -> Unit = {},
+    val setAlertsEnabled: (Boolean) -> Unit = {},
+    val installNtfy: () -> Unit = {},
+    val deletePlace: (Place) -> Unit = {},
+    val addPlace: (String, Int) -> Unit = { _, _ -> },
+)
+
+/**
+ * The whole tab, drawn from [state] alone. [map] draws the map itself (OpenStreetMap tiles in the
+ * app, a stand-in in screenshots).
+ */
+@Composable
+internal fun MapContent(
+    state: MapUiState,
+    onMyWay: OnMyWay,
+    error: Int?,
+    actions: MapActions,
+    map: @Composable (focus: GeoPoint?, Modifier) -> Unit,
+    snackbar: SnackbarHostState = remember { SnackbarHostState() },
+    explainBackground: Boolean = false,
+    onExplainBackground: (Boolean) -> Unit = {},
+) {
+    var focus by remember { mutableStateOf<GeoPoint?>(null) }
+    var addingPlace by rememberSaveable { mutableStateOf(false) }
+    Column(Modifier.fillMaxSize()) {
+        Box(Modifier.fillMaxWidth().weight(1f)) {
+            map(focus, Modifier.fillMaxSize())
             SmallFloatingActionButton(
                 onClick = {
-                    viewModel.refresh()
+                    actions.refresh()
                     state.myFix?.let { focus = it.point }
                 },
                 containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -166,21 +222,15 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item(key = "on-my-way") {
-                OnMyWayCard(onMyWay, onChange = viewModel::setOnMyWay)
+                OnMyWayCard(onMyWay, onChange = actions.setOnMyWay)
             }
             item(key = "share") {
                 SharingCard(
                     isSharing = state.isSharing,
                     needsBackground = state.isSharing && !state.hasBackgroundPermission &&
                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q,
-                    onToggle = { on ->
-                        if (on && !state.hasPermission) {
-                            foregroundLauncher.launch(DeviceLocation.FOREGROUND_PERMISSIONS)
-                        } else {
-                            viewModel.setSharing(on)
-                        }
-                    },
-                    onAllowBackground = { explainBackground = true },
+                    onToggle = actions.setSharing,
+                    onAllowBackground = { onExplainBackground(true) },
                 )
             }
 
@@ -189,7 +239,7 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(stringResource(R.string.alerts_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                            Switch(checked = state.alertsEnabled, onCheckedChange = viewModel::setAlertsEnabled)
+                            Switch(checked = state.alertsEnabled, onCheckedChange = actions.setAlertsEnabled)
                         }
                         Text(stringResource(R.string.alerts_body), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         when {
@@ -197,9 +247,7 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
                             state.instant.hasApp -> GreyText(stringResource(R.string.instant_connecting))
                             else -> {
                                 GreyText(stringResource(R.string.instant_off))
-                                TextButton(onClick = {
-                                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PushRegistration.NTFY_PLAY_STORE_URL)))
-                                }) { Text(stringResource(R.string.instant_install)) }
+                                TextButton(onClick = actions.installNtfy) { Text(stringResource(R.string.instant_install)) }
                             }
                         }
                     }
@@ -224,34 +272,34 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
                     Card(Modifier.fillMaxWidth()) {
                         state.places.forEachIndexed { index, place ->
                             if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                            PlaceRow(place, canDelete = state.isParent, onClick = { focus = place.center }, onDelete = { viewModel.deletePlace(place) })
+                            PlaceRow(place, canDelete = state.isParent, onClick = { focus = place.center }, onDelete = { actions.deletePlace(place) })
                         }
                     }
                 }
             }
-            item(key = "error") { ErrorText(actionState.error) }
+            item(key = "error") { ErrorText(error) }
         }
     }
 
     if (explainBackground) {
         AlertDialog(
-            onDismissRequest = { explainBackground = false },
+            onDismissRequest = { onExplainBackground(false) },
             title = { Text(stringResource(R.string.background_title)) },
             text = { Text(stringResource(R.string.background_body)) },
             confirmButton = {
                 TextButton(onClick = {
-                    explainBackground = false
-                    backgroundLauncher.launch(DeviceLocation.BACKGROUND_PERMISSION)
+                    onExplainBackground(false)
+                    actions.allowBackground()
                 }) { Text(stringResource(R.string.continue_)) }
             },
-            dismissButton = { TextButton(onClick = { explainBackground = false }) { Text(stringResource(R.string.not_now)) } },
+            dismissButton = { TextButton(onClick = { onExplainBackground(false) }) { Text(stringResource(R.string.not_now)) } },
         )
     }
 
     if (addingPlace) {
         AddPlaceDialog(
             onAdd = { name, radius ->
-                viewModel.addPlace(name, radius)
+                actions.addPlace(name, radius)
                 addingPlace = false
             },
             onDismiss = { addingPlace = false },

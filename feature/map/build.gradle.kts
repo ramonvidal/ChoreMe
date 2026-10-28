@@ -1,5 +1,6 @@
 plugins {
     id("choreme.android.feature")
+    id("choreme.android.compose.tests")
 }
 
 android {

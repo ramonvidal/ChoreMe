@@ -55,6 +55,7 @@ import com.choreme.core.model.agenda.AgendaDay
 import com.choreme.core.model.agenda.CalendarEvent
 import com.choreme.core.model.agenda.FamilyCalendar
 import com.choreme.core.model.chore.Chore
+import com.choreme.core.model.agenda.NewEvent
 import com.choreme.core.ui.ErrorText
 import com.choreme.core.ui.HeaderLine
 import com.choreme.core.ui.ItemIcon
@@ -63,6 +64,7 @@ import com.choreme.core.ui.SectionLabel
 import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.icon
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -73,26 +75,54 @@ internal fun AgendaScreen(viewModel: AgendaViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val actionState by viewModel.actionState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    var choosing by rememberSaveable { mutableStateOf(false) }
-    var adding by rememberSaveable { mutableStateOf(false) }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
         viewModel.onPermissionResult()
     }
+    AgendaContent(
+        state = state,
+        error = actionState.error,
+        actions = AgendaActions(
+            choose = { viewModel.choose(it) },
+            showView = { viewModel.showView(it) },
+            showMonth = { viewModel.showMonth(it) },
+            selectDay = { viewModel.selectDay(it) },
+            open = { event ->
+                try {
+                    context.startActivity(viewModel.openIntent(event))
+                } catch (e: ActivityNotFoundException) {
+                    Toast.makeText(context, R.string.open_failed, Toast.LENGTH_SHORT).show()
+                }
+            },
+            allowCalendars = { permissionLauncher.launch(CalendarRepository.PERMISSIONS) },
+            addEvent = { calendarId, event -> viewModel.addEvent(calendarId, event) },
+        ),
+    )
+}
 
-    fun open(event: CalendarEvent) {
-        try {
-            context.startActivity(viewModel.openIntent(event))
-        } catch (e: ActivityNotFoundException) {
-            Toast.makeText(context, R.string.open_failed, Toast.LENGTH_SHORT).show()
-        }
-    }
+/** What the Agenda tab can ask for; [AgendaScreen] passes the view model's, tests pass their own. */
+internal class AgendaActions(
+    val choose: (Set<Long>) -> Unit = {},
+    val showView: (AgendaView) -> Unit = {},
+    val showMonth: (YearMonth) -> Unit = {},
+    val selectDay: (LocalDate) -> Unit = {},
+    val open: (CalendarEvent) -> Unit = {},
+    val allowCalendars: () -> Unit = {},
+    val addEvent: (Long, NewEvent) -> Unit = { _, _ -> },
+)
+
+/** The whole tab, drawn from [state] alone, so it can be screenshotted without a phone's calendars. */
+@Composable
+internal fun AgendaContent(state: AgendaUiState, error: Int?, actions: AgendaActions) {
+    var choosing by rememberSaveable { mutableStateOf(false) }
+    var adding by rememberSaveable { mutableStateOf(false) }
+    val open = actions.open
 
     if (state.needsChoice || choosing) {
         CalendarPicker(
             calendars = state.calendars,
             initial = state.selected ?: state.suggestion,
             onSave = {
-                viewModel.choose(it)
+                actions.choose(it)
                 choosing = false
             },
         )
@@ -115,16 +145,16 @@ internal fun AgendaScreen(viewModel: AgendaViewModel = hiltViewModel()) {
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                PillTab(stringResource(R.string.view_list), state.view == AgendaView.LIST, onClick = { viewModel.showView(AgendaView.LIST) })
-                PillTab(stringResource(R.string.view_month), state.view == AgendaView.MONTH, onClick = { viewModel.showView(AgendaView.MONTH) })
+                PillTab(stringResource(R.string.view_list), state.view == AgendaView.LIST, onClick = { actions.showView(AgendaView.LIST) })
+                PillTab(stringResource(R.string.view_month), state.view == AgendaView.MONTH, onClick = { actions.showView(AgendaView.MONTH) })
             }
         }
         if (state.view == AgendaView.MONTH && state.hasPermission) {
             MonthView(
                 state = state,
-                onMonth = viewModel::showMonth,
-                onSelect = viewModel::selectDay,
-                onOpenEvent = ::open,
+                onMonth = actions.showMonth,
+                onSelect = actions.selectDay,
+                onOpenEvent = open,
                 modifier = Modifier.fillMaxSize(),
             )
         } else LazyColumn(
@@ -137,7 +167,7 @@ internal fun AgendaScreen(viewModel: AgendaViewModel = hiltViewModel()) {
                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(stringResource(R.string.permission_title), style = MaterialTheme.typography.titleMedium)
                             Text(stringResource(R.string.permission_body))
-                            Button(onClick = { permissionLauncher.launch(CalendarRepository.PERMISSIONS) }) {
+                            Button(onClick = actions.allowCalendars) {
                                 Text(stringResource(R.string.permission_allow))
                             }
                         }
@@ -156,10 +186,10 @@ internal fun AgendaScreen(viewModel: AgendaViewModel = hiltViewModel()) {
             state.days.forEach { day ->
                 item(key = "day-${day.date}") { SectionLabel(dayLabel(day.date, state.today)) }
                 item(key = "entries-${day.date}") {
-                    DayCard(day, emptyText = stringResource(R.string.nothing_today), onOpenEvent = ::open)
+                    DayCard(day, emptyText = stringResource(R.string.nothing_today), onOpenEvent = open)
                 }
             }
-            item(key = "error") { ErrorText(actionState.error) }
+            item(key = "error") { ErrorText(error) }
         }
         }
 
@@ -181,7 +211,7 @@ internal fun AgendaScreen(viewModel: AgendaViewModel = hiltViewModel()) {
             today = state.today,
             initialDate = if (state.view == AgendaView.MONTH) maxOf(state.selectedDay, state.today) else state.today,
             onAdd = { calendarId, event ->
-                viewModel.addEvent(calendarId, event)
+                actions.addEvent(calendarId, event)
                 adding = false
             },
             onDismiss = { adding = false },
