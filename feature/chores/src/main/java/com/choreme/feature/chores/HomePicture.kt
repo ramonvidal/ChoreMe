@@ -1,12 +1,11 @@
 package com.choreme.feature.chores
 
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.animateValue
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -26,14 +25,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -105,236 +100,288 @@ private fun homeMood(scene: HomeScene): Int = when {
 }
 
 /**
- * A small house with a tree and flowers, drawn in the app's few colours. Each chore to do is a
- * scruffy weed in the grass (bigger once it's overdue); finishing one pulls it and grows flowers
- * in, so the picture changes with every chore. The more that waits, the worse the weather:
- * clouds, then rain, then a storm with lightning. The lights are on while nothing is overdue.
+ * "Our home" as 8-bit pixel art: a fixed grid of big square pixels, a few flat colours, and
+ * animations that step a few frames a second like an old console. It shows the same things
+ * as before: each chore to do is a weed in the grass (overgrown once overdue), finishing one
+ * pulls it and plants flowers, the tree grows with the last 7 days' points, the windows are
+ * lit and the chimney smokes while nothing is overdue, and the weather turns from sun to
+ * clouds, rain and a storm with lightning as chores pile up.
  */
 @Composable
 internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
-    val growth by animateFloatAsState(scene.growth, tween(1200), label = "growth")
-    // Counted up and down smoothly, so a new flower grows in and a pulled weed shrinks away.
-    // A springy count: a newly earned flower overshoots a little, so it visibly pops in.
-    val flowers by animateFloatAsState(scene.flowers.toFloat(), spring(dampingRatio = 0.4f, stiffness = 120f), label = "flowers")
+    // Counted up and down, so a new flower grows in and a pulled weed shrinks away, in steps.
+    val flowers by animateFloatAsState(scene.flowers.toFloat(), tween(900), label = "flowers")
     val weeds by animateFloatAsState(scene.weeds.toFloat(), tween(700), label = "weeds")
-    val light by animateFloatAsState(if (scene.lightsOn) 1f else 0f, tween(800), label = "light")
-    // 0 sunny, 1 cloudy, 2 rain, 3 storm; eased so the sky darkens and clears gradually.
     val gloom by animateFloatAsState(scene.weather.ordinal.toFloat(), tween(1500), label = "gloom")
     val motion = rememberInfiniteTransition(label = "garden")
-    val sway by motion.animateFloat(-1f, 1f, infiniteRepeatable(tween(2600), RepeatMode.Reverse), label = "sway")
-    val drift by motion.animateFloat(0f, 1f, infiniteRepeatable(tween(9000, easing = LinearEasing), RepeatMode.Reverse), label = "drift")
-    val fall by motion.animateFloat(0f, 1f, infiniteRepeatable(tween(650, easing = LinearEasing)), label = "rain")
-    val flash by motion.animateFloat(
-        0f,
-        0f,
-        infiniteRepeatable(
-            keyframes {
-                durationMillis = 4200
-                0f at 3000
-                1f at 3060
-                0f at 3200
-                0.8f at 3300
-                0f at 3450
-            },
-        ),
-        label = "lightning",
-    )
-
-    // Its own colours, not the theme's: a picture looks the same in light and dark mode.
-    val green = Green
-    val leaf = if (scene.tired) lerp(green, Tired, 0.5f) else green
-    val sky = when {
-        gloom <= 1f -> lerp(Sky, Overcast, gloom)
-        gloom <= 2f -> lerp(Overcast, Rainy, gloom - 1f)
-        else -> lerp(Rainy, Stormy, gloom - 2f)
-    }
+    // 8 frames a second, like an old game: everything moves in whole pixels.
+    val frame by motion.animateValue(0, FRAMES, Int.VectorConverter, infiniteRepeatable(tween(FRAMES * 125, easing = LinearEasing)), label = "frame")
+    val fall by motion.animateValue(0, 64, Int.VectorConverter, infiniteRepeatable(tween(64 * 40, easing = LinearEasing)), label = "rain")
     val storm = scene.weather == Weather.STORM
 
     Canvas(modifier) {
-        val w = size.width
-        val h = size.height
-        val ground = h * 0.82f
-        drawRect(sky, size = Size(w, ground))
-        val grass = lerp(Paper, green, 0.18f + 0.22f * growth)
-        drawRect(lerp(grass, Mud, (gloom / 3f) * 0.5f), Offset(0f, ground), Size(w, h - ground))
+        val cell = size.height / ROWS
+        val cols = (size.width / cell).toInt()
+        val grid = PixelGrid(this, cell, (size.width - cols * cell) / 2f)
+        val ground = ROWS - 5
+        val mid = cols / 2
 
-        // The sun fades behind the clouds.
+        // Sky, in bands that darken with the weather; grass with a checked texture.
+        val sky = when {
+            gloom <= 1f -> lerp(Sky, Overcast, gloom)
+            gloom <= 2f -> lerp(Overcast, Rainy, gloom - 1f)
+            else -> lerp(Rainy, Stormy, gloom - 2f)
+        }
+        drawRect(sky, size = Size(size.width, ground * cell))
+        val mud = (gloom / 3f) * 0.55f
+        val grass = lerp(Grass, Mud, mud)
+        val grassDark = lerp(GrassDark, MudDark, mud)
+        drawRect(grass, Offset(0f, ground * cell), Size(size.width, size.height - ground * cell))
+        for (x in -1..cols) {
+            if (x % 2 == 0) grid.px(grassDark, x, ground)
+            for (y in ground + 2 until ROWS) if ((x + y) % 4 == 0) grid.px(grassDark, x, y)
+        }
+
+        // The sun, rays blinking, fading behind the clouds.
         val sunAlpha = (1f - gloom / 1.5f).coerceIn(0f, 1f)
-        if (sunAlpha > 0f) drawCircle(Sun, radius = h * 0.09f, center = Offset(w * 0.86f, h * 0.2f), alpha = sunAlpha)
+        if (sunAlpha > 0f) grid.sun(cols - 7, 2, frame % 4 < 2, sunAlpha)
 
-        // Clouds: two when cloudy, more and darker with rain and storm. Each fades in as it arrives.
-        val cloudColor = lerp(CloudGrey, StormCloud, ((gloom - 1f) / 2f).coerceIn(0f, 1f))
-        CloudSpots.forEachIndexed { i, (x, y, r) ->
+        // Clouds drift a pixel at a time; more and darker as the weather turns.
+        val cloudColor = lerp(Cloud, StormCloud, ((gloom - 1f) / 2f).coerceIn(0f, 1f))
+        CloudSpots.forEachIndexed { i, (x, y) ->
             val alpha = (gloom * CloudSpots.size / 3f - i).coerceIn(0f, 1f)
             if (alpha > 0f) {
-                val dx = (if (i % 2 == 0) drift else 1f - drift) * w * 0.06f
-                cloud(Offset(w * x + dx, h * y), h * r, cloudColor, alpha)
+                val dx = ((frame / 4 + i * 3) % 6).let { if (it > 3) 6 - it else it }
+                grid.sprite(CLOUD, (cols * x).toInt() + dx, y, mapOf('X' to cloudColor), alpha)
             }
         }
 
-        // Rain from under the clouds, heavier in a storm.
-        val rain = ((gloom - 1f).coerceIn(0f, 2f) * 12f).toInt()
-        val drop = h * 0.07f
-        repeat(rain) { i ->
-            val x = w * (0.08f + 0.84f * ((i * 0.618f) % 1f))
-            val t = (fall + i * 0.37f) % 1f
-            val y = h * 0.3f + t * (ground - h * 0.3f)
-            drawLine(Rain, Offset(x, y), Offset(x - drop * 0.3f, y + drop), strokeWidth = 1.2.dp.toPx(), alpha = 0.8f)
+        // Pixel rain, heavier in a storm.
+        val drops = ((gloom - 1f).coerceIn(0f, 2f) * 10f).toInt()
+        repeat(drops) { i ->
+            val x = (i * 37 + 5) % cols
+            val y = 6 + (fall + i * 11) % (ground - 6)
+            grid.px(RainDrop, x, y, h = 2)
         }
 
-        // The house, in the middle.
-        val houseW = h * 0.62f
-        val houseH = h * 0.38f
-        val left = w * 0.5f - houseW / 2
-        val top = ground - houseH
-        drawRect(Walls, Offset(left, top), Size(houseW, houseH))
-        drawRect(Line, Offset(left, top), Size(houseW, houseH), style = Stroke(1.5.dp.toPx()))
-        val roof = Path().apply {
-            moveTo(left - houseW * 0.1f, top)
-            lineTo(left + houseW / 2, top - houseH * 0.72f)
-            lineTo(left + houseW * 1.1f, top)
-            close()
-        }
-        drawPath(roof, Roof)
-        val door = Size(houseW * 0.2f, houseH * 0.52f)
-        drawRoundRect(green, Offset(left + houseW / 2 - door.width / 2, ground - door.height), door, CornerRadius(2.dp.toPx()))
-        val window = Size(houseW * 0.2f, houseH * 0.28f)
-        val windowColor = lerp(DarkWindow, Lamp, light)
-        listOf(left + houseW * 0.12f, left + houseW * 0.68f).forEach { x ->
-            drawRect(windowColor, Offset(x, top + houseH * 0.22f), window)
-            drawRect(Line, Offset(x, top + houseH * 0.22f), window, style = Stroke(1.dp.toPx()))
+        // The house: red roof, chimney, white walls, two windows, a green door.
+        val left = mid - HOUSE_WIDTH / 2
+        val top = ground - HOUSE_HEIGHT
+        grid.house(left, top, lit = scene.lightsOn)
+        // Smoke from the chimney while all is well.
+        if (scene.lightsOn && !storm) {
+            repeat(3) { k ->
+                val step = (frame / 2 + k * 3) % 9
+                if (step < 6) grid.px(Smoke, left + 12 + (step / 3) % 2, top - 1 - step, alpha = 1f - step / 7f)
+            }
         }
 
-        // A tree that grows from a sapling, bending in the storm.
-        tree(Offset(w * 0.2f, ground), h * (0.22f + 0.38f * growth), leaf, Line, if (storm) sway * 4f + 3f else sway)
+        // A tree that grows in three sizes with the points, bending in the storm.
+        val treeSize = when {
+            scene.growth >= 0.67f -> 2
+            scene.growth >= 0.34f -> 1
+            else -> 0
+        }
+        val wind = if (storm) (if (frame % 4 < 2) 1 else 2) else 0
+        grid.tree(left - 9, ground - 1, treeSize, if (scene.tired) lerp(Leaf, Tired, 0.5f) else Leaf, wind)
 
-        // Flowers either side of the house, one per point (up to a dozen).
-        val slots = flowerSlots(w, houseW)
+        // Flowers by the house, one per point; a new one grows a pixel at a time.
+        val slots = flowerSlots(left, cols)
         slots.take(ceil(flowers).toInt()).forEachIndexed { i, x ->
-            val grown = (flowers - i).coerceIn(0f, 1.25f)
-            val stem = h * (0.1f + 0.06f * ((i * 7) % 3) / 2f) * (0.6f + 0.4f * growth)
-            flower(Offset(x, ground), stem, leaf, Petals[i % Petals.size], if (scene.tired) 24f else sway * 4f, scene.tired, grown)
+            val grown = (flowers - i).coerceIn(0f, 1f)
+            val bob = if (storm) 1 else if ((frame / 4 + i) % 2 == 0) 0 else 1
+            grid.flower(x, ground - 1, stem = 2 + i % 2, grown, Petals[i % Petals.size], scene.tired, if (scene.tired) 1 else bob)
         }
 
-        // Weeds in front, one per chore waiting today; the overdue ones are overgrown.
-        val weedGap = w / HomeScene.MAX_WEEDS
-        val strip = h - ground
+        // Weeds in the grass in front, one per chore waiting today; overgrown once overdue.
+        val weedGap = cols / HomeScene.MAX_WEEDS
         repeat(ceil(weeds).toInt()) { i ->
             val grown = (weeds - i).coerceIn(0f, 1f)
-            // Spread out from the middle: 5, 4, 6, 3, 7, ...
             val slot = HomeScene.MAX_WEEDS / 2 + if (i % 2 == 0) i / 2 else -(i / 2 + 1)
-            val overgrown = i < scene.overgrown
-            weed(Offset(weedGap * (slot + 0.5f), h), strip * (if (overgrown) 2.4f else 1.6f) * grown, i, overgrown, sway)
+            grid.weed(weedGap * slot + weedGap / 2, ROWS - 1, i < scene.overgrown, grown, (frame / 2 + i) % 2)
         }
 
-        // Lightning: a bolt and a flash of the whole picture, every few seconds in a storm.
-        if (storm && flash > 0f) {
-            val bolt = Path().apply {
-                val x = w * 0.66f
-                moveTo(x, h * 0.28f)
-                lineTo(x - h * 0.05f, h * 0.46f)
-                lineTo(x + h * 0.01f, h * 0.46f)
-                lineTo(x - h * 0.04f, h * 0.66f)
-            }
-            drawPath(bolt, Lamp, alpha = flash, style = Stroke(2.5.dp.toPx()))
-            drawRect(Color.White, alpha = flash * 0.35f)
+        // Lightning: a pixel bolt and a flash of the whole picture, now and then in a storm.
+        if (storm && frame in LIGHTNING_FRAMES) {
+            grid.sprite(BOLT, (cols * 0.66f).toInt(), 5, mapOf('Y' to Lamp))
+            drawRect(Color.White, alpha = if (frame == LIGHTNING_FRAMES.first) 0.45f else 0.2f)
         }
     }
 }
 
-private fun DrawScope.flowerSlots(w: Float, houseW: Float): List<Float> {
-    val gap = 11.dp.toPx()
-    val houseLeft = w * 0.5f - houseW * 0.65f
-    val houseRight = w * 0.5f + houseW * 0.65f
-    val leftSide = generateSequence(houseLeft - gap) { it - gap }.takeWhile { it > w * 0.28f }.toList()
-    val rightSide = generateSequence(houseRight + gap) { it + gap }.takeWhile { it < w - gap }.toList()
-    // Alternate sides so a few flowers spread out instead of bunching up.
+/** Flower columns either side of the house, alternating sides, three pixels apart. */
+private fun flowerSlots(houseLeft: Int, cols: Int): List<Int> {
+    val leftSide = generateSequence(houseLeft - 2) { it - 3 }.takeWhile { it > houseLeft - 7 }.toList()
+    val rightSide = generateSequence(houseLeft + HOUSE_WIDTH + 1) { it + 3 }.takeWhile { it < cols - 2 }.toList()
     return (0 until maxOf(leftSide.size, rightSide.size)).flatMap { listOfNotNull(rightSide.getOrNull(it), leftSide.getOrNull(it)) }
 }
 
-private fun DrawScope.tree(base: Offset, height: Float, leaf: Color, trunk: Color, sway: Float) {
-    drawLine(trunk, base, Offset(base.x, base.y - height * 0.55f), strokeWidth = 3.dp.toPx())
-    rotate(sway * 2f, pivot = base) {
-        drawCircle(leaf, radius = height * 0.32f, center = Offset(base.x, base.y - height * 0.68f))
-        drawCircle(leaf, radius = height * 0.24f, center = Offset(base.x - height * 0.2f, base.y - height * 0.5f))
-        drawCircle(leaf, radius = height * 0.24f, center = Offset(base.x + height * 0.2f, base.y - height * 0.52f))
+/** Big square pixels on a [cell]-sized grid, centred by [x0]. */
+private class PixelGrid(val scope: DrawScope, val cell: Float, val x0: Float) {
+    fun px(color: Color, x: Int, y: Int, w: Int = 1, h: Int = 1, alpha: Float = 1f) {
+        // A hair bigger than the cell, so neighbouring pixels never show a seam.
+        scope.drawRect(color, Offset(x0 + x * cell, y * cell), Size(w * cell + 0.5f, h * cell + 0.5f), alpha = alpha)
     }
-}
 
-private fun DrawScope.flower(base: Offset, stem: Float, leaf: Color, petal: Color, tilt: Float, tired: Boolean, grown: Float) {
-    if (grown <= 0f) return
-    rotate(tilt, pivot = base) {
-        val head = Offset(base.x, base.y - stem * grown)
-        drawLine(leaf, base, head, strokeWidth = 1.5.dp.toPx())
-        val r = 3.dp.toPx() * grown
-        val color = if (tired) lerp(petal, Tired, 0.45f) else petal
-        listOf(Offset(r, 0f), Offset(-r, 0f), Offset(0f, r), Offset(0f, -r)).forEach { drawCircle(color, r * 0.85f, head + it) }
-        drawCircle(Sun, r * 0.6f, head)
-    }
-}
-
-/**
- * A scruffy weed: five uneven blades leaning every which way, a dull olive. Overgrown ones are
- * darker, with a couple of brown seed heads.
- */
-private fun DrawScope.weed(base: Offset, height: Float, seed: Int, overgrown: Boolean, sway: Float) {
-    if (height <= 0f) return
-    val color = if (overgrown) WeedDark else Weed
-    val half = 1.8.dp.toPx()
-    val spread = 3.5.dp.toPx()
-    for (b in -2..2) {
-        // Same shape every time for the same weed: lengths and leans from its index.
-        val jitter = ((seed * 31 + b * 17) % 7 + 7) % 7 / 6f
-        val foot = base.x + b * spread * 0.8f
-        val length = height * (0.55f + 0.45f * jitter) * if (b == 0) 1f else 0.85f
-        val lean = b * spread * (0.8f + jitter) + sway * half * 1.5f
-        val tip = Offset(foot + lean, base.y - length)
-        val blade = Path().apply {
-            moveTo(foot - half, base.y)
-            quadraticTo(foot + lean * 0.2f, base.y - length * 0.5f, tip.x, tip.y)
-            quadraticTo(foot + lean * 0.4f, base.y - length * 0.45f, foot + half, base.y)
-            close()
+    /** Rows of characters, one per pixel; '.' is see-through. */
+    fun sprite(rows: List<String>, x: Int, y: Int, colors: Map<Char, Color>, alpha: Float = 1f) {
+        rows.forEachIndexed { dy, row ->
+            row.forEachIndexed { dx, c -> colors[c]?.let { px(it, x + dx, y + dy, alpha = alpha) } }
         }
-        drawPath(blade, color)
-        if (overgrown && (b == 0 || b == 2)) drawCircle(Seed, half * 1.3f, tip)
+    }
+
+    fun sun(x: Int, y: Int, rays: Boolean, alpha: Float) {
+        sprite(SUN, x, y, mapOf('S' to SunCore, 'L' to SunLight), alpha)
+        if (rays) sprite(SUN_RAYS, x - 1, y - 1, mapOf('r' to SunLight), alpha)
+    }
+
+    fun house(x: Int, y: Int, lit: Boolean) {
+        sprite(
+            HOUSE,
+            x,
+            y,
+            mapOf(
+                'R' to Roof, 'r' to RoofDark, 'C' to Chimney, 'O' to Line, 'W' to Walls,
+                'G' to if (lit) Lamp else DarkWindow, 'g' to if (lit) LampEdge else Line,
+                'D' to Door, 'K' to Lamp,
+            ),
+        )
+    }
+
+    /** Three sizes: sapling, young tree, full tree. A round crown, shaded on the lower right. */
+    fun tree(x: Int, base: Int, size: Int, leaf: Color, wind: Int) {
+        val trunk = 2 + size
+        val radius = 1 + size * 2
+        px(Trunk, x, base - trunk + 1, w = if (size == 2) 2 else 1, h = trunk)
+        val cx = x + wind
+        val cy = base - trunk - radius + 1
+        for (dy in -radius..radius) for (dx in -radius..radius) {
+            if (dx * dx + dy * dy <= radius * radius + radius) {
+                px(if (dx + dy > radius / 2) LeafDark else leaf, cx + dx, cy + dy)
+            }
+        }
+    }
+
+    /** A plus-shaped head on a short stem; drooping (head moved down and over) when tired. */
+    fun flower(x: Int, base: Int, stem: Int, grown: Float, petal: Color, tired: Boolean, bob: Int) {
+        val shown = (stem * grown).toInt().coerceAtLeast(if (grown > 0f) 1 else 0)
+        if (shown == 0) return
+        px(Leaf, x, base - shown + 1, h = shown)
+        if (grown < 0.7f) return
+        val hx = x + bob
+        val hy = base - stem - 1 + if (tired) 1 else 0
+        val color = if (tired) lerp(petal, Tired, 0.45f) else petal
+        listOf(0 to -1, -1 to 0, 1 to 0, 0 to 1).forEach { (dx, dy) -> px(color, hx + dx, hy + dy) }
+        px(SunLight, hx, hy)
+    }
+
+    /** A scruffy tuft of uneven blades; overgrown ones are taller, darker, with seed heads. */
+    fun weed(x: Int, base: Int, overgrown: Boolean, grown: Float, sway: Int) {
+        val heights = if (overgrown) listOf(3, 6, 4, 5, 2) else listOf(2, 4, 3)
+        val color = if (overgrown) WeedDark else Weed
+        val start = x - heights.size / 2
+        heights.forEachIndexed { i, full ->
+            val h = (full * grown).toInt()
+            if (h > 0) {
+                px(color, start + i, base - h + 1, h = h - 1)
+                // The tip leans with the wind, a pixel either way.
+                px(color, start + i + if (i % 2 == sway) 1 else 0, base - h + 1)
+                if (overgrown && full >= 5 && grown >= 1f) px(Seed, start + i, base - h)
+            }
+        }
     }
 }
 
-private fun DrawScope.cloud(center: Offset, r: Float, color: Color, alpha: Float) {
-    drawCircle(color, r, center, alpha = alpha)
-    drawCircle(color, r * 0.75f, center + Offset(-r * 1.0f, r * 0.25f), alpha = alpha)
-    drawCircle(color, r * 0.8f, center + Offset(r * 1.0f, r * 0.2f), alpha = alpha)
-    drawRoundRect(color, center + Offset(-r * 1.6f, r * 0.1f), Size(r * 3.2f, r * 0.9f), CornerRadius(r * 0.45f), alpha = alpha)
-}
+private const val ROWS = 28
+private const val FRAMES = 16
+private val LIGHTNING_FRAMES = 12..13
+private const val HOUSE_WIDTH = 17
+private const val HOUSE_HEIGHT = 15
 
-/** Where clouds gather, in arrival order: (x, y) as parts of the picture, and radius. */
-private val CloudSpots = listOf(
-    Triple(0.4f, 0.18f, 0.11f),
-    Triple(0.78f, 0.16f, 0.1f),
-    Triple(0.14f, 0.14f, 0.09f),
-    Triple(0.6f, 0.1f, 0.12f),
-    Triple(0.93f, 0.26f, 0.08f),
-    Triple(0.27f, 0.27f, 0.08f),
+private val HOUSE = listOf(
+    "........R........",
+    ".......RRR.CC....",
+    "......RRRRRCC....",
+    ".....RRrRRRCC....",
+    "....RRRRRRRRR....",
+    "...RRrRRRRRrRR...",
+    "..RRRRRRRRRRRRR..",
+    ".rRRRRRrRRRRRRRr.",
+    "..OOOOOOOOOOOOO..",
+    "..OWWWWWWWWWWWO..",
+    "..OWggWWWWWggWO..",
+    "..OWGGWDDDWGGWO..",
+    "..OWWWWDDDWWWWO..",
+    "..OWWWWDDKWWWWO..",
+    "..OWWWWDDDWWWWO..",
 )
 
-private val Sky = Color(0xFFE6EFF3)
-private val Paper = Color(0xFFFFFFFF)
-private val Walls = Color(0xFFFFFFFF)
-private val Line = Color(0xFF8E8E8A)
-private val Roof = Color(0xFF1C1C1C)
-private val DarkWindow = Color(0xFFE4E4E0)
-private val Green = Color(0xFF2E6B52)
-private val Overcast = Color(0xFFD3D8DC)
-private val Rainy = Color(0xFFAEB6BE)
-private val Stormy = Color(0xFF6B7480)
-private val Sun = Color(0xFFF2C14E)
-private val Lamp = Color(0xFFF6D77A)
-private val CloudGrey = Color(0xFFB9BEC4)
-private val StormCloud = Color(0xFF4A515B)
-private val Rain = Color(0xFF6F8FAA)
-private val Mud = Color(0xFF8C8466)
+private val SUN = listOf(
+    ".SSS.",
+    "SSLSS",
+    "SLSSS",
+    "SSSSS",
+    ".SSS.",
+)
+
+private val SUN_RAYS = listOf(
+    "...r...",
+    ".......",
+    ".......",
+    "r.....r",
+    ".......",
+    ".......",
+    "...r...",
+)
+
+private val CLOUD = listOf(
+    "...XXX...",
+    ".XXXXXXX.",
+    "XXXXXXXXX",
+    ".XXXXXXX.",
+)
+
+private val BOLT = listOf(
+    "..YY",
+    ".YY.",
+    "YYYY",
+    "..Y.",
+    ".Y..",
+    "Y...",
+)
+
+/** Where clouds gather, in arrival order: x as a part of the width, y in pixels. */
+private val CloudSpots = listOf(0.34f to 1, 0.74f to 3, 0.08f to 2, 0.55f to 0, 0.88f to 6, 0.2f to 6)
+
+// A small, flat palette, the same in light and dark mode.
+private val Sky = Color(0xFF9ED8F2)
+private val Overcast = Color(0xFFB9C3CB)
+private val Rainy = Color(0xFF8E9AA6)
+private val Stormy = Color(0xFF4B5563)
+private val Grass = Color(0xFF6BBF59)
+private val GrassDark = Color(0xFF4E9A43)
+private val Mud = Color(0xFF8C7A55)
+private val MudDark = Color(0xFF6E5F42)
+private val Walls = Color(0xFFF4F1E8)
+private val Line = Color(0xFF3B3B3B)
+private val Roof = Color(0xFFC0503F)
+private val RoofDark = Color(0xFF8E3A2E)
+private val Chimney = Color(0xFF7A4A3A)
+private val Door = Color(0xFF2E6B52)
+private val DarkWindow = Color(0xFF5A6470)
+private val Lamp = Color(0xFFFFD966)
+private val LampEdge = Color(0xFFE8B84A)
+private val Smoke = Color(0xFFEDEDED)
+private val SunCore = Color(0xFFFFC93C)
+private val SunLight = Color(0xFFFFE08A)
+private val Cloud = Color(0xFFF2F4F6)
+private val StormCloud = Color(0xFF3F4650)
+private val RainDrop = Color(0xFF5B8DEF)
+private val Leaf = Color(0xFF3E9A4A)
+private val LeafDark = Color(0xFF2C7337)
+private val Trunk = Color(0xFF7A4E2D)
 private val Tired = Color(0xFFB8AE92)
-private val Weed = Color(0xFF76703A)
-private val WeedDark = Color(0xFF59532A)
-private val Seed = Color(0xFF8A6B3E)
-private val Petals = listOf(Color(0xFFE38B7A), Color(0xFFF0F0EC), Color(0xFFC9A0DC), Color(0xFFF2C14E))
+private val Weed = Color(0xFF8A8A3A)
+private val WeedDark = Color(0xFF5E5A26)
+private val Seed = Color(0xFF9C6B3A)
+private val Petals = listOf(Color(0xFFFF6F61), Color(0xFFFFFFFF), Color(0xFFB98AE0), Color(0xFFFFC93C))
