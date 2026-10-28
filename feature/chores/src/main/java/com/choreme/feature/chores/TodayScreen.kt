@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -456,7 +457,8 @@ private fun AskForNotificationPermission() {
 internal fun ChoresHeader(state: ChoresUiState, onOpenGroceries: () -> Unit) {
     val toDo = state.board.toDo.size
     TabHeader(title = stringResource(R.string.chores_title), modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)) {
-        Row {
+        // Wraps whole pieces onto a new line with big text, never single letters.
+        FlowRow {
             HeaderLine(pluralStringResource(R.plurals.summary_to_do, toDo, toDo))
             val mine = state.board.mine.size
             if (mine > 0) {
@@ -602,7 +604,11 @@ internal fun ChoreCard(
                     ItemIcon(chore.template.icon, Modifier.size(22.dp), tint = colors.onSurfaceVariant)
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(chore.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            itemVerticalAlignment = Alignment.CenterVertically,
+                        ) {
                             if (chore.urgent) UrgentTag()
                             if (team.isNotEmpty() && teamText != null) AvatarStack(team, teamText, ring = cardColor)
                             if (line.isNotEmpty()) {

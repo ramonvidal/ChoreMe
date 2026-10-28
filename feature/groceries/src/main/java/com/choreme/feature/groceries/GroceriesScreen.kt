@@ -439,16 +439,15 @@ internal fun ToBuyRow(item: GroceryItem, large: Boolean, onBought: () -> Unit, o
     ) {
         ItemIcon(item.icon, Modifier.size(if (large) 26.dp else 22.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.width(18.dp))
-        Text(
-            item.name,
-            style = if (large) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f, fill = false),
-        )
-        if (item.isStaple) {
-            Spacer(Modifier.width(8.dp))
-            UsualTag()
+        FlowRow(
+            modifier = Modifier.weight(1f).padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(item.name, style = if (large) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge)
+            if (item.isStaple) UsualTag()
         }
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.width(12.dp))
         TickCircle(ticked, large)
     }
 }

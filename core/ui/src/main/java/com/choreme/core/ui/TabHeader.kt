@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalDensity
 import com.choreme.core.model.Member
 import com.choreme.core.ui.theme.memberColor
 
@@ -35,11 +35,13 @@ fun MemberAvatar(member: Member, modifier: Modifier = Modifier, size: Dp = 40.dp
         modifier = modifier.size(size).background(memberColor(member.color), CircleShape),
         contentAlignment = Alignment.Center,
     ) {
+        // Sized to the circle (dp, not the phone's text size), so the initial always fits.
         Text(
             member.name.take(1).uppercase(),
             color = Color.White,
             fontWeight = FontWeight.Bold,
-            fontSize = (size.value * 0.42f).sp,
+            fontSize = with(LocalDensity.current) { (size * 0.42f).toSp() },
+            maxLines = 1,
         )
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -195,7 +196,7 @@ internal fun FamilyContent(
         item { ErrorText(actionState.error) }
 
         item(key = "invite-actions") {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 state.family?.let { family -> InviteButton(family) }
                 if (state.isParent) {
                     OutlinedButton(
@@ -421,11 +422,14 @@ private fun MemberRow(
         MemberAvatar(member, size = 36.dp)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // The tag moves under the name when they don't fit side by side.
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text(
                     if (isMe) stringResource(R.string.member_me, member.name) else member.name,
                     style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(1f, fill = false),
                 )
                 if (away != null) AwayTag(away)
             }
