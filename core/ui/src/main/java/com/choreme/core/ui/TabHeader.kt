@@ -21,7 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalDensity
@@ -36,11 +38,16 @@ fun MemberAvatar(member: Member, modifier: Modifier = Modifier, size: Dp = 40.dp
         contentAlignment = Alignment.Center,
     ) {
         // Sized to the circle (dp, not the phone's text size), so the initial always fits.
+        val letter = with(LocalDensity.current) { (size * 0.42f).toSp() }
         Text(
             member.name.take(1).uppercase(),
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = with(LocalDensity.current) { (size * 0.42f).toSp() },
+            style = TextStyle(
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = letter,
+                lineHeight = letter,
+                lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.Both),
+            ),
             maxLines = 1,
         )
     }
