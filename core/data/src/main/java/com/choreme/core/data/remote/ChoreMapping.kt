@@ -1,6 +1,7 @@
 package com.choreme.core.data.remote
 
 import com.choreme.core.data.remote.FirestoreSchema.APPROVED_BY
+import com.choreme.core.data.remote.FirestoreSchema.ASSIGNED_TO
 import com.choreme.core.data.remote.FirestoreSchema.CLAIMED_BY
 import com.choreme.core.data.remote.FirestoreSchema.COMPLETED_BY
 import com.choreme.core.data.remote.FirestoreSchema.CREATED_BY
@@ -46,6 +47,7 @@ internal fun Chore.toFields(): Map<String, Any?> = mapOf(
     STATUS to status.name,
     CLAIMED_BY to claimedBy,
     HELPERS to helpers.sorted(),
+    ASSIGNED_TO to assignedTo.sorted(),
     COMPLETED_BY to completedBy,
     APPROVED_BY to approvedBy,
     LAST_DONE_BY to lastDoneBy,
@@ -75,6 +77,7 @@ internal fun DocumentSnapshot.toChore(): Chore? = runCatching {
         status = ChoreStatus.valueOf(getString(STATUS).orEmpty()),
         claimedBy = getString(CLAIMED_BY),
         helpers = people(HELPERS),
+        assignedTo = people(ASSIGNED_TO),
         completedBy = getString(COMPLETED_BY),
         approvedBy = getString(APPROVED_BY),
         lastDoneBy = getString(LAST_DONE_BY),

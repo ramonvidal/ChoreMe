@@ -246,7 +246,12 @@ class ChoresViewModel @Inject internal constructor(
 
     fun update(chore: Chore, draft: ChoreDraft) = change(chore) { me, _ ->
         // Who it's for changes only when a parent picked differently, and only while it's to do.
-        val reassigned = if (me.role == Role.PARENT && isActive && draft.people != team) assign(draft.people, me) else this
+        // Saving the same people again also makes it last (chores given out before assignments stayed).
+        val reassigned = if (me.role == Role.PARENT && isActive && (draft.people != team || draft.people != assignedTo)) {
+            assign(draft.people, me)
+        } else {
+            this
+        }
         reassigned.copy(
             points = if (me.role == Role.PARENT) draft.points.coerceIn(Chore.POINTS) else points,
             title = draft.title.trim(),

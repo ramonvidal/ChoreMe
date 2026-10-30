@@ -92,7 +92,7 @@ internal fun ChoreEditorSheet(
     var notifyWhenDone by remember { mutableStateOf(chore?.notifyWhenDone ?: true) }
     var urgent by remember { mutableStateOf(chore?.urgent ?: false) }
     var points by remember { mutableIntStateOf(chore?.points ?: Chore.POINTS.first) }
-    var forWhom by remember { mutableStateOf(chore?.team.orEmpty()) }
+    var forWhom by remember { mutableStateOf(chore?.assignedTo?.ifEmpty { null } ?: chore?.team.orEmpty()) }
 
     val templateTitles = ChoreTemplate.entries.associateWith { stringResource(it.title) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)

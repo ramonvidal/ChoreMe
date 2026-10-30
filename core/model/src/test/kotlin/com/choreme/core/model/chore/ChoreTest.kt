@@ -121,6 +121,21 @@ class ChoreTest {
     }
 
     @Test
+    fun `a repeating chore given to someone comes back to them every time`() {
+        val medicine = Chore("m", "Take medicine", recurrence = Recurrence.EveryDays(1), dueDate = today).assign(setOf("mom"), mom)
+        val tomorrow = medicine.complete(mom, today)
+        assertEquals(today.plusDays(1), tomorrow.dueDate)
+        assertEquals(ChoreStatus.CLAIMED, tomorrow.status)
+        assertEquals(setOf("mom"), tomorrow.team)
+        // A kid's, once approved, too; and a chore someone only grabbed goes back to anyone.
+        val kids = dishes.assign(setOf("leo", "mia"), mom).complete(leo, today).approve(mom, today)
+        assertEquals(setOf("leo", "mia"), kids.team)
+        assertEquals(ChoreStatus.OPEN, dishes.claim(leo).complete(leo, today).approve(mom, today).status)
+        // Freeing it for anyone ends the assignment.
+        assertEquals(emptySet<String>(), medicine.assign(emptySet(), mom).complete(mom, today).team)
+    }
+
+    @Test
     fun `parents say who does it, or who did it`() {
         val assigned = oneOff.assign(setOf("mia", "leo"), mom)
         assertEquals(ChoreStatus.CLAIMED, assigned.status)

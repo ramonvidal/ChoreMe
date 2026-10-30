@@ -28,19 +28,27 @@ class ChoreReminderTest {
     }
 
     @Test
-    fun `chores someone took are theirs, even later in the week, and remind them`() {
-        val mine = Chore("m", "Laundry", dueDate = today.plusDays(2), status = ChoreStatus.CLAIMED, claimedBy = "mom")
+    fun `chores someone took are theirs, and remind them`() {
+        val mine = Chore("m", "Laundry", dueDate = today, status = ChoreStatus.CLAIMED, claimedBy = "mom")
         val theirs = Chore("t", "Dishes", dueDate = today, status = ChoreStatus.CLAIMED, claimedBy = "leo")
         val open = chore(today)
         val board = buildTodayBoard(listOf(mine, theirs, open), today, memberId = "mom")
         assertEquals(listOf(mine), board.mine)
         assertEquals(setOf(theirs, open), board.toDo.toSet())
-        assertEquals(emptyList<Chore>(), board.upcoming)
         assertEquals(ChoreReminder(toDo = 2, overdue = 0, awaitingApproval = 0, mine = 1), reminderFor(board, Role.PARENT, today))
         // Nothing else due: still a reminder, for what you said you'd do.
         assertEquals(1, reminderFor(buildTodayBoard(listOf(mine), today, "mom"), Role.KID, today)?.mine)
         // Without a member, nothing is set apart.
         assertEquals(emptyList<Chore>(), buildTodayBoard(listOf(mine), today).mine)
+    }
+
+    @Test
+    fun `yours for a later day waits under coming up until its day`() {
+        val tomorrow = Chore("m", "Take medicine", dueDate = today.plusDays(1), status = ChoreStatus.CLAIMED, claimedBy = "mom")
+        val board = buildTodayBoard(listOf(tomorrow), today, memberId = "mom")
+        assertEquals(emptyList<Chore>(), board.mine)
+        assertEquals(listOf(tomorrow), board.upcoming)
+        assertEquals(listOf(tomorrow), buildTodayBoard(listOf(tomorrow), today.plusDays(1), memberId = "mom").mine)
     }
 
     @Test

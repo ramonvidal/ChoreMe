@@ -77,6 +77,8 @@ object FirestoreSchema {
     /** Member ids doing a chore together with claimedBy (chores and the chore log). */
     const val HELPERS = "helpers"
     const val LAST_HELPERS = "lastHelpers"
+    /** Who a parent gave a chore to; a repeating one goes back to them each time. */
+    const val ASSIGNED_TO = "assignedTo"
 
     // Locations and places
     const val LATITUDE = "latitude"

@@ -76,7 +76,7 @@ service cloud.firestore {
         && (!('urgent' in c) || c.urgent is bool)
         && validPoints(c)
         && (!('doneCount' in c) || (c.doneCount is int && c.doneCount >= 0))
-        && validPeople(c, 'helpers') && validPeople(c, 'lastHelpers');
+        && validPeople(c, 'helpers') && validPeople(c, 'lastHelpers') && validPeople(c, 'assignedTo');
     }
 
     // Member ids of people doing a chore together (besides claimedBy / lastDoneBy).
@@ -97,6 +97,8 @@ service cloud.firestore {
       return c.status == 'OPEN' && c.claimedBy == null && c.completedBy == null
         && c.approvedBy == null && c.lastDoneBy == null
         && helpersOf(c).size() == 0
+        // Giving a chore to someone is a parent's call.
+        && c.get('assignedTo', []).size() == 0
         // Kids report chores at the usual worth; parents decide what bigger jobs count.
         && (!('points' in c) || c.points == 1);
     }

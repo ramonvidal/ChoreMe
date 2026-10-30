@@ -45,6 +45,11 @@ data class Chore(
     val claimedBy: String? = null,
     /** Others doing it together with [claimedBy] (never including them). */
     val helpers: Set<String> = emptySet(),
+    /**
+     * Who a parent gave it to. Unlike [claimedBy], it stays: a repeating chore goes back to
+     * them every time round ("Take medicine", every day, is always mine).
+     */
+    val assignedTo: Set<String> = emptySet(),
     val completedBy: String? = null,
     val approvedBy: String? = null,
     val lastDoneBy: String? = null,
@@ -110,9 +115,9 @@ fun Chore.unclaim(by: Member): Chore {
 fun Chore.assign(people: Set<String>, by: Member): Chore {
     require(by.role == Role.PARENT) { "Only parents can say who does a chore" }
     check(isActive) { "Chore is already finished" }
-    if (people.isEmpty()) return copy(status = ChoreStatus.OPEN, claimedBy = null, helpers = emptySet())
+    if (people.isEmpty()) return copy(status = ChoreStatus.OPEN, claimedBy = null, helpers = emptySet(), assignedTo = emptySet())
     val lead = claimedBy?.takeIf { it in people } ?: people.min()
-    return copy(status = ChoreStatus.CLAIMED, claimedBy = lead, helpers = people - lead)
+    return copy(status = ChoreStatus.CLAIMED, claimedBy = lead, helpers = people - lead, assignedTo = people)
 }
 
 /** Parents' work counts straight away; kids' work goes to a parent for approval. */
@@ -150,7 +155,10 @@ fun Chore.reject(by: Member): Chore {
     return copy(status = ChoreStatus.CLAIMED, claimedBy = completedBy, completedBy = null)
 }
 
-/** One-off chores end as DONE; recurring ones reopen, free for anyone, on their next date. */
+/**
+ * One-off chores end as DONE; recurring ones reopen on their next date: back with whoever
+ * they're assigned to, or free for anyone.
+ */
 private fun Chore.finish(doneBy: String, together: Set<String>, approvedBy: String?, today: LocalDate): Chore {
     val next = recurrence.nextDueDate(previousDue = dueDate, doneOn = today)
     return if (next == null) {
@@ -165,11 +173,12 @@ private fun Chore.finish(doneBy: String, together: Set<String>, approvedBy: Stri
             doneCount = doneCount + 1,
         )
     } else {
+        val lead = assignedTo.minOrNull()
         copy(
-            status = ChoreStatus.OPEN,
+            status = if (lead == null) ChoreStatus.OPEN else ChoreStatus.CLAIMED,
             dueDate = next,
-            claimedBy = null,
-            helpers = emptySet(),
+            claimedBy = lead,
+            helpers = assignedTo - setOfNotNull(lead),
             completedBy = null,
             approvedBy = approvedBy,
             lastDoneBy = doneBy,

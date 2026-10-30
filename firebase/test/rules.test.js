@@ -279,6 +279,14 @@ describe('chores', () => {
     await assertSucceeds(updateDoc(ref(leo), { claimedBy: 'member-kid2', helpers: [] }));
   });
 
+  test('only parents give a chore to someone, and a kid cannot change it', async () => {
+    await assertSucceeds(updateDoc(ref(parent('alice')), { status: 'CLAIMED', claimedBy: 'member-kid1', helpers: [], assignedTo: ['member-kid1'] }));
+    await assertFails(updateDoc(ref(kidDevice('kid1')), { assignedTo: [] }));
+    await assertFails(updateDoc(ref(kidDevice('kid2')), { assignedTo: ['member-kid1', 'member-kid2'] }));
+    await assertFails(setDoc(doc(kidDevice('kid1'), 'families', FAMILY, 'chores', 'mine'), { ...chore, createdBy: 'member-kid1', assignedTo: ['member-kid1'] }));
+    await assertFails(updateDoc(ref(parent('alice')), { assignedTo: 'member-kid1' }));
+  });
+
   test('parents say who does a chore, several people at once', async () => {
     await assertSucceeds(updateDoc(ref(parent('alice')), { status: 'CLAIMED', claimedBy: 'member-kid1', helpers: ['member-kid2'] }));
     await assertFails(updateDoc(ref(parent('alice')), { helpers: 'member-kid2' }));
