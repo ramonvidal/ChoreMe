@@ -30,6 +30,11 @@ val ChoreTemplate.icon: Int
         ChoreTemplate.MAKE_BEDS -> R.drawable.ic_item_bed
         ChoreTemplate.WATER_PLANTS -> R.drawable.ic_item_plant
         ChoreTemplate.GROCERIES -> R.drawable.ic_item_cart
+        ChoreTemplate.TIDY_UP -> R.drawable.ic_item_sofa
+        ChoreTemplate.ORGANIC_WASTE -> R.drawable.ic_item_leaf
+        ChoreTemplate.RECYCLING -> R.drawable.ic_item_recycle
+        ChoreTemplate.FEED_PETS -> R.drawable.ic_item_paw
+        ChoreTemplate.TAKE_MEDICINE -> R.drawable.ic_item_pill
         ChoreTemplate.OTHER -> R.drawable.ic_item_sparkles
     }
 

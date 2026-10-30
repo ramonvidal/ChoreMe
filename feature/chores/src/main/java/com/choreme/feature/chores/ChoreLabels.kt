@@ -26,6 +26,11 @@ internal val ChoreTemplate.title: Int
         ChoreTemplate.MAKE_BEDS -> R.string.template_make_beds
         ChoreTemplate.WATER_PLANTS -> R.string.template_water_plants
         ChoreTemplate.GROCERIES -> R.string.template_groceries
+        ChoreTemplate.TIDY_UP -> R.string.template_tidy_up
+        ChoreTemplate.ORGANIC_WASTE -> R.string.template_organic_waste
+        ChoreTemplate.RECYCLING -> R.string.template_recycling
+        ChoreTemplate.FEED_PETS -> R.string.template_feed_pets
+        ChoreTemplate.TAKE_MEDICINE -> R.string.template_take_medicine
         ChoreTemplate.OTHER -> R.string.template_other
     }
 

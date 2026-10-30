@@ -31,6 +31,11 @@ enum class ChoreTemplate {
     MAKE_BEDS,
     WATER_PLANTS,
     GROCERIES,
+    TIDY_UP,
+    ORGANIC_WASTE,
+    RECYCLING,
+    FEED_PETS,
+    TAKE_MEDICINE,
     OTHER,
 }
 
