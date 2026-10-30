@@ -296,6 +296,7 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
             canRemoveSaved = state::canRemove,
             onRemoveSaved = actions.removeSaved,
             canSetPoints = state.isParent,
+            people = if (state.isParent) state.atHome else emptyList(),
             onSave = { draft ->
                 adding = false
                 actions.create(draft)?.let { existing ->
@@ -315,6 +316,7 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
                 editing = null
             },
             canSetPoints = state.isParent,
+            people = if (state.isParent) state.atHome else emptyList(),
             onDelete = {
                 actions.delete(chore)
                 editing = null

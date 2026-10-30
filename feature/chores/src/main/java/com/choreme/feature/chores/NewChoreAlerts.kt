@@ -122,7 +122,7 @@ internal class NewChoreWorker @AssistedInject constructor(
             val fresh = recent.filter { it.id !in shown && it.reportedBy != session.memberId && it.isActive }
             if (fresh.isNotEmpty() && canNotify() && notifications.isEnabled(AlertKind.NEW_CHORES)) {
                 val names = families.observeMembers(session.familyId).first().associate { it.id to it.name }
-                fresh.forEach { show(it, names[it.reportedBy]) }
+                fresh.forEach { show(it, names[it.reportedBy], forMe = session.memberId in it.team) }
             }
             prefs.edit()
                 .putLong(KEY_CHECKED, now.toEpochMilli())
@@ -206,7 +206,7 @@ internal class NewChoreWorker @AssistedInject constructor(
         PackageManager.PERMISSION_GRANTED
 
     @Suppress("MissingPermission") // Checked in canNotify().
-    private fun show(chore: Chore, who: String?) {
+    private fun show(chore: Chore, who: String?, forMe: Boolean = false) {
         val context = applicationContext
         // Urgent ones get their own channel, which pops up on screen (people can tune each in Android's settings).
         val channel = if (chore.urgent) {
@@ -220,9 +220,17 @@ internal class NewChoreWorker @AssistedInject constructor(
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
         val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, channel.id))
             .setSmallIcon(R.drawable.ic_notification_chores)
-            .setContentTitle(if (chore.urgent) context.getString(R.string.urgent_title, chore.title) else chore.title)
+            .setContentTitle(
+                when {
+                    chore.urgent -> context.getString(R.string.urgent_title, chore.title)
+                    forMe -> context.getString(R.string.assigned_title, chore.title)
+                    else -> chore.title
+                },
+            )
             .setPriority(if (chore.urgent) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT)
-            .setContentText(context.getString(R.string.new_chore_body, who ?: context.getString(R.string.someone)))
+            .setContentText(
+                context.getString(if (forMe) R.string.assigned_body else R.string.new_chore_body, who ?: context.getString(R.string.someone)),
+            )
             .setAutoCancel(true)
             .setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
             .build()

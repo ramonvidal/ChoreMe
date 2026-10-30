@@ -47,7 +47,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import com.choreme.core.model.Member
 import com.choreme.core.ui.ItemIcon
+import com.choreme.core.ui.MemberAvatar
 import com.choreme.core.ui.icon
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreTemplate
@@ -74,6 +76,8 @@ internal fun ChoreEditorSheet(
     onRemoveSaved: (SavedChore) -> Unit = {},
     /** Parents choose what a chore is worth; kids' reports are worth [Chore.POINTS] first. */
     canSetPoints: Boolean = false,
+    /** Who a parent can give it to (everyone at home); empty hides the choice, as for kids. */
+    people: List<Member> = emptyList(),
 ) {
     var removing by remember { mutableStateOf<SavedChore?>(null) }
     val initialRecurrence = chore?.recurrence ?: Recurrence.Once
@@ -88,6 +92,7 @@ internal fun ChoreEditorSheet(
     var notifyWhenDone by remember { mutableStateOf(chore?.notifyWhenDone ?: true) }
     var urgent by remember { mutableStateOf(chore?.urgent ?: false) }
     var points by remember { mutableIntStateOf(chore?.points ?: Chore.POINTS.first) }
+    var forWhom by remember { mutableStateOf(chore?.team.orEmpty()) }
 
     val templateTitles = ChoreTemplate.entries.associateWith { stringResource(it.title) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -153,6 +158,9 @@ internal fun ChoreEditorSheet(
                 modifier = Modifier.fillMaxWidth(),
             )
 
+            if (people.isNotEmpty() && (chore == null || chore.isActive)) {
+                ForWhomRow(people, forWhom, onChange = { forWhom = it })
+            }
             if (canSetPoints) PointsRow(points, onPoints = { points = it })
 
             Row(
@@ -226,7 +234,7 @@ internal fun ChoreEditorSheet(
                 Button(
                     onClick = {
                         val due = if (chore == null && recurrence == Recurrence.Once) today else dueDate
-                        onSave(ChoreDraft(title, template ?: ChoreTemplate.OTHER, checkNotNull(recurrence), due, notifyWhenDone, urgent, points))
+                        onSave(ChoreDraft(title, template ?: ChoreTemplate.OTHER, checkNotNull(recurrence), due, notifyWhenDone, urgent, points, forWhom))
                     },
                     enabled = title.isNotBlank() && recurrence != null,
                 ) { Text(stringResource(CoreUiR.string.save)) }
@@ -246,6 +254,32 @@ internal fun ChoreEditorSheet(
             },
             dismissButton = { TextButton(onClick = { removing = null }) { Text(stringResource(CoreUiR.string.cancel)) } },
         )
+    }
+}
+
+/**
+ * "For: (R) Ramon (L) Leo (M) Mia": who's doing it, picked straight away. Several can do it
+ * together; nobody picked means anyone can grab it.
+ */
+@Composable
+internal fun ForWhomRow(people: List<Member>, picked: Set<String>, onChange: (Set<String>) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(stringResource(R.string.editor_for))
+        Text(
+            stringResource(if (picked.isEmpty()) R.string.editor_for_anyone else R.string.editor_for_hint),
+            style = MaterialTheme.typography.bodySmall,
+        )
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            people.forEach { person ->
+                val selected = person.id in picked
+                FilterChip(
+                    selected = selected,
+                    onClick = { onChange(if (selected) picked - person.id else picked + person.id) },
+                    leadingIcon = { MemberAvatar(person, size = 20.dp) },
+                    label = { Text(person.name) },
+                )
+            }
+        }
     }
 }
 

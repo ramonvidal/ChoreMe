@@ -106,6 +106,23 @@ class ChoreCardsScreenshotTest {
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-garden.png")
     }
 
+    /** The editor's "For" choice: who a parent gives a new chore to. */
+    @Test
+    fun forWhom() {
+        compose.setContent {
+            ChoreMeTheme(darkTheme = false, dynamicColor = false) {
+                Surface {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        ForWhomRow(listOf(mom, leo, mia), picked = emptySet(), onChange = {})
+                        ForWhomRow(listOf(mom, leo, mia), picked = setOf("leo", "mia"), onChange = {})
+                    }
+                }
+            }
+        }
+        compose.onNodeWithText("Nobody picked: anyone can grab it.").assertExists()
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/editor-for-whom.png")
+    }
+
     /** The "well done" after finishing a chore, caught mid-way. */
     @Test
     fun cheer() {

@@ -123,6 +123,11 @@
     </plurals>
     <string name="reminder_body">Anyone can grab one in ChoreMe.</string>
     <string name="editor_urgent">Urgent</string>
+    <string name="editor_for">For</string>
+    <string name="editor_for_anyone">Nobody picked: anyone can grab it.</string>
+    <string name="editor_for_hint">They\'ll see it under Yours. Pick several to do it together.</string>
+    <string name="assigned_title">For you: %1$s</string>
+    <string name="assigned_body">From %1$s</string>
     <string name="editor_points">Points</string>
     <string name="editor_points_hint">Harder chores are worth more. Kept for next time it repeats.</string>
     <string name="editor_urgent_hint">Needs doing as soon as possible: shown first, in red, and the family gets an alert.</string>

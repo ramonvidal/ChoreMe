@@ -103,6 +103,8 @@ data class ChoreDraft(
     val notifyWhenDone: Boolean = true,
     val urgent: Boolean = false,
     val points: Int = 1,
+    /** Who it's for, picked by a parent: nobody means anyone can grab it. */
+    val people: Set<String> = emptySet(),
 )
 
 sealed interface CalendarResult {
@@ -176,25 +178,28 @@ class ChoresViewModel @Inject internal constructor(
         findOpenDuplicate(draft.title, uiState.value.chores)?.let { existing ->
             // "It's already on the list, and now it's urgent": parents can raise it.
             if (draft.urgent && !existing.urgent && uiState.value.isParent) change(existing) { _, _ -> copy(urgent = true) }
+            // ...and still free: then it goes to whoever the parent picked.
+            if (draft.people.isNotEmpty() && existing.status == ChoreStatus.OPEN && uiState.value.isParent) {
+                change(existing) { me, _ -> assign(draft.people, me) }
+            }
             return existing
         }
         val (familyId, me) = context() ?: return null
         // Kids report at the starting worth; a parent can raise it (see firestore.rules).
         val points = if (me.role == Role.PARENT) draft.points.coerceIn(Chore.POINTS) else Chore.POINTS.first
-        chores.create(
-            familyId,
-            me.id,
-            Chore(
-                id = "",
-                title = draft.title.trim(),
-                template = draft.template,
-                recurrence = draft.recurrence,
-                dueDate = draft.dueDate,
-                notifyWhenDone = draft.notifyWhenDone,
-                urgent = draft.urgent,
-                points = points,
-            ),
+        val chore = Chore(
+            id = "",
+            title = draft.title.trim(),
+            template = draft.template,
+            recurrence = draft.recurrence,
+            dueDate = draft.dueDate,
+            notifyWhenDone = draft.notifyWhenDone,
+            urgent = draft.urgent,
+            points = points,
         )
+        // A parent can give it to someone (or several) straight away; kids report it for anyone.
+        val people = draft.people.filterTo(mutableSetOf()) { it in uiState.value.members }
+        chores.create(familyId, me.id, if (me.role == Role.PARENT && people.isNotEmpty()) chore.assign(people, me) else chore)
         // Something typed by hand becomes a quick pick for next time.
         if (shouldSaveForLater(draft.template, draft.title, uiState.value.savedChores)) {
             chores.saveForLater(familyId, me.id, draft.title, points)
@@ -240,7 +245,9 @@ class ChoresViewModel @Inject internal constructor(
 
 
     fun update(chore: Chore, draft: ChoreDraft) = change(chore) { me, _ ->
-        copy(
+        // Who it's for changes only when a parent picked differently, and only while it's to do.
+        val reassigned = if (me.role == Role.PARENT && isActive && draft.people != team) assign(draft.people, me) else this
+        reassigned.copy(
             points = if (me.role == Role.PARENT) draft.points.coerceIn(Chore.POINTS) else points,
             title = draft.title.trim(),
             template = draft.template,
