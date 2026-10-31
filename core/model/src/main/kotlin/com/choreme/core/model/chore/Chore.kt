@@ -205,7 +205,14 @@ fun Chore.wasJustFinished(before: Chore): Boolean =
         (doneCount > before.doneCount || lastDoneOn != before.lastDoneOn || lastDoneBy != before.lastDoneBy)
 
 /** A chore someone typed by hand, kept as a quick pick for next time. */
-data class SavedChore(val id: String, val title: String, val createdBy: String, val points: Int = 1)
+data class SavedChore(
+    val id: String,
+    val title: String,
+    val createdBy: String,
+    val points: Int = 1,
+    /** The ready-made chore it's closest to, for its group and icon; OTHER for ones saved before. */
+    val template: ChoreTemplate = ChoreTemplate.OTHER,
+)
 
 /** A hand-typed chore (not one of the built-in templates) is saved unless it already is. */
 fun shouldSaveForLater(template: ChoreTemplate, title: String, saved: List<SavedChore>): Boolean =

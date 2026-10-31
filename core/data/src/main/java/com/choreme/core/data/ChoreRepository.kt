@@ -10,6 +10,7 @@ import com.choreme.core.data.remote.FirestoreSchema.DONE_BY
 import com.choreme.core.data.remote.FirestoreSchema.HELPERS
 import com.choreme.core.data.remote.FirestoreSchema.ON
 import com.choreme.core.data.remote.FirestoreSchema.POINTS
+import com.choreme.core.data.remote.FirestoreSchema.TEMPLATE
 import com.choreme.core.data.remote.FirestoreSchema.TITLE
 import com.choreme.core.data.remote.FirestoreSchema.UPDATED_AT
 import com.choreme.core.data.remote.FirestoreSchema.UPDATED_BY
@@ -20,6 +21,7 @@ import com.choreme.core.data.remote.toFields
 import com.choreme.core.model.NameKeys
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreDone
+import com.choreme.core.model.chore.ChoreTemplate
 import com.choreme.core.model.chore.SavedChore
 import com.choreme.core.model.chore.completeLog
 import com.google.firebase.Timestamp
@@ -135,14 +137,20 @@ class ChoreRepository @Inject constructor(
         savedChores(familyId).documentsFlow().map { docs ->
             docs.mapNotNull { doc ->
                 val title = doc.getString(TITLE) ?: return@mapNotNull null
-                SavedChore(doc.id, title, doc.getString(CREATED_BY).orEmpty(), doc.getLong(POINTS)?.toInt() ?: 1)
+                SavedChore(
+                    id = doc.id,
+                    title = title,
+                    createdBy = doc.getString(CREATED_BY).orEmpty(),
+                    points = doc.getLong(POINTS)?.toInt() ?: 1,
+                    template = doc.getString(TEMPLATE)?.let { name -> ChoreTemplate.entries.firstOrNull { it.name == name } } ?: ChoreTemplate.OTHER,
+                )
             }.sortedBy { it.title.lowercase() }
         }
 
     /** Keeps a hand-typed chore for next time; saving the same name twice keeps one. */
-    fun saveForLater(familyId: String, memberId: String, title: String, points: Int = 1) {
+    fun saveForLater(familyId: String, memberId: String, title: String, points: Int = 1, template: ChoreTemplate = ChoreTemplate.OTHER) {
         val ref = NameKeys.documentId(title)?.let(savedChores(familyId)::document) ?: return
-        ref.set(mapOf(TITLE to title.trim(), CREATED_BY to memberId, POINTS to points.toLong())).logFailure()
+        ref.set(mapOf(TITLE to title.trim(), CREATED_BY to memberId, POINTS to points.toLong(), TEMPLATE to template.name)).logFailure()
     }
 
     /** A saved chore picked with other points keeps them for next time. */

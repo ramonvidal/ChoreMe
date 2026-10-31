@@ -60,7 +60,9 @@ service cloud.firestore {
     }
 
     function validSavedChore(d) {
-      return d.title is string && d.title.size() > 0 && d.title.size() <= 60 && validPoints(d);
+      return d.title is string && d.title.size() > 0 && d.title.size() <= 60 && validPoints(d)
+        // The ready-made chore it's closest to, for its group in the editor.
+        && (!('template' in d) || (d.template is string && d.template.size() <= 30));
     }
 
     function myMemberId(f) {

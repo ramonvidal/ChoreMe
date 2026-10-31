@@ -238,6 +238,8 @@ describe('chores', () => {
     await assertSucceeds(setDoc(saved(kidDevice('kid1'), 'feed-the-cat'), feedCat));
     await assertFails(setDoc(saved(kidDevice('kid2'), 'x'), feedCat));
     await assertFails(setDoc(saved(kidDevice('kid1'), 'y'), { ...feedCat, title: '' }));
+    await assertSucceeds(setDoc(saved(kidDevice('kid1'), 'feed-the-dog'), { ...feedCat, title: 'Feed the dog', template: 'FEED_PETS' }));
+    await assertFails(setDoc(saved(kidDevice('kid1'), 'z'), { ...feedCat, template: 42 }));
     await assertSucceeds(getDocs(collection(kidDevice('kid2'), 'families', FAMILY, 'choreTemplates')));
     await assertFails(deleteDoc(saved(kidDevice('kid2'), 'feed-the-cat')));
     await assertSucceeds(deleteDoc(saved(parent('alice'), 'feed-the-cat')));

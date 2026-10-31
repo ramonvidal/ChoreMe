@@ -21,6 +21,10 @@ import com.choreme.core.model.chore.ChoreTemplate
 import com.choreme.core.model.chore.Recurrence
 import com.choreme.core.model.chore.SavedChore
 import com.choreme.core.model.chore.HomeScene
+import com.choreme.core.model.chore.ChoreChoice
+import com.choreme.core.model.chore.choreChoices
+import com.choreme.core.model.chore.guessTemplate
+import com.choreme.core.model.chore.mostUsed
 import com.choreme.core.model.chore.MemberWeek
 import com.choreme.core.model.chore.homeScene
 import com.choreme.core.model.chore.savedChoreToUpdate
@@ -92,6 +96,10 @@ data class ChoresUiState(
     fun canRemove(saved: SavedChore) = isParent || saved.createdBy == me?.id
 
     val scene: HomeScene get() = homeScene(weekPoints, chores, today)
+
+    /** What the editor offers: ready-made chores, then saved ones; and the family's most used. */
+    val choices: List<ChoreChoice> get() = choreChoices(savedChores)
+    val popular: List<ChoreChoice> get() = mostUsed(choices, chores)
 }
 
 /** What the person typed in the chore editor. */
@@ -187,10 +195,12 @@ class ChoresViewModel @Inject internal constructor(
         val (familyId, me) = context() ?: return null
         // Kids report at the starting worth; a parent can raise it (see firestore.rules).
         val points = if (me.role == Role.PARENT) draft.points.coerceIn(Chore.POINTS) else Chore.POINTS.first
+        // A typed chore gets the icon of the ready-made one it's closest to ("Lixo Bio": a leaf).
+        val template = if (draft.template == ChoreTemplate.OTHER) guessTemplate(draft.title) ?: ChoreTemplate.OTHER else draft.template
         val chore = Chore(
             id = "",
             title = draft.title.trim(),
-            template = draft.template,
+            template = template,
             recurrence = draft.recurrence,
             dueDate = draft.dueDate,
             notifyWhenDone = draft.notifyWhenDone,
@@ -202,7 +212,7 @@ class ChoresViewModel @Inject internal constructor(
         chores.create(familyId, me.id, if (me.role == Role.PARENT && people.isNotEmpty()) chore.assign(people, me) else chore)
         // Something typed by hand becomes a quick pick for next time.
         if (shouldSaveForLater(draft.template, draft.title, uiState.value.savedChores)) {
-            chores.saveForLater(familyId, me.id, draft.title, points)
+            chores.saveForLater(familyId, me.id, draft.title, points, template)
         } else if (me.role == Role.PARENT) {
             // A saved chore picked with other points keeps them for next time.
             savedChoreToUpdate(draft.title, points, uiState.value.savedChores)?.let { chores.setSavedPoints(familyId, it.id, it.points) }

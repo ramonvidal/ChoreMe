@@ -292,7 +292,8 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
         ChoreEditorSheet(
             chore = null,
             today = state.today,
-            savedChores = state.savedChores,
+            choices = state.choices,
+            popular = state.popular,
             canRemoveSaved = state::canRemove,
             onRemoveSaved = actions.removeSaved,
             canSetPoints = state.isParent,
@@ -311,6 +312,7 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
         ChoreEditorSheet(
             chore = chore,
             today = state.today,
+            choices = state.choices,
             onSave = {
                 actions.update(chore, it)
                 editing = null

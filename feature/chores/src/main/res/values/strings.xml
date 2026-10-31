@@ -128,6 +128,16 @@
     </plurals>
     <string name="reminder_body">Anyone can grab one in ChoreMe.</string>
     <string name="editor_urgent">Urgent</string>
+    <string name="editor_title_placeholder">Type what needs doing…</string>
+    <string name="editor_new_chore_hint">Nothing like it yet. It\'ll be saved for next time.</string>
+    <string name="editor_most_used">Most used</string>
+    <string name="group_kitchen">Kitchen</string>
+    <string name="group_cleaning">Cleaning</string>
+    <string name="group_laundry">Laundry</string>
+    <string name="group_bins">Bins</string>
+    <string name="group_care">Care</string>
+    <string name="group_errands">Errands</string>
+    <string name="group_own">Your own</string>
     <string name="editor_for">For</string>
     <string name="editor_for_anyone">Nobody picked: anyone can grab it.</string>
     <string name="editor_for_hint">They\'ll see it under Yours. Pick several to do it together.</string>

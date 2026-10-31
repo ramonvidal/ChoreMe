@@ -1,6 +1,23 @@
 package com.choreme.feature.chores
 
 import com.choreme.core.ui.R as CoreUiR
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.text.style.TextOverflow
+import com.choreme.core.model.chore.ChoreChoice
+import com.choreme.core.model.chore.ChoreGroup
+import com.choreme.core.model.chore.choreChoices
+import com.choreme.core.model.chore.group
+import com.choreme.core.model.chore.searchChoices
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -71,7 +88,9 @@ internal fun ChoreEditorSheet(
     onSave: (ChoreDraft) -> Unit,
     onDelete: (() -> Unit)?,
     onDismiss: () -> Unit,
-    savedChores: List<SavedChore> = emptyList(),
+    /** Ready-made and saved chores to pick from, and the family's most used ones. */
+    choices: List<ChoreChoice> = choreChoices(emptyList()),
+    popular: List<ChoreChoice> = emptyList(),
     canRemoveSaved: (SavedChore) -> Boolean = { false },
     onRemoveSaved: (SavedChore) -> Unit = {},
     /** Parents choose what a chore is worth; kids' reports are worth [Chore.POINTS] first. */
@@ -100,7 +119,7 @@ internal fun ChoreEditorSheet(
     fun pick(picked: ChoreTemplate) {
         template = picked
         // Only replace the title if it's empty or still the previous template's.
-        if (picked != ChoreTemplate.OTHER && (title.isBlank() || title == titleFromTemplate)) {
+        if (picked != ChoreTemplate.OTHER) {
             title = templateTitles.getValue(picked)
             titleFromTemplate = title
         }
@@ -120,42 +139,35 @@ internal fun ChoreEditorSheet(
                 stringResource(if (chore == null) R.string.add_chore_title else R.string.edit_chore),
                 style = MaterialTheme.typography.titleLarge,
             )
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                ChoreTemplate.entries.forEach { option ->
-                    FilterChip(
-                        selected = template == option,
-                        onClick = { pick(option) },
-                        leadingIcon = { ItemIcon(option.icon, Modifier.size(FilterChipDefaults.IconSize)) },
-                        label = { Text(templateTitles.getValue(option)) },
-                    )
-                }
-            }
-            if (savedChores.isNotEmpty()) {
-                Text(stringResource(R.string.saved_chores), style = MaterialTheme.typography.labelLarge)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    savedChores.forEach { saved ->
-                        SavedChoreChip(
-                            title = saved.title,
-                            selected = template == ChoreTemplate.OTHER && title == saved.title,
-                            onClick = {
-                                template = ChoreTemplate.OTHER
-                                title = saved.title
-                                titleFromTemplate = saved.title
-                                if (canSetPoints) points = saved.points
-                            },
-                            onLongClick = { if (canRemoveSaved(saved)) removing = saved },
-                        )
-                    }
-                }
-                Text(stringResource(R.string.saved_chore_hint), style = MaterialTheme.typography.bodySmall)
-            }
+            // Typing first: most of the time two or three letters and a tap is enough.
             OutlinedTextField(
                 value = title,
                 onValueChange = { if (it.length <= MAX_TITLE_LENGTH) title = it },
                 label = { Text(stringResource(R.string.editor_title_label)) },
+                placeholder = { Text(stringResource(R.string.editor_title_placeholder)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                 modifier = Modifier.fillMaxWidth(),
+            )
+            ChoicePicker(
+                choices = choices,
+                popular = popular,
+                // While typing a new chore, only what matches; otherwise "Most used" and the groups.
+                query = if (chore == null && title != titleFromTemplate) title else "",
+                titleOf = { choice -> choiceTitle(choice, templateTitles) },
+                isSelected = { choice -> title.isNotBlank() && title == choiceTitle(choice, templateTitles) },
+                onPick = { choice ->
+                    when (choice) {
+                        is ChoreChoice.BuiltIn -> pick(choice.template)
+                        is ChoreChoice.Saved -> {
+                            template = choice.template
+                            title = choice.saved.title
+                            titleFromTemplate = choice.saved.title
+                            if (canSetPoints) points = choice.saved.points
+                        }
+                    }
+                },
+                onLongPress = { choice -> if (choice is ChoreChoice.Saved && canRemoveSaved(choice.saved)) removing = choice.saved },
             )
 
             if (people.isNotEmpty() && (chore == null || chore.isActive)) {
@@ -303,23 +315,135 @@ private fun PointsRow(points: Int, onPoints: (Int) -> Unit) {
     }
 }
 
-/** Like a FilterChip, plus long-press (to remove it from the saved list). */
+private fun choiceTitle(choice: ChoreChoice, templateTitles: Map<ChoreTemplate, String>): String = when (choice) {
+    is ChoreChoice.BuiltIn -> templateTitles.getValue(choice.template)
+    is ChoreChoice.Saved -> choice.saved.title
+}
+
+/**
+ * The chores to pick from, kept short: what matches the [query] while typing; otherwise the
+ * family's most used in one row, then groups (Kitchen, Cleaning, ... and "Your own"), folded
+ * closed, one open at a time.
+ */
 @Composable
-private fun SavedChoreChip(title: String, selected: Boolean, onClick: () -> Unit, onLongClick: () -> Unit) {
+internal fun ChoicePicker(
+    choices: List<ChoreChoice>,
+    popular: List<ChoreChoice>,
+    query: String,
+    titleOf: (ChoreChoice) -> String,
+    isSelected: (ChoreChoice) -> Boolean,
+    onPick: (ChoreChoice) -> Unit,
+    onLongPress: (ChoreChoice) -> Unit,
+) {
+    var open by rememberSaveable { mutableStateOf<String?>(null) }
+    val chip: @Composable (ChoreChoice) -> Unit = { choice ->
+        ChoiceChip(
+            title = titleOf(choice),
+            icon = choice.template.icon,
+            selected = isSelected(choice),
+            onClick = { onPick(choice) },
+            onLongClick = { onLongPress(choice) },
+        )
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (query.isNotBlank()) {
+            val found = searchChoices(query, choices, titleOf).take(MAX_FOUND)
+            if (found.isEmpty()) {
+                Text(stringResource(R.string.editor_new_chore_hint), style = MaterialTheme.typography.bodySmall)
+            } else {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    found.forEach { chip(it) }
+                }
+            }
+            return@Column
+        }
+        if (popular.isNotEmpty()) {
+            Text(stringResource(R.string.editor_most_used), style = MaterialTheme.typography.labelLarge)
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                popular.forEach { chip(it) }
+            }
+        }
+        val groups = ChoreGroup.entries.map { group -> group.name to choices.filter { it.group == group } } +
+            ("OWN" to choices.filter { it.group == null })
+        groups.filter { it.second.isNotEmpty() }.forEach { (key, inGroup) ->
+            val group = ChoreGroup.entries.firstOrNull { it.name == key }
+            GroupRow(
+                title = stringResource(group?.label ?: R.string.group_own),
+                icon = group?.icon ?: ChoreTemplate.OTHER.icon,
+                count = inGroup.size,
+                open = open == key,
+                onToggle = { open = if (open == key) null else key },
+            )
+            AnimatedVisibility(open == key) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        inGroup.forEach { chip(it) }
+                    }
+                    if (inGroup.any { it is ChoreChoice.Saved }) {
+                        Text(stringResource(R.string.saved_chore_hint), style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** One group, folded: its icon, name and how many chores, and an arrow. */
+@Composable
+private fun GroupRow(title: String, @DrawableRes icon: Int, count: Int, open: Boolean, onToggle: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small).clickable(onClick = onToggle).padding(vertical = 8.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ItemIcon(icon, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.width(12.dp))
+        Text(title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        Text(count.toString(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown, contentDescription = null)
+    }
+}
+
+/** A chore to pick: its icon and name on one line (long names end in "…"); long-press for a saved one's options. */
+@Composable
+private fun ChoiceChip(title: String, @DrawableRes icon: Int, selected: Boolean, onClick: () -> Unit, onLongClick: () -> Unit) {
     val shape = RoundedCornerShape(8.dp)
     Surface(
         shape = shape,
         color = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        modifier = Modifier.clip(shape).combinedClickable(onClick = onClick, onLongClick = onLongClick),
+        border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.outline),
+        modifier = Modifier.widthIn(max = 240.dp).clip(shape).combinedClickable(onClick = onClick, onLongClick = onLongClick),
     ) {
         Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            ItemIcon(ChoreTemplate.OTHER.icon, Modifier.size(18.dp))
+            ItemIcon(icon, Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text(title)
+            Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
+
+@get:StringRes
+private val ChoreGroup.label: Int
+    get() = when (this) {
+        ChoreGroup.KITCHEN -> R.string.group_kitchen
+        ChoreGroup.CLEANING -> R.string.group_cleaning
+        ChoreGroup.LAUNDRY -> R.string.group_laundry
+        ChoreGroup.BINS -> R.string.group_bins
+        ChoreGroup.CARE -> R.string.group_care
+        ChoreGroup.ERRANDS -> R.string.group_errands
+    }
+
+@get:DrawableRes
+private val ChoreGroup.icon: Int
+    get() = when (this) {
+        ChoreGroup.KITCHEN -> ChoreTemplate.DISHES.icon
+        ChoreGroup.CLEANING -> ChoreTemplate.VACUUM.icon
+        ChoreGroup.LAUNDRY -> ChoreTemplate.LAUNDRY.icon
+        ChoreGroup.BINS -> ChoreTemplate.TRASH.icon
+        ChoreGroup.CARE -> ChoreTemplate.TAKE_MEDICINE.icon
+        ChoreGroup.ERRANDS -> ChoreTemplate.GROCERIES.icon
+    }
+
+private const val MAX_FOUND = 12
 
 @Composable
 private fun RepeatSection(
