@@ -8,6 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -64,7 +66,8 @@ class ChoicePickerScreenshotTest {
             }
         }
         compose.onNodeWithText("Bins").performClick()
-        compose.onNodeWithText("Take out organic waste").assertExists()
+        // In the open Bins group and in the "lix" results.
+        compose.onAllNodesWithText("Take out organic waste").assertCountEquals(2)
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/editor-picker.png")
     }
 }
