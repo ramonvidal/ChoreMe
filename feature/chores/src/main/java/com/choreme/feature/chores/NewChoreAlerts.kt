@@ -1,5 +1,6 @@
 package com.choreme.feature.chores
 
+import com.choreme.core.ui.ChoreNames
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -162,7 +163,7 @@ internal class NewChoreWorker @AssistedInject constructor(
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
         val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, DONE_CHANNEL_ID))
             .setSmallIcon(R.drawable.ic_notification_chores)
-            .setContentTitle(context.getString(R.string.done_title, who ?: context.getString(R.string.someone), chore.title))
+            .setContentTitle(context.getString(R.string.done_title, who ?: context.getString(R.string.someone), ChoreNames.shown(context, chore.title)))
             .setAutoCancel(true)
             .setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
             .build()
@@ -193,7 +194,7 @@ internal class NewChoreWorker @AssistedInject constructor(
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
         val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, APPROVAL_CHANNEL_ID))
             .setSmallIcon(R.drawable.ic_notification_chores)
-            .setContentTitle(context.getString(R.string.approval_title, who ?: context.getString(R.string.someone), chore.title))
+            .setContentTitle(context.getString(R.string.approval_title, who ?: context.getString(R.string.someone), ChoreNames.shown(context, chore.title)))
             .setContentText(context.getString(R.string.approval_body))
             .setAutoCancel(true)
             .setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
@@ -222,9 +223,9 @@ internal class NewChoreWorker @AssistedInject constructor(
             .setSmallIcon(R.drawable.ic_notification_chores)
             .setContentTitle(
                 when {
-                    chore.urgent -> context.getString(R.string.urgent_title, chore.title)
-                    forMe -> context.getString(R.string.assigned_title, chore.title)
-                    else -> chore.title
+                    chore.urgent -> context.getString(R.string.urgent_title, ChoreNames.shown(context, chore.title))
+                    forMe -> context.getString(R.string.assigned_title, ChoreNames.shown(context, chore.title))
+                    else -> ChoreNames.shown(context, chore.title)
                 },
             )
             .setPriority(if (chore.urgent) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT)

@@ -1,5 +1,8 @@
 package com.choreme.feature.chores
 
+import androidx.compose.ui.platform.LocalContext
+import com.choreme.core.ui.title
+import com.choreme.core.ui.ChoreNames
 import com.choreme.core.ui.R as CoreUiR
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -107,10 +110,11 @@ internal fun ChoreEditorSheet(
     /** Who a parent can give it to (everyone at home); empty hides the choice, as for kids. */
     people: List<Member> = emptyList(),
 ) {
+    val context = LocalContext.current
     var removing by remember { mutableStateOf<SavedChore?>(null) }
     val initialRecurrence = chore?.recurrence ?: Recurrence.Once
     var template by remember { mutableStateOf(chore?.template) }
-    var title by remember { mutableStateOf(chore?.title.orEmpty()) }
+    var title by remember { mutableStateOf(chore?.title?.let { ChoreNames.shown(context, it) }.orEmpty()) }
     var titleFromTemplate by remember { mutableStateOf<String?>(null) }
     var kind by remember { mutableStateOf(initialRecurrence.kind()) }
     var everyDays by remember { mutableIntStateOf((initialRecurrence as? Recurrence.EveryDays)?.days ?: 1) }

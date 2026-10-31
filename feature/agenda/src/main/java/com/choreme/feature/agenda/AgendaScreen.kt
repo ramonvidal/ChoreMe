@@ -1,5 +1,6 @@
 package com.choreme.feature.agenda
 
+import com.choreme.core.ui.choreTitle
 import android.content.ActivityNotFoundException
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -285,7 +286,7 @@ internal fun ChoreRow(chore: Chore) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         ItemIcon(chore.template.icon, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(chore.title, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        Text(choreTitle(chore.title), style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
         Text(stringResource(R.string.chore_due), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

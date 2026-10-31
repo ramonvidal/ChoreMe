@@ -13,26 +13,6 @@ import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 
-@get:StringRes
-internal val ChoreTemplate.title: Int
-    get() = when (this) {
-        ChoreTemplate.DISHES -> R.string.template_dishes
-        ChoreTemplate.LAUNDRY -> R.string.template_laundry
-        ChoreTemplate.FOLD_CLOTHES -> R.string.template_fold_clothes
-        ChoreTemplate.CLEAN_KITCHEN -> R.string.template_clean_kitchen
-        ChoreTemplate.CLEAN_BATHROOM -> R.string.template_clean_bathroom
-        ChoreTemplate.TRASH -> R.string.template_trash
-        ChoreTemplate.VACUUM -> R.string.template_vacuum
-        ChoreTemplate.MAKE_BEDS -> R.string.template_make_beds
-        ChoreTemplate.WATER_PLANTS -> R.string.template_water_plants
-        ChoreTemplate.GROCERIES -> R.string.template_groceries
-        ChoreTemplate.TIDY_UP -> R.string.template_tidy_up
-        ChoreTemplate.ORGANIC_WASTE -> R.string.template_organic_waste
-        ChoreTemplate.RECYCLING -> R.string.template_recycling
-        ChoreTemplate.FEED_PETS -> R.string.template_feed_pets
-        ChoreTemplate.TAKE_MEDICINE -> R.string.template_take_medicine
-        ChoreTemplate.OTHER -> R.string.template_other
-    }
 
 internal fun DayOfWeek.shortName(): String = getDisplayName(TextStyle.SHORT, Locale.getDefault())
 

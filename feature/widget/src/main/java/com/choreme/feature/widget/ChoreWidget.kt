@@ -1,5 +1,6 @@
 package com.choreme.feature.widget
 
+import com.choreme.core.ui.ChoreNames
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -122,7 +123,7 @@ private fun Content(context: Context, data: WidgetData) {
                         )
                         Spacer(GlanceModifier.width(6.dp))
                         Text(
-                            chore.title,
+                            ChoreNames.shown(context, chore.title),
                             maxLines = 1,
                             style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurface),
                         )

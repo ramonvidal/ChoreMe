@@ -1,5 +1,6 @@
 package com.choreme.feature.chores
 
+import com.choreme.core.ui.ChoreNames
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -110,7 +111,7 @@ internal class TimedReminderWorker @AssistedInject constructor(
                     ?.let { list -> list.firstOrNull { it.id == choreId } ?: return Result.success() }
                 if (chore != null) {
                     if (!chore.isActive) return Result.success()
-                    title = chore.title
+                    title = ChoreNames.shown(applicationContext, chore.title)
                 }
             }
         }

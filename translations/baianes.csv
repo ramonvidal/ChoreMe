@@ -25,6 +25,22 @@ core/ui,error_last_parent,,"You're the only parent. Let another parent join firs
 core/ui,error_recent_sign_in,,"Your family data is deleted. To also delete your Google sign-in, sign in again and choose ""Delete my data"" once more.","Os dados da sua família foram apagados. Pra apagar também seu login do Google, entre de novo e escolha ""Apagar meus dados"" mais uma vez."
 core/ui,points,one,%d point,%d ponto
 core/ui,points,other,%d points,%d pontos
+core/ui,template_dishes,,Wash dishes,Lavar os pratos
+core/ui,template_laundry,,Do laundry,Lavar roupa
+core/ui,template_fold_clothes,,Fold clothes,Dobrar a roupa
+core/ui,template_clean_kitchen,,Clean kitchen,Limpar a cozinha
+core/ui,template_clean_bathroom,,Clean bathroom,Limpar o banheiro
+core/ui,template_trash,,Take out trash,Botar o lixo pra fora
+core/ui,template_vacuum,,Vacuum,Passar o aspirador
+core/ui,template_make_beds,,Make beds,Arrumar as camas
+core/ui,template_water_plants,,Water plants,Aguar as plantas
+core/ui,template_groceries,,Grocery shopping,Fazer a feira
+core/ui,template_tidy_up,,Tidy the living room,Arrumar a sala
+core/ui,template_organic_waste,,Take out organic waste,Botar o lixo orgânico
+core/ui,template_recycling,,Take out recycling,Botar o reciclável
+core/ui,template_feed_pets,,Feed the pets,Dar comida aos bichos
+core/ui,template_take_medicine,,Take medicine,Tomar remédio
+core/ui,template_other,,Something else,Outra coisa
 feature/agenda,agenda_title,,Agenda,Agenda
 feature/agenda,permission_title,,Show your family calendar,Mostrar a agenda da família
 feature/agenda,permission_body,,"Nos Corre! shows the calendars already on this phone, like a shared Google Calendar, next to your chores. Events you add here go to that calendar, and Google sends the alerts to everyone who shares it.","O Nos Corre! mostra as agendas que já estão neste celular, como uma Agenda Google dividida, junto dos corres. Os eventos que você adiciona aqui vão pra essa agenda, e o Google manda os avisos pra todo mundo que divide ela."
@@ -141,22 +157,6 @@ feature/chores,editor_notify_when_done,,Let everyone know when it's done,Avisar 
 feature/chores,done_channel,,Chores done,Corres feitos
 feature/chores,done_channel_description,,When someone finishes a chore,Quando alguém termina um corre
 feature/chores,done_title,,%1$s did: %2$s,%1$s fez: %2$s
-feature/chores,template_dishes,,Wash dishes,Lavar os pratos
-feature/chores,template_laundry,,Do laundry,Lavar roupa
-feature/chores,template_fold_clothes,,Fold clothes,Dobrar a roupa
-feature/chores,template_clean_kitchen,,Clean kitchen,Limpar a cozinha
-feature/chores,template_clean_bathroom,,Clean bathroom,Limpar o banheiro
-feature/chores,template_trash,,Take out trash,Botar o lixo pra fora
-feature/chores,template_vacuum,,Vacuum,Passar o aspirador
-feature/chores,template_make_beds,,Make beds,Arrumar as camas
-feature/chores,template_water_plants,,Water plants,Aguar as plantas
-feature/chores,template_groceries,,Grocery shopping,Fazer a feira
-feature/chores,template_tidy_up,,Tidy the living room,Arrumar a sala
-feature/chores,template_organic_waste,,Take out organic waste,Botar o lixo orgânico
-feature/chores,template_recycling,,Take out recycling,Botar o reciclável
-feature/chores,template_feed_pets,,Feed the pets,Dar comida aos bichos
-feature/chores,template_take_medicine,,Take medicine,Tomar remédio
-feature/chores,template_other,,Something else,Outra coisa
 feature/chores,new_chore_channel,,New chores,Corres novos
 feature/chores,new_chore_channel_description,,When someone in the family adds something that needs doing,Quando alguém da família bota uma coisa pra fazer
 feature/chores,new_chore_body,,%1$s noticed it needs doing,%1$s viu que precisa fazer

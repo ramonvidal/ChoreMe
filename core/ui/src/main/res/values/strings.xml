@@ -23,4 +23,21 @@
         <item quantity="one">%d point</item>
         <item quantity="other">%d points</item>
     </plurals>
+    <!-- Ready-made chores, shown in each phone's language (see ChoreNames.kt) -->
+    <string name="template_dishes">Wash dishes</string>
+    <string name="template_laundry">Do laundry</string>
+    <string name="template_fold_clothes">Fold clothes</string>
+    <string name="template_clean_kitchen">Clean kitchen</string>
+    <string name="template_clean_bathroom">Clean bathroom</string>
+    <string name="template_trash">Take out trash</string>
+    <string name="template_vacuum">Vacuum</string>
+    <string name="template_make_beds">Make beds</string>
+    <string name="template_water_plants">Water plants</string>
+    <string name="template_groceries">Grocery shopping</string>
+    <string name="template_tidy_up">Tidy the living room</string>
+    <string name="template_organic_waste">Take out organic waste</string>
+    <string name="template_recycling">Take out recycling</string>
+    <string name="template_feed_pets">Feed the pets</string>
+    <string name="template_take_medicine">Take medicine</string>
+    <string name="template_other">Something else</string>
 </resources>

@@ -1,5 +1,7 @@
 package com.choreme.feature.family
 
+import androidx.compose.ui.platform.LocalContext
+import com.choreme.core.ui.ChoreNames
 import com.choreme.core.ui.R as CoreUiR
 import androidx.compose.foundation.clickable
 import com.choreme.core.ui.theme.memberColor
@@ -126,6 +128,7 @@ private fun NoteDialog(initial: String, onSave: (String) -> Unit, onDelete: (() 
 @Composable
 internal fun WeekSection(week: List<MemberWeek>) {
     val most = week.maxOfOrNull { it.points }?.coerceAtLeast(1) ?: 1
+    val context = LocalContext.current
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
             week.forEach { person ->
@@ -153,7 +156,7 @@ internal fun WeekSection(week: List<MemberWeek>) {
                             )
                         }
                         if (person.done.isNotEmpty()) {
-                            val titles = person.done.map { it.title }.distinct()
+                            val titles = person.done.map { ChoreNames.shown(context, it.title) }.distinct()
                             Text(
                                 titles.take(MAX_TITLES).joinToString(", ") + if (titles.size > MAX_TITLES) "…" else "",
                                 style = MaterialTheme.typography.bodySmall,
