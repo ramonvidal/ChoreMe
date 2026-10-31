@@ -39,6 +39,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -170,6 +173,7 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
     var assigning by remember { mutableStateOf<Chore?>(null) }
     var remindFor by remember { mutableStateOf<Chore?>(null) }
     var showHome by remember { mutableStateOf(false) }
+    var showLater by rememberSaveable { mutableStateOf(false) }
 
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -252,6 +256,28 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
                         item(key = "upcoming-title") { SectionLabel(stringResource(R.string.section_upcoming)) }
                         item(key = "upcoming") {
                             CompactList(board.upcoming, trailing = { dayLabel(it.dueDate, state.today) }, onClick = { if (state.isParent) editing = it })
+                        }
+                    }
+
+                    // Further out (next month's, say): folded, so it's there without taking room.
+                    if (board.later.isNotEmpty()) {
+                        item(key = "later-title") {
+                            Row(
+                                Modifier.fillMaxWidth().clickable { showLater = !showLater },
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                SectionLabel(stringResource(R.string.section_later, board.later.size), Modifier.weight(1f))
+                                Icon(
+                                    if (showLater) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                        if (showLater) {
+                            item(key = "later") {
+                                CompactList(board.later, trailing = { dayLabel(it.dueDate, state.today) }, onClick = { if (state.isParent) editing = it })
+                            }
                         }
                     }
 

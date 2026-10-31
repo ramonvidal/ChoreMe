@@ -3,6 +3,7 @@
     <!-- Sections -->
     <string name="section_awaiting">Waiting for a parent\'s OK</string>
     <string name="section_to_do">Needs doing</string>
+    <string name="section_later">Later (%1$d)</string>
     <string name="section_yours">Yours</string>
     <string name="section_upcoming">Coming up</string>
     <string name="section_done_today">Done today</string>

@@ -238,6 +238,8 @@ internal fun ChoreEditorSheet(
             val firstDue = when {
                 recurrence == null -> dueDate
                 chore != null && recurrence == chore.recurrence -> dueDate
+                // Changing an existing chore's repeat counts from today, unless a start was picked.
+                chore != null && dueDate == chore.dueDate -> recurrence.firstDueDate(today)
                 else -> recurrence.firstDueDate(dueDate)
             }
             if (showRepeat) RepeatSection(

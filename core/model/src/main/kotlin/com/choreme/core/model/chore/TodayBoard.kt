@@ -15,6 +15,8 @@ data class TodayBoard(
      * are due by today, or urgent; not in [toDo]. Later ones wait in [upcoming], like the rest.
      */
     val mine: List<Chore> = emptyList(),
+    /** Due after [UPCOMING_DAYS] days (next month's, say), soonest first, so none goes missing. */
+    val later: List<Chore> = emptyList(),
 ) {
     companion object {
         const val UPCOMING_DAYS = 7L
@@ -38,5 +40,8 @@ fun buildTodayBoard(chores: List<Chore>, today: LocalDate, memberId: String? = n
             .filter { it.isActive && !it.urgent && it.dueDate > today && it.dueDate <= today.plusDays(TodayBoard.UPCOMING_DAYS) }
             .sortedWith(compareBy<Chore> { it.dueDate }.then(byTitle)),
         doneToday = chores.filter { it.lastDoneOn == today }.sortedWith(byTitle),
+        later = others
+            .filter { it.isActive && !it.urgent && it.dueDate > today.plusDays(TodayBoard.UPCOMING_DAYS) }
+            .sortedWith(compareBy<Chore> { it.dueDate }.then(byTitle)),
     )
 }

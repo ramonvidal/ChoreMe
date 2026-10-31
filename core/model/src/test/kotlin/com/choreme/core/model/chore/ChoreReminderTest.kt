@@ -60,4 +60,13 @@ class ChoreReminderTest {
         assertEquals(2, choresBadge(chores, today, "mom", Role.PARENT))
         assertEquals(1, choresBadge(chores, today, "leo", Role.KID))
     }
+
+    @Test
+    fun `chores further out wait under later, so none goes missing`() {
+        val rent = Chore("r", "Pay the rent", recurrence = Recurrence.Monthly(20), dueDate = today.plusDays(27))
+        val bins = Chore("b", "Bins", dueDate = today.plusDays(3))
+        val board = buildTodayBoard(listOf(rent, bins), today)
+        assertEquals(listOf(bins), board.upcoming)
+        assertEquals(listOf(rent), board.later)
+    }
 }

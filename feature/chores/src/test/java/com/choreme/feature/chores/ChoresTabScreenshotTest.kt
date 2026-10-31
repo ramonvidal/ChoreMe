@@ -51,6 +51,7 @@ class ChoresTabScreenshotTest {
         Chore("6", "Clean the bathroom", ChoreTemplate.CLEAN_BATHROOM, dueDate = today, status = ChoreStatus.PENDING_APPROVAL, claimedBy = "mia", completedBy = "mia", points = 3),
         Chore("7", "Take out the trash", ChoreTemplate.TRASH, recurrence = Recurrence.EveryDays(2), dueDate = today.plusDays(1)),
         Chore("8", "Water the plants", ChoreTemplate.WATER_PLANTS, dueDate = today.plusDays(3)),
+        Chore("10", "Pay the rent", ChoreTemplate.OTHER, recurrence = Recurrence.Monthly(20), dueDate = today.plusDays(23), repeatUntil = LocalDate.of(2027, 12, 31)),
         Chore("9", "Make the beds", ChoreTemplate.MAKE_BEDS, dueDate = today, status = ChoreStatus.DONE, lastDoneBy = "leo", lastDoneOn = today),
     )
     private val log = listOf(
@@ -90,6 +91,7 @@ class ChoresTabScreenshotTest {
     fun parent() {
         shoot("tab-chores", mom, dark = false)
         compose.onNodeWithText("Hoover the living room").assertExists()
+        compose.onNodeWithText("Later (1)").assertExists()
     }
 
     @Test
