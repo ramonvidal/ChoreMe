@@ -123,6 +123,5 @@ jobs:
           fi
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/service-account.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/service-account.json"
-          PROJECT=$(jq -r .project_id "$GOOGLE_APPLICATION_CREDENTIALS")
-          npx firebase deploy --only firestore:rules --project "$PROJECT" --non-interactive
+          node deploy-rules.mjs
           rm -f "$GOOGLE_APPLICATION_CREDENTIALS"

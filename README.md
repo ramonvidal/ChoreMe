@@ -30,7 +30,8 @@ Sync and sign-in need a Firebase project. The free Spark plan is enough.
 4. **Firestore → Rules**: replace the rules with the contents of
    [`firebase/firestore.rules`](firebase/firestore.rules) and publish. Or, with the
    Firebase CLI: `cd firebase && npx firebase deploy --only firestore:rules --project <your-project-id>`.
-   To have CI publish them on every push instead (after their tests pass), add a
+   To have CI publish them on every push instead (after their tests pass, with
+   `firebase/deploy-rules.mjs`), add a
    service account key as the GitHub secret `FIREBASE_SERVICE_ACCOUNT`: Firebase
    **Project settings → Service accounts → Generate new private key**, then paste the
    whole downloaded JSON file into **GitHub → Settings → Secrets and variables →
