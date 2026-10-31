@@ -30,6 +30,12 @@ Sync and sign-in need a Firebase project. The free Spark plan is enough.
 4. **Firestore → Rules**: replace the rules with the contents of
    [`firebase/firestore.rules`](firebase/firestore.rules) and publish. Or, with the
    Firebase CLI: `cd firebase && npx firebase deploy --only firestore:rules --project <your-project-id>`.
+   To have CI publish them on every push instead (after their tests pass), add a
+   service account key as the GitHub secret `FIREBASE_SERVICE_ACCOUNT`: Firebase
+   **Project settings → Service accounts → Generate new private key**, then paste the
+   whole downloaded JSON file into **GitHub → Settings → Secrets and variables →
+   Actions → New repository secret**. The key can change the whole Firebase project, so
+   keep it only there and delete the downloaded file.
 5. **Project settings → Your apps → Add app → Android**, package name `com.choreme`.
 6. Google sign-in only works for apps signed with a key whose **SHA-1** is
    registered there, so everyone uses one shared debug key:

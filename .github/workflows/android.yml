@@ -9,6 +9,8 @@ on:
 
 jobs:
   build:
+    # After the rules are tested (and published), so a release never needs rules that aren't live.
+    needs: firestore-rules
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -106,3 +108,21 @@ jobs:
 
       - name: Firestore security rules tests
         run: npm test
+
+      # Publishes the tested rules to the family's Firebase project, so a new app version never
+      # writes something the live rules don't allow yet. Needs the FIREBASE_SERVICE_ACCOUNT
+      # secret (a service account key, JSON); without it this step only says so.
+      - name: Publish the rules to Firebase
+        if: github.event_name == 'push' && (github.ref_name == 'claude/family-org-android-app-sdu50s' || github.ref_name == 'main')
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::warning::No FIREBASE_SERVICE_ACCOUNT secret, so the rules were not published. See README."
+            exit 0
+          fi
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/service-account.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/service-account.json"
+          PROJECT=$(jq -r .project_id "$GOOGLE_APPLICATION_CREDENTIALS")
+          npx firebase deploy --only firestore:rules --project "$PROJECT" --non-interactive
+          rm -f "$GOOGLE_APPLICATION_CREDENTIALS"
