@@ -149,6 +149,6 @@ class GroceryRepository @Inject constructor(
         mapOf(*fields, UPDATED_AT to FieldValue.serverTimestamp(), UPDATED_BY to memberId)
 
     private fun Task<*>.logFailure() {
-        addOnFailureListener { Log.w("ChoreMe", "Grocery write failed", it) }
+        reportFailure("Grocery write")
     }
 }

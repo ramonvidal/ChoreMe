@@ -40,16 +40,16 @@ class NoteRepository @Inject constructor(
     fun add(familyId: String, memberId: String, text: String) {
         notes(familyId).document()
             .set(mapOf(TEXT to text, CREATED_BY to memberId, UPDATED_AT to Instant.now().toEpochMilli()))
-            .addOnFailureListener { Log.w("ChoreMe", "Couldn't add note", it) }
+            .reportFailure("Couldn't add note")
     }
 
     fun edit(familyId: String, note: Note, text: String) {
         notes(familyId).document(note.id)
             .update(mapOf(TEXT to text, UPDATED_AT to Instant.now().toEpochMilli()))
-            .addOnFailureListener { Log.w("ChoreMe", "Couldn't edit note", it) }
+            .reportFailure("Couldn't edit note")
     }
 
     fun delete(familyId: String, noteId: String) {
-        notes(familyId).document(noteId).delete().addOnFailureListener { Log.w("ChoreMe", "Couldn't delete note", it) }
+        notes(familyId).document(noteId).delete().reportFailure("Couldn't delete note")
     }
 }

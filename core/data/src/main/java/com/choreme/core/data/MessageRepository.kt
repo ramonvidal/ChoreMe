@@ -30,7 +30,7 @@ class MessageRepository @Inject constructor(
     fun send(familyId: String, from: String, text: String, now: Instant = Instant.now()) {
         messages(familyId).document()
             .set(mapOf(TEXT to text, FROM to from, AT to now.toEpochMilli()))
-            .addOnFailureListener { Log.w("ChoreMe", "Couldn't send message", it) }
+            .reportFailure("Couldn't send message")
         // One field per query, so no extra Firestore index is needed; only our own are removed.
         messages(familyId)
             .whereLessThan(AT, now.minus(FamilyMessage.KEEP).toEpochMilli())
@@ -39,7 +39,7 @@ class MessageRepository @Inject constructor(
     }
 
     fun delete(familyId: String, messageId: String) {
-        messages(familyId).document(messageId).delete().addOnFailureListener { Log.w("ChoreMe", "Couldn't delete message", it) }
+        messages(familyId).document(messageId).delete().reportFailure("Couldn't delete message")
     }
 
     /** The last week's messages. */

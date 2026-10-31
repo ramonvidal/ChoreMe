@@ -165,6 +165,6 @@ class ChoreRepository @Inject constructor(
     private fun stamp(memberId: String) = mapOf(UPDATED_AT to FieldValue.serverTimestamp(), UPDATED_BY to memberId)
 
     private fun Task<*>.logFailure() {
-        addOnFailureListener { Log.w("ChoreMe", "Chore write failed", it) }
+        reportFailure("Chore write")
     }
 }

@@ -36,11 +36,11 @@ class AnnouncementRepository @Inject constructor(
     fun announce(familyId: String, memberId: String, kind: AnnouncementKind, at: Instant = Instant.now()) {
         ref(familyId, memberId, kind)
             .set(mapOf(MEMBER_ID to memberId, KIND to kind.name, AT to at.toEpochMilli()))
-            .addOnFailureListener { Log.w("ChoreMe", "Couldn't share $kind", it) }
+            .reportFailure("Couldn't share $kind")
     }
 
     fun clear(familyId: String, memberId: String, kind: AnnouncementKind) {
-        ref(familyId, memberId, kind).delete().addOnFailureListener { Log.w("ChoreMe", "Couldn't clear $kind", it) }
+        ref(familyId, memberId, kind).delete().reportFailure("Couldn't clear $kind")
     }
 
     fun observe(familyId: String): Flow<List<Announcement>> =

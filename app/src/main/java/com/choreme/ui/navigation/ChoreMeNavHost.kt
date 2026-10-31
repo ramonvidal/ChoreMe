@@ -17,6 +17,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import com.choreme.core.ui.R as CoreUiR
+import com.choreme.core.data.WriteFailures
+import com.choreme.core.data.WriteFailure
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -64,8 +73,23 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0, choresBadge: Int = 0, groceries
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
 
+    // A save the family's database refused would otherwise vanish without a word.
+    val snackbar = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        WriteFailures.events.collect { failure ->
+            snackbar.currentSnackbarData?.dismiss()
+            snackbar.showSnackbar(
+                context.getString(if (failure == WriteFailure.REFUSED) CoreUiR.string.error_save_refused else CoreUiR.string.error_save_failed),
+                withDismissAction = true,
+                duration = SnackbarDuration.Long,
+            )
+        }
+    }
+
     Scaffold(
         topBar = { UpdateBanner() },
+        snackbarHost = { SnackbarHost(snackbar) },
         bottomBar = {
             NavigationBar {
                 TopLevelDestination.entries.forEach { destination ->

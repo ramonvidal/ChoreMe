@@ -104,7 +104,7 @@ class FamilyRepository @Inject constructor(
     /** Away until [until] (inclusive), or back home with null. Fire-and-forget, like other small edits. */
     fun setAway(familyId: String, memberId: String, until: LocalDate?) {
         members(familyId).document(memberId).update(FirestoreSchema.AWAY_UNTIL, until?.toString())
-            .addOnFailureListener { Log.w("ChoreMe", "Couldn't save away", it) }
+            .reportFailure("Couldn't save away")
     }
 
     fun observeJoinRequests(familyId: String): Flow<List<JoinRequest>> =

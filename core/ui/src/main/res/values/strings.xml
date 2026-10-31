@@ -8,6 +8,8 @@
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="undo">Undo</string>
+    <string name="error_save_refused">Couldn\'t save that: the family\'s database refused it. Make sure ChoreMe is up to date, then try again.</string>
+    <string name="error_save_failed">Couldn\'t save that. Check your connection and try again.</string>
     <string name="error_generic">Something went wrong. Check your connection and try again.</string>
     <string name="error_offline">You need to be online to join a family.</string>
     <string name="error_name_required">Please enter a name.</string>

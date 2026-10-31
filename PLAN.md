@@ -38,7 +38,7 @@
 | Colour rules | A green edge means a chore is yours, a red edge that it's urgent; chore buttons stay plain. People show as their coloured avatar. Swipe a chore right for its button, left for its options; swipe a grocery to tick it off. Finishing a chore shows "Well done! +2 points" with a tick and a buzz |
 | Screenshots | Every tab (light, dark, the largest text size, empty) is drawn from its state alone (`XxxContent`) and screenshotted on each release (`screenshots.zip`) |
 | Pictures | **No emoji.** Chores and grocery items use line drawings from **Tabler Icons** (MIT); app controls use Google's **Material Symbols** (Apache 2.0). Only the drawings in use are copied into `:core:ui`, so nothing is downloaded and they follow light/dark mode |
-| Offline | Firestore's built-in offline cache; no separate local database. Writes show up at once and sync when there's signal |
+| Offline | Firestore's built-in offline cache; no separate local database. Writes show up at once and sync when there's signal. A write the server refuses (or that fails) shows "Couldn't save that" at the bottom of the app (`WriteFailures` in `:core:data`). CI publishes the tested rules to Firebase on every push (`FIREBASE_SERVICE_ACCOUNT` secret) |
 
 ## Sharing and sync
 
