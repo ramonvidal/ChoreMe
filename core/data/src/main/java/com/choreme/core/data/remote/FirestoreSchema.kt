@@ -79,6 +79,10 @@ object FirestoreSchema {
     const val LAST_HELPERS = "lastHelpers"
     /** Who a parent gave a chore to; a repeating one goes back to them each time. */
     const val ASSIGNED_TO = "assignedTo"
+    /** For a "MONTHLY" chore: the day of the month (1 to 31). */
+    const val MONTH_DAY = "monthDay"
+    /** The last day a repeating chore can be due ("2027-12-31"); missing repeats for ever. */
+    const val REPEAT_UNTIL = "repeatUntil"
 
     // Locations and places
     const val LATITUDE = "latitude"

@@ -552,7 +552,9 @@ internal fun ChoreCard(
         }
         if (overdueDays > 0) add(pluralStringResource(R.plurals.overdue_days, overdueDays, overdueDays))
         if (overdueDays < 0) add(dayLabel(chore.dueDate, state.today))
-        if (chore.recurrence != Recurrence.Once) add(recurrenceLabel(chore.recurrence))
+        if (chore.recurrence != Recurrence.Once) {
+            add(recurrenceLabel(chore.recurrence) + (chore.repeatUntil?.let { " " + untilLabel(it) } ?: ""))
+        }
         if (chore.points > 1) add(pluralStringResource(CoreUiR.plurals.points, chore.points, chore.points))
         if (reminder != null) add(stringResource(R.string.reminder_at, reminder.atZone(ZoneId.systemDefault()).format(SHORT_TIME)))
     }.joinToString(" · ")

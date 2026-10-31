@@ -72,7 +72,9 @@ service cloud.firestore {
     function validChore(c) {
       return c.title is string && c.title.size() > 0 && c.title.size() <= 60
         && c.status in ['OPEN', 'CLAIMED', 'PENDING_APPROVAL', 'DONE']
-        && c.recurrenceType in ['ONCE', 'EVERY_DAYS', 'WEEKLY']
+        && c.recurrenceType in ['ONCE', 'EVERY_DAYS', 'WEEKLY', 'MONTHLY']
+        && (c.recurrenceType != 'MONTHLY' || (c.monthDay is int && c.monthDay >= 1 && c.monthDay <= 31))
+        && (!('repeatUntil' in c) || c.repeatUntil == null || (c.repeatUntil is string && c.repeatUntil.size() == 10))
         && c.dueDate is string && c.dueDate.size() == 10
         && (!('notifyWhenDone' in c) || c.notifyWhenDone is bool)
         && (!('urgent' in c) || c.urgent is bool)

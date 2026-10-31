@@ -20,6 +20,24 @@ sealed interface Recurrence {
         }
     }
 
+    /**
+     * On this day of every month, e.g. the 5th. In a shorter month a 29th to 31st falls on its
+     * last day, so "the 31st" is never skipped.
+     */
+    data class Monthly(val day: Int) : Recurrence {
+        init {
+            require(day in 1..31) { "Pick a day from 1 to 31" }
+        }
+
+        /** This month's (or a later month's) date for [day], on or after [date]. */
+        fun onOrAfter(date: LocalDate): LocalDate {
+            val thisMonth = date.withDayOfMonth(minOf(day, date.lengthOfMonth()))
+            if (!thisMonth.isBefore(date)) return thisMonth
+            val next = date.plusMonths(1)
+            return next.withDayOfMonth(minOf(day, next.lengthOfMonth()))
+        }
+    }
+
     companion object {
         const val MAX_DAYS = 90
     }
@@ -36,5 +54,13 @@ fun Recurrence.nextDueDate(previousDue: LocalDate, doneOn: LocalDate): LocalDate
         Recurrence.Once -> null
         is Recurrence.EveryDays -> from.plusDays(days.toLong())
         is Recurrence.Weekly -> generateSequence(from.plusDays(1)) { it.plusDays(1) }.first { it.dayOfWeek in days }
+        is Recurrence.Monthly -> onOrAfter(from.plusDays(1))
     }
+}
+
+/** The first due date for a new repeating chore that starts on or after [start]. */
+fun Recurrence.firstDueDate(start: LocalDate): LocalDate = when (this) {
+    is Recurrence.Monthly -> onOrAfter(start)
+    is Recurrence.Weekly -> generateSequence(start) { it.plusDays(1) }.first { it.dayOfWeek in days }
+    else -> start
 }

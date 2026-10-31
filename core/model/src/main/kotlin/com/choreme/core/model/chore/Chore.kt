@@ -44,6 +44,8 @@ data class Chore(
     val title: String,
     val template: ChoreTemplate = ChoreTemplate.OTHER,
     val recurrence: Recurrence = Recurrence.Once,
+    /** The last day a repeating chore can be due; null repeats for ever. After it, it's done. */
+    val repeatUntil: LocalDate? = null,
     val dueDate: LocalDate,
     val status: ChoreStatus = ChoreStatus.OPEN,
     /** Member ids, not device uids, so a kid with two tablets is still one person. */
@@ -165,7 +167,8 @@ fun Chore.reject(by: Member): Chore {
  * they're assigned to, or free for anyone.
  */
 private fun Chore.finish(doneBy: String, together: Set<String>, approvedBy: String?, today: LocalDate): Chore {
-    val next = recurrence.nextDueDate(previousDue = dueDate, doneOn = today)
+    // Past its end date, the last time round finishes it for good.
+    val next = recurrence.nextDueDate(previousDue = dueDate, doneOn = today)?.takeIf { repeatUntil == null || !it.isAfter(repeatUntil) }
     return if (next == null) {
         copy(
             status = ChoreStatus.DONE,

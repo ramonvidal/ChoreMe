@@ -11,7 +11,9 @@ import com.choreme.core.data.remote.FirestoreSchema.HELPERS
 import com.choreme.core.data.remote.FirestoreSchema.LAST_HELPERS
 import com.choreme.core.data.remote.FirestoreSchema.LAST_DONE_BY
 import com.choreme.core.data.remote.FirestoreSchema.LAST_DONE_ON
+import com.choreme.core.data.remote.FirestoreSchema.MONTH_DAY
 import com.choreme.core.data.remote.FirestoreSchema.NOTIFY_WHEN_DONE
+import com.choreme.core.data.remote.FirestoreSchema.REPEAT_UNTIL
 import com.choreme.core.data.remote.FirestoreSchema.RECURRENCE_TYPE
 import com.choreme.core.data.remote.FirestoreSchema.STATUS
 import com.choreme.core.data.remote.FirestoreSchema.TEMPLATE
@@ -40,7 +42,10 @@ internal fun Chore.toFields(): Map<String, Any?> = mapOf(
         Recurrence.Once -> "ONCE"
         is Recurrence.EveryDays -> "EVERY_DAYS"
         is Recurrence.Weekly -> "WEEKLY"
+        is Recurrence.Monthly -> "MONTHLY"
     },
+    MONTH_DAY to (recurrence as? Recurrence.Monthly)?.day?.toLong(),
+    REPEAT_UNTIL to repeatUntil?.toString(),
     EVERY_DAYS to (recurrence as? Recurrence.EveryDays)?.days?.toLong(),
     WEEK_DAYS to (recurrence as? Recurrence.Weekly)?.days?.map { it.value.toLong() }?.sorted().orEmpty(),
     DUE_DATE to dueDate.toString(),
@@ -66,6 +71,7 @@ internal fun DocumentSnapshot.toChore(): Chore? = runCatching {
         "WEEKLY" -> Recurrence.Weekly(
             (get(WEEK_DAYS) as List<*>).map { DayOfWeek.of((it as Number).toInt()) }.toSet(),
         )
+        "MONTHLY" -> Recurrence.Monthly(checkNotNull(getLong(MONTH_DAY)).toInt())
         else -> Recurrence.Once
     }
     Chore(
@@ -73,6 +79,7 @@ internal fun DocumentSnapshot.toChore(): Chore? = runCatching {
         title = getString(TITLE).orEmpty(),
         template = runCatching { ChoreTemplate.valueOf(getString(TEMPLATE).orEmpty()) }.getOrDefault(ChoreTemplate.OTHER),
         recurrence = recurrence,
+        repeatUntil = getString(REPEAT_UNTIL)?.let(LocalDate::parse),
         dueDate = LocalDate.parse(getString(DUE_DATE)),
         status = ChoreStatus.valueOf(getString(STATUS).orEmpty()),
         claimedBy = getString(CLAIMED_BY),

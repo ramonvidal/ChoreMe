@@ -47,7 +47,25 @@ internal fun recurrenceLabel(recurrence: Recurrence): String = when (recurrence)
         R.string.repeat_weekly,
         WEEK.filter { it in recurrence.days }.joinToString { it.shortName() },
     )
+    is Recurrence.Monthly -> stringResource(R.string.repeat_monthly, ordinal(recurrence.day))
 }
+
+/** "1st", "2nd", "3rd", "5th", "11th", "22nd". */
+internal fun ordinal(day: Int): String {
+    val suffix = when {
+        day % 100 in 11..13 -> "th"
+        day % 10 == 1 -> "st"
+        day % 10 == 2 -> "nd"
+        day % 10 == 3 -> "rd"
+        else -> "th"
+    }
+    return "$day$suffix"
+}
+
+/** "until 31 Dec 2027". */
+@Composable
+internal fun untilLabel(until: LocalDate): String =
+    stringResource(R.string.repeat_until, until.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())))
 
 /** "Today", "Tomorrow", "Wed", or a date further out. */
 @Composable

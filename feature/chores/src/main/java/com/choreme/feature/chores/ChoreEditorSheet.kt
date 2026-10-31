@@ -74,8 +74,17 @@ import com.choreme.core.model.chore.Recurrence
 import com.choreme.core.model.chore.SavedChore
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.util.Locale
+import java.time.format.DateTimeFormatter
+import java.time.ZoneOffset
+import java.time.Instant
+import com.choreme.core.model.chore.firstDueDate
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePicker
 
-private enum class RepeatKind { ONCE, EVERY_DAYS, WEEKLY }
+private enum class RepeatKind { ONCE, EVERY_DAYS, WEEKLY, MONTHLY }
 
 /**
  * Reports something that needs doing ([chore] null) or edits a chore. Picking a template
@@ -106,6 +115,8 @@ internal fun ChoreEditorSheet(
     var kind by remember { mutableStateOf(initialRecurrence.kind()) }
     var everyDays by remember { mutableIntStateOf((initialRecurrence as? Recurrence.EveryDays)?.days ?: 1) }
     var weekDays by remember { mutableStateOf((initialRecurrence as? Recurrence.Weekly)?.days ?: setOf(DayOfWeek.SATURDAY)) }
+    var monthDay by remember { mutableIntStateOf((initialRecurrence as? Recurrence.Monthly)?.day ?: today.dayOfMonth) }
+    var repeatUntil by remember { mutableStateOf(chore?.repeatUntil) }
     var dueDate by remember { mutableStateOf(chore?.dueDate ?: today) }
     var showRepeat by remember { mutableStateOf(initialRecurrence != Recurrence.Once) }
     var notifyWhenDone by remember { mutableStateOf(chore?.notifyWhenDone ?: true) }
@@ -213,27 +224,39 @@ internal fun ChoreEditorSheet(
                     when {
                         showRepeat -> stringResource(R.string.editor_repeat_hide)
                         kind == RepeatKind.ONCE -> stringResource(R.string.editor_repeat_show)
-                        else -> stringResource(R.string.editor_repeats, currentRecurrenceLabel(kind, everyDays, weekDays))
+                        else -> stringResource(R.string.editor_repeats, currentRecurrenceLabel(kind, everyDays, weekDays, monthDay))
                     },
                 )
+            }
+            val recurrence = when (kind) {
+                RepeatKind.ONCE -> Recurrence.Once
+                RepeatKind.EVERY_DAYS -> Recurrence.EveryDays(everyDays)
+                RepeatKind.WEEKLY -> weekDays.takeIf { it.isNotEmpty() }?.let { Recurrence.Weekly(it) }
+                RepeatKind.MONTHLY -> Recurrence.Monthly(monthDay)
+            }
+            // The first time it's due: "the 5th" starts on the next 5th; a changed repeat starts afresh.
+            val firstDue = when {
+                recurrence == null -> dueDate
+                chore != null && recurrence == chore.recurrence -> dueDate
+                else -> recurrence.firstDueDate(dueDate)
             }
             if (showRepeat) RepeatSection(
                 kind = kind,
                 everyDays = everyDays,
                 weekDays = weekDays,
+                monthDay = monthDay,
                 dueDate = dueDate,
+                firstDue = firstDue,
+                repeatUntil = repeatUntil,
                 today = today,
                 onKind = { kind = it },
                 onEveryDays = { everyDays = it },
                 onWeekDays = { weekDays = it },
+                onMonthDay = { monthDay = it },
                 onDueDate = { dueDate = it },
+                onRepeatUntil = { repeatUntil = it },
             )
-
-            val recurrence = when (kind) {
-                RepeatKind.ONCE -> Recurrence.Once
-                RepeatKind.EVERY_DAYS -> Recurrence.EveryDays(everyDays)
-                RepeatKind.WEEKLY -> weekDays.takeIf { it.isNotEmpty() }?.let { Recurrence.Weekly(it) }
-            }
+            val endsTooSoon = recurrence != Recurrence.Once && repeatUntil?.isBefore(firstDue) == true
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (onDelete != null) {
                     TextButton(onClick = onDelete) {
@@ -245,10 +268,15 @@ internal fun ChoreEditorSheet(
                 Spacer(Modifier.width(8.dp))
                 Button(
                     onClick = {
-                        val due = if (chore == null && recurrence == Recurrence.Once) today else dueDate
-                        onSave(ChoreDraft(title, template ?: ChoreTemplate.OTHER, checkNotNull(recurrence), due, notifyWhenDone, urgent, points, forWhom))
+                        val due = if (chore == null && recurrence == Recurrence.Once) today else firstDue
+                        onSave(
+                            ChoreDraft(
+                                title, template ?: ChoreTemplate.OTHER, checkNotNull(recurrence), due, notifyWhenDone, urgent, points, forWhom,
+                                repeatUntil = repeatUntil,
+                            ),
+                        )
                     },
-                    enabled = title.isNotBlank() && recurrence != null,
+                    enabled = title.isNotBlank() && recurrence != null && !endsTooSoon,
                 ) { Text(stringResource(CoreUiR.string.save)) }
             }
         }
@@ -450,13 +478,19 @@ private fun RepeatSection(
     kind: RepeatKind,
     everyDays: Int,
     weekDays: Set<DayOfWeek>,
+    monthDay: Int,
     dueDate: LocalDate,
+    firstDue: LocalDate,
+    repeatUntil: LocalDate?,
     today: LocalDate,
     onKind: (RepeatKind) -> Unit,
     onEveryDays: (Int) -> Unit,
     onWeekDays: (Set<DayOfWeek>) -> Unit,
+    onMonthDay: (Int) -> Unit,
     onDueDate: (LocalDate) -> Unit,
+    onRepeatUntil: (LocalDate?) -> Unit,
 ) {
+    var pickingEnd by remember { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         RepeatOption(stringResource(R.string.repeat_once), kind == RepeatKind.ONCE) { onKind(RepeatKind.ONCE) }
         RepeatOption(stringResource(R.string.repeat_daily), kind == RepeatKind.EVERY_DAYS && everyDays == 1) {
@@ -490,25 +524,81 @@ private fun RepeatSection(
                 }
             }
         }
-        if (kind != RepeatKind.ONCE) {
-            Text(stringResource(R.string.editor_starts), style = MaterialTheme.typography.labelLarge)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(today, today.plusDays(1)).forEach { date ->
-                    FilterChip(selected = dueDate == date, onClick = { onDueDate(date) }, label = { Text(dayLabel(date, today)) })
+        RepeatOption(stringResource(R.string.editor_monthly), kind == RepeatKind.MONTHLY) { onKind(RepeatKind.MONTHLY) }
+        if (kind == RepeatKind.MONTHLY) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 40.dp)) {
+                OutlinedIconButton(onClick = { onMonthDay(if (monthDay > 1) monthDay - 1 else 31) }) {
+                    Text("−", style = MaterialTheme.typography.titleLarge)
                 }
-                if (dueDate != today && dueDate != today.plusDays(1)) {
-                    FilterChip(selected = true, onClick = {}, label = { Text(stringResource(R.string.editor_starts_on, dayLabel(dueDate, today))) })
+                Text(stringResource(R.string.editor_month_day, ordinal(monthDay)), modifier = Modifier.padding(horizontal = 16.dp))
+                OutlinedIconButton(onClick = { onMonthDay(if (monthDay < 31) monthDay + 1 else 1) }) {
+                    Text("+", style = MaterialTheme.typography.titleLarge)
                 }
             }
         }
+        if (kind != RepeatKind.ONCE) {
+            Text(stringResource(R.string.editor_starts), style = MaterialTheme.typography.labelLarge)
+            if (kind == RepeatKind.MONTHLY) {
+                // Monthly starts on the next of its days; nothing to choose.
+                Text(stringResource(R.string.editor_starts_on, dayLabel(firstDue, today)), modifier = Modifier.padding(start = 4.dp))
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf(today, today.plusDays(1)).forEach { date ->
+                        FilterChip(selected = dueDate == date, onClick = { onDueDate(date) }, label = { Text(dayLabel(date, today)) })
+                    }
+                    if (firstDue != today && firstDue != today.plusDays(1)) {
+                        FilterChip(selected = true, onClick = {}, label = { Text(stringResource(R.string.editor_starts_on, dayLabel(firstDue, today))) })
+                    }
+                }
+            }
+            // "Until the end of next year": the last day it can be due.
+            Text(stringResource(R.string.editor_ends), style = MaterialTheme.typography.labelLarge)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(selected = repeatUntil == null, onClick = { onRepeatUntil(null) }, label = { Text(stringResource(R.string.editor_ends_never)) })
+                FilterChip(
+                    selected = repeatUntil != null,
+                    onClick = { pickingEnd = true },
+                    label = { Text(repeatUntil?.let { stringResource(R.string.editor_ends_on, endLabel(it)) } ?: stringResource(R.string.editor_ends_pick)) },
+                )
+            }
+        }
+    }
+
+    if (pickingEnd) {
+        val start = maxOf(firstDue, today)
+        val utcStart = start.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+        val picker = rememberDatePickerState(
+            initialSelectedDateMillis = (repeatUntil ?: start.withDayOfYear(1).plusYears(2).minusDays(1))
+                .atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long) = utcTimeMillis >= utcStart
+            },
+        )
+        DatePickerDialog(
+            onDismissRequest = { pickingEnd = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        picker.selectedDateMillis?.let { onRepeatUntil(Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()) }
+                        pickingEnd = false
+                    },
+                    enabled = picker.selectedDateMillis != null,
+                ) { Text(stringResource(CoreUiR.string.save)) }
+            },
+            dismissButton = { TextButton(onClick = { pickingEnd = false }) { Text(stringResource(CoreUiR.string.cancel)) } },
+        ) { DatePicker(state = picker) }
     }
 }
 
+/** "31 Dec 2027". */
+private fun endLabel(date: LocalDate): String = date.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault()))
+
 @Composable
-private fun currentRecurrenceLabel(kind: RepeatKind, everyDays: Int, weekDays: Set<DayOfWeek>): String = when (kind) {
+private fun currentRecurrenceLabel(kind: RepeatKind, everyDays: Int, weekDays: Set<DayOfWeek>, monthDay: Int): String = when (kind) {
     RepeatKind.ONCE -> recurrenceLabel(Recurrence.Once)
     RepeatKind.EVERY_DAYS -> recurrenceLabel(Recurrence.EveryDays(everyDays))
     RepeatKind.WEEKLY -> if (weekDays.isEmpty()) recurrenceLabel(Recurrence.Once) else recurrenceLabel(Recurrence.Weekly(weekDays))
+    RepeatKind.MONTHLY -> recurrenceLabel(Recurrence.Monthly(monthDay))
 }
 
 @Composable
@@ -529,6 +619,7 @@ private fun Recurrence.kind() = when (this) {
     Recurrence.Once -> RepeatKind.ONCE
     is Recurrence.EveryDays -> RepeatKind.EVERY_DAYS
     is Recurrence.Weekly -> RepeatKind.WEEKLY
+    is Recurrence.Monthly -> RepeatKind.MONTHLY
 }
 
 // Matches the limit in firestore.rules.

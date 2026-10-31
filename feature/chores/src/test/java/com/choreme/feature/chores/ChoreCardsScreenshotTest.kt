@@ -47,6 +47,10 @@ class ChoreCardsScreenshotTest {
     private val trash = Chore("4", "Take out the trash", ChoreTemplate.TRASH, dueDate = today, points = 2)
     private val hoover = Chore("6", "Hoover the living room", ChoreTemplate.VACUUM, dueDate = today, status = ChoreStatus.CLAIMED, claimedBy = "mom", helpers = setOf("mia"))
     private val garage = Chore("7", "Tidy the garage", ChoreTemplate.OTHER, dueDate = today, status = ChoreStatus.CLAIMED, claimedBy = "leo", helpers = setOf("mia"), points = 4)
+    private val rent = Chore(
+        "8", "Pay the rent", ChoreTemplate.OTHER, recurrence = com.choreme.core.model.chore.Recurrence.Monthly(5),
+        dueDate = today, repeatUntil = LocalDate.of(2027, 12, 31),
+    )
     private val leak = Chore("5", "Water leak under the sink", ChoreTemplate.CLEAN_KITCHEN, dueDate = today, reportedBy = "leo", urgent = true)
 
     @Test
@@ -59,6 +63,7 @@ class ChoreCardsScreenshotTest {
                         HomeCard(homeScene(14, overdue = 0, urgent = 0, toDo = 3), onClick = {})
                         ChoreCard(trash, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         ChoreCard(hoover, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {}, mine = true)
+                        ChoreCard(rent, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         ChoreCard(garage, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         ChoreCard(leak, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         AwaitingCard(bathroom, state, onApprove = {}, onReject = {})
@@ -76,6 +81,7 @@ class ChoreCardsScreenshotTest {
         compose.onNodeWithText("1 is yours").assertExists()
         compose.onNodeWithText("You and Mia are on it").assertExists()
         compose.onNodeWithText("On it · 4 points").assertExists()
+        compose.onNodeWithText("Every month on the 5th until 31 Dec 2027").assertExists()
         compose.onNodeWithContentDescription("Leo and Mia are on it").assertExists() // their avatars
         compose.onAllNodesWithText("Me too").assertCountEquals(2) // Laundry and the garage
         compose.onNodeWithText("14 points in 7 days").assertExists()

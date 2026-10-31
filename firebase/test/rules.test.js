@@ -289,6 +289,14 @@ describe('chores', () => {
     await assertFails(updateDoc(ref(parent('alice')), { assignedTo: 'member-kid1' }));
   });
 
+  test('a chore can repeat on a day of the month, until an end date', async () => {
+    const monthly = { ...chore, recurrenceType: 'MONTHLY', monthDay: 5, repeatUntil: '2027-12-31' };
+    await assertSucceeds(setDoc(doc(parent('alice'), 'families', FAMILY, 'chores', 'rent'), monthly));
+    await assertFails(setDoc(doc(parent('alice'), 'families', FAMILY, 'chores', 'bad1'), { ...monthly, monthDay: 32 }));
+    await assertFails(setDoc(doc(parent('alice'), 'families', FAMILY, 'chores', 'bad2'), { ...monthly, monthDay: null }));
+    await assertFails(setDoc(doc(parent('alice'), 'families', FAMILY, 'chores', 'bad3'), { ...monthly, repeatUntil: 'next year' }));
+  });
+
   test('parents say who does a chore, several people at once', async () => {
     await assertSucceeds(updateDoc(ref(parent('alice')), { status: 'CLAIMED', claimedBy: 'member-kid1', helpers: ['member-kid2'] }));
     await assertFails(updateDoc(ref(parent('alice')), { helpers: 'member-kid2' }));

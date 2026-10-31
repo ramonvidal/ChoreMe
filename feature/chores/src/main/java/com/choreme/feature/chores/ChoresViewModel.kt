@@ -113,6 +113,8 @@ data class ChoreDraft(
     val points: Int = 1,
     /** Who it's for, picked by a parent: nobody means anyone can grab it. */
     val people: Set<String> = emptySet(),
+    /** The last day it repeats (null: for ever); ignored for one-off chores. */
+    val repeatUntil: LocalDate? = null,
 )
 
 sealed interface CalendarResult {
@@ -202,6 +204,7 @@ class ChoresViewModel @Inject internal constructor(
             title = draft.title.trim(),
             template = template,
             recurrence = draft.recurrence,
+            repeatUntil = draft.repeatUntil.takeIf { draft.recurrence != Recurrence.Once },
             dueDate = draft.dueDate,
             notifyWhenDone = draft.notifyWhenDone,
             urgent = draft.urgent,
@@ -267,6 +270,7 @@ class ChoresViewModel @Inject internal constructor(
             title = draft.title.trim(),
             template = draft.template,
             recurrence = draft.recurrence,
+            repeatUntil = draft.repeatUntil.takeIf { draft.recurrence != Recurrence.Once },
             dueDate = draft.dueDate,
             notifyWhenDone = draft.notifyWhenDone,
             urgent = draft.urgent,

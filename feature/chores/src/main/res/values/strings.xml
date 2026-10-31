@@ -60,6 +60,14 @@
         <item quantity="other">Every %d days</item>
     </plurals>
     <string name="repeat_weekly">On %1$s</string>
+    <string name="repeat_monthly">Every month on the %1$s</string>
+    <string name="repeat_until">until %1$s</string>
+    <string name="editor_monthly">Every month</string>
+    <string name="editor_month_day">On the %1$s</string>
+    <string name="editor_ends">Ends</string>
+    <string name="editor_ends_never">Never</string>
+    <string name="editor_ends_on">On %1$s</string>
+    <string name="editor_ends_pick">Pick a date…</string>
 
     <!-- Editor -->
     <string name="editor_title_label">What needs doing</string>

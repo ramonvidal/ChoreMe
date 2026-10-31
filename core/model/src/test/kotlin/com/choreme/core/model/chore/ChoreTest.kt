@@ -190,3 +190,33 @@ class JustFinishedTest {
         assertEquals(true, dishes.notifyWhenDone)
     }
 }
+
+class MonthlyRepeatTest {
+    private val mom = com.choreme.core.model.Member(id = "mom", name = "Mom", role = com.choreme.core.model.Role.PARENT)
+
+    @Test
+    fun `on the 5th of every month`() {
+        val monthly = Recurrence.Monthly(5)
+        assertEquals(LocalDate.of(2026, 11, 5), monthly.firstDueDate(LocalDate.of(2026, 10, 31)))
+        assertEquals(LocalDate.of(2026, 11, 5), monthly.firstDueDate(LocalDate.of(2026, 11, 5)))
+        // Done on the day, or a bit late: next month's 5th.
+        assertEquals(LocalDate.of(2026, 12, 5), monthly.nextDueDate(LocalDate.of(2026, 11, 5), LocalDate.of(2026, 11, 5)))
+        assertEquals(LocalDate.of(2026, 12, 5), monthly.nextDueDate(LocalDate.of(2026, 11, 5), LocalDate.of(2026, 11, 9)))
+    }
+
+    @Test
+    fun `the 31st falls on the last day of shorter months`() {
+        val monthly = Recurrence.Monthly(31)
+        assertEquals(LocalDate.of(2027, 2, 28), monthly.nextDueDate(LocalDate.of(2027, 1, 31), LocalDate.of(2027, 1, 31)))
+        assertEquals(LocalDate.of(2027, 3, 31), monthly.nextDueDate(LocalDate.of(2027, 2, 28), LocalDate.of(2027, 2, 28)))
+    }
+
+    @Test
+    fun `a repeating chore stops after its end date`() {
+        val rent = Chore("r", "Pay rent", recurrence = Recurrence.Monthly(5), dueDate = LocalDate.of(2027, 11, 5), repeatUntil = LocalDate.of(2027, 12, 31))
+        val december = rent.complete(mom, LocalDate.of(2027, 11, 5))
+        assertEquals(ChoreStatus.OPEN, december.status)
+        assertEquals(LocalDate.of(2027, 12, 5), december.dueDate)
+        assertEquals(ChoreStatus.DONE, december.complete(mom, LocalDate.of(2027, 12, 5)).status) // no January 2028
+    }
+}
