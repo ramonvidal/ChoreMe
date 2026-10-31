@@ -41,8 +41,8 @@ class UpdatesRowTest {
                 }
             }
         }
-        compose.onNodeWithText("This phone has ChoreMe 0.31.").assertExists()
-        compose.onNodeWithText("ChoreMe 0.32 is ready: tap Install at the top of the screen.").assertExists()
+        compose.onNodeWithText("This phone has Nos Corre! 0.31.").assertExists()
+        compose.onNodeWithText("Nos Corre! 0.32 is ready: tap Install at the top of the screen.").assertExists()
         compose.onNodeWithText("You have the newest version.").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/settings-updates.png")
 

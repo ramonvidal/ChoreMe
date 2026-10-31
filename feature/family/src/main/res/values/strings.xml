@@ -1,7 +1,7 @@
 <resources>
     <string name="family_invite_hint">Share this code so others can ask to join:</string>
     <string name="family_share_invite">Share invite code</string>
-    <string name="family_invite_message">Join the %1$s family on ChoreMe with the code %2$s</string>
+    <string name="family_invite_message">Join the %1$s family on Nos Corre! with the code %2$s</string>
     <string name="family_requests_title">Waiting to join</string>
     <string name="family_members_title">Members</string>
     <string name="family_add_kid">Add a kid without a phone</string>
@@ -31,7 +31,7 @@
     <string name="delete_my_data">Delete my data</string>
     <string name="leave_confirm">Leave the family? This phone loses access, and your location, ping address and arrival history are deleted. Chores and groceries you added stay for the family.</string>
     <string name="leave_last_confirm">You\'re the last one here. Leaving deletes the whole family: chores, groceries, places and everything else. This can\'t be undone.</string>
-    <string name="delete_confirm">Leave the family and delete your ChoreMe account? If you\'re the last one, the whole family\'s data is deleted too. This can\'t be undone.</string>
+    <string name="delete_confirm">Leave the family and delete your Nos Corre! account? If you\'re the last one, the whole family\'s data is deleted too. This can\'t be undone.</string>
     <!-- This phone: notifications, quiet hours, instant alerts, updates -->
     <string name="this_phone_title">This phone</string>
     <string name="this_phone_hint">These choices are only for this phone.</string>
@@ -56,6 +56,7 @@
     <string name="alert_on_my_way_hint">When someone taps \"On my way home\" (needs ntfy)</string>
     <string name="alert_shopping">At the shop</string>
     <string name="alert_shopping_hint">When someone starts shopping, so you can add what\'s missing (needs ntfy)</string>
+    <string name="language_section">Language</string>
     <string name="alert_morning">Morning summary</string>
     <string name="alert_morning_hint">At 8:00, what needs doing today</string>
     <string name="alert_weekly">Week in review</string>
@@ -69,10 +70,10 @@
     <string name="instant_off">Off. Install the free ntfy app to get alerts within seconds instead of within 15–30 minutes.</string>
     <string name="instant_install">Get ntfy (free)</string>
     <string name="updates_section">App updates</string>
-    <string name="updates_installed">This phone has ChoreMe %1$s.</string>
+    <string name="updates_installed">This phone has Nos Corre! %1$s.</string>
     <string name="updates_check">Check for updates</string>
     <string name="updates_up_to_date">You have the newest version.</string>
-    <string name="updates_found">ChoreMe %1$s is ready: tap Install at the top of the screen.</string>
+    <string name="updates_found">Nos Corre! %1$s is ready: tap Install at the top of the screen.</string>
     <string name="updates_failed">Couldn\'t reach the update page. Check the connection and try again.</string>
     <string name="ok">OK</string>
     <!-- Family board -->

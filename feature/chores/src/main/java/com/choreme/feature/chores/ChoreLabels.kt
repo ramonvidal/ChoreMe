@@ -50,8 +50,9 @@ internal fun recurrenceLabel(recurrence: Recurrence): String = when (recurrence)
     is Recurrence.Monthly -> stringResource(R.string.repeat_monthly, ordinal(recurrence.day))
 }
 
-/** "1st", "2nd", "3rd", "5th", "11th", "22nd". */
+/** "1st", "2nd", "3rd", "5th", "11th", "22nd" in English; just the number elsewhere ("dia 5"). */
 internal fun ordinal(day: Int): String {
+    if (Locale.getDefault().language != "en") return day.toString()
     val suffix = when {
         day % 100 in 11..13 -> "th"
         day % 10 == 1 -> "st"

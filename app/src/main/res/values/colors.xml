@@ -1,5 +1,5 @@
 <resources>
-    <!-- Soft cards: a white house on the app's one green (see core/ui theme). -->
-    <color name="ic_launcher_background">#2E6B52</color>
+    <!-- The "Nos Corre!" icon's yellow, around the artwork (drawable-*dpi/ic_launcher_foreground). -->
+    <color name="ic_launcher_background">#FDD314</color>
     <color name="window_background">#F4F4F2</color>
 </resources>

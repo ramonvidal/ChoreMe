@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Baianês. Made from translations/baianes.csv by translations/i18n.py: edit the table, not this file. -->
+<resources>
+    <string name="update_available">Saiu o Nos Corre! %1$s</string>
+    <string name="update_install">Instalar</string>
+    <string name="update_later">Depois</string>
+    <string name="update_allow">Pra atualizar, deixe o Nos Corre! instalar apps (só precisa uma vez).</string>
+    <string name="update_allow_button">Deixar</string>
+    <string name="update_downloading">Baixando a atualização…</string>
+    <string name="update_failed">Não deu pra baixar a atualização. Veja a internet.</string>
+    <string name="update_retry">Tentar de novo</string>
+</resources>

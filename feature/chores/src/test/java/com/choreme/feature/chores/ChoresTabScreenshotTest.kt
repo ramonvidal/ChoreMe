@@ -97,6 +97,14 @@ class ChoresTabScreenshotTest {
     @Test
     fun parentDark() = shoot("tab-chores-dark", mom, dark = true)
 
+    /** In Baianês (Brazilian Portuguese, Bahia style). */
+    @Test
+    @Config(qualifiers = "pt-rBR-w411dp-h1800dp")
+    fun baianes() {
+        shoot("tab-chores-baianes", mom, dark = false)
+        compose.onNodeWithText("Corres").assertExists()
+    }
+
     @Test
     fun kid() = shoot("tab-chores-kid", mia, dark = false)
 

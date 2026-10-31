@@ -88,6 +88,14 @@ class FamilyTabScreenshotTest {
     @Test
     fun parentDark() = shoot("tab-family-dark", dark = true)
 
+    /** In Baianês (Brazilian Portuguese, Bahia style). */
+    @Test
+    @Config(qualifiers = "pt-rBR-w411dp-h2000dp")
+    fun baianes() {
+        shoot("tab-family-baianes", dark = false)
+        compose.onNodeWithText("Avisar a galera").assertExists()
+    }
+
     /** The phone's text size turned up to the largest step: nothing should be cut off. */
     @Test
     fun largeText() {

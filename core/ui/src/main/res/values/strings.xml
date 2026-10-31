@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ChoreMe</string>
+    <string name="app_name">Nos Corre!</string>
     <string name="coming_soon">Coming soon</string>
     <string name="approve">Approve</string>
     <string name="decline">Decline</string>
@@ -8,7 +8,7 @@
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="undo">Undo</string>
-    <string name="error_save_refused">Couldn\'t save that: the family\'s database refused it. Make sure ChoreMe is up to date, then try again.</string>
+    <string name="error_save_refused">Couldn\'t save that: the family\'s database refused it. Make sure Nos Corre! is up to date, then try again.</string>
     <string name="error_save_failed">Couldn\'t save that. Check your connection and try again.</string>
     <string name="error_generic">Something went wrong. Check your connection and try again.</string>
     <string name="error_offline">You need to be online to join a family.</string>

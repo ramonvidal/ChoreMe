@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Baianês. Made from translations/baianes.csv by translations/i18n.py: edit the table, not this file. -->
+<resources>
+    <string name="sign_in_tagline">Os corres, a feira e a agenda da família, divididos com todo mundo de casa.</string>
+    <string name="sign_in_google">Entrar com o Google</string>
+    <string name="sign_in_kid">Sou pivete</string>
+    <string name="sign_in_kid_hint">Não precisa de conta do Google. Mainha ou painho aprova este aparelho.</string>
+    <string name="onboarding_title">Monte sua família</string>
+    <string name="onboarding_title_kid">Peça pra entrar na sua família</string>
+    <string name="onboarding_declined">Seu pedido foi recusado, ou você saiu da família. Pode pedir de novo aqui embaixo.</string>
+    <string name="onboarding_create_title">Começar uma família nova</string>
+    <string name="onboarding_create">Criar família</string>
+    <string name="onboarding_join_title">Entrar com um código de convite</string>
+    <string name="onboarding_join_hint">Peça o código a mainha ou painho. Fica na aba Família deles.</string>
+    <string name="onboarding_join">Pedir pra entrar</string>
+    <string name="onboarding_join_as_kid">Sou pivete</string>
+    <string name="onboarding_switch_account">Usar outra conta</string>
+    <string name="onboarding_back">Voltar</string>
+    <string name="your_name">Seu nome</string>
+    <string name="family_name">Nome da família</string>
+    <string name="invite_code">Código de convite</string>
+    <string name="awaiting_title">Esperando um responsável em %1$s</string>
+    <string name="awaiting_body">Eles veem seu pedido na aba Família. Esta tela segue sozinha quando aprovarem.</string>
+    <string name="awaiting_cancel">Cancelar pedido</string>
+    <string name="firebase_missing_title">A sincronização não tá configurada</string>
+    <string name="firebase_missing_body">Esta versão não tem a configuração do Firebase, então a família não sincroniza. Adicione app/google-services.json como explica o README e gere de novo.</string>
+    <string name="error_sign_in">Não deu pra entrar. Veja a internet e tente de novo.</string>
+</resources>

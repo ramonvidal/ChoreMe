@@ -135,7 +135,7 @@
         <item quantity="one">%d waiting for your OK</item>
         <item quantity="other">%d waiting for your OK</item>
     </plurals>
-    <string name="reminder_body">Anyone can grab one in ChoreMe.</string>
+    <string name="reminder_body">Anyone can grab one in Nos Corre!.</string>
     <string name="editor_urgent">Urgent</string>
     <string name="editor_title_placeholder">Type what needs doing…</string>
     <string name="editor_new_chore_hint">Nothing like it yet. It\'ll be saved for next time.</string>

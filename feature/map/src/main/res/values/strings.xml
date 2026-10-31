@@ -5,7 +5,7 @@
     <string name="share_needs_background">To keep sharing while the app is closed, allow location \"all the time\".</string>
     <string name="share_allow_background">Allow all the time</string>
     <string name="background_title">Keep sharing in the background?</string>
-    <string name="background_body">On the next screen, choose \"Allow all the time\". Otherwise your location only updates while ChoreMe is open.</string>
+    <string name="background_body">On the next screen, choose \"Allow all the time\". Otherwise your location only updates while Nos Corre! is open.</string>
     <string name="continue_">Continue</string>
     <string name="not_now">Not now</string>
 
@@ -51,7 +51,7 @@
     <string name="alert_left">%1$s left %2$s</string>
     <string name="someone">Someone</string>
     <string name="instant_on">Instant: alerts arrive within seconds.</string>
-    <string name="instant_off">For instant alerts instead of up to 15 minutes, install the free ntfy app. No account needed; ChoreMe connects to it by itself.</string>
+    <string name="instant_off">For instant alerts instead of up to 15 minutes, install the free ntfy app. No account needed; Nos Corre! connects to it by itself.</string>
     <string name="instant_install">Get ntfy (free)</string>
     <string name="instant_connecting">ntfy is installed; connecting…</string>
     <string name="osm_credit">© OpenStreetMap contributors</string>

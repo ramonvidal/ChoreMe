@@ -1,5 +1,5 @@
 <resources>
-    <string name="widget_name">ChoreMe</string>
+    <string name="widget_name">Nos Corre!</string>
     <string name="widget_description">What needs doing at home, and a shortcut to the grocery list</string>
     <string name="widget_title">Needs doing</string>
     <string name="widget_nothing">Nothing right now</string>
@@ -7,5 +7,5 @@
     <string name="widget_to_buy">%1$d to buy</string>
     <string name="widget_out_of">Out of…</string>
     <string name="widget_open">Open</string>
-    <string name="widget_not_set_up">Open ChoreMe to join your family</string>
+    <string name="widget_not_set_up">Open Nos Corre! to join your family</string>
 </resources>

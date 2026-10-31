@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Baianês. Made from translations/baianes.csv by translations/i18n.py: edit the table, not this file. -->
+<resources>
+    <string name="grocery_quick_add">Acabou alguma coisa? Escreva aqui</string>
+    <string name="grocery_to_buy">Pra comprar (%1$d)</string>
+    <string name="grocery_restock">Repor o de sempre (%1$d)</string>
+    <string name="grocery_nothing_to_buy">Nada pra comprar. Toque aqui embaixo no que for acabando.</string>
+    <string name="grocery_at_home">Em casa</string>
+    <string name="grocery_at_home_hint">Toque no que acabou pra botar na lista. Segure pra editar.</string>
+    <string name="grocery_bought">%1$s comprado</string>
+    <string name="grocery_already_on_list">%1$s já tá na lista</string>
+    <string name="grocery_empty_title">A lista da feira da família</string>
+    <string name="grocery_empty_body">Tudo que você adiciona fica aqui pra próxima vez, então a feira da semana é só uns toques. Comece com os itens mais comuns, ou escreva os seus aí em cima.</string>
+    <string name="grocery_add_starter">Começar com os itens comuns</string>
+    <string name="grocery_edit_title">Editar item</string>
+    <string name="grocery_shopping_off">Tô no mercado</string>
+    <string name="grocery_shopping_on">Na feira: a tela fica acesa</string>
+    <string name="grocery_item_name">Nome</string>
+    <string name="grocery_staple">Do de sempre</string>
+    <string name="grocery_usual_tag">de sempre</string>
+    <string name="grocery_staple_hint">Comprado quase toda semana. \"Repor o de sempre\" bota todos de uma vez.</string>
+    <string name="grocery_category">Corredor</string>
+    <string name="grocery_delete">Tirar da lista de vez</string>
+    <string name="category_produce">Frutas e verduras</string>
+    <string name="category_bakery">Padaria</string>
+    <string name="category_meat_fish">Carne e peixe</string>
+    <string name="category_dairy_eggs">Laticínios e ovos</string>
+    <string name="category_pantry">Despensa</string>
+    <string name="category_frozen">Congelados</string>
+    <string name="category_drinks">Bebidas</string>
+    <string name="category_snacks">Lanches e doces</string>
+    <string name="category_household">Casa e limpeza</string>
+    <string name="category_personal_care">Higiene pessoal</string>
+    <string name="category_other">Outros</string>
+    <string name="shopping_channel">Alguém tá no mercado</string>
+    <string name="shopping_channel_description">Quando alguém da família tá fazendo a feira, pra você adicionar o que falta</string>
+    <string name="shopping_title">%1$s tá no mercado</string>
+    <string name="shopping_someone">Alguém</string>
+    <string name="shopping_body">Tá faltando alguma coisa? Bota na lista agora.</string>
+    <string name="shopping_now">%1$s tá no mercado agora: o que você adicionar aparece no celular dele.</string>
+    <string name="list_groceries">Feira</string>
+    <string name="list_new">Nova lista</string>
+    <string name="list_new_title">Nova lista</string>
+    <string name="list_new_hint">Pra qualquer coisa além da feira: farmácia, loja de material, a mala de uma viagem.</string>
+    <string name="list_new_placeholder">ex.: Farmácia</string>
+    <string name="list_delete">Remover lista</string>
+    <string name="list_delete_title">Remover \"%1$s\"?</string>
+    <string name="list_delete_body">A lista e tudo que tem nela somem pra família toda.</string>
+    <string name="list_empty">Nada nessa lista ainda. Escreva aí em cima pra adicionar.</string>
+    <plurals name="grocery_to_buy_count">
+        <item quantity="one">%d pra comprar</item>
+        <item quantity="other">%d pra comprar</item>
+    </plurals>
+</resources>

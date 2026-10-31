@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Baianês. Made from translations/baianes.csv by translations/i18n.py: edit the table, not this file. -->
+<resources>
+    <string name="share_title">Dividir minha localização</string>
+    <string name="share_body_off">Desligado. A família não vê onde você tá.</string>
+    <string name="share_body_on">Ligado. A família vê mais ou menos onde você tá, atualizado de 15 em 15 minutos mais ou menos. Desligue quando quiser.</string>
+    <string name="share_needs_background">Pra continuar dividindo com o app fechado, permita a localização \"o tempo todo\".</string>
+    <string name="share_allow_background">Permitir o tempo todo</string>
+    <string name="background_title">Continuar dividindo em segundo plano?</string>
+    <string name="background_body">Na próxima tela, escolha \"Permitir o tempo todo\". Senão sua localização só atualiza com o Nos Corre! aberto.</string>
+    <string name="continue_">Continuar</string>
+    <string name="not_now">Agora não</string>
+    <string name="family_title">Família</string>
+    <string name="status_not_sharing">Não tá dividindo</string>
+    <string name="status_at">Em %1$s · %2$s</string>
+    <string name="status_away">Fora dos lugares salvos · %1$s</string>
+    <string name="status_stale">%1$s · o celular pode tá desligado</string>
+    <string name="just_now">agorinha</string>
+    <string name="places_title">Lugares</string>
+    <string name="places_hint">Dê nome aos lugares, tipo Casa ou Escola, pro mapa dizer \"Na Escola\".</string>
+    <string name="add_place_title">Dar nome a este lugar</string>
+    <string name="place_name">Nome</string>
+    <string name="place_radius">Tamanho</string>
+    <string name="radius_meters">%1$d m</string>
+    <string name="delete_place">Apagar %1$s</string>
+    <string name="refresh">Atualizar agora</string>
+    <string name="you">Você</string>
+    <string name="no_position">Não deu pra achar onde este celular tá. Veja se a localização tá ligada nas configurações rápidas.</string>
+    <string name="share_failed">Não deu pra dividir sua localização com a família. Veja a internet; se continuar, as regras do banco de dados podem precisar de atualização.</string>
+    <string name="save_place">Salvar este lugar</string>
+    <string name="place_saved">%1$s salvo</string>
+    <string name="place_pending">%1$s salvo neste celular; chega pra família quando tiver internet</string>
+    <string name="place_failed">Não deu pra salvar o lugar. Só os responsáveis salvam lugares; veja também se as regras do banco de dados estão atualizadas.</string>
+    <string name="alerts_title">Avisos de chegada</string>
+    <string name="alerts_body">Um aviso quando alguém chega ou sai de um lugar salvo. Pode levar uns 15 minutos pra chegar.</string>
+    <string name="alerts_channel">Chegadas e saídas</string>
+    <string name="alerts_channel_description">Quando alguém da família chega ou sai de um lugar salvo</string>
+    <string name="alert_arrived">%1$s chegou em %2$s</string>
+    <string name="alert_left">%1$s saiu de %2$s</string>
+    <string name="someone">Alguém</string>
+    <string name="instant_on">Na hora: os avisos chegam em segundos.</string>
+    <string name="instant_off">Pra avisos na hora em vez de até 15 minutos, instale o app grátis ntfy. Não precisa de conta; o Nos Corre! se conecta sozinho.</string>
+    <string name="instant_install">Baixar o ntfy (grátis)</string>
+    <string name="instant_connecting">O ntfy tá instalado; conectando…</string>
+    <string name="osm_credit">© colaboradores do OpenStreetMap</string>
+    <string name="on_my_way_button">Tô indo pra casa</string>
+    <string name="on_my_way_sent">A família sabe que você tá indo pra casa.</string>
+    <string name="on_my_way_home_now">Cheguei</string>
+    <string name="on_my_way_other">%1$s tá indo pra casa (desde %2$s)</string>
+    <string name="on_my_way_channel">Indo pra casa</string>
+    <string name="on_my_way_channel_description">Quando alguém da família tá indo pra casa</string>
+    <string name="on_my_way_title">%1$s tá indo pra casa</string>
+    <string name="on_my_way_hint">Avise a galera que você tá voltando pra casa.</string>
+    <plurals name="minutes_ago">
+        <item quantity="one">há %d min</item>
+        <item quantity="other">há %d min</item>
+    </plurals>
+    <plurals name="hours_ago">
+        <item quantity="one">há %d hora</item>
+        <item quantity="other">há %d horas</item>
+    </plurals>
+    <plurals name="days_ago">
+        <item quantity="one">há %d dia</item>
+        <item quantity="other">há %d dias</item>
+    </plurals>
+</resources>

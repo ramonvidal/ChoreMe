@@ -42,13 +42,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.choreme.core.model.AlertKind
 import com.choreme.core.model.QuietHours
+import com.choreme.core.settings.AppLanguage
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.RadioButton
+import androidx.compose.ui.semantics.Role
 import com.choreme.core.push.PushRegistration
 import com.choreme.core.ui.ItemIcon
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-private enum class Fold { ALERTS, QUIET, INSTANT, UPDATES }
+private enum class Fold { LANGUAGE, ALERTS, QUIET, INSTANT, UPDATES }
 
 /** "This phone": each part folded to one line with its current state, opened with a tap. */
 @Composable
@@ -64,6 +68,29 @@ internal fun PhoneSettings(viewModel: PhoneSettingsViewModel = hiltViewModel()) 
 
     Column {
         Text(stringResource(R.string.this_phone_hint), style = MaterialTheme.typography.bodySmall)
+
+        val language = remember { AppLanguage.current() }
+        FoldRow(
+            title = stringResource(R.string.language_section),
+            summary = language.label,
+            open = open == Fold.LANGUAGE,
+            onToggle = { toggle(Fold.LANGUAGE) },
+        ) {
+            // Each language in its own name, so it can be found whichever is showing.
+            AppLanguage.entries.forEach { option ->
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .selectable(selected = option == language, role = Role.RadioButton) { if (option != language) AppLanguage.choose(option) }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(selected = option == language, onClick = null)
+                    Spacer(Modifier.width(12.dp))
+                    Text(option.label, style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+        }
 
         val quiet = settings.quietHours
         FoldRow(

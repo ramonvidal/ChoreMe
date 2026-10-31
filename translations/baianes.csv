@@ -1,0 +1,487 @@
+module,key,quantity,english,baianes
+app,nav_today,,Chores,Corres
+app,nav_groceries,,Groceries,Feira
+app,nav_agenda,,Agenda,Agenda
+app,nav_family,,Family,Família
+app,nav_map,,Map,Mapa
+core/ui,app_name,,Nos Corre!,Nos Corre!
+core/ui,coming_soon,,Coming soon,Já já tá aí
+core/ui,approve,,Approve,Aprovar
+core/ui,decline,,Decline,Recusar
+core/ui,remove,,Remove,Remover
+core/ui,add,,Add,Adicionar
+core/ui,cancel,,Cancel,Cancelar
+core/ui,save,,Save,Salvar
+core/ui,undo,,Undo,Desfazer
+core/ui,error_save_refused,,"Couldn't save that: the family's database refused it. Make sure Nos Corre! is up to date, then try again.","Oxe, não deu pra salvar: o banco de dados da família recusou. Veja se o Nos Corre! tá atualizado e tente de novo."
+core/ui,error_save_failed,,Couldn't save that. Check your connection and try again.,Não deu pra salvar. Veja a internet e tente de novo.
+core/ui,error_generic,,Something went wrong. Check your connection and try again.,Deu ruim. Veja a internet e tente de novo.
+core/ui,error_offline,,You need to be online to join a family.,Precisa de internet pra entrar numa família.
+core/ui,error_name_required,,Please enter a name.,Bota um nome aí.
+core/ui,error_family_name_required,,Please enter a family name.,Bota o nome da família.
+core/ui,error_invite_code_invalid,,Invite codes have 6 letters and numbers.,O código de convite tem 6 letras e números.
+core/ui,error_invite_code_not_found,,No family has that invite code. Check it with a parent.,Nenhuma família tem esse código. Confira com mainha ou painho.
+core/ui,error_last_parent,,"You're the only parent. Let another parent join first, so someone can still approve chores and let people in.","Você é o único responsável. Deixe outro responsável entrar antes, pra alguém continuar aprovando os corres e deixando a galera entrar."
+core/ui,error_recent_sign_in,,"Your family data is deleted. To also delete your Google sign-in, sign in again and choose ""Delete my data"" once more.","Os dados da sua família foram apagados. Pra apagar também seu login do Google, entre de novo e escolha ""Apagar meus dados"" mais uma vez."
+core/ui,points,one,%d point,%d ponto
+core/ui,points,other,%d points,%d pontos
+feature/agenda,agenda_title,,Agenda,Agenda
+feature/agenda,permission_title,,Show your family calendar,Mostrar a agenda da família
+feature/agenda,permission_body,,"Nos Corre! shows the calendars already on this phone, like a shared Google Calendar, next to your chores. Events you add here go to that calendar, and Google sends the alerts to everyone who shares it.","O Nos Corre! mostra as agendas que já estão neste celular, como uma Agenda Google dividida, junto dos corres. Os eventos que você adiciona aqui vão pra essa agenda, e o Google manda os avisos pra todo mundo que divide ela."
+feature/agenda,permission_allow,,Allow calendar access,Permitir acesso à agenda
+feature/agenda,no_calendars,,There are no calendars on this phone. Add a Google account with the family calendar in the phone's settings to see it here. Repeating and planned chores still show below.,Não tem nenhuma agenda neste celular. Adicione nas configurações do celular uma conta do Google com a agenda da família pra ver aqui. Os corres que repetem ou estão marcados aparecem aqui embaixo do mesmo jeito.
+feature/agenda,choose_title,,Which calendars should the agenda show?,Quais agendas mostrar?
+feature/agenda,choose_hint,,This choice is only for this phone.,Essa escolha vale só pra este celular.
+feature/agenda,choose_save,,Show these,Mostrar essas
+feature/agenda,change_calendars,,Change,Mudar
+feature/agenda,read_only,,read only,só leitura
+feature/agenda,all_day,,All day,O dia todo
+feature/agenda,time_range,,%1$s – %2$s,%1$s – %2$s
+feature/agenda,nothing_today,,Nothing planned today,Nada marcado hoje
+feature/agenda,chore_due,,Chore,Corre
+feature/agenda,open_failed,,No calendar app to open this event,Nenhum app de agenda pra abrir esse evento
+feature/agenda,add_event,,Add event,Adicionar evento
+feature/agenda,event_title,,What's happening,O que vai rolar
+feature/agenda,event_calendar,,Calendar,Agenda
+feature/agenda,event_day,,Day,Dia
+feature/agenda,event_pick_day,,Pick a day,Escolher um dia
+feature/agenda,event_all_day,,All day,O dia todo
+feature/agenda,event_starts,,Starts at %1$s,Começa às %1$s
+feature/agenda,event_change_time,,Change,Mudar
+feature/agenda,event_duration,,How long,Quanto tempo
+feature/agenda,event_alert,,Alert,Aviso
+feature/agenda,event_alert_evening_before,,The evening before at %1$s,Na noite anterior às %1$s
+feature/agenda,event_alert_minutes,one,%d minute before,%d minuto antes
+feature/agenda,event_alert_minutes,other,%d minutes before,%d minutos antes
+feature/agenda,event_alert_hour,,1 hour before,1 hora antes
+feature/agenda,event_alert_day,,1 day before,1 dia antes
+feature/agenda,duration_minutes,,%1$d min,%1$d min
+feature/agenda,duration_hours,one,%d hour,%d hora
+feature/agenda,duration_hours,other,%d hours,%d horas
+feature/agenda,today,,Today,Hoje
+feature/agenda,tomorrow,,Tomorrow,Amanhã
+feature/agenda,ok,,OK,OK
+feature/agenda,view_list,,Next 2 weeks,Próximas 2 semanas
+feature/agenda,view_month,,Month,Mês
+feature/agenda,previous_month,,Previous month,Mês anterior
+feature/agenda,next_month,,Next month,Próximo mês
+feature/agenda,nothing_this_day,,Nothing on this day,Nada nesse dia
+feature/chores,section_awaiting,,Waiting for a parent's OK,Esperando o OK de mainha ou painho
+feature/chores,section_to_do,,Needs doing,Pra fazer
+feature/chores,section_later,,Later (%1$d),Mais pra frente (%1$d)
+feature/chores,section_yours,,Yours,Seus
+feature/chores,section_upcoming,,Coming up,Vem aí
+feature/chores,section_done_today,,Done today,Feitos hoje
+feature/chores,nothing_to_do,,Nothing needs doing right now,Nada pra fazer agora
+feature/chores,nothing_to_do_body,,The house is in good shape. Enjoy it!,"A casa tá massa. Aproveite, meu rei!"
+feature/chores,empty_title,,Nothing needs doing,Nada pra fazer
+feature/chores,empty_body_parent,,"When someone notices something, like a full sink or an overflowing bin, they add it here. Anyone can grab it, and kids' finished chores come to you to approve.","Quando alguém nota alguma coisa, tipo a pia cheia ou o lixo transbordando, bota aqui. Qualquer um pode pegar, e os corres que os pivetes terminam vêm pra você aprovar."
+feature/chores,empty_body_kid,,Noticed something that needs doing? Add it with the button below.,Viu alguma coisa pra fazer? Bota aqui no botão de baixo.
+feature/chores,groceries_link,,%1$d on the grocery list,%1$d na lista da feira
+feature/chores,grab,,I'll do it,Deixa comigo
+feature/chores,done,,Done,Feito
+feature/chores,let_go,,Let go,Largar
+feature/chores,add_to_calendar,,Calendar,Agenda
+feature/chores,added_to_calendar,,Added to %1$s,Adicionado em %1$s
+feature/chores,no_calendar_app,,No calendar app on this phone,Nenhum app de agenda neste celular
+feature/chores,done_by,,Done by…,Feito por…
+feature/chores,done_by_title,,Who did it?,Quem fez?
+feature/chores,done_by_hint,,Pick everyone who did it. Each of them gets the points.,Marque todo mundo que fez. Cada um ganha os pontos.
+feature/chores,who_does,,Who's doing it…,Quem vai fazer…
+feature/chores,who_does_title,,Who's doing it?,Quem vai fazer?
+feature/chores,who_does_hint,,Pick everyone doing it together. Nobody picked: free for anyone to grab.,Marque todo mundo que vai fazer junto. Ninguém marcado: qualquer um pode pegar.
+feature/chores,join,,Me too,Eu também
+feature/chores,on_it_many,,%1$s are on it,%1$s estão nessa
+feature/chores,you_and_on_it,,You and %1$s are on it,Você e %1$s estão nessa
+feature/chores,on_it_short,,On it,Na pegada
+feature/chores,swipe_more,,More,Mais
+feature/chores,names_and,,%1$s and %2$s,%1$s e %2$s
+feature/chores,not_yet,,Not yet,Ainda não
+feature/chores,on_it,,%1$s is on it,%1$s tá nessa
+feature/chores,you_are_on_it,,You're on it,Você tá nessa
+feature/chores,finished_by,,%1$s says it's done,%1$s diz que fez
+feature/chores,waiting_for_parent,,Waiting for a parent to check,Esperando mainha ou painho conferir
+feature/chores,done_today_by,,%1$s,%1$s
+feature/chores,due_today,,Today,Hoje
+feature/chores,due_tomorrow,,Tomorrow,Amanhã
+feature/chores,overdue_days,one,%d day late,%d dia atrasado
+feature/chores,overdue_days,other,%d days late,%d dias atrasado
+feature/chores,someone,,Someone,Alguém
+feature/chores,add_chore,,Something needs doing,Tem coisa pra fazer
+feature/chores,add_chore_title,,What needs doing?,O que tem pra fazer?
+feature/chores,already_on_list,,%1$s is already on the list,%1$s já tá na lista
+feature/chores,reported_by,,%1$s noticed,%1$s viu
+feature/chores,reported_by_you,,You noticed,Você viu
+feature/chores,edit_chore,,Edit chore,Editar corre
+feature/chores,repeat_once,,Once,Uma vez
+feature/chores,repeat_daily,,Every day,Todo dia
+feature/chores,repeat_every_days,one,Every day,Todo dia
+feature/chores,repeat_every_days,other,Every %d days,A cada %d dias
+feature/chores,repeat_weekly,,On %1$s,Em %1$s
+feature/chores,repeat_monthly,,Every month on the %1$s,Todo mês no dia %1$s
+feature/chores,repeat_until,,until %1$s,até %1$s
+feature/chores,editor_monthly,,Every month,Todo mês
+feature/chores,editor_month_day,,On the %1$s,No dia %1$s
+feature/chores,editor_ends,,Ends,Termina
+feature/chores,editor_ends_never,,Never,Nunca
+feature/chores,editor_ends_on,,On %1$s,Em %1$s
+feature/chores,editor_ends_pick,,Pick a date…,Escolher uma data…
+feature/chores,editor_title_label,,What needs doing,O que tem pra fazer
+feature/chores,editor_repeat_show,,Repeat…,Repetir…
+feature/chores,editor_repeat_hide,,Don't show repeat options,Esconder as opções de repetir
+feature/chores,editor_repeats,,Repeats: %1$s,Repete: %1$s
+feature/chores,editor_every_n_days,,Every few days,A cada uns dias
+feature/chores,editor_weekdays,,On certain days,Em certos dias
+feature/chores,editor_days_less,,Fewer days,Menos dias
+feature/chores,editor_days_more,,More days,Mais dias
+feature/chores,editor_starts,,First time,Primeira vez
+feature/chores,editor_starts_on,,Next due %1$s,Próxima vez %1$s
+feature/chores,editor_delete,,Delete chore,Apagar corre
+feature/chores,editor_notify_when_done,,Let everyone know when it's done,Avisar a galera quando terminar
+feature/chores,done_channel,,Chores done,Corres feitos
+feature/chores,done_channel_description,,When someone finishes a chore,Quando alguém termina um corre
+feature/chores,done_title,,%1$s did: %2$s,%1$s fez: %2$s
+feature/chores,template_dishes,,Wash dishes,Lavar os pratos
+feature/chores,template_laundry,,Do laundry,Lavar roupa
+feature/chores,template_fold_clothes,,Fold clothes,Dobrar a roupa
+feature/chores,template_clean_kitchen,,Clean kitchen,Limpar a cozinha
+feature/chores,template_clean_bathroom,,Clean bathroom,Limpar o banheiro
+feature/chores,template_trash,,Take out trash,Botar o lixo pra fora
+feature/chores,template_vacuum,,Vacuum,Passar o aspirador
+feature/chores,template_make_beds,,Make beds,Arrumar as camas
+feature/chores,template_water_plants,,Water plants,Aguar as plantas
+feature/chores,template_groceries,,Grocery shopping,Fazer a feira
+feature/chores,template_tidy_up,,Tidy the living room,Arrumar a sala
+feature/chores,template_organic_waste,,Take out organic waste,Botar o lixo orgânico
+feature/chores,template_recycling,,Take out recycling,Botar o reciclável
+feature/chores,template_feed_pets,,Feed the pets,Dar comida aos bichos
+feature/chores,template_take_medicine,,Take medicine,Tomar remédio
+feature/chores,template_other,,Something else,Outra coisa
+feature/chores,new_chore_channel,,New chores,Corres novos
+feature/chores,new_chore_channel_description,,When someone in the family adds something that needs doing,Quando alguém da família bota uma coisa pra fazer
+feature/chores,new_chore_body,,%1$s noticed it needs doing,%1$s viu que precisa fazer
+feature/chores,approval_channel,,Chores to approve,Corres pra aprovar
+feature/chores,approval_channel_description,,When a kid says they finished a chore,Quando um pivete diz que terminou um corre
+feature/chores,approval_title,,%1$s finished: %2$s,%1$s terminou: %2$s
+feature/chores,approval_body,,Waiting for your OK,Esperando seu OK
+feature/chores,saved_chores,,Saved,Salvos
+feature/chores,saved_chore_hint,,Chores you type are saved here for next time. Long-press one to remove it.,Os corres que você escreve ficam salvos aqui pra próxima. Segure um pra tirar.
+feature/chores,remove_saved_chore,,"Remove ""%1$s"" from saved chores?","Tirar ""%1$s"" dos corres salvos?"
+feature/chores,reminder_channel,,Chore reminders,Lembretes dos corres
+feature/chores,reminder_channel_description,,A morning summary of the chores due today,Um resumo de manhã dos corres de hoje
+feature/chores,reminder_to_do,one,%d chore to do today,%d corre pra hoje
+feature/chores,reminder_to_do,other,%d chores to do today,%d corres pra hoje
+feature/chores,reminder_overdue,one,%d is late,%d atrasado
+feature/chores,reminder_overdue,other,%d are late,%d atrasados
+feature/chores,reminder_awaiting,one,%d waiting for your OK,%d esperando seu OK
+feature/chores,reminder_awaiting,other,%d waiting for your OK,%d esperando seu OK
+feature/chores,reminder_body,,Anyone can grab one in Nos Corre!.,Qualquer um pode pegar um no Nos Corre!.
+feature/chores,editor_urgent,,Urgent,Urgente
+feature/chores,editor_title_placeholder,,Type what needs doing…,Escreva o que tem pra fazer…
+feature/chores,editor_new_chore_hint,,Nothing like it yet. It'll be saved for next time.,Nada parecido ainda. Fica salvo pra próxima.
+feature/chores,editor_most_used,,Most used,Os mais usados
+feature/chores,group_kitchen,,Kitchen,Cozinha
+feature/chores,group_cleaning,,Cleaning,Limpeza
+feature/chores,group_laundry,,Laundry,Roupa
+feature/chores,group_bins,,Bins,Lixo
+feature/chores,group_care,,Care,Cuidados
+feature/chores,group_errands,,Errands,Rua
+feature/chores,group_own,,Your own,Seus
+feature/chores,editor_for,,For,Pra quem
+feature/chores,editor_for_anyone,,Nobody picked: anyone can grab it.,Ninguém marcado: qualquer um pode pegar.
+feature/chores,editor_for_hint,,They'll see it under Yours. Pick several to do it together.,Vai aparecer em Seus. Marque vários pra fazerem junto.
+feature/chores,assigned_title,,For you: %1$s,Pra você: %1$s
+feature/chores,assigned_body,,From %1$s,De %1$s
+feature/chores,editor_points,,Points,Pontos
+feature/chores,editor_points_hint,,Harder chores are worth more. Kept for next time it repeats.,Corre mais pesado vale mais. Fica guardado pra quando repetir.
+feature/chores,editor_urgent_hint,,"Needs doing as soon as possible: shown first, in red, and the family gets an alert.","Precisa fazer o quanto antes: aparece primeiro, em vermelho, e a família recebe um aviso."
+feature/chores,urgent,,Urgent,Urgente
+feature/chores,urgent_channel,,Urgent chores,Corres urgentes
+feature/chores,urgent_channel_description,,When someone adds something that needs doing as soon as possible,Quando alguém bota uma coisa pra fazer o quanto antes
+feature/chores,urgent_title,,Urgent: %1$s,"Urgente, oxe: %1$s"
+feature/chores,remind_me,,Remind me,Me lembra
+feature/chores,reminder_at,,Reminder %1$s,Lembrete %1$s
+feature/chores,remind_title,,Remind me at,Me lembra às
+feature/chores,remind_hint,,"A reminder on this phone only. If the time has passed today, it's for tomorrow.","Um lembrete só neste celular. Se o horário já passou hoje, é pra amanhã."
+feature/chores,reminder_set,,I'll remind you at %1$s,Te lembro às %1$s
+feature/chores,timed_channel,,Your reminders,Seus lembretes
+feature/chores,timed_channel_description,,Chores you asked to be reminded of at a time,Corres que você pediu pra lembrar numa hora
+feature/chores,timed_title,,Reminder: %1$s,Lembrete: %1$s
+feature/chores,timed_body,,You asked to be reminded about this.,Você pediu pra eu te lembrar disso.
+feature/chores,chores_title,,Chores,Corres
+feature/chores,summary_yours,one,%d is yours,%d é seu
+feature/chores,summary_yours,other,%d are yours,%d são seus
+feature/chores,reminder_mine,one,You're on %d,Você tá em %d
+feature/chores,reminder_mine,other,You're on %d,Você tá em %d
+feature/chores,summary_to_do,one,%d needs doing,%d pra fazer
+feature/chores,summary_to_do,other,%d need doing,%d pra fazer
+feature/chores,done_already,,Done already,Já fiz
+feature/chores,change_reminder,,Change reminder,Mudar lembrete
+feature/chores,home_title,,Our home,Nosso cafofo
+feature/chores,home_points,one,%d point in 7 days,%d ponto em 7 dias
+feature/chores,home_points,other,%d points in 7 days,%d pontos em 7 dias
+feature/chores,home_hint,,"Each chore to do is a weed in the grass. Finishing it pulls the weed and grows flowers, more for harder chores. The more chores wait, the worse the weather: clouds, then rain, then a storm. Points count over the last 7 days, so the garden never resets. The lights stay on while nothing is overdue.","Cada corre pra fazer é um mato na grama. Terminar arranca o mato e nasce flor, mais pros corres pesados. Quanto mais corre esperando, pior o tempo: nuvem, depois chuva, depois temporal. Os pontos contam dos últimos 7 dias, então o jardim nunca zera. As luzes ficam acesas enquanto nada tá atrasado."
+feature/chores,home_close,,Close,Fechar
+feature/chores,home_mood_start,,A quiet garden. The next chore done plants the first flower.,Jardim tranquilo. O próximo corre feito planta a primeira flor.
+feature/chores,home_mood_growing,,"The garden is growing. Nice work, everyone.","O jardim tá crescendo. Arretado, galera!"
+feature/chores,home_mood_bloom,,Full bloom! The house is in great shape this week.,Tudo florido! A casa tá massa essa semana.
+feature/chores,home_mood_overdue,,"Something is overdue, so the lights are off for now.","Tem coisa atrasada, então as luzes tão apagadas por enquanto."
+feature/chores,home_mood_tired,,The garden looks a bit tired: a few chores are piling up.,O jardim tá meio cansado: uns corres tão acumulando.
+feature/chores,home_mood_cloudy,,Clouds are gathering: a few chores are waiting.,Tá nublando: uns corres esperando.
+feature/chores,home_mood_rain,,It's raining on the garden: lots of chores to do.,Tá chovendo no jardim: muito corre pra fazer.
+feature/chores,home_mood_storm,,A storm! Chores are piling up. Every one finished clears the sky a bit.,"Ó paí ó, que temporal! Os corres tão acumulando. Cada um feito abre um pouco o céu."
+feature/chores,weekly_channel,,Week in review,Resumo da semana
+feature/chores,weekly_channel_description,,Sunday evening: the points everyone earned this week,Domingo à noite: os pontos de cada um na semana
+feature/chores,weekly_title,one,This week: %d point,Essa semana: %d ponto
+feature/chores,weekly_title,other,This week: %d points,Essa semana: %d pontos
+feature/chores,weekly_person,,%1$s %2$d,%1$s %2$d
+feature/chores,cheer_points,one,Well done! +%d point,Arretado! +%d ponto
+feature/chores,cheer_points,other,Well done! +%d points,Arretado! +%d pontos
+feature/chores,cheer_waiting,,Well done! A parent will check it,Arretado! Mainha ou painho vai conferir
+feature/family,family_invite_hint,,Share this code so others can ask to join:,Mande este código pra galera pedir pra entrar:
+feature/family,family_share_invite,,Share invite code,Mandar o código de convite
+feature/family,family_invite_message,,Join the %1$s family on Nos Corre! with the code %2$s,Entra na família %1$s no Nos Corre! com o código %2$s
+feature/family,family_requests_title,,Waiting to join,Esperando pra entrar
+feature/family,family_members_title,,Members,Membros
+feature/family,family_add_kid,,Add a kid without a phone,Adicionar pivete sem celular
+feature/family,family_add_kid_hint,,"Parents can mark this kid's chores done for them. If they get a device later, link it when approving it.","Os responsáveis podem marcar os corres desse pivete como feitos por ele. Se ele ganhar um aparelho depois, ligue na hora de aprovar."
+feature/family,family_remove_confirm,,Remove %1$s from the family? Their devices will lose access.,Tirar %1$s da família? Os aparelhos dele perdem o acesso.
+feature/family,kid_name,,Kid's name,Nome do pivete
+feature/family,request_wants_kid,,%1$s wants to join as a kid,%1$s quer entrar como pivete
+feature/family,request_wants_parent,,%1$s wants to join as a parent,%1$s quer entrar como responsável
+feature/family,request_link_to,,This device belongs to:,Este aparelho é de:
+feature/family,request_new_profile,,New profile for %1$s,Perfil novo pra %1$s
+feature/family,member_me,,%1$s (you),%1$s (você)
+feature/family,member_no_device,,No device,Sem aparelho
+feature/family,member_devices,one,%d device,%d aparelho
+feature/family,member_devices,other,%d devices,%d aparelhos
+feature/family,role_parent,,Parent,Mainha/Painho
+feature/family,role_kid,,Kid,Pivete
+feature/family,sign_out,,Sign out,Sair
+feature/family,sign_out_kid_warning,,This device will need a parent's approval again to rejoin. Sign out anyway?,Este aparelho vai precisar da aprovação de mainha ou painho de novo pra voltar. Sair mesmo assim?
+feature/family,join_channel,,Join requests,Pedidos pra entrar
+feature/family,join_channel_description,,When someone asks to join the family,Quando alguém pede pra entrar na família
+feature/family,join_title,,%1$s wants to join the family,%1$s quer entrar na família
+feature/family,join_body,,Open the Family tab to let them in,Abra a aba Família pra deixar entrar
+feature/family,privacy_title,,Your data,Seus dados
+feature/family,leave_family,,Leave family,Sair da família
+feature/family,delete_my_data,,Delete my data,Apagar meus dados
+feature/family,leave_confirm,,"Leave the family? This phone loses access, and your location, ping address and arrival history are deleted. Chores and groceries you added stay for the family.","Sair da família? Este celular perde o acesso, e sua localização, endereço de aviso e histórico de chegadas são apagados. Os corres e a feira que você adicionou ficam pra família."
+feature/family,leave_last_confirm,,"You're the last one here. Leaving deletes the whole family: chores, groceries, places and everything else. This can't be undone.","Você é o último aqui. Sair apaga a família inteira: corres, feira, lugares e tudo mais. Não tem volta."
+feature/family,delete_confirm,,"Leave the family and delete your Nos Corre! account? If you're the last one, the whole family's data is deleted too. This can't be undone.","Sair da família e apagar sua conta do Nos Corre!? Se você for o último, os dados da família toda também são apagados. Não tem volta."
+feature/family,this_phone_title,,This phone,Este celular
+feature/family,this_phone_hint,,These choices are only for this phone.,Essas escolhas valem só pra este celular.
+feature/family,alerts_summary,,%1$d of %2$d on,%1$d de %2$d ligados
+feature/family,quiet_off,,Off,Desligado
+feature/family,quiet_summary,,%1$s to %2$s,%1$s às %2$s
+feature/family,instant_summary_on,,On,Ligado
+feature/family,instant_summary_off,,Off,Desligado
+feature/family,updates_summary,,Version %1$s,Versão %1$s
+feature/family,alerts_section,,Notifications,Notificações
+feature/family,alert_new_chores,,New chores,Corres novos
+feature/family,alert_new_chores_hint,,When someone adds something that needs doing,Quando alguém bota uma coisa pra fazer
+feature/family,alert_chores_done,,Chores done,Corres feitos
+feature/family,alert_chores_done_hint,,"When someone finishes a chore marked ""let everyone know""","Quando alguém termina um corre marcado ""avisar a galera"""
+feature/family,alert_approvals,,Chores to approve,Corres pra aprovar
+feature/family,alert_approvals_hint,,When a kid finishes a chore (parents),Quando um pivete termina um corre (responsáveis)
+feature/family,alert_join_requests,,Join requests,Pedidos pra entrar
+feature/family,alert_join_requests_hint,,When someone asks to join the family (parents),Quando alguém pede pra entrar na família (responsáveis)
+feature/family,alert_arrivals,,Arrivals and departures,Chegadas e saídas
+feature/family,alert_arrivals_hint,,When someone arrives at or leaves a saved place,Quando alguém chega ou sai de um lugar salvo
+feature/family,alert_on_my_way,,On the way home,Indo pra casa
+feature/family,alert_on_my_way_hint,,"When someone taps ""On my way home"" (needs ntfy)","Quando alguém toca em ""Tô indo pra casa"" (precisa do ntfy)"
+feature/family,alert_shopping,,At the shop,No mercado
+feature/family,alert_shopping_hint,,"When someone starts shopping, so you can add what's missing (needs ntfy)","Quando alguém começa a feira, pra você adicionar o que falta (precisa do ntfy)"
+feature/family,language_section,,Language,Idioma
+feature/family,alert_morning,,Morning summary,Resumo da manhã
+feature/family,alert_morning_hint,,"At 8:00, what needs doing today","Às 8:00, o que tem pra fazer hoje"
+feature/family,alert_weekly,,Week in review,Resumo da semana
+feature/family,alert_weekly_hint,,"Sunday evening, the week's points for everyone","Domingo à noite, os pontos da semana de todo mundo"
+feature/family,quiet_section,,Quiet hours,Horário de silêncio
+feature/family,quiet_hint,,"Notifications still arrive, just without sound or vibration.","As notificações continuam chegando, só que sem som nem vibração."
+feature/family,quiet_from,,From %1$s,Das %1$s
+feature/family,quiet_to,,Until %1$s,Até %1$s
+feature/family,instant_section,,Instant alerts,Avisos na hora
+feature/family,instant_on,,"On, through ntfy. Alerts arrive within seconds.","Ligado, pelo ntfy. Os avisos chegam em segundos."
+feature/family,instant_off,,Off. Install the free ntfy app to get alerts within seconds instead of within 15–30 minutes.,Desligado. Instale o app grátis ntfy pra receber os avisos em segundos em vez de 15–30 minutos.
+feature/family,instant_install,,Get ntfy (free),Baixar o ntfy (grátis)
+feature/family,updates_section,,App updates,Atualizações do app
+feature/family,updates_installed,,This phone has Nos Corre! %1$s.,Este celular tem o Nos Corre! %1$s.
+feature/family,updates_check,,Check for updates,Procurar atualizações
+feature/family,updates_up_to_date,,You have the newest version.,Você tá com a versão mais nova.
+feature/family,updates_found,,Nos Corre! %1$s is ready: tap Install at the top of the screen.,O Nos Corre! %1$s tá pronto: toque em Instalar lá em cima.
+feature/family,updates_failed,,Couldn't reach the update page. Check the connection and try again.,Não deu pra abrir a página de atualização. Veja a internet e tente de novo.
+feature/family,ok,,OK,OK
+feature/family,notes_title,,Notes,Recados
+feature/family,notes_empty,,"Things everyone should know: the Wi-Fi password, who picks up whom, when grandma arrives.","O que todo mundo precisa saber: a senha do Wi-Fi, quem busca quem, quando vovó chega."
+feature/family,notes_add,,Add a note,Adicionar recado
+feature/family,notes_new,,New note,Recado novo
+feature/family,notes_edit,,Edit note,Editar recado
+feature/family,notes_placeholder,,e.g. Grandma arrives Friday at 18:00,ex.: Vovó chega sexta às 18:00
+feature/family,week_title,,This week,Essa semana
+feature/family,away_until,,Away until %1$s,Fora até %1$s
+feature/family,away_title,,%1$s is away until…,%1$s tá fora até…
+feature/family,away_hint,,"While away: no chore reminders on their phone, and they're not offered for ""done by"".","Enquanto tá fora: sem lembrete de corre no celular dele, e não aparece em ""feito por""."
+feature/family,away_set,,Set,Marcar
+feature/family,away_back,,Back home,Voltou pra casa
+feature/family,family_title,,Family,Família
+feature/family,family_member_count,one,%d member,%d membro
+feature/family,family_member_count,other,%d members,%d membros
+feature/family,family_invite_button,,Invite · %1$s,Convidar · %1$s
+feature/family,message_title,,Message everyone,Avisar a galera
+feature/family,message_placeholder,,e.g. Dinner's ready!,ex.: A comida tá pronta!
+feature/family,message_send,,Send,Mandar
+feature/family,message_you,,You,Você
+feature/family,message_someone,,Someone,Alguém
+feature/family,message_show_all,,Show all,Ver tudo
+feature/family,message_show_less,,Show less,Ver menos
+feature/family,message_remove_confirm,,Remove this message for everyone?,Apagar esse recado pra todo mundo?
+feature/family,message_channel,,Family messages,Recados da família
+feature/family,message_channel_description,,When someone sends a message to the whole family,Quando alguém manda um recado pra família toda
+feature/family,alert_messages,,Family messages,Recados da família
+feature/family,alert_messages_hint,,When someone sends a message to everyone,Quando alguém manda um recado pra todo mundo
+feature/groceries,grocery_quick_add,,Out of something? Type it here,Acabou alguma coisa? Escreva aqui
+feature/groceries,grocery_to_buy,,To buy (%1$d),Pra comprar (%1$d)
+feature/groceries,grocery_restock,,Restock usuals (%1$d),Repor o de sempre (%1$d)
+feature/groceries,grocery_nothing_to_buy,,Nothing to buy. Tap below whatever runs out.,Nada pra comprar. Toque aqui embaixo no que for acabando.
+feature/groceries,grocery_at_home,,At home,Em casa
+feature/groceries,grocery_at_home_hint,,Tap what ran out to add it to the list. Long-press to edit.,Toque no que acabou pra botar na lista. Segure pra editar.
+feature/groceries,grocery_bought,,%1$s bought,%1$s comprado
+feature/groceries,grocery_already_on_list,,%1$s is already on the list,%1$s já tá na lista
+feature/groceries,grocery_empty_title,,Your family's shopping list,A lista da feira da família
+feature/groceries,grocery_empty_body,,"Everything you add stays here for next time, so the weekly shop is just a few taps. Start with common items, or type your own above.","Tudo que você adiciona fica aqui pra próxima vez, então a feira da semana é só uns toques. Comece com os itens mais comuns, ou escreva os seus aí em cima."
+feature/groceries,grocery_add_starter,,Start with common items,Começar com os itens comuns
+feature/groceries,grocery_edit_title,,Edit item,Editar item
+feature/groceries,grocery_shopping_off,,I'm in the shop,Tô no mercado
+feature/groceries,grocery_shopping_on,,Shopping: screen stays on,Na feira: a tela fica acesa
+feature/groceries,grocery_item_name,,Name,Nome
+feature/groceries,grocery_staple,,A usual,Do de sempre
+feature/groceries,grocery_usual_tag,,usual,de sempre
+feature/groceries,grocery_staple_hint,,"Bought most weeks. ""Restock usuals"" adds all of these at once.","Comprado quase toda semana. ""Repor o de sempre"" bota todos de uma vez."
+feature/groceries,grocery_category,,Aisle,Corredor
+feature/groceries,grocery_delete,,Delete from the list for good,Tirar da lista de vez
+feature/groceries,category_produce,,Fruit & vegetables,Frutas e verduras
+feature/groceries,category_bakery,,Bakery,Padaria
+feature/groceries,category_meat_fish,,Meat & fish,Carne e peixe
+feature/groceries,category_dairy_eggs,,Dairy & eggs,Laticínios e ovos
+feature/groceries,category_pantry,,Pantry,Despensa
+feature/groceries,category_frozen,,Frozen,Congelados
+feature/groceries,category_drinks,,Drinks,Bebidas
+feature/groceries,category_snacks,,Snacks & sweets,Lanches e doces
+feature/groceries,category_household,,Household & cleaning,Casa e limpeza
+feature/groceries,category_personal_care,,Personal care,Higiene pessoal
+feature/groceries,category_other,,Other,Outros
+feature/groceries,shopping_channel,,Someone's at the shop,Alguém tá no mercado
+feature/groceries,shopping_channel_description,,"When someone in the family is shopping, so you can add what's missing","Quando alguém da família tá fazendo a feira, pra você adicionar o que falta"
+feature/groceries,shopping_title,,%1$s is at the shop,%1$s tá no mercado
+feature/groceries,shopping_someone,,Someone,Alguém
+feature/groceries,shopping_body,,Anything missing? Add it to the list now.,Tá faltando alguma coisa? Bota na lista agora.
+feature/groceries,shopping_now,,%1$s is at the shop now: anything you add shows up on their phone.,%1$s tá no mercado agora: o que você adicionar aparece no celular dele.
+feature/groceries,list_groceries,,Groceries,Feira
+feature/groceries,list_new,,New list,Nova lista
+feature/groceries,list_new_title,,New list,Nova lista
+feature/groceries,list_new_hint,,"For anything besides groceries: the pharmacy, the hardware store, packing for a trip.","Pra qualquer coisa além da feira: farmácia, loja de material, a mala de uma viagem."
+feature/groceries,list_new_placeholder,,e.g. Pharmacy,ex.: Farmácia
+feature/groceries,list_delete,,Remove list,Remover lista
+feature/groceries,list_delete_title,,"Remove ""%1$s""?","Remover ""%1$s""?"
+feature/groceries,list_delete_body,,The list and everything on it are removed for the whole family.,A lista e tudo que tem nela somem pra família toda.
+feature/groceries,list_empty,,Nothing on this list yet. Type above to add something.,Nada nessa lista ainda. Escreva aí em cima pra adicionar.
+feature/groceries,grocery_to_buy_count,one,%d to buy,%d pra comprar
+feature/groceries,grocery_to_buy_count,other,%d to buy,%d pra comprar
+feature/map,share_title,,Share my location,Dividir minha localização
+feature/map,share_body_off,,Off. The family can't see where you are.,Desligado. A família não vê onde você tá.
+feature/map,share_body_on,,"On. The family sees roughly where you are, updated every 15 minutes or so. Turn it off any time.","Ligado. A família vê mais ou menos onde você tá, atualizado de 15 em 15 minutos mais ou menos. Desligue quando quiser."
+feature/map,share_needs_background,,"To keep sharing while the app is closed, allow location ""all the time"".","Pra continuar dividindo com o app fechado, permita a localização ""o tempo todo""."
+feature/map,share_allow_background,,Allow all the time,Permitir o tempo todo
+feature/map,background_title,,Keep sharing in the background?,Continuar dividindo em segundo plano?
+feature/map,background_body,,"On the next screen, choose ""Allow all the time"". Otherwise your location only updates while Nos Corre! is open.","Na próxima tela, escolha ""Permitir o tempo todo"". Senão sua localização só atualiza com o Nos Corre! aberto."
+feature/map,continue_,,Continue,Continuar
+feature/map,not_now,,Not now,Agora não
+feature/map,family_title,,Family,Família
+feature/map,status_not_sharing,,Not sharing,Não tá dividindo
+feature/map,status_at,,At %1$s · %2$s,Em %1$s · %2$s
+feature/map,status_away,,Away from saved places · %1$s,Fora dos lugares salvos · %1$s
+feature/map,status_stale,,%1$s · phone may be off,%1$s · o celular pode tá desligado
+feature/map,just_now,,just now,agorinha
+feature/map,minutes_ago,one,%d min ago,há %d min
+feature/map,minutes_ago,other,%d min ago,há %d min
+feature/map,hours_ago,one,%d hour ago,há %d hora
+feature/map,hours_ago,other,%d hours ago,há %d horas
+feature/map,days_ago,one,%d day ago,há %d dia
+feature/map,days_ago,other,%d days ago,há %d dias
+feature/map,places_title,,Places,Lugares
+feature/map,places_hint,,"Name places like Home or School, so the map says ""At School"".","Dê nome aos lugares, tipo Casa ou Escola, pro mapa dizer ""Na Escola""."
+feature/map,add_place_title,,Name this place,Dar nome a este lugar
+feature/map,place_name,,Name,Nome
+feature/map,place_radius,,Size,Tamanho
+feature/map,radius_meters,,%1$d m,%1$d m
+feature/map,delete_place,,Delete %1$s,Apagar %1$s
+feature/map,refresh,,Update now,Atualizar agora
+feature/map,you,,You,Você
+feature/map,no_position,,Couldn't find where this phone is. Check that location is turned on in the phone's quick settings.,Não deu pra achar onde este celular tá. Veja se a localização tá ligada nas configurações rápidas.
+feature/map,share_failed,,"Couldn't share your location with the family. Check your connection; if it keeps happening, the Firebase database rules may need updating.","Não deu pra dividir sua localização com a família. Veja a internet; se continuar, as regras do banco de dados podem precisar de atualização."
+feature/map,save_place,,Save this place,Salvar este lugar
+feature/map,place_saved,,%1$s saved,%1$s salvo
+feature/map,place_pending,,%1$s saved on this phone; it reaches the family when you're online,%1$s salvo neste celular; chega pra família quando tiver internet
+feature/map,place_failed,,Couldn't save the place. Only parents can save places; also check the Firebase database rules are up to date.,Não deu pra salvar o lugar. Só os responsáveis salvam lugares; veja também se as regras do banco de dados estão atualizadas.
+feature/map,alerts_title,,Arrival alerts,Avisos de chegada
+feature/map,alerts_body,,A notification when someone arrives at or leaves a saved place. It can take up to about 15 minutes to arrive.,Um aviso quando alguém chega ou sai de um lugar salvo. Pode levar uns 15 minutos pra chegar.
+feature/map,alerts_channel,,Arrivals and departures,Chegadas e saídas
+feature/map,alerts_channel_description,,When family members arrive at or leave saved places,Quando alguém da família chega ou sai de um lugar salvo
+feature/map,alert_arrived,,%1$s arrived at %2$s,%1$s chegou em %2$s
+feature/map,alert_left,,%1$s left %2$s,%1$s saiu de %2$s
+feature/map,someone,,Someone,Alguém
+feature/map,instant_on,,Instant: alerts arrive within seconds.,Na hora: os avisos chegam em segundos.
+feature/map,instant_off,,"For instant alerts instead of up to 15 minutes, install the free ntfy app. No account needed; Nos Corre! connects to it by itself.","Pra avisos na hora em vez de até 15 minutos, instale o app grátis ntfy. Não precisa de conta; o Nos Corre! se conecta sozinho."
+feature/map,instant_install,,Get ntfy (free),Baixar o ntfy (grátis)
+feature/map,instant_connecting,,ntfy is installed; connecting…,O ntfy tá instalado; conectando…
+feature/map,osm_credit,,© OpenStreetMap contributors,© colaboradores do OpenStreetMap
+feature/map,on_my_way_button,,On my way home,Tô indo pra casa
+feature/map,on_my_way_sent,,The family knows you're on the way home.,A família sabe que você tá indo pra casa.
+feature/map,on_my_way_home_now,,I'm home,Cheguei
+feature/map,on_my_way_other,,%1$s is on the way home (since %2$s),%1$s tá indo pra casa (desde %2$s)
+feature/map,on_my_way_channel,,On the way home,Indo pra casa
+feature/map,on_my_way_channel_description,,When someone in the family is on the way home,Quando alguém da família tá indo pra casa
+feature/map,on_my_way_title,,%1$s is on the way home,%1$s tá indo pra casa
+feature/map,on_my_way_hint,,Let the family know you're heading home.,Avise a galera que você tá voltando pra casa.
+feature/onboarding,sign_in_tagline,,"Chores, groceries and the family calendar, shared by everyone at home.","Os corres, a feira e a agenda da família, divididos com todo mundo de casa."
+feature/onboarding,sign_in_google,,Sign in with Google,Entrar com o Google
+feature/onboarding,sign_in_kid,,I'm a kid,Sou pivete
+feature/onboarding,sign_in_kid_hint,,No Google account needed. A parent will approve this device.,Não precisa de conta do Google. Mainha ou painho aprova este aparelho.
+feature/onboarding,onboarding_title,,Set up your family,Monte sua família
+feature/onboarding,onboarding_title_kid,,Ask to join your family,Peça pra entrar na sua família
+feature/onboarding,onboarding_declined,,"Your request was declined, or you were removed from the family. You can ask again below.","Seu pedido foi recusado, ou você saiu da família. Pode pedir de novo aqui embaixo."
+feature/onboarding,onboarding_create_title,,Start a new family,Começar uma família nova
+feature/onboarding,onboarding_create,,Create family,Criar família
+feature/onboarding,onboarding_join_title,,Join with an invite code,Entrar com um código de convite
+feature/onboarding,onboarding_join_hint,,Ask a parent for the code. It's on their Family tab.,Peça o código a mainha ou painho. Fica na aba Família deles.
+feature/onboarding,onboarding_join,,Ask to join,Pedir pra entrar
+feature/onboarding,onboarding_join_as_kid,,I'm a kid,Sou pivete
+feature/onboarding,onboarding_switch_account,,Use a different account,Usar outra conta
+feature/onboarding,onboarding_back,,Back,Voltar
+feature/onboarding,your_name,,Your name,Seu nome
+feature/onboarding,family_name,,Family name,Nome da família
+feature/onboarding,invite_code,,Invite code,Código de convite
+feature/onboarding,awaiting_title,,Waiting for a parent in %1$s,Esperando um responsável em %1$s
+feature/onboarding,awaiting_body,,They'll see your request on their Family tab. This screen moves on by itself once they approve it.,Eles veem seu pedido na aba Família. Esta tela segue sozinha quando aprovarem.
+feature/onboarding,awaiting_cancel,,Cancel request,Cancelar pedido
+feature/onboarding,firebase_missing_title,,Sync isn't set up,A sincronização não tá configurada
+feature/onboarding,firebase_missing_body,,"This build has no Firebase configuration, so family sharing can't work. Add app/google-services.json as described in the README and rebuild.","Esta versão não tem a configuração do Firebase, então a família não sincroniza. Adicione app/google-services.json como explica o README e gere de novo."
+feature/onboarding,error_sign_in,,Couldn't sign in. Check your connection and try again.,Não deu pra entrar. Veja a internet e tente de novo.
+feature/update,update_available,,Nos Corre! %1$s is available,Saiu o Nos Corre! %1$s
+feature/update,update_install,,Install,Instalar
+feature/update,update_later,,Later,Depois
+feature/update,update_allow,,"To update, allow Nos Corre! to install apps (only needed once).","Pra atualizar, deixe o Nos Corre! instalar apps (só precisa uma vez)."
+feature/update,update_allow_button,,Allow,Deixar
+feature/update,update_downloading,,Downloading update…,Baixando a atualização…
+feature/update,update_failed,,The update couldn't be downloaded. Check your connection.,Não deu pra baixar a atualização. Veja a internet.
+feature/update,update_retry,,Try again,Tentar de novo
+feature/widget,widget_name,,Nos Corre!,Nos Corre!
+feature/widget,widget_description,,"What needs doing at home, and a shortcut to the grocery list","O que tem pra fazer em casa, e um atalho pra lista da feira"
+feature/widget,widget_title,,Needs doing,Pra fazer
+feature/widget,widget_nothing,,Nothing right now,"Nada agora, de boa"
+feature/widget,widget_more,,+%1$d more,+%1$d mais
+feature/widget,widget_to_buy,,%1$d to buy,%1$d pra comprar
+feature/widget,widget_out_of,,Out of…,Acabou…
+feature/widget,widget_open,,Open,Abrir
+feature/widget,widget_not_set_up,,Open Nos Corre! to join your family,Abra o Nos Corre! pra entrar na sua família

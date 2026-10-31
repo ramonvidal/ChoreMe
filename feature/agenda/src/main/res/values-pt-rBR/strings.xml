@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Baianês. Made from translations/baianes.csv by translations/i18n.py: edit the table, not this file. -->
+<resources>
+    <string name="agenda_title">Agenda</string>
+    <string name="permission_title">Mostrar a agenda da família</string>
+    <string name="permission_body">O Nos Corre! mostra as agendas que já estão neste celular, como uma Agenda Google dividida, junto dos corres. Os eventos que você adiciona aqui vão pra essa agenda, e o Google manda os avisos pra todo mundo que divide ela.</string>
+    <string name="permission_allow">Permitir acesso à agenda</string>
+    <string name="no_calendars">Não tem nenhuma agenda neste celular. Adicione nas configurações do celular uma conta do Google com a agenda da família pra ver aqui. Os corres que repetem ou estão marcados aparecem aqui embaixo do mesmo jeito.</string>
+    <string name="choose_title">Quais agendas mostrar?</string>
+    <string name="choose_hint">Essa escolha vale só pra este celular.</string>
+    <string name="choose_save">Mostrar essas</string>
+    <string name="change_calendars">Mudar</string>
+    <string name="read_only">só leitura</string>
+    <string name="all_day">O dia todo</string>
+    <string name="time_range">%1$s – %2$s</string>
+    <string name="nothing_today">Nada marcado hoje</string>
+    <string name="chore_due">Corre</string>
+    <string name="open_failed">Nenhum app de agenda pra abrir esse evento</string>
+    <string name="add_event">Adicionar evento</string>
+    <string name="event_title">O que vai rolar</string>
+    <string name="event_calendar">Agenda</string>
+    <string name="event_day">Dia</string>
+    <string name="event_pick_day">Escolher um dia</string>
+    <string name="event_all_day">O dia todo</string>
+    <string name="event_starts">Começa às %1$s</string>
+    <string name="event_change_time">Mudar</string>
+    <string name="event_duration">Quanto tempo</string>
+    <string name="event_alert">Aviso</string>
+    <string name="event_alert_evening_before">Na noite anterior às %1$s</string>
+    <string name="event_alert_hour">1 hora antes</string>
+    <string name="event_alert_day">1 dia antes</string>
+    <string name="duration_minutes">%1$d min</string>
+    <string name="today">Hoje</string>
+    <string name="tomorrow">Amanhã</string>
+    <string name="ok">OK</string>
+    <string name="view_list">Próximas 2 semanas</string>
+    <string name="view_month">Mês</string>
+    <string name="previous_month">Mês anterior</string>
+    <string name="next_month">Próximo mês</string>
+    <string name="nothing_this_day">Nada nesse dia</string>
+    <plurals name="event_alert_minutes">
+        <item quantity="one">%d minuto antes</item>
+        <item quantity="other">%d minutos antes</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">%d hora</item>
+        <item quantity="other">%d horas</item>
+    </plurals>
+</resources>

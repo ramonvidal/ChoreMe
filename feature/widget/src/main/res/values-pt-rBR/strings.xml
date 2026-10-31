@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Baianês. Made from translations/baianes.csv by translations/i18n.py: edit the table, not this file. -->
+<resources>
+    <string name="widget_name">Nos Corre!</string>
+    <string name="widget_description">O que tem pra fazer em casa, e um atalho pra lista da feira</string>
+    <string name="widget_title">Pra fazer</string>
+    <string name="widget_nothing">Nada agora, de boa</string>
+    <string name="widget_more">+%1$d mais</string>
+    <string name="widget_to_buy">%1$d pra comprar</string>
+    <string name="widget_out_of">Acabou…</string>
+    <string name="widget_open">Abrir</string>
+    <string name="widget_not_set_up">Abra o Nos Corre! pra entrar na sua família</string>
+</resources>

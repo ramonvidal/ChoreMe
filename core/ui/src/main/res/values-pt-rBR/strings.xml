@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Baianês. Made from translations/baianes.csv by translations/i18n.py: edit the table, not this file. -->
+<resources>
+    <string name="app_name">Nos Corre!</string>
+    <string name="coming_soon">Já já tá aí</string>
+    <string name="approve">Aprovar</string>
+    <string name="decline">Recusar</string>
+    <string name="remove">Remover</string>
+    <string name="add">Adicionar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="save">Salvar</string>
+    <string name="undo">Desfazer</string>
+    <string name="error_save_refused">Oxe, não deu pra salvar: o banco de dados da família recusou. Veja se o Nos Corre! tá atualizado e tente de novo.</string>
+    <string name="error_save_failed">Não deu pra salvar. Veja a internet e tente de novo.</string>
+    <string name="error_generic">Deu ruim. Veja a internet e tente de novo.</string>
+    <string name="error_offline">Precisa de internet pra entrar numa família.</string>
+    <string name="error_name_required">Bota um nome aí.</string>
+    <string name="error_family_name_required">Bota o nome da família.</string>
+    <string name="error_invite_code_invalid">O código de convite tem 6 letras e números.</string>
+    <string name="error_invite_code_not_found">Nenhuma família tem esse código. Confira com mainha ou painho.</string>
+    <string name="error_last_parent">Você é o único responsável. Deixe outro responsável entrar antes, pra alguém continuar aprovando os corres e deixando a galera entrar.</string>
+    <string name="error_recent_sign_in">Os dados da sua família foram apagados. Pra apagar também seu login do Google, entre de novo e escolha \"Apagar meus dados\" mais uma vez.</string>
+    <plurals name="points">
+        <item quantity="one">%d ponto</item>
+        <item quantity="other">%d pontos</item>
+    </plurals>
+</resources>
