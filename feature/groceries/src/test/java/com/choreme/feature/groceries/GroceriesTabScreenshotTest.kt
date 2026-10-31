@@ -67,6 +67,14 @@ class GroceriesTabScreenshotTest {
         compose.onNodeWithText("Milk").assertExists()
     }
 
+    /** In Baianês: the family's items (saved in English) show in Portuguese. */
+    @Test
+    @Config(qualifiers = "pt-rBR-w411dp-h1600dp")
+    fun baianes() {
+        shoot("tab-groceries-baianes", state, dark = false)
+        compose.onNodeWithText("Leite").assertExists()
+    }
+
     @Test
     fun atHomeDark() = shoot("tab-groceries-dark", state, dark = true)
 

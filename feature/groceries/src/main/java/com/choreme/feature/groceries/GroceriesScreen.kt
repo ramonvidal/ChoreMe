@@ -86,6 +86,9 @@ import com.choreme.core.model.grocery.FamilyLists
 import com.choreme.core.model.grocery.GroceryCategory
 import com.choreme.core.model.grocery.GroceryIcons
 import com.choreme.core.model.grocery.GroceryItem
+import java.util.Locale
+import androidx.compose.ui.platform.LocalConfiguration
+import com.choreme.core.model.grocery.GroceryTranslations
 import com.choreme.core.model.grocery.QuickAddResult
 import com.choreme.core.ui.EmptyState
 import com.choreme.core.ui.ItemIcon
@@ -158,7 +161,7 @@ internal fun GroceriesContent(state: GroceriesUiState, query: String, actions: G
         scope.launch {
             snackbar.currentSnackbarData?.dismiss()
             val result = snackbar.showSnackbar(
-                message = context.getString(R.string.grocery_bought, item.name),
+                message = context.getString(R.string.grocery_bought, GroceryTranslations.inLanguage(item.name, Locale.getDefault().language)),
                 actionLabel = context.getString(CoreUiR.string.undo),
                 duration = SnackbarDuration.Short,
             )
@@ -171,7 +174,7 @@ internal fun GroceriesContent(state: GroceriesUiState, query: String, actions: G
         if (result is QuickAddResult.AlreadyNeeded) {
             scope.launch {
                 snackbar.currentSnackbarData?.dismiss()
-                snackbar.showSnackbar(context.getString(R.string.grocery_already_on_list, result.item.name))
+                snackbar.showSnackbar(context.getString(R.string.grocery_already_on_list, GroceryTranslations.inLanguage(result.item.name, Locale.getDefault().language)))
             }
         }
     }
@@ -444,7 +447,7 @@ internal fun ToBuyRow(item: GroceryItem, large: Boolean, onBought: () -> Unit, o
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(item.name, style = if (large) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge)
+            Text(groceryName(item.name), style = if (large) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge)
             if (item.isStaple) UsualTag()
         }
         Spacer(Modifier.width(12.dp))
@@ -516,7 +519,7 @@ private fun AtHomeGroup(group: CategoryGroup, onNeeded: (GroceryItem) -> Unit, o
 @Composable
 internal fun ItemTile(item: GroceryItem, onClick: () -> Unit, onLongClick: () -> Unit) {
     Text(
-        item.name,
+        groceryName(item.name),
         style = MaterialTheme.typography.bodyLarge,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
@@ -545,7 +548,7 @@ internal fun ItemChip(item: GroceryItem, onClick: () -> Unit, onLongClick: () ->
         ) {
             ItemIcon(item.icon, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.width(6.dp))
-            Text(item.name, style = MaterialTheme.typography.bodyMedium)
+            Text(groceryName(item.name), style = MaterialTheme.typography.bodyMedium)
             if (item.isStaple) {
                 Spacer(Modifier.width(6.dp))
                 UsualTag()
@@ -561,7 +564,7 @@ private fun EditItemDialog(
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var name by rememberSaveable(item.id) { mutableStateOf(item.name) }
+    var name by rememberSaveable(item.id) { mutableStateOf(GroceryTranslations.inLanguage(item.name, Locale.getDefault().language)) }
     var category by rememberSaveable(item.id) { mutableStateOf(item.category) }
     var isStaple by rememberSaveable(item.id) { mutableStateOf(item.isStaple) }
 
@@ -624,3 +627,10 @@ private const val MAX_NAME_LENGTH = 60
 
 @get:DrawableRes
 private val GroceryItem.icon: Int get() = GroceryIcons.forItem(name, category).drawable
+
+/** A known grocery's name in this phone's language ("Milk" is "Leite" in Baianês); others as typed. */
+@Composable
+internal fun groceryName(name: String): String {
+    val language = LocalConfiguration.current.locales[0].language
+    return remember(name, language) { GroceryTranslations.inLanguage(name, language) }
+}

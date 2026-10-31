@@ -71,6 +71,6 @@ fun homeScene(weekPoints: Int, overdue: Int, urgent: Int, toDo: Int = 0): HomeSc
 fun homeScene(weekPoints: Int, chores: List<Chore>, today: LocalDate): HomeScene = homeScene(
     weekPoints = weekPoints,
     overdue = chores.count { it.isOverdue(today) },
-    urgent = chores.count { it.urgent && it.isActive },
+    urgent = chores.count { it.urgent && it.isActive && !it.dueDate.isAfter(today) },
     toDo = chores.count { it.isActive && !it.dueDate.isAfter(today) },
 )

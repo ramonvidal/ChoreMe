@@ -30,17 +30,17 @@ class TodayBoardTest {
     }
 
     @Test
-    fun `urgent chores come first, even ones due later`() {
+    fun `urgent chores come first from their day, and wait until it`() {
         val board = buildTodayBoard(
             listOf(
                 chore("Trash", today.minusDays(2)),
                 chore("Dishes", today),
-                chore("Leak under the sink", today.plusDays(3)).copy(urgent = true),
+                chore("Pay the lawyer", today.plusDays(6)).copy(urgent = true),
                 chore("Bathroom", today).copy(urgent = true),
             ),
             today,
         )
-        assertEquals(listOf("Bathroom", "Leak under the sink", "Trash", "Dishes"), board.toDo.map { it.title })
-        assertEquals(emptyList<String>(), board.upcoming.map { it.title })
+        assertEquals(listOf("Bathroom", "Trash", "Dishes"), board.toDo.map { it.title })
+        assertEquals(listOf("Pay the lawyer"), board.upcoming.map { it.title })
     }
 }

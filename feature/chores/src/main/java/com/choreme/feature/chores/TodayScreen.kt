@@ -774,6 +774,10 @@ internal fun CompactRow(chore: Chore, trailing: String, onClick: () -> Unit, don
             Spacer(Modifier.width(12.dp))
         }
         Text(choreTitle(chore.title), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        if (chore.urgent && !done) {
+            UrgentTag()
+            Spacer(Modifier.width(8.dp))
+        }
         Text(trailing, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

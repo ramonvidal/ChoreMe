@@ -3,7 +3,7 @@
 <resources>
     <string name="sign_in_tagline">Os corres, a feira e a agenda da família, divididos com todo mundo de casa.</string>
     <string name="sign_in_google">Entrar com o Google</string>
-    <string name="sign_in_kid">Sou pivete</string>
+    <string name="sign_in_kid">Sou guri</string>
     <string name="sign_in_kid_hint">Não precisa de conta do Google. Mainha ou painho aprova este aparelho.</string>
     <string name="onboarding_title">Monte sua família</string>
     <string name="onboarding_title_kid">Peça pra entrar na sua família</string>
@@ -13,7 +13,7 @@
     <string name="onboarding_join_title">Entrar com um código de convite</string>
     <string name="onboarding_join_hint">Peça o código a mainha ou painho. Fica na aba Família deles.</string>
     <string name="onboarding_join">Pedir pra entrar</string>
-    <string name="onboarding_join_as_kid">Sou pivete</string>
+    <string name="onboarding_join_as_kid">Sou guri</string>
     <string name="onboarding_switch_account">Usar outra conta</string>
     <string name="onboarding_back">Voltar</string>
     <string name="your_name">Seu nome</string>

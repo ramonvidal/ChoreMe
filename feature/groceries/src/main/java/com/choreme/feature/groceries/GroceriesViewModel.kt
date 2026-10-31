@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 
 data class GroceriesUiState(
@@ -178,7 +179,7 @@ class GroceriesViewModel @Inject constructor(
     }
 
     fun addStarterItems() = withFamily { familyId, memberId ->
-        groceries.addStarterItems(familyId, memberId, uiState.value.catalog)
+        groceries.addStarterItems(familyId, memberId, uiState.value.catalog, Locale.getDefault().language)
     }
 
     fun save(item: GroceryItem) = withFamily { familyId, memberId ->

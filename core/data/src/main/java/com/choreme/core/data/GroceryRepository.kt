@@ -17,6 +17,7 @@ import com.choreme.core.model.grocery.FamilyLists
 import com.choreme.core.model.grocery.GroceryCategory
 import com.choreme.core.model.grocery.GroceryItem
 import com.choreme.core.model.grocery.GroceryNames
+import com.choreme.core.model.grocery.GroceryTranslations
 import com.choreme.core.model.grocery.StarterItems
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.FieldValue
@@ -115,12 +116,15 @@ class GroceryRepository @Inject constructor(
         batch.commit().logFailure()
     }
 
-    /** Adds the starter catalog, skipping anything the family already has. */
-    fun addStarterItems(familyId: String, memberId: String, catalog: List<GroceryItem>) {
-        val existing = catalog.map { GroceryNames.key(it.name) }.toSet()
+    /**
+     * Adds the starter catalog in the phone's [language] ("en" or "pt"), skipping anything the
+     * family already has, in either language.
+     */
+    fun addStarterItems(familyId: String, memberId: String, catalog: List<GroceryItem>, language: String) {
         val batch = firestore.get().batch()
         StarterItems
-            .filter { (name, _) -> GroceryNames.key(name) !in existing }
+            .map { (name, category) -> GroceryTranslations.inLanguage(name, language) to category }
+            .filter { (name, _) -> catalog.none { GroceryTranslations.sameItem(it.name, name) } }
             .forEach { (name, category) ->
                 val ref = items(familyId).document(checkNotNull(GroceryNames.documentId(name)))
                 batch.set(ref, itemData(name, category, isNeeded = false, isStaple = false, memberId))

@@ -89,9 +89,9 @@ feature/chores,section_yours,,Yours,Seus
 feature/chores,section_upcoming,,Coming up,Vem aí
 feature/chores,section_done_today,,Done today,Feitos hoje
 feature/chores,nothing_to_do,,Nothing needs doing right now,Nada pra fazer agora
-feature/chores,nothing_to_do_body,,The house is in good shape. Enjoy it!,"A casa tá massa. Aproveite, meu rei!"
+feature/chores,nothing_to_do_body,,The house is in good shape. Enjoy it!,"A casa tá massa. Aproveite, visse!"
 feature/chores,empty_title,,Nothing needs doing,Nada pra fazer
-feature/chores,empty_body_parent,,"When someone notices something, like a full sink or an overflowing bin, they add it here. Anyone can grab it, and kids' finished chores come to you to approve.","Quando alguém nota alguma coisa, tipo a pia cheia ou o lixo transbordando, bota aqui. Qualquer um pode pegar, e os corres que os pivetes terminam vêm pra você aprovar."
+feature/chores,empty_body_parent,,"When someone notices something, like a full sink or an overflowing bin, they add it here. Anyone can grab it, and kids' finished chores come to you to approve.","Quando alguém nota alguma coisa, tipo a pia cheia ou o lixo transbordando, bota aqui. Qualquer um pode pegar, e os corres que os guris terminam vêm pra você aprovar."
 feature/chores,empty_body_kid,,Noticed something that needs doing? Add it with the button below.,Viu alguma coisa pra fazer? Bota aqui no botão de baixo.
 feature/chores,groceries_link,,%1$d on the grocery list,%1$d na lista da feira
 feature/chores,grab,,I'll do it,Deixa comigo
@@ -161,7 +161,7 @@ feature/chores,new_chore_channel,,New chores,Corres novos
 feature/chores,new_chore_channel_description,,When someone in the family adds something that needs doing,Quando alguém da família bota uma coisa pra fazer
 feature/chores,new_chore_body,,%1$s noticed it needs doing,%1$s viu que precisa fazer
 feature/chores,approval_channel,,Chores to approve,Corres pra aprovar
-feature/chores,approval_channel_description,,When a kid says they finished a chore,Quando um pivete diz que terminou um corre
+feature/chores,approval_channel_description,,When a kid says they finished a chore,Quando um guri diz que terminou um corre
 feature/chores,approval_title,,%1$s finished: %2$s,%1$s terminou: %2$s
 feature/chores,approval_body,,Waiting for your OK,Esperando seu OK
 feature/chores,saved_chores,,Saved,Salvos
@@ -243,11 +243,11 @@ feature/family,family_share_invite,,Share invite code,Mandar o código de convit
 feature/family,family_invite_message,,Join the %1$s family on Nos Corre! with the code %2$s,Entra na família %1$s no Nos Corre! com o código %2$s
 feature/family,family_requests_title,,Waiting to join,Esperando pra entrar
 feature/family,family_members_title,,Members,Membros
-feature/family,family_add_kid,,Add a kid without a phone,Adicionar pivete sem celular
-feature/family,family_add_kid_hint,,"Parents can mark this kid's chores done for them. If they get a device later, link it when approving it.","Os responsáveis podem marcar os corres desse pivete como feitos por ele. Se ele ganhar um aparelho depois, ligue na hora de aprovar."
+feature/family,family_add_kid,,Add a kid without a phone,Adicionar guri sem celular
+feature/family,family_add_kid_hint,,"Parents can mark this kid's chores done for them. If they get a device later, link it when approving it.","Os responsáveis podem marcar os corres desse guri como feitos por ele. Se ele ganhar um aparelho depois, ligue na hora de aprovar."
 feature/family,family_remove_confirm,,Remove %1$s from the family? Their devices will lose access.,Tirar %1$s da família? Os aparelhos dele perdem o acesso.
-feature/family,kid_name,,Kid's name,Nome do pivete
-feature/family,request_wants_kid,,%1$s wants to join as a kid,%1$s quer entrar como pivete
+feature/family,kid_name,,Kid's name,Nome do guri
+feature/family,request_wants_kid,,%1$s wants to join as a kid,%1$s quer entrar como guri
 feature/family,request_wants_parent,,%1$s wants to join as a parent,%1$s quer entrar como responsável
 feature/family,request_link_to,,This device belongs to:,Este aparelho é de:
 feature/family,request_new_profile,,New profile for %1$s,Perfil novo pra %1$s
@@ -256,7 +256,7 @@ feature/family,member_no_device,,No device,Sem aparelho
 feature/family,member_devices,one,%d device,%d aparelho
 feature/family,member_devices,other,%d devices,%d aparelhos
 feature/family,role_parent,,Parent,Mainha/Painho
-feature/family,role_kid,,Kid,Pivete
+feature/family,role_kid,,Kid,Guri
 feature/family,sign_out,,Sign out,Sair
 feature/family,sign_out_kid_warning,,This device will need a parent's approval again to rejoin. Sign out anyway?,Este aparelho vai precisar da aprovação de mainha ou painho de novo pra voltar. Sair mesmo assim?
 feature/family,join_channel,,Join requests,Pedidos pra entrar
@@ -283,7 +283,7 @@ feature/family,alert_new_chores_hint,,When someone adds something that needs doi
 feature/family,alert_chores_done,,Chores done,Corres feitos
 feature/family,alert_chores_done_hint,,"When someone finishes a chore marked ""let everyone know""","Quando alguém termina um corre marcado ""avisar a galera"""
 feature/family,alert_approvals,,Chores to approve,Corres pra aprovar
-feature/family,alert_approvals_hint,,When a kid finishes a chore (parents),Quando um pivete termina um corre (responsáveis)
+feature/family,alert_approvals_hint,,When a kid finishes a chore (parents),Quando um guri termina um corre (responsáveis)
 feature/family,alert_join_requests,,Join requests,Pedidos pra entrar
 feature/family,alert_join_requests_hint,,When someone asks to join the family (parents),Quando alguém pede pra entrar na família (responsáveis)
 feature/family,alert_arrivals,,Arrivals and departures,Chegadas e saídas
@@ -446,7 +446,7 @@ feature/map,on_my_way_title,,%1$s is on the way home,%1$s tá indo pra casa
 feature/map,on_my_way_hint,,Let the family know you're heading home.,Avise a galera que você tá voltando pra casa.
 feature/onboarding,sign_in_tagline,,"Chores, groceries and the family calendar, shared by everyone at home.","Os corres, a feira e a agenda da família, divididos com todo mundo de casa."
 feature/onboarding,sign_in_google,,Sign in with Google,Entrar com o Google
-feature/onboarding,sign_in_kid,,I'm a kid,Sou pivete
+feature/onboarding,sign_in_kid,,I'm a kid,Sou guri
 feature/onboarding,sign_in_kid_hint,,No Google account needed. A parent will approve this device.,Não precisa de conta do Google. Mainha ou painho aprova este aparelho.
 feature/onboarding,onboarding_title,,Set up your family,Monte sua família
 feature/onboarding,onboarding_title_kid,,Ask to join your family,Peça pra entrar na sua família
@@ -456,7 +456,7 @@ feature/onboarding,onboarding_create,,Create family,Criar família
 feature/onboarding,onboarding_join_title,,Join with an invite code,Entrar com um código de convite
 feature/onboarding,onboarding_join_hint,,Ask a parent for the code. It's on their Family tab.,Peça o código a mainha ou painho. Fica na aba Família deles.
 feature/onboarding,onboarding_join,,Ask to join,Pedir pra entrar
-feature/onboarding,onboarding_join_as_kid,,I'm a kid,Sou pivete
+feature/onboarding,onboarding_join_as_kid,,I'm a kid,Sou guri
 feature/onboarding,onboarding_switch_account,,Use a different account,Usar outra conta
 feature/onboarding,onboarding_back,,Back,Voltar
 feature/onboarding,your_name,,Your name,Seu nome

@@ -19,7 +19,8 @@ sealed interface QuickAddResult {
 fun quickAdd(input: String, catalog: List<GroceryItem>): QuickAddResult {
     val name = input.trim().replace(Regex("\\s+"), " ")
     if (name.isEmpty()) return QuickAddResult.Blank
-    val existing = catalog.firstOrNull { GroceryNames.key(it.name) == GroceryNames.key(name) }
+    // "leite" finds the family's "Milk": one item, whichever language each phone shows.
+    val existing = catalog.firstOrNull { GroceryNames.key(it.name) == GroceryNames.key(name) || GroceryTranslations.sameItem(it.name, name) }
     return when {
         existing == null -> QuickAddResult.Create(name.replaceFirstChar { it.uppercase() }, CategoryGuesser.guess(name))
         existing.isNeeded -> QuickAddResult.AlreadyNeeded(existing)
@@ -35,7 +36,11 @@ fun suggestions(query: String, catalog: List<GroceryItem>, limit: Int = 6): List
         .filter { !it.isNeeded }
         .mapNotNull { item ->
             val name = GroceryNames.key(item.name)
+            // Also by its name in the other language, so "lei" suggests "Milk".
+            val other = plainName(GroceryNames.key(GroceryTranslations.inLanguage(item.name, "pt")))
+            val english = plainName(GroceryNames.key(GroceryTranslations.inLanguage(item.name, "en")))
             when {
+                other.startsWith(plainName(key)) || english.startsWith(plainName(key)) -> 0 to item
                 name.startsWith(key) -> 0 to item
                 name.split(' ').any { it.startsWith(key) } -> 1 to item
                 key in name -> 2 to item

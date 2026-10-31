@@ -8,9 +8,9 @@
     <string name="section_upcoming">Vem aí</string>
     <string name="section_done_today">Feitos hoje</string>
     <string name="nothing_to_do">Nada pra fazer agora</string>
-    <string name="nothing_to_do_body">A casa tá massa. Aproveite, meu rei!</string>
+    <string name="nothing_to_do_body">A casa tá massa. Aproveite, visse!</string>
     <string name="empty_title">Nada pra fazer</string>
-    <string name="empty_body_parent">Quando alguém nota alguma coisa, tipo a pia cheia ou o lixo transbordando, bota aqui. Qualquer um pode pegar, e os corres que os pivetes terminam vêm pra você aprovar.</string>
+    <string name="empty_body_parent">Quando alguém nota alguma coisa, tipo a pia cheia ou o lixo transbordando, bota aqui. Qualquer um pode pegar, e os corres que os guris terminam vêm pra você aprovar.</string>
     <string name="empty_body_kid">Viu alguma coisa pra fazer? Bota aqui no botão de baixo.</string>
     <string name="groceries_link">%1$d na lista da feira</string>
     <string name="grab">Deixa comigo</string>
@@ -76,7 +76,7 @@
     <string name="new_chore_channel_description">Quando alguém da família bota uma coisa pra fazer</string>
     <string name="new_chore_body">%1$s viu que precisa fazer</string>
     <string name="approval_channel">Corres pra aprovar</string>
-    <string name="approval_channel_description">Quando um pivete diz que terminou um corre</string>
+    <string name="approval_channel_description">Quando um guri diz que terminou um corre</string>
     <string name="approval_title">%1$s terminou: %2$s</string>
     <string name="approval_body">Esperando seu OK</string>
     <string name="saved_chores">Salvos</string>
