@@ -18,7 +18,7 @@ android {
     val buildNumber = providers.environmentVariable("GITHUB_RUN_NUMBER").map(String::toInt).getOrElse(1)
 
     defaultConfig {
-        applicationId = "com.choreme"
+        applicationId = "com.punyplatypus.noscorre"
         versionCode = buildNumber
         versionName = "0.$buildNumber"
     }
