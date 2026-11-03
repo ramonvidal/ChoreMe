@@ -116,3 +116,12 @@ build-logic/
 firebase/
   firestore.rules Who can read and write what; tested in firebase/test
 ```
+
+## Google Play
+
+The same code builds two apps: `github` (the APK on the release page; updates itself) and `play`
+(the bundle for Google Play; no self-updater). `docs/play-store/README.md` has the whole checklist
+(Firebase, upload key, forms, testing tracks); `docs/` is also the site for the privacy policy
+and data-deletion pages. Secrets CI uses for the bundle: `UPLOAD_KEYSTORE_BASE64`,
+`UPLOAD_KEYSTORE_PASSWORD`, `UPLOAD_KEY_ALIAS`, `UPLOAD_KEY_PASSWORD`. Build one locally with
+`UPLOAD_KEYSTORE_FILE=... UPLOAD_KEYSTORE_PASSWORD=... UPLOAD_KEY_ALIAS=... UPLOAD_KEY_PASSWORD=... ./gradlew bundlePlayRelease -PplayUpload`.

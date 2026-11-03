@@ -20,7 +20,13 @@ import javax.inject.Singleton
 
 /** Asks the release page for the newest build. Free and anonymous: no account or key involved. */
 @Singleton
-class UpdateRepository @Inject constructor(@ApplicationContext private val context: Context) {
+class UpdateRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val selfUpdate: SelfUpdate,
+) {
+    /** False in the Play Store build: no checks, no banner, no installing. */
+    val enabled: Boolean get() = selfUpdate.enabled
+
     private val prefs = context.getSharedPreferences("updates", Context.MODE_PRIVATE)
 
     private val _available = MutableStateFlow<AppUpdate?>(null)
@@ -40,6 +46,7 @@ class UpdateRepository @Inject constructor(@ApplicationContext private val conte
 
     /** Checks when one is due (see [Updates.CHECK_EVERY]); a network problem just keeps what's known. */
     suspend fun refresh() {
+        if (!enabled) return
         val now = Instant.now()
         if (Updates.isCheckDue(lastCheck(), now)) runCatching { fetchAndRemember(now) }
         publish(cachedUpdate())
@@ -50,6 +57,7 @@ class UpdateRepository @Inject constructor(@ApplicationContext private val conte
      * Throws when the release page can't be reached.
      */
     suspend fun checkNow(): AppUpdate? {
+        if (!enabled) return null
         prefs.edit().remove(KEY_DISMISSED).apply()
         fetchAndRemember(Instant.now())
         publish(cachedUpdate())

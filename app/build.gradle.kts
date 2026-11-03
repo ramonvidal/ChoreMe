@@ -35,11 +35,39 @@ android {
         }
     }
 
+    // Two builds of the same app. github: the APK on the project's release page, which updates
+    // itself. play: the bundle for Google Play, which Google updates (so no self-updater, and
+    // not the permission to install apps). Everything else is shared.
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("github") { dimension = "distribution" }
+        create("play") { dimension = "distribution" }
+    }
+
+    // The Play bundle is signed with the upload key (Google then signs what people install with
+    // its own key). Built with -PplayUpload, with the key in these environment variables (CI
+    // keeps them as secrets); every other build uses the shared debug key below.
+    val signForPlay = providers.gradleProperty("playUpload").isPresent
+    if (signForPlay) {
+        fun upload(name: String) = providers.environmentVariable(name).orNull
+            ?: error("Signing for Google Play needs the environment variable $name (see README, \"Google Play\")")
+        signingConfigs.create("upload") {
+            storeFile = file(upload("UPLOAD_KEYSTORE_FILE"))
+            storePassword = upload("UPLOAD_KEYSTORE_PASSWORD")
+            keyAlias = upload("UPLOAD_KEY_ALIAS")
+            keyPassword = upload("UPLOAD_KEY_PASSWORD")
+        }
+    }
+
+    // The language picked in the app (English or Baianês) must work whatever the phone's own
+    // language is, so a bundle can't hand each phone only its own language's texts.
+    bundle { language { enableSplit = false } }
+
     buildTypes {
         release {
             // Same key as debug builds: it's the one registered in Firebase, and it means a
             // release installs over a test build (and the other way round) without uninstalling.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (signForPlay) signingConfigs.getByName("upload") else signingConfigs.getByName("debug")
             // Shrinking would make the APK smaller, but can break code that's only found at
             // runtime; worth turning on once there are UI tests on a real device.
             isMinifyEnabled = false
@@ -53,6 +81,7 @@ dependencies {
     implementation(projects.core.data)
     implementation(projects.core.ui)
     implementation(projects.core.push)
+    implementation(projects.core.update)
     implementation(projects.feature.onboarding)
     implementation(projects.feature.chores)
     implementation(projects.feature.groceries)

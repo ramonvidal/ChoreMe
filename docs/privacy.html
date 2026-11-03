@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy policy · Nos Corre!</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><img src="icon-512.png" alt=""><h1>Privacy policy</h1><div>Nos Corre! · Updated 3 November 2026</div></header>
+<main>
+<nav><a href="#en">English</a><a href="#pt">Português</a><a href="index.html">Home</a></nav>
+
+<section id="en">
+<h2>What this is</h2>
+<p>Nos Corre! (the "app") is a free Android app that lets the people of one household share chores, a grocery list, notes, messages, a map and the calendar. This page says what the app stores about you, why, and how to remove it. The app has <b>no ads</b>, <b>no analytics</b> and <b>no tracking</b>, and nothing is sold or shared with advertisers.</p>
+
+<h2>What the app stores</h2>
+<table>
+<tr><th>Data</th><th>Why</th><th>Where</th></tr>
+<tr><td>Your Google account's name and email (adults who sign in with Google). Kids may use an anonymous sign-in with no personal data, only a random ID.</td><td>To sign you in and recognise you in your family.</td><td>Google Firebase Authentication</td></tr>
+<tr><td>Family data: family name and invite code, members' names and roles, chores (names, dates, who did them, points), groceries and lists, notes, messages to the family, "at the shop" and "on my way home" notices, away dates.</td><td>The app's purpose: sharing these with the rest of your family.</td><td>Google Firebase Cloud Firestore, readable only by members of your family</td></tr>
+<tr><td>Location (precise), only while you switch on "Share my location". Updated about every 15 minutes, also when the app is closed if you allow location "all the time". Saved places (name, position, size) that parents add, and arrivals/departures at them.</td><td>To show the family where you are on the map and to send arrival alerts.</td><td>Cloud Firestore, readable only by your family. Stopping sharing removes your location.</td></tr>
+<tr><td>A notification address (a URL) for each phone that uses the free ntfy app for instant alerts.</td><td>To wake the phone for alerts. The wake-up carries no family data.</td><td>Cloud Firestore</td></tr>
+<tr><td>Calendar events, if you allow calendar access.</td><td>To show the agenda and to add events you create.</td><td>Only on your phone and its calendar account (for example Google Calendar). Not sent to the app's servers.</td></tr>
+<tr><td>Settings of this phone (alerts, quiet hours, language, reminders).</td><td>To remember your choices.</td><td>Only on your phone</td></tr>
+</table>
+
+<h2>Other services involved</h2>
+<ul>
+<li><b>Google Firebase</b> (Authentication and Cloud Firestore) stores the data above on Google's servers and sends it encrypted. Google's own privacy policy applies to its service.</li>
+<li><b>OpenStreetMap</b> serves the map pictures. Their servers see your IP address and the map area you look at.</li>
+<li><b>ntfy / UnifiedPush</b>, only if you install that app, delivers contentless wake-up pings.</li>
+<li>Builds installed from the project's GitHub page (not Google Play) also ask GitHub for the newest version.</li>
+</ul>
+
+<h2>Who can see your data</h2>
+<p>Only the members of your family, and only after a parent approves them. Parents can remove members and delete messages. We do not read or use your family's data for anything else.</p>
+
+<h2>Children</h2>
+<p>The app is meant for households, with parents in charge. A child can join only when a parent approves the request, and a child needs no Google account. The app shows no ads to anyone, and nothing about a child is shared outside the family. A parent can remove a child's profile at any time.</p>
+
+<h2>Keeping and deleting your data</h2>
+<p>Your data stays until you delete it. In the app, <i>Family &rarr; Your data</i> has <b>Leave family</b> (removes your location, notification address and arrival history; chores and groceries you added stay for the family) and <b>Delete my data</b> (also deletes your account; if you are the last member, the whole family's data is deleted). See <a href="delete-account.html">how to delete your data</a>, also without the app.</p>
+
+<h2>Security</h2>
+<p>Data travels encrypted. Access is controlled by security rules: a family's data can be read only by members of that family, and children cannot approve people or change roles.</p>
+
+<h2>Changes and contact</h2>
+<p>If this policy changes, the date above changes. Questions: <a href="https://github.com/ramonvidal/ChoreMe/issues">open an issue</a> on the project page.</p>
+</section>
+
+<section id="pt">
+<h2>Política de privacidade (Português)</h2>
+<p>O Nos Corre! é um app Android gratuito pra uma casa dividir os corres, a lista da feira, recados, mensagens, mapa e agenda. O app <b>não tem anúncios</b>, <b>não tem análise de uso</b> e <b>não rastreia ninguém</b>. Nada é vendido nem repassado a anunciantes.</p>
+
+<h2>O que o app guarda</h2>
+<ul>
+<li><b>Conta:</b> nome e e-mail da sua conta Google (adultos que entram com o Google), no Firebase Authentication. Os guris podem entrar de forma anônima, sem dado pessoal, só com um código aleatório.</li>
+<li><b>Dados da família:</b> nome da família e código de convite, nomes e papéis dos membros, corres (nomes, datas, quem fez, pontos), feira e listas, recados, mensagens, avisos de "tô no mercado" e "tô indo pra casa", datas de viagem. Ficam no Cloud Firestore do Google Firebase, e só os membros da sua família conseguem ler.</li>
+<li><b>Localização precisa</b>, só enquanto você ligar "Dividir minha localização" (atualiza de uns 15 em 15 minutos, inclusive com o app fechado se você permitir "o tempo todo"), mais os lugares salvos pelos responsáveis e as chegadas e saídas deles. Serve pra mostrar no mapa e avisar das chegadas. Parar de dividir apaga sua localização.</li>
+<li><b>Endereço de aviso</b> de cada celular que usa o app ntfy, pra acordar o celular nos avisos na hora. O aviso não leva dado da família.</li>
+<li><b>Agenda</b> (se você permitir): lida no próprio celular, nunca enviada aos servidores do app. Os eventos que você cria vão pra agenda do celular.</li>
+<li><b>Ajustes deste celular</b> (avisos, horário de silêncio, idioma, lembretes): só no celular.</li>
+</ul>
+
+<h2>Outros serviços</h2>
+<p>Google Firebase guarda os dados acima, criptografados na viagem. O OpenStreetMap entrega as imagens do mapa e vê seu IP e a área que você olha. O ntfy/UnifiedPush só entra se você instalar o app, e só leva avisos vazios. Versões baixadas da página do projeto no GitHub (fora da Google Play) também consultam o GitHub pela versão mais nova.</p>
+
+<h2>Quem vê seus dados</h2>
+<p>Só os membros da sua família, depois que um responsável aprova. Responsáveis podem remover membros e apagar mensagens.</p>
+
+<h2>Crianças</h2>
+<p>O app é pra casas, com mainha e painho no comando. Um guri só entra com a aprovação de um responsável e não precisa de conta Google. Não há anúncios pra ninguém, e nada sobre o guri sai da família. Um responsável pode apagar o perfil dele quando quiser.</p>
+
+<h2>Guardar e apagar</h2>
+<p>Seus dados ficam até você apagar. No app, <i>Família &rarr; Seus dados</i> tem <b>Sair da família</b> e <b>Apagar meus dados</b> (apaga também sua conta; se você for o último, a família inteira é apagada). Veja <a href="delete-account.html">como apagar seus dados</a>, inclusive sem o app.</p>
+
+<h2>Contato</h2>
+<p>Dúvidas: <a href="https://github.com/ramonvidal/ChoreMe/issues">abra um chamado</a> na página do projeto.</p>
+</section>
+</main></body></html>

@@ -15,7 +15,6 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
-    implementation(libs.firebase.messaging)
     implementation(libs.kotlinx.coroutines.play.services)
     // Google sign-in (Credential Manager), used for signing in and before deleting an account.
     implementation(libs.androidx.credentials)

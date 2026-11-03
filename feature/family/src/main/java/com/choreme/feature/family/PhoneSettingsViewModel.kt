@@ -40,6 +40,9 @@ class PhoneSettingsViewModel @Inject constructor(
 
     val installedVersion: String = updates.installedVersion
 
+    /** False in the Play Store build, which Google updates. */
+    val canSelfUpdate: Boolean = updates.enabled
+
     private val _updateCheck = MutableStateFlow<UpdateCheck>(UpdateCheck.Idle)
     val updateCheck: StateFlow<UpdateCheck> = _updateCheck
 

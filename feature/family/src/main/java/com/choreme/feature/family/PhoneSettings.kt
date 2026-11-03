@@ -142,13 +142,23 @@ internal fun PhoneSettings(viewModel: PhoneSettingsViewModel = hiltViewModel()) 
                 }) { Text(stringResource(R.string.instant_install)) }
             }
         }
-        FoldRow(
-            title = stringResource(R.string.updates_section),
-            summary = stringResource(R.string.updates_summary, viewModel.installedVersion),
-            open = open == Fold.UPDATES,
-            onToggle = { toggle(Fold.UPDATES) },
-        ) {
-            UpdatesRow(viewModel.installedVersion, updateCheck, onCheck = viewModel::checkForUpdates)
+        if (viewModel.canSelfUpdate) {
+            FoldRow(
+                title = stringResource(R.string.updates_section),
+                summary = stringResource(R.string.updates_summary, viewModel.installedVersion),
+                open = open == Fold.UPDATES,
+                onToggle = { toggle(Fold.UPDATES) },
+            ) {
+                UpdatesRow(viewModel.installedVersion, updateCheck, onCheck = viewModel::checkForUpdates)
+            }
+        } else {
+            // Updated by Google Play: just the version, to tell people which one they have.
+            Text(
+                stringResource(R.string.updates_summary, viewModel.installedVersion),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 12.dp),
+            )
         }
     }
 

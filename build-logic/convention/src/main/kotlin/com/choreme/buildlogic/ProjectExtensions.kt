@@ -16,9 +16,10 @@ internal val Project.libs: VersionCatalog
 
 internal fun VersionCatalog.library(alias: String): MinimalExternalModuleDependency = findLibrary(alias).get().get()
 
-internal const val COMPILE_SDK = 35
+// Google Play wants apps (new ones and updates) to target Android 16, API 36, from 31 Aug 2026.
+internal const val COMPILE_SDK = 36
 internal const val MIN_SDK = 26
-internal const val TARGET_SDK = 35
+internal const val TARGET_SDK = 36
 
 @Suppress("UnstableApiUsage")
 internal fun Project.configureKotlinAndroid(android: CommonExtension<*, *, *, *, *, *>) {

@@ -35,6 +35,18 @@ jobs:
           if [ -n "$GOOGLE_SERVICES_JSON" ]; then printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json; echo "Firebase config added"; fi
           if [ -n "$DEBUG_KEYSTORE_BASE64" ]; then printf '%s' "$DEBUG_KEYSTORE_BASE64" | base64 -d > app/debug.keystore; echo "Debug key added"; fi
 
+      # A google-services.json without this app's package would build an app that can't sync or
+      # sign in. Better to stop here, saying what to do, than to publish that.
+      - name: Check the Firebase config is for this app
+        run: |
+          if [ ! -f app/google-services.json ]; then echo "No Firebase config: the app will build without sync."; exit 0; fi
+          APP_ID=$(sed -n 's/.*applicationId = "\(.*\)".*/\1/p' app/build.gradle.kts | head -1)
+          if ! jq -e --arg id "$APP_ID" '[.client[].client_info.android_client_info.package_name] | index($id)' app/google-services.json > /dev/null; then
+            echo "::error::GOOGLE_SERVICES_JSON has no app for $APP_ID. In Firebase (Project settings, Your apps) add an Android app with that package name, download google-services.json again, and replace the GOOGLE_SERVICES_JSON secret."
+            exit 1
+          fi
+          echo "Firebase config has $APP_ID"
+
       - name: Module structure rules tests
         run: ./gradlew -p build-logic :rules:test
 
@@ -56,13 +68,40 @@ jobs:
           name: screenshots
           path: screenshots/
 
+      # The APK for the release page (github flavor: it updates itself).
       - name: Build APKs
-        run: ./gradlew assembleDebug assembleRelease
+        run: ./gradlew assembleGithubDebug assembleGithubRelease
 
       - uses: actions/upload-artifact@v4
         with:
           name: choreme-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/github/debug/*.apk
+
+      # The bundle for Google Play (play flavor: no self-updater), signed with the upload key.
+      # Needs the UPLOAD_* secrets (see README, "Google Play"); without them this is skipped.
+      - name: Build the Google Play bundle
+        env:
+          UPLOAD_KEYSTORE_BASE64: ${{ secrets.UPLOAD_KEYSTORE_BASE64 }}
+          UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+          UPLOAD_KEY_ALIAS: ${{ secrets.UPLOAD_KEY_ALIAS }}
+          UPLOAD_KEY_PASSWORD: ${{ secrets.UPLOAD_KEY_PASSWORD }}
+        run: |
+          if [ -z "$UPLOAD_KEYSTORE_BASE64" ]; then
+            echo "::notice::No UPLOAD_KEYSTORE_BASE64 secret, so no Google Play bundle was built. See README."
+            exit 0
+          fi
+          printf '%s' "$UPLOAD_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          export UPLOAD_KEYSTORE_FILE="$RUNNER_TEMP/upload.jks"
+          ./gradlew bundlePlayRelease -PplayUpload
+          rm -f "$RUNNER_TEMP/upload.jks"
+          # Native libraries must support 16 KB memory pages (Google Play checks); the app has none of its own.
+          unzip -l app/build/outputs/bundle/playRelease/*.aab | grep '\.so$' || echo "No native libraries in the bundle"
+
+      - uses: actions/upload-artifact@v4
+        if: hashFiles('app/build/outputs/bundle/playRelease/*.aab') != ''
+        with:
+          name: nos-corre-play-bundle
+          path: app/build/outputs/bundle/playRelease/*.aab
 
       # One release per build, tagged v0.<build>, so update apps such as Obtainium see a new
       # version each time. GitHub's fixed link always serves the newest one:
@@ -72,7 +111,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp app/build/outputs/apk/release/app-release.apk ChoreMe.apk
+          cp app/build/outputs/apk/github/release/app-github-release.apk ChoreMe.apk
           (cd screenshots && zip -q ../screenshots.zip *.png)
           gh release create "v0.${GITHUB_RUN_NUMBER}" ChoreMe.apk screenshots.zip \
             --target "$GITHUB_SHA" \
