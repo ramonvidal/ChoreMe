@@ -4,12 +4,14 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.app.PendingIntent
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Looper
 import android.os.Build
 import androidx.core.content.ContextCompat
 import com.choreme.core.model.location.GeoPoint
 import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofencingEvent
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -117,6 +119,12 @@ class DeviceLocation @Inject constructor(@ApplicationContext private val context
         ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
     companion object {
+        /** Whether [intent], sent by Android for [notifyWhenLeaving], says the phone left the circle. */
+        fun isLeavingEvent(intent: Intent): Boolean {
+            val event = GeofencingEvent.fromIntent(intent) ?: return false
+            return !event.hasError() && event.geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT
+        }
+
         val FOREGROUND_PERMISSIONS = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
 
         /** Has to be asked for on its own, after the foreground permission (Android 10+). */
