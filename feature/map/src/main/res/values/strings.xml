@@ -63,4 +63,8 @@
     <string name="on_my_way_channel_description">When someone in the family is on the way home</string>
     <string name="on_my_way_title">%1$s is on the way home</string>
     <string name="on_my_way_hint">Let the family know you\'re heading home.</string>
+    <string name="live_channel">Sharing while you move</string>
+    <string name="live_channel_description">Shown only while you\'re on the move and sharing your location with the family</string>
+    <string name="live_title">Sharing your location</string>
+    <string name="live_text">While you\'re on the move, so the family can follow your way</string>
 </resources>

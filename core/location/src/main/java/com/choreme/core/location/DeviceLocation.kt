@@ -3,14 +3,24 @@ package com.choreme.core.location
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.app.PendingIntent
 import android.content.pm.PackageManager
+import android.os.Looper
 import android.os.Build
 import androidx.core.content.ContextCompat
 import com.choreme.core.model.location.GeoPoint
+import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofencingRequest
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeoutOrNull
 import java.time.Duration
@@ -54,6 +64,55 @@ class DeviceLocation @Inject constructor(@ApplicationContext private val context
         return location?.let { DeviceFix(GeoPoint(it.latitude, it.longitude), it.accuracy, Instant.ofEpochMilli(it.time)) }
     }
 
+    /**
+     * A steady stream of readings, at most one every [intervalMs] and only after moving
+     * [minDistanceMeters]. Battery-friendly accuracy. For short stretches while someone is on the
+     * move: it needs "allow all the time" (the caller checks) and stops when the flow is cancelled.
+     */
+    @SuppressLint("MissingPermission") // Checked by hasPermission().
+    fun updates(intervalMs: Long, minDistanceMeters: Float): Flow<DeviceFix> = callbackFlow {
+        if (!hasPermission()) {
+            close()
+            return@callbackFlow
+        }
+        val request = LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, intervalMs)
+            .setMinUpdateDistanceMeters(minDistanceMeters)
+            .setMinUpdateIntervalMillis(intervalMs / 2)
+            .build()
+        val callback = object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                result.locations.forEach {
+                    trySend(DeviceFix(GeoPoint(it.latitude, it.longitude), it.accuracy, Instant.ofEpochMilli(it.time)))
+                }
+            }
+        }
+        client.requestLocationUpdates(request, callback, Looper.getMainLooper())
+        awaitClose { client.removeLocationUpdates(callback) }
+    }
+
+    /**
+     * Asks Android (which watches it cheaply, without this app running) to send [pending] once the
+     * phone leaves a circle of [radiusMeters] around [center]. Replaces an earlier one for the same
+     * [pending]. False when it couldn't be set (no permission, or Google Play services is busy).
+     */
+    @SuppressLint("MissingPermission") // Checked by hasBackgroundPermission().
+    suspend fun notifyWhenLeaving(center: GeoPoint, radiusMeters: Float, pending: PendingIntent): Boolean {
+        if (!hasBackgroundPermission()) return false
+        val fence = Geofence.Builder()
+            .setRequestId(FENCE_ID)
+            .setCircularRegion(center.latitude, center.longitude, radiusMeters)
+            .setExpirationDuration(Geofence.NEVER_EXPIRE)
+            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
+            .build()
+        val request = GeofencingRequest.Builder().addGeofence(fence).build()
+        return runCatching { LocationServices.getGeofencingClient(context).addGeofences(request, pending).await() }.isSuccess
+    }
+
+    /** Takes back [notifyWhenLeaving]. */
+    suspend fun stopNotifyingWhenLeaving(pending: PendingIntent) {
+        runCatching { LocationServices.getGeofencingClient(context).removeGeofences(pending).await() }
+    }
+
     private fun isGranted(permission: String) =
         ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
@@ -63,6 +122,7 @@ class DeviceLocation @Inject constructor(@ApplicationContext private val context
         /** Has to be asked for on its own, after the foreground permission (Android 10+). */
         const val BACKGROUND_PERMISSION = Manifest.permission.ACCESS_BACKGROUND_LOCATION
 
+        private const val FENCE_ID = "left-home-spot"
         private const val TIMEOUT_MS = 30_000L
         private const val GOOD_ENOUGH_METERS = 100f
         private val FRESH_ENOUGH: Duration = Duration.ofMinutes(5)

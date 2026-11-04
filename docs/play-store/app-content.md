@@ -32,6 +32,8 @@ All "No". "Take medicine" is only a chore title a family types; the app has no h
 
 ## Permissions to declare
 - **Background location** (`ACCESS_BACKGROUND_LOCATION`) needs its own declaration, see below.
+- **Foreground service, type location** (`FOREGROUND_SERVICE_LOCATION`) needs its own declaration in
+  Play Console (App content, Foreground service permissions), see below.
 - Foreground location, calendar read and write, notifications, internet: no special form.
 - `REQUEST_INSTALL_PACKAGES` is removed from the Play build (only the GitHub build has it).
 
@@ -52,6 +54,18 @@ time; stopping removes their position from the family's data.
 
 If Google rejects it, tell me: I can remove background location from the Play build (arrival
 alerts then only work with the app open) and resubmit.
+
+## Foreground service (location) declaration
+**Feature:** Live family location. While a person who turned on "Share my location" is on the
+move (for example driving home), the app shares their position every few seconds so the family can
+follow the way. When they have stayed in one place for about five minutes, the service stops by
+itself and the phone only watches a circle around it through Android's geofencing (almost no battery).
+**Why a foreground service:** Frequent updates must continue with the app closed while the phone is
+in a pocket or on a car mount. Android shows the required notification, "Sharing your location".
+**User control:** Off by default; one switch in the Map tab turns the whole thing off at any time.
+**Demo video:** the same as for background location, adding: leave the circle (walk or drive away),
+show the notification "Sharing your location" and the position moving on another phone, then stop and
+show the notification disappearing after a few minutes.
 
 ## Developer contact
 A public contact email or website is required. The project page works:

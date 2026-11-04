@@ -170,6 +170,14 @@ rules let kids make only the grab / let go / "I finished" steps, in their own na
       Parents manage rooms and tasks; anyone can mark a task done (kids go through
       approval, as always). Deleting a room deletes its tasks. The living-house
       picture on Chores stays; improving it is for a later version.
+- [x] **Live location while moving** (free). While sharing, Android watches a 150 m
+      circle around a resting phone (geofence, almost no battery). Leaving it starts
+      a foreground service that shares every ~15 s (at least 20 m apart); after
+      ~5 min in one place it stops and sets a new circle. The 15-minute worker stays
+      as the safety net (and re-sets the circle after a restart). Needs "allow all the
+      time" (already asked for) and a Play declaration for foreground service type
+      location. No paid plan: asking other phones for a fresh position on demand
+      would need FCM, which needs the Blaze plan; not done.
 - [ ] **Extras.** Home-screen widget ("Out of…" and today's chores), weekly
       dark mode polish.
 

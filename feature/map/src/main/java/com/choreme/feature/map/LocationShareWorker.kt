@@ -32,6 +32,9 @@ internal class LocationShareWorker @AssistedInject constructor(
         val session = withTimeoutOrNull(TIMEOUT_MS) { families.session.first { it != SessionState.Loading } }
             as? SessionState.InFamily ?: return Result.success()
         val fix = device.current() ?: return Result.success()
+        // Also (re)sets the circle that wakes frequent updates once this phone is on the move
+        // (it is lost after a restart); skipped while it's already following someone.
+        if (!LiveShareService.running) LiveShare.arm(applicationContext, device, fix.point)
         return try {
             tracker.share(session.familyId, session.memberId, fix)
             Result.success()

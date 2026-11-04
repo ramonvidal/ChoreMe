@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- Shares the position often, only while someone is on the move. -->
+        <service
+            android:name="com.choreme.feature.map.LiveShareService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+        <!-- Android tells it the phone left the circle it was watching. -->
+        <receiver
+            android:name="com.choreme.feature.map.LeftSpotReceiver"
+            android:exported="false" />
+    </application>
+</manifest>

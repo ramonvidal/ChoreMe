@@ -51,6 +51,10 @@
     <string name="on_my_way_channel_description">Quando alguém da família tá indo pra casa</string>
     <string name="on_my_way_title">%1$s tá indo pra casa</string>
     <string name="on_my_way_hint">Avise a galera que você tá voltando pra casa.</string>
+    <string name="live_channel">Compartilhando em movimento</string>
+    <string name="live_channel_description">Só aparece quando você tá em movimento e compartilhando sua localização com a família</string>
+    <string name="live_title">Compartilhando sua localização</string>
+    <string name="live_text">Enquanto você tá na estrada, pra galera acompanhar seu caminho</string>
     <plurals name="minutes_ago">
         <item quantity="one">há %d min</item>
         <item quantity="other">há %d min</item>

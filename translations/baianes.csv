@@ -452,6 +452,10 @@ feature/map,on_my_way_channel,,On the way home,Indo pra casa
 feature/map,on_my_way_channel_description,,When someone in the family is on the way home,Quando alguém da família tá indo pra casa
 feature/map,on_my_way_title,,%1$s is on the way home,%1$s tá indo pra casa
 feature/map,on_my_way_hint,,Let the family know you're heading home.,Avise a galera que você tá voltando pra casa.
+feature/map,live_channel,,Sharing while you move,Compartilhando em movimento
+feature/map,live_channel_description,,Shown only while you're on the move and sharing your location with the family,Só aparece quando você tá em movimento e compartilhando sua localização com a família
+feature/map,live_title,,Sharing your location,Compartilhando sua localização
+feature/map,live_text,,"While you're on the move, so the family can follow your way","Enquanto você tá na estrada, pra galera acompanhar seu caminho"
 feature/onboarding,sign_in_tagline,,"Chores, groceries and the family calendar, shared by everyone at home.","Os corres, a feira e a agenda da família, divididos com todo mundo de casa."
 feature/onboarding,sign_in_google,,Sign in with Google,Entrar com o Google
 feature/onboarding,sign_in_kid,,I'm a kid,Sou guri

@@ -174,6 +174,8 @@ class MapViewModel @Inject internal constructor(
     /** After any permission dialog; also refreshes this phone's position. */
     fun onPermissionsChanged() {
         permissions.value = device.hasPermission() to device.hasBackgroundPermission()
+        // "Allow all the time" may have just been given: start watching for the phone moving.
+        if (sharing.isSharing.value) viewModelScope.launch { LiveShare.arm(context, device) }
         refresh()
     }
 
@@ -181,9 +183,11 @@ class MapViewModel @Inject internal constructor(
         sharing.set(on)
         if (on) {
             LocationSharing.start(context)
+            viewModelScope.launch { LiveShare.arm(context, device) }
             refresh()
         } else {
             LocationSharing.stop(context)
+            viewModelScope.launch { LiveShare.disarm(context, device) }
             tracker.forgetShared()
             val state = uiState.value
             val familyId = state.familyId ?: return
