@@ -259,10 +259,10 @@ private fun RoomDetail(overview: RoomOverview, state: RoomsUiState, actions: Roo
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Box {
             RoomPicture(room, Modifier.fillMaxWidth().aspectRatio(DETAIL_RATIO))
-            // Round buttons on a solid color, so they stand out from any picture.
+            // Dark round buttons with a light icon, so they stand out from any picture.
             val buttonColors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface,
+                containerColor = MaterialTheme.colorScheme.inverseSurface,
+                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
             )
             FilledIconButton(onClick = onBack, Modifier.padding(12.dp), colors = buttonColors) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.room_back))
