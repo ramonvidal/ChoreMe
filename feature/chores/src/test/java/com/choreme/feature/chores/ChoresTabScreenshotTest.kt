@@ -6,7 +6,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -61,7 +63,7 @@ class ChoresTabScreenshotTest {
         ChoreDone("12", "Fold clothes", "mia", today.minusDays(3), points = 2, helpers = setOf("leo")),
     )
 
-    private fun state(me: Member) = ChoresUiState(
+    private fun state(me: Member, pointsOn: Boolean = true) = ChoresUiState(
         loading = false,
         familyId = "f",
         me = me,
@@ -72,14 +74,16 @@ class ChoresTabScreenshotTest {
         groceriesToBuy = 5,
         week = weeklySummary(log, members, today),
         weekPoints = familyPoints(log, today),
+        weekFinished = log.size,
+        pointsOn = pointsOn,
     )
 
-    private fun shoot(name: String, me: Member, dark: Boolean, fontScale: Float = 1f) {
+    private fun shoot(name: String, me: Member, dark: Boolean, fontScale: Float = 1f, pointsOn: Boolean = true) {
         compose.setContent {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
                 CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
                 Surface(Modifier.fillMaxSize()) {
-                    ChoresContent(state(me), reminders = emptyMap(), onOpenGroceries = {}, actions = ChoresActions())
+                    ChoresContent(state(me, pointsOn), reminders = emptyMap(), onOpenGroceries = {}, actions = ChoresActions())
                 }
             }
             }
@@ -96,6 +100,14 @@ class ChoresTabScreenshotTest {
 
     @Test
     fun parentDark() = shoot("tab-chores-dark", mom, dark = true)
+
+    /** The family plays without points: no point numbers anywhere on the tab. */
+    @Test
+    fun withoutPoints() {
+        shoot("tab-chores-no-points", mom, dark = false, pointsOn = false)
+        compose.onAllNodesWithText("points", substring = true).assertCountEquals(0)
+        compose.onNodeWithText("Our home").assertExists()
+    }
 
     /** In Baianês (Brazilian Portuguese, Bahia style). */
     @Test

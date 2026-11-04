@@ -122,6 +122,7 @@
     <string name="change_reminder">Mudar lembrete</string>
     <string name="home_title">Nosso cafofo</string>
     <string name="home_hint">Cada corre pra fazer é um mato na grama. Terminar arranca o mato e nasce flor, mais pros corres pesados. Quanto mais corre esperando, pior o tempo: nuvem, depois chuva, depois temporal. Os pontos contam dos últimos 7 dias, então o jardim nunca zera. As luzes ficam acesas enquanto nada tá atrasado.</string>
+    <string name="home_hint_plain">Cada corre pra fazer é um mato na grama. Terminar arranca o mato e nasce flor. Quanto mais corre esperando, pior o tempo: nuvem, depois chuva, depois temporal. As luzes ficam acesas enquanto nada tá atrasado.</string>
     <string name="home_close">Fechar</string>
     <string name="home_mood_start">Jardim tranquilo. O próximo corre feito planta a primeira flor.</string>
     <string name="home_mood_growing">O jardim tá crescendo. Arretado, galera!</string>
@@ -134,6 +135,8 @@
     <string name="weekly_channel">Resumo da semana</string>
     <string name="weekly_channel_description">Domingo à noite: os pontos de cada um na semana</string>
     <string name="weekly_person">%1$s %2$d</string>
+    <string name="cheer_done">Arretado!</string>
+    <string name="weekly_chores_body">Mandaram bem, galera!</string>
     <string name="cheer_waiting">Arretado! Mainha ou painho vai conferir</string>
     <plurals name="overdue_days">
         <item quantity="one">%d dia atrasado</item>
@@ -178,5 +181,9 @@
     <plurals name="cheer_points">
         <item quantity="one">Arretado! +%d ponto</item>
         <item quantity="other">Arretado! +%d pontos</item>
+    </plurals>
+    <plurals name="weekly_chores_title">
+        <item quantity="one">Essa semana: %d corre feito</item>
+        <item quantity="other">Essa semana: %d corres feitos</item>
     </plurals>
 </resources>

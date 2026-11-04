@@ -101,6 +101,11 @@ class FamilyRepository @Inject constructor(
             docs.map { it.toMember() }.sortedWith(compareBy({ it.role != Role.PARENT }, { it.name.lowercase() }))
         }
 
+    /** Parents turn points on or off for the whole family; fire-and-forget, like other small edits. */
+    fun setPointsEnabled(familyId: String, enabled: Boolean) {
+        family(familyId).update(FirestoreSchema.POINTS_ENABLED, enabled).reportFailure("Couldn't save the points setting")
+    }
+
     /** Away until [until] (inclusive), or back home with null. Fire-and-forget, like other small edits. */
     fun setAway(familyId: String, memberId: String, until: LocalDate?) {
         members(familyId).document(memberId).update(FirestoreSchema.AWAY_UNTIL, until?.toString())

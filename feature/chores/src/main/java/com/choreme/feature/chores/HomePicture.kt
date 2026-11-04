@@ -41,23 +41,25 @@ import com.choreme.core.ui.R as CoreUiR
 
 /** "Our home" at the top of the Chores tab: the picture and one line. Tap for the week's points. */
 @Composable
-internal fun HomeCard(scene: HomeScene, onClick: () -> Unit) {
+internal fun HomeCard(scene: HomeScene, showPoints: Boolean = true, onClick: () -> Unit) {
     Card(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         HomePicture(scene, Modifier.fillMaxWidth().height(112.dp))
         Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 12.dp)) {
             Text(stringResource(R.string.home_title), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-            Text(
-                pluralStringResource(R.plurals.home_points, scene.points, scene.points),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            if (showPoints) {
+                Text(
+                    pluralStringResource(R.plurals.home_points, scene.points, scene.points),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
 
-/** The bigger picture, what it means, and everyone's points this week. */
+/** The bigger picture, what it means, and (with points on) everyone's points this week. */
 @Composable
-internal fun HomeDialog(scene: HomeScene, week: List<MemberWeek>, onDismiss: () -> Unit) {
+internal fun HomeDialog(scene: HomeScene, week: List<MemberWeek>, showPoints: Boolean = true, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.home_title)) },
@@ -66,7 +68,7 @@ internal fun HomeDialog(scene: HomeScene, week: List<MemberWeek>, onDismiss: () 
                 Card { HomePicture(scene, Modifier.fillMaxWidth().height(150.dp)) }
                 Text(stringResource(homeMood(scene)), style = MaterialTheme.typography.bodyLarge)
                 Text(
-                    stringResource(R.string.home_hint),
+                    stringResource(if (showPoints) R.string.home_hint else R.string.home_hint_plain),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

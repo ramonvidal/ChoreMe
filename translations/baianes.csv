@@ -221,6 +221,7 @@ feature/chores,home_title,,Our home,Nosso cafofo
 feature/chores,home_points,one,%d point in 7 days,%d ponto em 7 dias
 feature/chores,home_points,other,%d points in 7 days,%d pontos em 7 dias
 feature/chores,home_hint,,"Each chore to do is a weed in the grass. Finishing it pulls the weed and grows flowers, more for harder chores. The more chores wait, the worse the weather: clouds, then rain, then a storm. Points count over the last 7 days, so the garden never resets. The lights stay on while nothing is overdue.","Cada corre pra fazer é um mato na grama. Terminar arranca o mato e nasce flor, mais pros corres pesados. Quanto mais corre esperando, pior o tempo: nuvem, depois chuva, depois temporal. Os pontos contam dos últimos 7 dias, então o jardim nunca zera. As luzes ficam acesas enquanto nada tá atrasado."
+feature/chores,home_hint_plain,,"Each chore to do is a weed in the grass. Finishing it pulls the weed and grows flowers. The more chores wait, the worse the weather: clouds, then rain, then a storm. The lights stay on while nothing is overdue.","Cada corre pra fazer é um mato na grama. Terminar arranca o mato e nasce flor. Quanto mais corre esperando, pior o tempo: nuvem, depois chuva, depois temporal. As luzes ficam acesas enquanto nada tá atrasado."
 feature/chores,home_close,,Close,Fechar
 feature/chores,home_mood_start,,A quiet garden. The next chore done plants the first flower.,Jardim tranquilo. O próximo corre feito planta a primeira flor.
 feature/chores,home_mood_growing,,"The garden is growing. Nice work, everyone.","O jardim tá crescendo. Arretado, galera!"
@@ -237,6 +238,10 @@ feature/chores,weekly_title,other,This week: %d points,Essa semana: %d pontos
 feature/chores,weekly_person,,%1$s %2$d,%1$s %2$d
 feature/chores,cheer_points,one,Well done! +%d point,Arretado! +%d ponto
 feature/chores,cheer_points,other,Well done! +%d points,Arretado! +%d pontos
+feature/chores,cheer_done,,Well done!,Arretado!
+feature/chores,weekly_chores_title,one,This week: %d chore done,Essa semana: %d corre feito
+feature/chores,weekly_chores_title,other,This week: %d chores done,Essa semana: %d corres feitos
+feature/chores,weekly_chores_body,,"Good work, everyone!","Mandaram bem, galera!"
 feature/chores,cheer_waiting,,Well done! A parent will check it,Arretado! Mainha ou painho vai conferir
 feature/family,family_invite_hint,,Share this code so others can ask to join:,Mande este código pra galera pedir pra entrar:
 feature/family,family_share_invite,,Share invite code,Mandar o código de convite
@@ -318,6 +323,8 @@ feature/family,notes_add,,Add a note,Adicionar recado
 feature/family,notes_new,,New note,Recado novo
 feature/family,notes_edit,,Edit note,Editar recado
 feature/family,notes_placeholder,,e.g. Grandma arrives Friday at 18:00,ex.: Vovó chega sexta às 18:00
+feature/family,points_setting_title,,Chore points,Pontos dos corres
+feature/family,points_setting_hint,,"Chores earn points, shown on the chores, in the week's summary and when someone finishes one. Turn off to hide points everywhere; everything else stays.","Os corres dão pontos, mostrados nos corres, no resumo da semana e quando alguém termina um. Desligue pra esconder os pontos de tudo; o resto continua igual."
 feature/family,week_title,,This week,Essa semana
 feature/family,away_until,,Away until %1$s,Fora até %1$s
 feature/family,away_title,,%1$s is away until…,%1$s tá fora até…

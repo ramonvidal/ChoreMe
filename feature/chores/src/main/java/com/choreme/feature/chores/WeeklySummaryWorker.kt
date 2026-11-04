@@ -54,7 +54,9 @@ internal class WeeklySummaryWorker @AssistedInject constructor(
         val from = weekStart(today)
         val log = withTimeoutOrNull(TIMEOUT_MS) { chores.observeLog(session.familyId, from).first() } ?: return Result.retry()
         val allChores = withTimeoutOrNull(TIMEOUT_MS) { chores.observeChores(session.familyId).first() } ?: return Result.retry()
-        weekRecap(completeLog(log, allChores), members, today)?.let(::show)
+        // Without points, the recap only says how many chores got done: no numbers per person.
+        val pointsOn = withTimeoutOrNull(TIMEOUT_MS) { families.observeFamily(session.familyId).first() }?.pointsEnabled ?: true
+        weekRecap(completeLog(log, allChores), members, today)?.let { show(it, pointsOn) }
         return Result.success()
     }
 
@@ -63,15 +65,23 @@ internal class WeeklySummaryWorker @AssistedInject constructor(
         PackageManager.PERMISSION_GRANTED
 
     @Suppress("MissingPermission") // Checked in canNotify().
-    private fun show(recap: WeekRecap) {
+    private fun show(recap: WeekRecap, pointsOn: Boolean) {
         val context = applicationContext
         val manager = context.getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(
             NotificationChannel(CHANNEL_ID, context.getString(R.string.weekly_channel), NotificationManager.IMPORTANCE_DEFAULT)
                 .apply { description = context.getString(R.string.weekly_channel_description) },
         )
-        val title = context.resources.getQuantityString(R.plurals.weekly_title, recap.totalPoints, recap.totalPoints)
-        val text = recap.byPerson.joinToString(", ") { (name, points) -> context.getString(R.string.weekly_person, name, points) }
+        val title = if (pointsOn) {
+            context.resources.getQuantityString(R.plurals.weekly_title, recap.totalPoints, recap.totalPoints)
+        } else {
+            context.resources.getQuantityString(R.plurals.weekly_chores_title, recap.chores, recap.chores)
+        }
+        val text = if (pointsOn) {
+            recap.byPerson.joinToString(", ") { (name, points) -> context.getString(R.string.weekly_person, name, points) }
+        } else {
+            context.getString(R.string.weekly_chores_body)
+        }
 
         // Opens the app without this module having to know its activity.
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)

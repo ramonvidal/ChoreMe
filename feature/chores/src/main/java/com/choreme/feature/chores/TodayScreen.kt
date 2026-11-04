@@ -166,7 +166,7 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
     // A small "well done" each time a chore is finished: a tick, the points, a little buzz.
     fun finished(chore: Chore, approved: Boolean = false) {
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-        cheer = Cheer(chore.points, waiting = !approved && !state.isParent, at = System.nanoTime())
+        cheer = Cheer(if (state.pointsOn) chore.points else 0, waiting = !approved && !state.isParent, at = System.nanoTime())
     }
     var editing by remember { mutableStateOf<Chore?>(null) }
     var adding by remember { mutableStateOf(false) }
@@ -195,7 +195,7 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
                 }
                 !state.hasChores -> item(key = "empty") { EmptyChores(state.isParent) }
                 else -> {
-                    item(key = "home") { HomeCard(state.scene, onClick = { showHome = true }) }
+                    item(key = "home") { HomeCard(state.scene, showPoints = state.pointsOn, onClick = { showHome = true }) }
                     val board = state.board
                     val choreCard: @Composable (Chore, Boolean) -> Unit = { chore, mine ->
                         ChoreCard(
@@ -323,7 +323,7 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
             popular = state.popular,
             canRemoveSaved = state::canRemove,
             onRemoveSaved = actions.removeSaved,
-            canSetPoints = state.isParent,
+            canSetPoints = state.isParent && state.pointsOn,
             people = if (state.isParent) state.atHome else emptyList(),
             onSave = { draft ->
                 adding = false
@@ -344,7 +344,7 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
                 actions.update(chore, it)
                 editing = null
             },
-            canSetPoints = state.isParent,
+            canSetPoints = state.isParent && state.pointsOn,
             people = if (state.isParent) state.atHome else emptyList(),
             onDelete = {
                 actions.delete(chore)
@@ -368,7 +368,7 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
             onDismiss = { remindFor = null },
         )
     }
-    if (showHome) HomeDialog(state.scene, state.week, onDismiss = { showHome = false })
+    if (showHome) HomeDialog(state.scene, if (state.pointsOn) state.week else emptyList(), showPoints = state.pointsOn, onDismiss = { showHome = false })
     doneByFor?.let { chore ->
         PeopleDialog(
             title = stringResource(R.string.done_by_title),
@@ -399,7 +399,7 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
     }
 }
 
-/** Finishing a chore: its points, or, for a kid, that it's gone to a parent. [at] tells two apart. */
+/** Finishing a chore: its points (0 when the family plays without points), or, for a kid, that it's gone to a parent. [at] tells two apart. */
 internal data class Cheer(val points: Int, val waiting: Boolean, val at: Long)
 
 /** A dark pill that pops up with a bouncing tick for a moment, then fades. */
@@ -432,6 +432,7 @@ internal fun CheerBubble(cheer: Cheer?, onGone: () -> Unit, modifier: Modifier =
                 Spacer(Modifier.width(10.dp))
                 Text(
                     if (current.waiting) stringResource(R.string.cheer_waiting)
+                    else if (current.points == 0) stringResource(R.string.cheer_done)
                     else pluralStringResource(R.plurals.cheer_points, current.points, current.points),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.inverseOnSurface,
@@ -582,7 +583,7 @@ internal fun ChoreCard(
         if (chore.recurrence != Recurrence.Once) {
             add(recurrenceLabel(chore.recurrence) + (chore.repeatUntil?.let { " " + untilLabel(it) } ?: ""))
         }
-        if (chore.points > 1) add(pluralStringResource(CoreUiR.plurals.points, chore.points, chore.points))
+        if (chore.points > 1 && state.pointsOn) add(pluralStringResource(CoreUiR.plurals.points, chore.points, chore.points))
         if (reminder != null) add(stringResource(R.string.reminder_at, reminder.atZone(ZoneId.systemDefault()).format(SHORT_TIME)))
     }.joinToString(" · ")
 

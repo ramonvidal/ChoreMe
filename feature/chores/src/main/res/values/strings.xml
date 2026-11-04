@@ -173,6 +173,7 @@
         <item quantity="other">%d points in 7 days</item>
     </plurals>
     <string name="home_hint">Each chore to do is a weed in the grass. Finishing it pulls the weed and grows flowers, more for harder chores. The more chores wait, the worse the weather: clouds, then rain, then a storm. Points count over the last 7 days, so the garden never resets. The lights stay on while nothing is overdue.</string>
+    <string name="home_hint_plain">Each chore to do is a weed in the grass. Finishing it pulls the weed and grows flowers. The more chores wait, the worse the weather: clouds, then rain, then a storm. The lights stay on while nothing is overdue.</string>
     <string name="home_close">Close</string>
     <string name="home_mood_start">A quiet garden. The next chore done plants the first flower.</string>
     <string name="home_mood_growing">The garden is growing. Nice work, everyone.</string>
@@ -195,5 +196,11 @@
         <item quantity="one">Well done! +%d point</item>
         <item quantity="other">Well done! +%d points</item>
     </plurals>
+    <string name="cheer_done">Well done!</string>
+    <plurals name="weekly_chores_title">
+        <item quantity="one">This week: %d chore done</item>
+        <item quantity="other">This week: %d chores done</item>
+    </plurals>
+    <string name="weekly_chores_body">Good work, everyone!</string>
     <string name="cheer_waiting">Well done! A parent will check it</string>
 </resources>

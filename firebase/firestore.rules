@@ -175,7 +175,9 @@ service cloud.firestore {
         && validName(request.resource.data.name);
       allow update: if isParent(f)
         && request.resource.data.createdBy == resource.data.createdBy
-        && request.resource.data.inviteCode == resource.data.inviteCode;
+        && request.resource.data.inviteCode == resource.data.inviteCode
+        // Whether the family plays with points: a parent's choice, yes or no.
+        && (!('pointsEnabled' in request.resource.data) || request.resource.data.pointsEnabled is bool);
       allow delete: if isParent(f);
 
       match /memberUids/{uid} {

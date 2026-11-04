@@ -154,6 +154,14 @@ describe('kids inside the family', () => {
     await assertFails(deleteDoc(doc(db, 'families', FAMILY, 'memberUids', 'alice')));
   });
 
+  test('only a parent decides whether the family plays with points', async () => {
+    const ref = doc(parent('alice'), 'families', FAMILY);
+    await assertSucceeds(updateDoc(ref, { pointsEnabled: false }));
+    await assertSucceeds(updateDoc(ref, { pointsEnabled: true }));
+    await assertFails(updateDoc(ref, { pointsEnabled: 'no' }));
+    await assertFails(updateDoc(doc(kidDevice('kid1'), 'families', FAMILY), { pointsEnabled: false }));
+  });
+
   test('a parent can remove a kid device, which loses access', async () => {
     await assertSucceeds(deleteDoc(doc(parent('alice'), 'families', FAMILY, 'memberUids', 'kid1')));
     await assertFails(getDocs(collection(kidDevice('kid1'), 'families', FAMILY, 'members')));

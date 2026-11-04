@@ -36,6 +36,8 @@ object FirestoreSchema {
     const val FAMILY_NAME = "familyName"
     const val NAME = "name"
     const val INVITE_CODE = "inviteCode"
+    /** On the family document: whether points are shown (missing: yes). */
+    const val POINTS_ENABLED = "pointsEnabled"
     const val CREATED_BY = "createdBy"
     const val CREATED_AT = "createdAt"
     const val ROLE = "role"
@@ -113,6 +115,7 @@ fun DocumentSnapshot.toFamily() = Family(
     id = id,
     name = getString(FirestoreSchema.NAME).orEmpty(),
     inviteCode = getString(FirestoreSchema.INVITE_CODE).orEmpty(),
+    pointsEnabled = getBoolean(FirestoreSchema.POINTS_ENABLED) ?: true,
 )
 
 fun DocumentSnapshot.toMember() = Member(

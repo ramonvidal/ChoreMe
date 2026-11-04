@@ -83,6 +83,28 @@ class FamilyTabScreenshotTest {
     fun parent() {
         shoot("tab-family", dark = false)
         compose.onNodeWithText("Dinner's ready!").assertExists()
+        compose.onNodeWithText("Chore points").assertExists() // the parents' switch
+        compose.onNodeWithText("This week").assertExists()
+    }
+
+    /** A family that plays without points: the week's points are gone; the switch stays to turn them back on. */
+    @Test
+    fun withoutPoints() {
+        compose.setContent {
+            ChoreMeTheme(darkTheme = false, dynamicColor = false) {
+                Surface(Modifier.fillMaxSize()) {
+                    FamilyContent(
+                        state.copy(family = state.family?.copy(pointsEnabled = false)),
+                        ActionState(),
+                        signOutNeedsApprovalAgain = false,
+                        actions = FamilyActions(),
+                    ) { Text("(This phone's settings)") }
+                }
+            }
+        }
+        compose.onNodeWithText("Chore points").assertExists()
+        compose.onNodeWithText("This week").assertDoesNotExist()
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/tab-family-no-points.png")
     }
 
     @Test

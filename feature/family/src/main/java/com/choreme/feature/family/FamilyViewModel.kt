@@ -58,6 +58,8 @@ data class FamilyUiState(
     val today: LocalDate = LocalDate.now(),
 ) {
     val isParent get() = me?.role == Role.PARENT
+    /** The family plays with points (the default). */
+    val pointsOn get() = family?.pointsEnabled ?: true
     val meMember get() = members.firstOrNull { it.id == me?.memberId }
 
     /** You can mark yourself away; parents can mark anyone. */
@@ -111,6 +113,11 @@ class FamilyViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FamilyUiState())
 
     /** Sends a message to everyone, and pings their phones so it shows at once (with ntfy). */
+    fun setPointsEnabled(enabled: Boolean) {
+        val me = uiState.value.me ?: return
+        families.setPointsEnabled(me.familyId, enabled)
+    }
+
     fun sendMessage(text: String) {
         val me = uiState.value.me ?: return
         val message = text.trim().take(FamilyMessage.MAX_LENGTH).takeIf { it.isNotEmpty() } ?: return

@@ -47,6 +47,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.Switch
 import androidx.compose.ui.semantics.Role as SemanticsRole
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
@@ -91,6 +93,7 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
             signOut = { viewModel.signOut() },
             leave = { viewModel.leave() },
             deleteMyData = { viewModel.deleteMyData { requestGoogleIdToken(context) } },
+            setPointsEnabled = { viewModel.setPointsEnabled(it) },
         ),
         phoneSettings = { PhoneSettings() },
     )
@@ -111,6 +114,7 @@ internal class FamilyActions(
     val signOut: () -> Unit = {},
     val leave: () -> Unit = {},
     val deleteMyData: () -> Unit = {},
+    val setPointsEnabled: (Boolean) -> Unit = {},
 )
 
 /** The whole tab, drawn from [state] alone; [phoneSettings] is "This phone", which has its own view model. */
@@ -209,7 +213,11 @@ internal fun FamilyContent(
             }
         }
 
-        if (state.isParent && state.week.isNotEmpty()) {
+        if (state.isParent) {
+            item(key = "points-setting") { PointsSetting(state.pointsOn, actions.setPointsEnabled) }
+        }
+
+        if (state.isParent && state.pointsOn && state.week.isNotEmpty()) {
             item { SectionLabel(stringResource(R.string.week_title)) }
             item(key = "week") { WeekSection(state.week) }
         }
@@ -388,6 +396,31 @@ private fun ProfileOption(label: String, selected: Boolean, onSelect: () -> Unit
         RadioButton(selected = selected, onClick = null)
         Spacer(Modifier.width(8.dp))
         Text(label)
+    }
+}
+
+/** For parents: whether the family plays with points. Off hides points everywhere. */
+@Composable
+internal fun PointsSetting(on: Boolean, onChange: (Boolean) -> Unit) {
+    Card(Modifier.fillMaxWidth()) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .toggleable(value = on, onValueChange = onChange, role = SemanticsRole.Switch)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.points_setting_title), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    stringResource(R.string.points_setting_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Switch(checked = on, onCheckedChange = null)
+        }
     }
 }
 

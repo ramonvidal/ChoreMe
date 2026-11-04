@@ -83,6 +83,9 @@
     <string name="notes_new">New note</string>
     <string name="notes_edit">Edit note</string>
     <string name="notes_placeholder">e.g. Grandma arrives Friday at 18:00</string>
+    <!-- Points setting -->
+    <string name="points_setting_title">Chore points</string>
+    <string name="points_setting_hint">Chores earn points, shown on the chores, in the week\'s summary and when someone finishes one. Turn off to hide points everywhere; everything else stays.</string>
     <!-- This week -->
     <string name="week_title">This week</string>
     <!-- Away -->
