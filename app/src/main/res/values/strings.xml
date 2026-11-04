@@ -1,6 +1,7 @@
 <resources>
     <string name="nav_today">Chores</string>
     <string name="nav_groceries">Groceries</string>
+    <string name="nav_rooms">Rooms</string>
     <string name="nav_agenda">Agenda</string>
     <string name="nav_family">Family</string>
     <string name="nav_map">Map</string>

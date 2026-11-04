@@ -578,6 +578,7 @@ internal fun ChoreCard(
             chore.reportedBy == me.id -> add(stringResource(R.string.reported_by_you))
             chore.reportedBy != null -> state.nameOf(chore.reportedBy)?.let { add(stringResource(R.string.reported_by, it)) }
         }
+        chore.roomId?.let { state.roomNames[it] }?.let { add(it) }
         if (overdueDays > 0) add(pluralStringResource(R.plurals.overdue_days, overdueDays, overdueDays))
         if (overdueDays < 0) add(dayLabel(chore.dueDate, state.today))
         if (chore.recurrence != Recurrence.Once) {

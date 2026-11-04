@@ -158,6 +158,18 @@ rules let kids make only the grab / let go / "I finished" steps, in their own na
       a newer build shows "ChoreMe 0.31 is available – Install", downloads, and
       Android asks to confirm. No store or extra app needed (only the very first
       install is from the link). Modules `:core:update` and `:feature:update`.
+- [x] **Points are optional.** A parent switches them off for the whole family
+      (Family tab): no points, totals or rankings show anywhere; the garden grows
+      with the chores done instead. Stored on the family document (`pointsEnabled`).
+- [x] **Rooms tab** (`:feature:rooms`). The family adds the rooms of the house, each
+      with a kind (a ready-made sketch is drawn for it), an optional photo (a small
+      JPEG kept in the room document, under 150 KB: Cloud Storage needs a paid plan),
+      a description and tasks. A task is an ordinary repeating chore with a `roomId`,
+      so it also shows on the Chores tab (with the room's name). A room shows when it
+      was last done ("Last done 5 days ago") and its next task ("every 10 days").
+      Parents manage rooms and tasks; anyone can mark a task done (kids go through
+      approval, as always). Deleting a room deletes its tasks. The living-house
+      picture on Chores stays; improving it is for a later version.
 - [ ] **Extras.** Home-screen widget ("Out of…" and today's chores), weekly
       dark mode polish.
 

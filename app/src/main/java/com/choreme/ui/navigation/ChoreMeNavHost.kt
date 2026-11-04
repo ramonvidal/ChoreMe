@@ -1,7 +1,9 @@
 package com.choreme.ui.navigation
 
 import com.choreme.R
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -49,15 +51,19 @@ import com.choreme.feature.groceries.GROCERIES_ROUTE
 import com.choreme.feature.groceries.groceriesScreen
 import com.choreme.feature.map.MAP_ROUTE
 import com.choreme.feature.map.mapScreen
+import com.choreme.feature.rooms.ROOMS_ROUTE
+import com.choreme.feature.rooms.roomsScreen
 import com.choreme.feature.update.UpdateBanner
 
 enum class TopLevelDestination(
     val route: String,
     @StringRes val label: Int,
-    val icon: ImageVector,
+    val icon: ImageVector? = null,
+    @DrawableRes val iconRes: Int = 0,
 ) {
     Today(TODAY_ROUTE, R.string.nav_today, Icons.Filled.Home),
     Groceries(GROCERIES_ROUTE, R.string.nav_groceries, Icons.Filled.ShoppingCart),
+    Rooms(ROOMS_ROUTE, R.string.nav_rooms, iconRes = CoreUiR.drawable.ic_nav_rooms),
     Agenda(AGENDA_ROUTE, R.string.nav_agenda, Icons.Filled.DateRange),
     Places(MAP_ROUTE, R.string.nav_map, Icons.Filled.Place),
     Family(FAMILY_ROUTE, R.string.nav_family, Icons.Filled.Person),
@@ -115,7 +121,11 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0, choresBadge: Int = 0, groceries
                                     }
                                 },
                             ) {
-                                Icon(destination.icon, contentDescription = null)
+                                if (destination.icon != null) {
+                                    Icon(destination.icon, contentDescription = null)
+                                } else {
+                                    Icon(painterResource(destination.iconRes), contentDescription = null)
+                                }
                             }
                         },
                         label = { Text(stringResource(destination.label)) },
@@ -137,6 +147,7 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0, choresBadge: Int = 0, groceries
         ) {
             todayScreen(onOpenGroceries = { navController.navigateToTab(TopLevelDestination.Groceries.route) })
             groceriesScreen()
+            roomsScreen()
             agendaScreen()
             mapScreen()
             familyScreen()

@@ -12,6 +12,7 @@ import {
   getDoc,
   getDocs,
   collection,
+  Bytes,
   setDoc,
   updateDoc,
   writeBatch,
@@ -537,6 +538,33 @@ describe('family news, notes, lists, chore log and away', () => {
     await assertSucceeds(updateDoc(fam(kidDevice('kid1'), 'notes', 'wifi'), { text: 'Wi-Fi: hunter3', updatedAt: 2 }));
     await assertFails(updateDoc(fam(parent('alice'), 'notes', 'wifi'), { createdBy: 'alice' }));
     await assertSucceeds(deleteDoc(fam(parent('alice'), 'notes', 'wifi')));
+  });
+
+  test('rooms: everyone sees them, parents manage them, pictures stay small', async () => {
+    const room = { name: 'Bathroom 1', type: 'BATHROOM', description: 'Upstairs, next to the kids room' };
+    await assertSucceeds(setDoc(fam(parent('alice'), 'rooms', 'bath1'), room));
+    await assertSucceeds(setDoc(fam(parent('alice'), 'rooms', 'pic'), { ...room, photo: Bytes.fromUint8Array(new Uint8Array(1000)) }));
+    await assertFails(setDoc(fam(parent('alice'), 'rooms', 'big'), { ...room, photo: Bytes.fromUint8Array(new Uint8Array(150001)) }));
+    await assertFails(setDoc(fam(parent('alice'), 'rooms', 'text'), { ...room, photo: 'not bytes' }));
+    await assertFails(setDoc(fam(parent('alice'), 'rooms', 'noname'), { ...room, name: '' }));
+    await assertFails(setDoc(fam(parent('alice'), 'rooms', 'long'), { ...room, description: 'x'.repeat(501) }));
+    await assertFails(setDoc(fam(kidDevice('kid1'), 'rooms', 'kid'), room));
+    await assertFails(updateDoc(fam(kidDevice('kid1'), 'rooms', 'bath1'), { name: 'Mine' }));
+    await assertFails(deleteDoc(fam(kidDevice('kid1'), 'rooms', 'bath1')));
+    await assertSucceeds(getDocs(collection(kidDevice('kid2'), 'families', FAMILY, 'rooms')));
+    await assertFails(getDocs(collection(parent('mallory'), 'families', FAMILY, 'rooms')));
+    await assertSucceeds(deleteDoc(fam(parent('alice'), 'rooms', 'bath1')));
+  });
+
+  test('a chore can belong to a room, by its id', async () => {
+    const task = {
+      title: 'Clean bathroom', template: 'CLEAN_BATHROOM', recurrenceType: 'EVERY_DAYS', everyDays: 10, weekDays: [],
+      dueDate: '2026-11-10', status: 'OPEN', claimedBy: null, completedBy: null, approvedBy: null,
+      lastDoneBy: null, lastDoneOn: null, createdBy: 'alice',
+    };
+    await assertSucceeds(setDoc(fam(parent('alice'), 'chores', 'c1'), { ...task, roomId: 'bath1' }));
+    await assertFails(setDoc(fam(parent('alice'), 'chores', 'c2'), { ...task, roomId: 12 }));
+    await assertFails(setDoc(fam(parent('alice'), 'chores', 'c3'), { ...task, roomId: 'x'.repeat(41) }));
   });
 
   test('lists: anyone makes one; items can be on it', async () => {

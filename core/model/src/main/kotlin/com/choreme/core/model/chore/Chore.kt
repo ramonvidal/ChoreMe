@@ -57,6 +57,8 @@ data class Chore(
      * them every time round ("Take medicine", every day, is always mine).
      */
     val assignedTo: Set<String> = emptySet(),
+    /** The room this task looks after (a task of the Rooms tab), if any. */
+    val roomId: String? = null,
     val completedBy: String? = null,
     val approvedBy: String? = null,
     val lastDoneBy: String? = null,

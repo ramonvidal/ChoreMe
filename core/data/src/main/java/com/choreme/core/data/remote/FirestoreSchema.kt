@@ -31,6 +31,7 @@ object FirestoreSchema {
     const val CHORE_LOG = "choreLog"
     const val LISTS = "lists"
     const val MESSAGES = "messages"
+    const val ROOMS = "rooms"
 
     const val FAMILY_ID = "familyId"
     const val FAMILY_NAME = "familyName"
@@ -85,6 +86,13 @@ object FirestoreSchema {
     const val MONTH_DAY = "monthDay"
     /** The last day a repeating chore can be due ("2027-12-31"); missing repeats for ever. */
     const val REPEAT_UNTIL = "repeatUntil"
+
+    /** On a chore: the room it looks after (rooms collection). */
+    const val ROOM_ID = "roomId"
+
+    // Rooms
+    const val DESCRIPTION = "description"
+    const val PHOTO = "photo"
 
     // Locations and places
     const val LATITUDE = "latitude"

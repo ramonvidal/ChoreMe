@@ -14,6 +14,7 @@ import com.choreme.core.data.remote.FirestoreSchema.LAST_DONE_ON
 import com.choreme.core.data.remote.FirestoreSchema.MONTH_DAY
 import com.choreme.core.data.remote.FirestoreSchema.NOTIFY_WHEN_DONE
 import com.choreme.core.data.remote.FirestoreSchema.REPEAT_UNTIL
+import com.choreme.core.data.remote.FirestoreSchema.ROOM_ID
 import com.choreme.core.data.remote.FirestoreSchema.RECURRENCE_TYPE
 import com.choreme.core.data.remote.FirestoreSchema.STATUS
 import com.choreme.core.data.remote.FirestoreSchema.TEMPLATE
@@ -62,6 +63,7 @@ internal fun Chore.toFields(): Map<String, Any?> = mapOf(
     URGENT to urgent,
     POINTS to points.toLong(),
     DONE_COUNT to doneCount.toLong(),
+    ROOM_ID to roomId,
 )
 
 /** Null for documents that can't be read as a chore, so one bad document doesn't hide the rest. */
@@ -97,6 +99,7 @@ internal fun DocumentSnapshot.toChore(): Chore? = runCatching {
         urgent = getBoolean(URGENT) ?: false,
         points = getLong(POINTS)?.toInt()?.coerceIn(Chore.POINTS) ?: 1,
         doneCount = getLong(DONE_COUNT)?.toInt() ?: 0,
+        roomId = getString(ROOM_ID),
     )
 }.getOrNull()
 

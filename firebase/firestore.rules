@@ -65,6 +65,14 @@ service cloud.firestore {
         && (!('template' in d) || (d.template is string && d.template.size() <= 30));
     }
 
+    // A room of the house: a name, its kind, a description and maybe a small picture (JPEG bytes).
+    function validRoom(d) {
+      return validName(d.name)
+        && d.type is string && d.type.size() <= 30
+        && (!('description' in d) || (d.description is string && d.description.size() <= 500))
+        && (!('photo' in d) || d.photo == null || (d.photo is bytes && d.photo.size() <= 150000));
+    }
+
     function myMemberId(f) {
       return get(membershipPath(f)).data.memberId;
     }
@@ -80,6 +88,8 @@ service cloud.firestore {
         && (!('urgent' in c) || c.urgent is bool)
         && validPoints(c)
         && (!('doneCount' in c) || (c.doneCount is int && c.doneCount >= 0))
+        // The room a task looks after (see rooms).
+        && (!('roomId' in c) || c.roomId == null || (c.roomId is string && c.roomId.size() <= 40))
         && validPeople(c, 'helpers') && validPeople(c, 'lastHelpers') && validPeople(c, 'assignedTo');
     }
 
@@ -301,6 +311,13 @@ service cloud.firestore {
           && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 200
           && request.resource.data.at is int;
         allow delete: if isParent(f) || (isMember(f) && resource.data.from == myMemberId(f));
+      }
+
+      // The house's rooms. Everyone sees them; parents add, change and remove them.
+      match /rooms/{roomId} {
+        allow read: if isMember(f);
+        allow create, update: if isParent(f) && validRoom(request.resource.data);
+        allow delete: if isParent(f);
       }
 
       // The family board. Anyone writes a note; the writer or a parent changes or removes it.

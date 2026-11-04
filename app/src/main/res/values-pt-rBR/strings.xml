@@ -3,6 +3,7 @@
 <resources>
     <string name="nav_today">Corres</string>
     <string name="nav_groceries">Feira</string>
+    <string name="nav_rooms">Cômodos</string>
     <string name="nav_agenda">Agenda</string>
     <string name="nav_family">Família</string>
     <string name="nav_map">Mapa</string>

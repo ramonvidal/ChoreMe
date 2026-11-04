@@ -9,6 +9,7 @@ import com.choreme.core.calendar.CalendarRepository
 import com.choreme.core.data.ChoreRepository
 import com.choreme.core.data.FamilyRepository
 import com.choreme.core.data.GroceryRepository
+import com.choreme.core.data.RoomRepository
 import com.choreme.core.data.PushEndpointRepository
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
@@ -85,6 +86,8 @@ data class ChoresUiState(
     val weekFinished: Int = 0,
     /** Whether the family plays with points; off, they show nowhere. */
     val pointsOn: Boolean = true,
+    /** The family's rooms by id, so a task of a room says which ("Bathroom 1"). */
+    val roomNames: Map<String, String> = emptyMap(),
 ) {
     val isParent get() = me?.role == Role.PARENT
     val hasChores get() = chores.isNotEmpty()
@@ -141,6 +144,7 @@ class ChoresViewModel @Inject internal constructor(
     families: FamilyRepository,
     private val chores: ChoreRepository,
     groceries: GroceryRepository,
+    rooms: RoomRepository,
     private val endpoints: PushEndpointRepository,
     private val push: PushSender,
     private val calendar: CalendarRepository,
@@ -171,8 +175,8 @@ class ChoresViewModel @Inject internal constructor(
                     chores.observeFinished(session.familyId, weekStart(LocalDate.now())).onStart { emit(emptyList()) },
                     ::Data,
                 ),
-                families.observeFamily(session.familyId),
-            ) { (allChores, members, groceryItems, saved, finished), family ->
+                combine(families.observeFamily(session.familyId), rooms.observe(session.familyId).onStart { emit(emptyList()) }, ::Pair),
+            ) { (allChores, members, groceryItems, saved, finished), (family, roomList) ->
                 val today = LocalDate.now()
                 ChoresUiState(
                     loading = false,
@@ -189,6 +193,7 @@ class ChoresViewModel @Inject internal constructor(
                     weekPoints = familyPoints(finished, today),
                     weekFinished = finished.size,
                     pointsOn = family?.pointsEnabled ?: true,
+                    roomNames = roomList.associate { it.id to it.name },
                 )
             }
         }

@@ -1,6 +1,7 @@
 module,key,quantity,english,baianes
 app,nav_today,,Chores,Corres
 app,nav_groceries,,Groceries,Feira
+app,nav_rooms,,Rooms,Cômodos
 app,nav_agenda,,Agenda,Agenda
 app,nav_family,,Family,Família
 app,nav_map,,Map,Mapa
@@ -475,6 +476,85 @@ feature/onboarding,awaiting_cancel,,Cancel request,Cancelar pedido
 feature/onboarding,firebase_missing_title,,Sync isn't set up,A sincronização não tá configurada
 feature/onboarding,firebase_missing_body,,"This build has no Firebase configuration, so family sharing can't work. Add app/google-services.json as described in the README and rebuild.","Esta versão não tem a configuração do Firebase, então a família não sincroniza. Adicione app/google-services.json como explica o README e gere de novo."
 feature/onboarding,error_sign_in,,Couldn't sign in. Check your connection and try again.,Não deu pra entrar. Veja a internet e tente de novo.
+feature/rooms,rooms_title,,Rooms,Cômodos
+feature/rooms,rooms_count,one,%d room,%d cômodo
+feature/rooms,rooms_count,other,%d rooms,%d cômodos
+feature/rooms,rooms_late,one,%d task is late,%d tarefa atrasada
+feature/rooms,rooms_late,other,%d tasks are late,%d tarefas atrasadas
+feature/rooms,rooms_empty_title,,"Your home, room by room","Sua casa, cômodo por cômodo"
+feature/rooms,rooms_empty_body,,"Add the rooms you look after, with the tasks that keep them tidy. Each room shows when it was last done and when it's due again.","Adicione os cômodos que vocês cuidam, com as tarefas que mantêm tudo em ordem. Cada cômodo mostra quando foi feito pela última vez e quando vence de novo."
+feature/rooms,rooms_empty_body_kid,,A parent can add the rooms of the house here.,Um dos pais pode adicionar aqui os cômodos da casa.
+feature/rooms,rooms_add,,Add a room,Adicionar cômodo
+feature/rooms,room_new,,New room,Novo cômodo
+feature/rooms,room_edit,,Edit room,Editar cômodo
+feature/rooms,room_back,,Back,Voltar
+feature/rooms,room_name,,Name,Nome
+feature/rooms,room_name_hint,,Bathroom 1,Banheiro 1
+feature/rooms,room_type,,Kind of room,Tipo de cômodo
+feature/rooms,room_description,,Notes (optional),Observações (opcional)
+feature/rooms,room_photo_add,,Add a picture,Adicionar foto
+feature/rooms,room_photo_change,,Change picture,Trocar foto
+feature/rooms,room_photo_remove,,Use the drawing,Usar o desenho
+feature/rooms,room_photo_failed,,Couldn't use that picture. Try another one.,Não deu pra usar essa foto. Tente outra.
+feature/rooms,room_delete,,Delete room,Excluir cômodo
+feature/rooms,room_delete_title,,Delete %1$s?,Excluir %1$s?
+feature/rooms,room_delete_body,one,The room and its %d task go away for good.,O cômodo e a sua %d tarefa somem de vez.
+feature/rooms,room_delete_body,other,The room and its %d tasks go away for good.,O cômodo e as suas %d tarefas somem de vez.
+feature/rooms,room_tasks,,Tasks,Tarefas
+feature/rooms,room_no_tasks,,"No tasks yet. Add what keeps this room in shape, like cleaning it every week.","Ainda sem tarefas. Adicione o que mantém o cômodo em dia, como limpar toda semana."
+feature/rooms,room_no_tasks_kid,,No tasks yet.,Ainda sem tarefas.
+feature/rooms,room_no_tasks_short,,No tasks yet,Ainda sem tarefas
+feature/rooms,room_never_done,,Not done yet,Ainda não foi feito
+feature/rooms,room_last_done,,Last done %1$s,Feito por último %1$s
+feature/rooms,room_next,,"Next: %1$s, %2$s","Próxima: %1$s, %2$s"
+feature/rooms,room_done,,Done,Feito
+feature/rooms,room_waiting_approval,,Waiting for a parent,Esperando os pais
+feature/rooms,room_add_task,,Add a task,Adicionar tarefa
+feature/rooms,task_ideas,,Ideas,Ideias
+feature/rooms,task_name,,Task,Tarefa
+feature/rooms,task_repeat,,Repeat,Repetir
+feature/rooms,task_last_done,,Last done,Feito por último
+feature/rooms,task_last_unknown,,Not sure,Não lembro
+feature/rooms,task_remove,,Remove task,Remover tarefa
+feature/rooms,task_due_today,,Due today,Pra hoje
+feature/rooms,task_due_in,one,Due in %d day,Daqui a %d dia
+feature/rooms,task_due_in,other,Due in %d days,Daqui a %d dias
+feature/rooms,task_late_by,one,%d day late,%d dia de atraso
+feature/rooms,task_late_by,other,%d days late,%d dias de atraso
+feature/rooms,tasks_late,one,%d task late,%d tarefa atrasada
+feature/rooms,tasks_late,other,%d tasks late,%d tarefas atrasadas
+feature/rooms,ago_today,,today,hoje
+feature/rooms,ago_yesterday,,yesterday,ontem
+feature/rooms,ago_days,one,%d day ago,há %d dia
+feature/rooms,ago_days,other,%d days ago,há %d dias
+feature/rooms,every_days,one,every day,todo dia
+feature/rooms,every_days,other,every %d days,a cada %d dias
+feature/rooms,every_days_choice,one,Every day,Todo dia
+feature/rooms,every_days_choice,other,Every %d days,A cada %d dias
+feature/rooms,room_type_living_room,,Living room,Sala
+feature/rooms,room_type_bedroom,,Bedroom,Quarto
+feature/rooms,room_type_kids_room,,Kids' room,Quarto dos guris
+feature/rooms,room_type_bathroom,,Bathroom,Banheiro
+feature/rooms,room_type_kitchen,,Kitchen,Cozinha
+feature/rooms,room_type_dining_room,,Dining room,Sala de jantar
+feature/rooms,room_type_office,,Office,Escritório
+feature/rooms,room_type_laundry,,Laundry,Lavanderia
+feature/rooms,room_type_garage,,Garage,Garagem
+feature/rooms,room_type_garden,,Garden,Jardim
+feature/rooms,room_type_balcony,,Balcony,Varanda
+feature/rooms,room_type_hallway,,Hallway,Corredor
+feature/rooms,room_type_other,,Something else,Outro
+feature/rooms,idea_change_sheets,,Change the sheets,Trocar os lençóis
+feature/rooms,idea_dust,,Dust,Tirar o pó
+feature/rooms,idea_mop,,Mop the floor,Passar pano no chão
+feature/rooms,idea_sweep,,Sweep the floor,Varrer o chão
+feature/rooms,idea_windows,,Clean the windows,Limpar as janelas
+feature/rooms,idea_clean_fridge,,Clean the fridge,Limpar a geladeira
+feature/rooms,idea_clean_oven,,Clean the oven,Limpar o forno
+feature/rooms,idea_clean_toilet,,Clean the toilet,Limpar o vaso
+feature/rooms,idea_wash_towels,,Wash the towels,Lavar as toalhas
+feature/rooms,idea_declutter,,Declutter,Desentulhar
+feature/rooms,idea_mow_lawn,,Mow the lawn,Cortar a grama
 feature/update,update_available,,Nos Corre! %1$s is available,Saiu o Nos Corre! %1$s
 feature/update,update_install,,Install,Instalar
 feature/update,update_later,,Later,Depois
