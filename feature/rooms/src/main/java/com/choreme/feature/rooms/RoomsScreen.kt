@@ -241,7 +241,7 @@ private fun LastDoneLine(overview: RoomOverview, today: LocalDate) {
     Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     if (next != null) {
         val every = next.everyDays?.let { everyText(it) }
-        val due = dueLabel(next, today).first
+        val due = dueLabel(next, today).first.replaceFirstChar { it.lowercase() }
         Text(
             stringResource(R.string.room_next, choreTitle(next.title), if (every != null) "$due · $every" else due),
             style = MaterialTheme.typography.bodyMedium,
