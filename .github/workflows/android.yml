@@ -127,8 +127,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cp app/build/outputs/apk/github/release/app-github-release.apk ChoreMe.apk
-          (cd screenshots && zip -q ../screenshots.zip *.png)
-          gh release create "v0.${GITHUB_RUN_NUMBER}" ChoreMe.apk screenshots.zip \
+          (cd screenshots && zip -q ../screenshots.zip *.png && zip -q ../store-screenshots.zip store-*.png)
+          gh release create "v0.${GITHUB_RUN_NUMBER}" ChoreMe.apk screenshots.zip store-screenshots.zip \
             --target "$GITHUB_SHA" \
             --title "ChoreMe 0.${GITHUB_RUN_NUMBER}" \
             --notes "Build ${GITHUB_RUN_NUMBER} from ${GITHUB_SHA::7}. Install ChoreMe.apk on Android; it updates over any earlier ChoreMe build." \

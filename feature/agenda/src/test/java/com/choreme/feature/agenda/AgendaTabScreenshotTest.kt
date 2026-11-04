@@ -84,4 +84,17 @@ class AgendaTabScreenshotTest {
 
     @Test
     fun monthDark() = shoot("tab-agenda-month-dark", state.copy(view = AgendaView.MONTH), dark = true)
+
+    // Google Play screenshots: 1080 x 1920, in English and in Baianês.
+    @Test
+    @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")
+    fun storeEn() {
+        shoot("store-5-agenda-en", state, dark = false)
+    }
+
+    @Test
+    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
+    fun storePt() {
+        shoot("store-5-agenda-pt", state, dark = false)
+    }
 }

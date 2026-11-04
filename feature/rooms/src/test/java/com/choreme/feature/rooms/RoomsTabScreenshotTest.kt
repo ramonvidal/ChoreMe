@@ -110,4 +110,29 @@ class RoomsTabScreenshotTest {
         }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/room-sketches.png")
     }
+
+    // Google Play screenshots: 1080 x 1920, in English and in Baianês.
+    @Test
+    @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")
+    fun storeEn() {
+        shoot("store-3-rooms-en", state, dark = false)
+    }
+
+    @Test
+    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
+    fun storePt() {
+        shoot("store-3-rooms-pt", state, dark = false)
+    }
+
+    @Test
+    @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")
+    fun storeDetailEn() {
+        shoot("store-4-room-en", state, dark = false, open = "bath1")
+    }
+
+    @Test
+    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
+    fun storeDetailPt() {
+        shoot("store-4-room-pt", state, dark = false, open = "bath1")
+    }
 }

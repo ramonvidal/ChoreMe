@@ -140,6 +140,19 @@ class ChoresTabScreenshotTest {
     fun largeText() {
         shoot("tab-chores-large-text", mom, dark = false, fontScale = LARGE_TEXT)
     }
+
+    // Google Play screenshots: 1080 x 1920, in English and in Baianês.
+    @Test
+    @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")
+    fun storeEn() {
+        shoot("store-1-chores-en", mom, dark = false)
+    }
+
+    @Test
+    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
+    fun storePt() {
+        shoot("store-1-chores-pt", mom, dark = false)
+    }
 }
 
 private const val LARGE_TEXT = 1.5f

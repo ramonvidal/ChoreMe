@@ -88,4 +88,17 @@ class GroceriesTabScreenshotTest {
 
     @Test
     fun shopping() = shoot("tab-groceries-shopping", state.copy(shopping = true, othersShopping = listOf("Leo")), dark = false)
+
+    // Google Play screenshots: 1080 x 1920, in English and in Baianês.
+    @Test
+    @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")
+    fun storeEn() {
+        shoot("store-2-groceries-en", state, dark = false)
+    }
+
+    @Test
+    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
+    fun storePt() {
+        shoot("store-2-groceries-pt", state, dark = false)
+    }
 }
