@@ -34,7 +34,8 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -258,11 +259,16 @@ private fun RoomDetail(overview: RoomOverview, state: RoomsUiState, actions: Roo
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Box {
             RoomPicture(room, Modifier.fillMaxWidth().aspectRatio(DETAIL_RATIO))
-            IconButton(onClick = onBack, Modifier.padding(8.dp)) {
+            // Round buttons on a solid color, so they stand out from any picture.
+            val buttonColors = IconButtonDefaults.filledIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+            )
+            FilledIconButton(onClick = onBack, Modifier.padding(12.dp), colors = buttonColors) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.room_back))
             }
             if (state.canManage) {
-                IconButton(onClick = onEdit, Modifier.align(Alignment.TopEnd).padding(8.dp)) {
+                FilledIconButton(onClick = onEdit, Modifier.align(Alignment.TopEnd).padding(12.dp), colors = buttonColors) {
                     Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.room_edit))
                 }
             }
@@ -566,5 +572,6 @@ private fun TaskDialog(
     )
 }
 
-private const val CARD_RATIO = 16f / 8f
-private const val DETAIL_RATIO = 16f / 9f
+// The sketches are drawn on a 100 x 60 grid.
+private const val CARD_RATIO = 100f / 60f
+private const val DETAIL_RATIO = 100f / 60f

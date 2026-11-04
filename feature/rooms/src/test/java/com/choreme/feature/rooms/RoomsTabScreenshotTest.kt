@@ -1,6 +1,13 @@
 package com.choreme.feature.rooms
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -83,4 +90,24 @@ class RoomsTabScreenshotTest {
 
     @Test
     fun detailDark() = shoot("tab-rooms-detail-dark", state, dark = true, open = "bath1")
+
+    /** Every kind of room's standard drawing, two by two, to check them by eye. */
+    @Test
+    fun sketches() {
+        compose.setContent {
+            ChoreMeTheme(darkTheme = false, dynamicColor = false) {
+                Surface(Modifier.fillMaxSize()) {
+                    Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        RoomType.entries.chunked(2).forEach { pair ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                pair.forEach { RoomSketch(it, Modifier.weight(1f).aspectRatio(100f / 60f)) }
+                                if (pair.size == 1) Spacer(Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/room-sketches.png")
+    }
 }
