@@ -55,7 +55,7 @@ jobs:
           {
             echo "### Debug key fingerprints (add the SHA-1 to the app in Firebase)"
             keytool -list -v -keystore app/debug.keystore -storepass android | grep -E "SHA1|SHA256" | sed 's/^ *//'
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Module structure rules tests
         run: ./gradlew -p build-logic :rules:test
@@ -107,7 +107,7 @@ jobs:
           {
             echo "### Upload key fingerprints (add the SHA-1 to the app in Firebase)"
             keytool -list -v -keystore "$RUNNER_TEMP/upload.jks" -storepass "$UPLOAD_KEYSTORE_PASSWORD" -alias "$UPLOAD_KEY_ALIAS" | grep -E "SHA1|SHA256" | sed 's/^ *//'
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
           rm -f "$RUNNER_TEMP/upload.jks"
           # Native libraries must support 16 KB memory pages (Google Play checks); the app has none of its own.
           unzip -l app/build/outputs/bundle/playRelease/*.aab | grep '\.so$' || echo "No native libraries in the bundle"
