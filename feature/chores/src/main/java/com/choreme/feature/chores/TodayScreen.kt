@@ -24,6 +24,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -631,8 +632,10 @@ internal fun ChoreCard(
                 colors = CardDefaults.cardColors(containerColor = cardColor),
                 border = edge,
             ) {
+                // A task of a room carries a small "#rooms" flag in the top right corner.
+                Box {
                 Row(
-                    Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                    Modifier.padding(start = 16.dp, end = 16.dp, top = if (chore.roomId != null) 22.dp else 14.dp, bottom = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
@@ -665,6 +668,18 @@ internal fun ChoreCard(
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.onSurface),
                         border = BorderStroke(1.dp, colors.outline),
                     ) { Text(stringResource(main.first)) }
+                }
+                if (chore.roomId != null) {
+                    Text(
+                        stringResource(R.string.room_tag),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.onSecondaryContainer,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .background(colors.secondaryContainer, RoundedCornerShape(bottomStart = 10.dp))
+                            .padding(horizontal = 10.dp, vertical = 3.dp),
+                    )
+                }
                 }
             }
         }

@@ -48,7 +48,7 @@ class ChoresTabScreenshotTest {
         Chore("1", "Water leak under the sink", ChoreTemplate.CLEAN_KITCHEN, dueDate = today, reportedBy = "leo", urgent = true),
         Chore("2", "Hoover the living room", ChoreTemplate.VACUUM, dueDate = today, status = ChoreStatus.CLAIMED, claimedBy = "mom", points = 2),
         Chore("3", "Tidy the garage", ChoreTemplate.OTHER, dueDate = today, status = ChoreStatus.CLAIMED, claimedBy = "leo", helpers = setOf("mia"), points = 4),
-        Chore("4", "Wash dishes", ChoreTemplate.DISHES, recurrence = Recurrence.EveryDays(1), dueDate = today, reportedBy = "ana"),
+        Chore("4", "Wash dishes", ChoreTemplate.DISHES, recurrence = Recurrence.EveryDays(1), dueDate = today, reportedBy = "ana", roomId = "kitchen"),
         Chore("5", "Laundry", ChoreTemplate.LAUNDRY, dueDate = today.minusDays(2), status = ChoreStatus.CLAIMED, claimedBy = "ana"),
         Chore("6", "Clean the bathroom", ChoreTemplate.CLEAN_BATHROOM, dueDate = today, status = ChoreStatus.PENDING_APPROVAL, claimedBy = "mia", completedBy = "mia", points = 3),
         Chore("7", "Take out the trash", ChoreTemplate.TRASH, recurrence = Recurrence.EveryDays(2), dueDate = today.plusDays(1)),
@@ -76,6 +76,7 @@ class ChoresTabScreenshotTest {
         weekPoints = familyPoints(log, today),
         weekFinished = log.size,
         pointsOn = pointsOn,
+        roomNames = mapOf("kitchen" to "Kitchen"),
     )
 
     private fun shoot(name: String, me: Member, dark: Boolean, fontScale: Float = 1f, pointsOn: Boolean = true) {
@@ -96,6 +97,8 @@ class ChoresTabScreenshotTest {
         shoot("tab-chores", mom, dark = false)
         compose.onNodeWithText("Hoover the living room").assertExists()
         compose.onNodeWithText("Later (1)").assertExists()
+        // A task that belongs to a room carries its tag.
+        compose.onNodeWithText("#rooms").assertExists()
     }
 
     @Test

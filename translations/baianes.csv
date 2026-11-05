@@ -244,6 +244,7 @@ feature/chores,weekly_chores_title,one,This week: %d chore done,Essa semana: %d 
 feature/chores,weekly_chores_title,other,This week: %d chores done,Essa semana: %d corres feitos
 feature/chores,weekly_chores_body,,"Good work, everyone!","Mandaram bem, galera!"
 feature/chores,cheer_waiting,,Well done! A parent will check it,Arretado! Mainha ou painho vai conferir
+feature/chores,room_tag,,#rooms,#cômodos
 feature/family,family_invite_hint,,Share this code so others can ask to join:,Mande este código pra galera pedir pra entrar:
 feature/family,family_share_invite,,Share invite code,Mandar o código de convite
 feature/family,family_invite_message,,Join the %1$s family on Nos Corre! with the code %2$s,Entra na família %1$s no Nos Corre! com o código %2$s
