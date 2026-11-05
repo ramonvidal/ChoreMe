@@ -49,6 +49,8 @@ import com.choreme.core.model.session.SessionState
 import com.choreme.core.push.PushKinds
 import com.choreme.core.push.PushSender
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -59,7 +61,10 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import com.choreme.core.model.chore.RoomFilter
 import com.choreme.core.model.chore.choreDone
+import com.choreme.core.model.chore.filteredBy
+import com.choreme.core.model.chore.hasRoomTasks
 import com.choreme.core.model.chore.nextReminderTime
 import java.time.Instant
 import java.time.LocalDateTime
@@ -88,7 +93,11 @@ data class ChoresUiState(
     val pointsOn: Boolean = true,
     /** The family's rooms by id, so a task of a room says which ("Bathroom 1"). */
     val roomNames: Map<String, String> = emptyMap(),
+    /** Show all chores, only those that belong to a room, or only the others. */
+    val roomFilter: RoomFilter = RoomFilter.ALL,
 ) {
+    /** The filter is only offered once some chore belongs to a room. */
+    val hasRoomTasks get() = chores.hasRoomTasks
     val isParent get() = me?.role == Role.PARENT
     val hasChores get() = chores.isNotEmpty()
     /** Everyone at home, for "who's doing it" and "who did it" (someone away can't have). */
@@ -163,7 +172,13 @@ class ChoresViewModel @Inject internal constructor(
 
     fun cancelReminder(chore: Chore) = timedReminders.cancel(chore.id)
 
-    val uiState: StateFlow<ChoresUiState> = families.session
+    private val roomFilter = MutableStateFlow(RoomFilter.ALL)
+
+    fun setRoomFilter(filter: RoomFilter) {
+        roomFilter.value = filter
+    }
+
+    private val baseState: Flow<ChoresUiState> = families.session
         .filterIsInstance<SessionState.InFamily>()
         .flatMapLatest { session ->
             combine(
@@ -197,7 +212,15 @@ class ChoresViewModel @Inject internal constructor(
                 )
             }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ChoresUiState())
+
+    val uiState: StateFlow<ChoresUiState> = combine(baseState, roomFilter) { state, filter ->
+        // Falls back to everything when no chore belongs to a room any more, so the board is never stuck empty.
+        val shown = if (state.hasRoomTasks) filter else RoomFilter.ALL
+        state.copy(
+            roomFilter = shown,
+            board = buildTodayBoard(state.chores.filteredBy(shown), state.today, state.me?.id),
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ChoresUiState())
 
     fun claim(chore: Chore) = change(chore) { me, _ -> claim(me) }
     fun unclaim(chore: Chore) = change(chore) { me, _ -> unclaim(me) }

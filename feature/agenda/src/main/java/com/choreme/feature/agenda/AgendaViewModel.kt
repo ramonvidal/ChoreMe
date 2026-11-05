@@ -15,6 +15,9 @@ import com.choreme.core.model.agenda.buildAgenda
 import com.choreme.core.model.agenda.buildMonth
 import com.choreme.core.model.agenda.monthGridRange
 import com.choreme.core.model.agenda.suggestFamilyCalendars
+import com.choreme.core.model.chore.RoomFilter
+import com.choreme.core.model.chore.filteredBy
+import com.choreme.core.model.chore.hasRoomTasks
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.ui.ActionState
 import com.choreme.core.ui.runAction
@@ -44,6 +47,10 @@ data class AgendaUiState(
     val month: YearMonth = YearMonth.now(),
     val monthDays: Map<LocalDate, AgendaDay> = emptyMap(),
     val selectedDay: LocalDate = LocalDate.now(),
+    /** Which chores to show among the events: all, only those of rooms, or only the others. */
+    val roomFilter: RoomFilter = RoomFilter.ALL,
+    /** The filter is only offered once some chore belongs to a room. */
+    val hasRoomTasks: Boolean = false,
 ) {
     val selectedDayEntries get() = monthDays[selectedDay]
     val needsChoice get() = hasPermission && calendars.isNotEmpty() && selected == null
@@ -65,6 +72,7 @@ class AgendaViewModel @Inject constructor(
     private val view = MutableStateFlow(AgendaView.LIST)
     private val month = MutableStateFlow(YearMonth.now())
     private val selectedDay = MutableStateFlow(LocalDate.now())
+    private val roomFilter = MutableStateFlow(RoomFilter.ALL)
 
     private val calendars = permission.flatMapLatest { granted ->
         if (granted) calendar.observeCalendars() else flowOf(emptyList())
@@ -93,8 +101,12 @@ class AgendaViewModel @Inject constructor(
         combine(permission, calendars, choice.selected, ::Triple),
         events,
         familyChores,
-        combine(view, month, selectedDay, ::Triple),
-    ) { (granted, calendarList, selected), eventList, choreList, (mode, shownMonth, day) ->
+        combine(combine(view, month, selectedDay, ::Triple), roomFilter, ::Pair),
+    ) { (granted, calendarList, selected), eventList, allChores, (shownNow, chosenFilter) ->
+        val (mode, shownMonth, day) = shownNow
+        val hasRooms = allChores.hasRoomTasks
+        val filter = if (hasRooms) chosenFilter else RoomFilter.ALL
+        val choreList = allChores.filteredBy(filter)
         val today = LocalDate.now()
         val zone = ZoneId.systemDefault()
         AgendaUiState(
@@ -107,8 +119,14 @@ class AgendaViewModel @Inject constructor(
             month = shownMonth,
             monthDays = if (mode == AgendaView.MONTH) buildMonth(eventList, choreList, shownMonth, today, zone) else emptyMap(),
             selectedDay = day,
+            roomFilter = filter,
+            hasRoomTasks = hasRooms,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AgendaUiState())
+
+    fun setRoomFilter(filter: RoomFilter) {
+        roomFilter.value = filter
+    }
 
     fun showView(mode: AgendaView) {
         view.value = mode

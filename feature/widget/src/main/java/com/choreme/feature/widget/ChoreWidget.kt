@@ -126,7 +126,16 @@ private fun Content(context: Context, data: WidgetData) {
                             ChoreNames.shown(context, chore.title),
                             maxLines = 1,
                             style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurface),
+                            modifier = GlanceModifier.defaultWeight(),
                         )
+                        // A task that belongs to a room says so.
+                        if (chore.roomId != null) {
+                            Text(
+                                context.getString(com.choreme.core.ui.R.string.room_tag),
+                                maxLines = 1,
+                                style = TextStyle(fontSize = 11.sp, color = GlanceTheme.colors.onSurfaceVariant),
+                            )
+                        }
                     }
                 }
                 if (data.toDo.size > MAX_ROWS) {

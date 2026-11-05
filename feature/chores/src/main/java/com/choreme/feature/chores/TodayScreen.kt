@@ -98,10 +98,13 @@ import com.choreme.core.ui.HeaderLine
 import com.choreme.core.ui.SectionLabel
 import com.choreme.core.ui.ItemIcon
 import com.choreme.core.ui.MemberAvatar
+import com.choreme.core.ui.RoomFilterRow
+import com.choreme.core.ui.RoomTag
 import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.icon
 import java.time.Instant
 import java.time.LocalTime
+import com.choreme.core.model.chore.RoomFilter
 import com.choreme.core.model.chore.SavedChore
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -135,6 +138,7 @@ internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel
             remind = { chore, time -> viewModel.remind(chore, time) },
             cancelReminder = { viewModel.cancelReminder(it) },
             addToCalendar = { viewModel.addToCalendar(it) },
+            setRoomFilter = { viewModel.setRoomFilter(it) },
         ),
     )
 }
@@ -157,6 +161,7 @@ internal class ChoresActions(
     val remind: (Chore, LocalTime) -> LocalDateTime = { _, time -> LocalDateTime.now().with(time) },
     val cancelReminder: (Chore) -> Unit = {},
     val addToCalendar: suspend (Chore) -> CalendarResult? = { null },
+    val setRoomFilter: (RoomFilter) -> Unit = {},
 )
 
 /** The whole tab, drawn from [state] alone, so it can be screenshotted without Firebase. */
@@ -189,6 +194,10 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
         ) {
             item(key = "header") {
                 ChoresHeader(state, onOpenGroceries)
+            }
+            // Only once some chore belongs to a room: all, only those of rooms, or only the others.
+            if (state.hasRoomTasks) {
+                item(key = "room-filter") { RoomFilterRow(state.roomFilter, actions.setRoomFilter) }
             }
             when {
                 state.loading -> item(key = "loading") {
@@ -669,17 +678,7 @@ internal fun ChoreCard(
                         border = BorderStroke(1.dp, colors.outline),
                     ) { Text(stringResource(main.first)) }
                 }
-                if (chore.roomId != null) {
-                    Text(
-                        stringResource(R.string.room_tag),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colors.onSecondaryContainer,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .background(colors.secondaryContainer, RoundedCornerShape(bottomStart = 10.dp))
-                            .padding(horizontal = 10.dp, vertical = 3.dp),
-                    )
-                }
+                if (chore.roomId != null) RoomTag(Modifier.align(Alignment.TopEnd), corner = true)
                 }
             }
         }

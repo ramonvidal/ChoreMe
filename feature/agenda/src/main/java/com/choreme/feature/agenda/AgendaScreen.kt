@@ -61,7 +61,10 @@ import com.choreme.core.ui.EmptyState
 import com.choreme.core.ui.ErrorText
 import com.choreme.core.ui.HeaderLine
 import com.choreme.core.ui.ItemIcon
+import com.choreme.core.model.chore.RoomFilter
 import com.choreme.core.ui.PillTab
+import com.choreme.core.ui.RoomFilterRow
+import com.choreme.core.ui.RoomTag
 import com.choreme.core.ui.SectionLabel
 import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.icon
@@ -96,6 +99,7 @@ internal fun AgendaScreen(viewModel: AgendaViewModel = hiltViewModel()) {
                 }
             },
             allowCalendars = { permissionLauncher.launch(CalendarRepository.PERMISSIONS) },
+            setRoomFilter = { viewModel.setRoomFilter(it) },
             addEvent = { calendarId, event -> viewModel.addEvent(calendarId, event) },
         ),
     )
@@ -110,6 +114,7 @@ internal class AgendaActions(
     val open: (CalendarEvent) -> Unit = {},
     val allowCalendars: () -> Unit = {},
     val addEvent: (Long, NewEvent) -> Unit = { _, _ -> },
+    val setRoomFilter: (RoomFilter) -> Unit = {},
 )
 
 /** The whole tab, drawn from [state] alone, so it can be screenshotted without a phone's calendars. */
@@ -150,6 +155,7 @@ internal fun AgendaContent(state: AgendaUiState, error: Int?, actions: AgendaAct
                 PillTab(stringResource(R.string.view_list), state.view == AgendaView.LIST, onClick = { actions.showView(AgendaView.LIST) })
                 PillTab(stringResource(R.string.view_month), state.view == AgendaView.MONTH, onClick = { actions.showView(AgendaView.MONTH) })
             }
+            if (state.hasRoomTasks) RoomFilterRow(state.roomFilter, actions.setRoomFilter)
         }
         if (state.view == AgendaView.MONTH && state.hasPermission) {
             MonthView(
@@ -287,6 +293,7 @@ internal fun ChoreRow(chore: Chore) {
     ) {
         ItemIcon(chore.template.icon, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(choreTitle(chore.title), style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        if (chore.roomId != null) RoomTag()
         Text(stringResource(R.string.chore_due), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

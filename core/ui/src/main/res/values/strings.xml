@@ -40,4 +40,8 @@
     <string name="template_feed_pets">Feed the pets</string>
     <string name="template_take_medicine">Take medicine</string>
     <string name="template_other">Something else</string>
+    <string name="room_tag">#rooms</string>
+    <string name="room_filter_all">All</string>
+    <string name="room_filter_rooms">Rooms</string>
+    <string name="room_filter_no_room">No room</string>
 </resources>

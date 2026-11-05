@@ -113,3 +113,29 @@ fun PillTab(label: String, selected: Boolean, onClick: () -> Unit, modifier: Mod
             .padding(horizontal = 12.dp, vertical = 8.dp),
     )
 }
+
+/** The small "#rooms" flag on a task that belongs to a room (cards in the corner, rows in line). */
+@Composable
+fun RoomTag(modifier: Modifier = Modifier, corner: Boolean = false) {
+    androidx.compose.material3.Text(
+        androidx.compose.ui.res.stringResource(R.string.room_tag),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSecondaryContainer,
+        modifier = modifier
+            .background(
+                MaterialTheme.colorScheme.secondaryContainer,
+                if (corner) androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 10.dp) else MaterialTheme.shapes.extraSmall,
+            )
+            .padding(horizontal = 10.dp, vertical = 3.dp),
+    )
+}
+
+/** "All / Rooms / No room" under a tab's title, to show only the chores of the rooms, or only the others. */
+@Composable
+fun RoomFilterRow(selected: com.choreme.core.model.chore.RoomFilter, onSelect: (com.choreme.core.model.chore.RoomFilter) -> Unit, modifier: Modifier = Modifier) {
+    Row(modifier.padding(horizontal = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        PillTab(androidx.compose.ui.res.stringResource(R.string.room_filter_all), selected == com.choreme.core.model.chore.RoomFilter.ALL, { onSelect(com.choreme.core.model.chore.RoomFilter.ALL) })
+        PillTab(androidx.compose.ui.res.stringResource(R.string.room_filter_rooms), selected == com.choreme.core.model.chore.RoomFilter.ROOMS, { onSelect(com.choreme.core.model.chore.RoomFilter.ROOMS) })
+        PillTab(androidx.compose.ui.res.stringResource(R.string.room_filter_no_room), selected == com.choreme.core.model.chore.RoomFilter.NO_ROOM, { onSelect(com.choreme.core.model.chore.RoomFilter.NO_ROOM) })
+    }
+}

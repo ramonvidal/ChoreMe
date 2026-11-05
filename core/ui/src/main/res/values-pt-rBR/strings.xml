@@ -36,6 +36,10 @@
     <string name="template_feed_pets">Dar comida aos bichos</string>
     <string name="template_take_medicine">Tomar remédio</string>
     <string name="template_other">Outra coisa</string>
+    <string name="room_tag">#cômodos</string>
+    <string name="room_filter_all">Todos</string>
+    <string name="room_filter_rooms">Cômodos</string>
+    <string name="room_filter_no_room">Sem cômodo</string>
     <plurals name="points">
         <item quantity="one">%d ponto</item>
         <item quantity="other">%d pontos</item>
