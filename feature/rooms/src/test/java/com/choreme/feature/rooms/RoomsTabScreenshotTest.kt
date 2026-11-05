@@ -91,7 +91,7 @@ class RoomsTabScreenshotTest {
     @Test
     fun detailDark() = shoot("tab-rooms-detail-dark", state, dark = true, open = "bath1")
 
-    /** Every kind of room's standard drawing, two by two, to check them by eye. */
+    /** Every kind of room's standard picture, two by two, to check them by eye. */
     @Test
     fun sketches() {
         compose.setContent {
@@ -100,7 +100,7 @@ class RoomsTabScreenshotTest {
                     Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         RoomType.entries.chunked(2).forEach { pair ->
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                pair.forEach { RoomSketch(it, Modifier.weight(1f).aspectRatio(100f / 60f)) }
+                                pair.forEach { RoomPicture(Room("x", "x", it), Modifier.weight(1f).aspectRatio(4f / 3f)) }
                                 if (pair.size == 1) Spacer(Modifier.weight(1f))
                             }
                         }

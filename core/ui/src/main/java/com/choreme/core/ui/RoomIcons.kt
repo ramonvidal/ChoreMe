@@ -21,3 +21,25 @@ val RoomType.icon: Int
         RoomType.HALLWAY -> R.drawable.ic_room_hallway
         RoomType.OTHER -> R.drawable.ic_room_other
     }
+
+/**
+ * The standard picture of a kind of room, a floor plan seen from above, for rooms without a
+ * photo of their own. Some kinds share one: the dining room is the kitchen's table, the laundry
+ * a wet room.
+ */
+@get:DrawableRes
+val RoomType.picture: Int
+    get() = when (this) {
+        RoomType.LIVING_ROOM -> R.drawable.room_living
+        RoomType.BEDROOM -> R.drawable.room_bedroom
+        RoomType.KIDS_ROOM -> R.drawable.room_kids
+        RoomType.BATHROOM -> R.drawable.room_bathroom
+        RoomType.KITCHEN, RoomType.DINING_ROOM -> R.drawable.room_kitchen
+        RoomType.OFFICE -> R.drawable.room_office
+        RoomType.LAUNDRY -> R.drawable.room_shower
+        RoomType.GARAGE -> R.drawable.room_garage
+        RoomType.GARDEN -> R.drawable.room_garden
+        RoomType.BALCONY -> R.drawable.room_balcony
+        RoomType.HALLWAY -> R.drawable.room_hallway
+        RoomType.OTHER -> R.drawable.room_attic
+    }

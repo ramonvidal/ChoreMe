@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -77,6 +79,7 @@ import com.choreme.core.ui.SectionLabel
 import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.choreTitle
 import com.choreme.core.ui.icon
+import com.choreme.core.ui.picture
 import java.time.LocalDate
 
 @Composable
@@ -192,14 +195,15 @@ private fun RoomList(state: RoomsUiState, onOpen: (String) -> Unit, onAdd: () ->
     }
 }
 
-/** The room's own photo, or the standard sketch for its kind. */
+/** The room's own photo, or the standard floor plan for its kind. */
 @Composable
 internal fun RoomPicture(room: Room, modifier: Modifier = Modifier) {
     val bitmap = remember(room.photo) { room.photo?.toBitmap() }
+    val backdrop = modifier.background(MaterialTheme.colorScheme.surfaceContainerHigh)
     if (bitmap != null) {
-        Image(bitmap.asImageBitmap(), contentDescription = null, modifier = modifier, contentScale = ContentScale.Crop)
+        Image(bitmap.asImageBitmap(), contentDescription = null, modifier = backdrop, contentScale = ContentScale.Crop)
     } else {
-        RoomSketch(room.type, modifier)
+        Image(painterResource(room.type.picture), contentDescription = null, modifier = backdrop, contentScale = ContentScale.Fit)
     }
 }
 
@@ -572,6 +576,6 @@ private fun TaskDialog(
     )
 }
 
-// The sketches are drawn on a 100 x 60 grid.
-private const val CARD_RATIO = 100f / 60f
-private const val DETAIL_RATIO = 100f / 60f
+// The standard pictures are 4:3.
+private const val CARD_RATIO = 4f / 3f
+private const val DETAIL_RATIO = 4f / 3f
