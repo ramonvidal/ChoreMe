@@ -26,6 +26,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.choreme.core.data.requestGoogleIdToken
 import com.choreme.core.ui.ErrorText
+import com.choreme.core.ui.Mascot
+import com.choreme.core.ui.NosButton
+import com.choreme.core.ui.NosButtonStyle
 
 @Composable
 fun SignInScreen(viewModel: SignInViewModel = hiltViewModel()) {
@@ -37,6 +40,7 @@ fun SignInScreen(viewModel: SignInViewModel = hiltViewModel()) {
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Mascot(size = 140.dp)
         Text(stringResource(CoreUiR.string.app_name), style = MaterialTheme.typography.displaySmall)
         Text(
             stringResource(R.string.sign_in_tagline),
@@ -44,16 +48,19 @@ fun SignInScreen(viewModel: SignInViewModel = hiltViewModel()) {
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(16.dp))
-        Button(
+        NosButton(
+            text = stringResource(R.string.sign_in_google),
             onClick = { viewModel.signInWithGoogle { requestGoogleIdToken(context) } },
             enabled = !state.busy,
             modifier = Modifier.fillMaxWidth(),
-        ) { Text(stringResource(R.string.sign_in_google)) }
-        OutlinedButton(
+        )
+        NosButton(
+            text = stringResource(R.string.sign_in_kid),
             onClick = viewModel::signInAsKid,
             enabled = !state.busy,
             modifier = Modifier.fillMaxWidth(),
-        ) { Text(stringResource(R.string.sign_in_kid)) }
+            style = NosButtonStyle.Tonal,
+        )
         Text(
             stringResource(R.string.sign_in_kid_hint),
             style = MaterialTheme.typography.bodySmall,

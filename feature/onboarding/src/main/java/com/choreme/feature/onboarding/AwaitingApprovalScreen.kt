@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.ui.ErrorText
+import com.choreme.core.ui.Mascot
 
 /** Shown until a parent approves the request; the session flow moves on by itself when they do. */
 @Composable
@@ -31,6 +32,7 @@ fun AwaitingApprovalScreen(session: SessionState.AwaitingApproval, viewModel: On
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Mascot(size = 120.dp)
         CircularProgressIndicator()
         Text(
             stringResource(R.string.awaiting_title, session.familyName),
