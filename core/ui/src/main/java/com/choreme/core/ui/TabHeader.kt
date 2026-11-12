@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalDensity
 import com.choreme.core.model.Member
 import com.choreme.core.ui.theme.memberColor
@@ -88,27 +89,27 @@ fun HeaderLine(text: String, modifier: Modifier = Modifier) {
     Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = modifier)
 }
 
-/** A small grey title over a group of cards ("Needs doing", "Today", "Members"). */
+/** A small spaced-out title over a group of cards ("NEEDS DOING", "TODAY", "MEMBERS"). */
 @Composable
 fun SectionLabel(text: String, modifier: Modifier = Modifier) {
     Text(
-        text,
-        style = MaterialTheme.typography.titleSmall,
+        text.uppercase(),
+        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 0.8.sp),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = modifier.padding(start = 4.dp, top = 16.dp, bottom = 4.dp),
     )
 }
 
-/** One of a few choices side by side (List / Month, Groceries / Pharmacy): the chosen one black, the others white. */
+/** One of a few choices side by side (List / Month, Groceries / Pharmacy): the chosen one yellow, the others sand. */
 @Composable
 fun PillTab(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Text(
         label,
         style = MaterialTheme.typography.labelLarge,
-        color = if (selected) MaterialTheme.colorScheme.inverseOnSurface else MaterialTheme.colorScheme.onSurface,
+        color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
         modifier = modifier
-            .clip(MaterialTheme.shapes.small)
-            .background(if (selected) MaterialTheme.colorScheme.inverseSurface else MaterialTheme.colorScheme.surfaceContainerLowest)
+            .clip(CircleShape)
+            .background(if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant)
             .selectable(selected = selected, onClick = onClick, role = Role.Tab)
             .padding(horizontal = 12.dp, vertical = 8.dp),
     )

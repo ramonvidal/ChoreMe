@@ -143,7 +143,7 @@ private fun DayCell(
                 fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal,
                 color = when {
                     isSelected -> MaterialTheme.colorScheme.inverseOnSurface
-                    isToday -> MaterialTheme.colorScheme.primary
+                    isToday -> MaterialTheme.colorScheme.secondary
                     inMonth -> MaterialTheme.colorScheme.onSurface
                     else -> MaterialTheme.colorScheme.outline
                 },

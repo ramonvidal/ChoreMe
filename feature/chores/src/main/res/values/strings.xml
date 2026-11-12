@@ -203,4 +203,6 @@
     </plurals>
     <string name="weekly_chores_body">Good work, everyone!</string>
     <string name="cheer_waiting">Well done! A parent will check it</string>
+    <string name="hero_all_done">All done for today</string>
+    <string name="hero_groceries">Groceries</string>
 </resources>

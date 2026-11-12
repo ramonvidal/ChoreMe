@@ -6,7 +6,9 @@ import com.choreme.core.model.AlertKind
 import com.choreme.core.model.AlertSettings
 import com.choreme.core.model.QuietHours
 import com.choreme.core.push.PushRegistration
+import com.choreme.core.settings.AppearanceSettings
 import com.choreme.core.settings.NotificationSettings
+import com.choreme.core.settings.ThemeMode
 import com.choreme.core.update.UpdateRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
@@ -30,7 +32,12 @@ class PhoneSettingsViewModel @Inject constructor(
     private val notifications: NotificationSettings,
     private val push: PushRegistration,
     private val updates: UpdateRepository,
+    private val appearance: AppearanceSettings,
 ) : ViewModel() {
+    val themeMode: StateFlow<ThemeMode> = appearance.mode
+
+    fun setThemeMode(mode: ThemeMode) = appearance.set(mode)
+
     val settings: StateFlow<AlertSettings> = notifications.settings
     val pushEndpoint: StateFlow<String?> = push.endpoint
 

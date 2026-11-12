@@ -334,7 +334,7 @@ internal fun ForWhomRow(people: List<Member>, picked: Set<String>, onChange: (Se
 private fun PointsRow(points: Int, onPoints: (Int) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            ItemIcon(CoreUiR.drawable.ic_star, tint = MaterialTheme.colorScheme.primary)
+            ItemIcon(CoreUiR.drawable.ic_star, tint = MaterialTheme.colorScheme.secondary)
             Spacer(Modifier.width(8.dp))
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.editor_points))

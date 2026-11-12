@@ -54,6 +54,10 @@
     <string name="alert_shopping">No mercado</string>
     <string name="alert_shopping_hint">Quando alguém começa a feira, pra você adicionar o que falta (precisa do ntfy)</string>
     <string name="language_section">Idioma</string>
+    <string name="appearance_section">Aparência</string>
+    <string name="appearance_system">Igual ao celular</string>
+    <string name="appearance_light">Claro</string>
+    <string name="appearance_dark">Escuro</string>
     <string name="alert_morning">Resumo da manhã</string>
     <string name="alert_morning_hint">Às 8:00, o que tem pra fazer hoje</string>
     <string name="alert_weekly">Resumo da semana</string>

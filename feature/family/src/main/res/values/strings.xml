@@ -57,6 +57,10 @@
     <string name="alert_shopping">At the shop</string>
     <string name="alert_shopping_hint">When someone starts shopping, so you can add what\'s missing (needs ntfy)</string>
     <string name="language_section">Language</string>
+    <string name="appearance_section">Look</string>
+    <string name="appearance_system">Same as the phone</string>
+    <string name="appearance_light">Light</string>
+    <string name="appearance_dark">Dark</string>
     <string name="alert_morning">Morning summary</string>
     <string name="alert_morning_hint">At 8:00, what needs doing today</string>
     <string name="alert_weekly">Week in review</string>

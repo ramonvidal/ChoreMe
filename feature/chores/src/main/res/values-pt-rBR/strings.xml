@@ -138,6 +138,8 @@
     <string name="cheer_done">Arretado!</string>
     <string name="weekly_chores_body">Mandaram bem, galera!</string>
     <string name="cheer_waiting">Arretado! Mainha ou painho vai conferir</string>
+    <string name="hero_all_done">Tudo feito por hoje</string>
+    <string name="hero_groceries">Feira</string>
     <plurals name="overdue_days">
         <item quantity="one">%d dia atrasado</item>
         <item quantity="other">%d dias atrasado</item>

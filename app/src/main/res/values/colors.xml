@@ -1,5 +1,5 @@
 <resources>
     <!-- The yellow along the top of the "Nos Corre!" icon art (drawable-*dpi/ic_launcher_foreground). -->
     <color name="ic_launcher_background">#FDDC03</color>
-    <color name="window_background">#F4F4F2</color>
+    <color name="window_background">#FAF7F0</color>
 </resources>

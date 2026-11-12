@@ -460,7 +460,7 @@ internal fun ToBuyRow(item: GroceryItem, large: Boolean, onBought: () -> Unit, o
 private fun TickCircle(ticked: Boolean, large: Boolean) {
     val size = if (large) 30.dp else 26.dp
     if (ticked) {
-        ItemIcon(CoreUiR.drawable.ic_check_circle, Modifier.size(size), tint = MaterialTheme.colorScheme.primary)
+        ItemIcon(CoreUiR.drawable.ic_check_circle, Modifier.size(size), tint = MaterialTheme.colorScheme.secondary)
     } else {
         Box(Modifier.size(size).padding(2.dp).border(2.dp, MaterialTheme.colorScheme.outline, CircleShape))
     }
@@ -481,10 +481,10 @@ private fun SwipeToBuy(onBought: () -> Unit, content: @Composable () -> Unit) {
         state = state,
         backgroundContent = {
             Box(
-                Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary).padding(horizontal = 20.dp),
+                Modifier.fillMaxSize().background(MaterialTheme.colorScheme.secondary).padding(horizontal = 20.dp),
                 contentAlignment = if (state.dismissDirection == SwipeToDismissBoxValue.EndToStart) Alignment.CenterEnd else Alignment.CenterStart,
             ) {
-                ItemIcon(CoreUiR.drawable.ic_check_circle, tint = MaterialTheme.colorScheme.onPrimary)
+                ItemIcon(CoreUiR.drawable.ic_check_circle, tint = MaterialTheme.colorScheme.onSecondary)
             }
         },
     ) { content() }
@@ -546,7 +546,7 @@ internal fun ItemChip(item: GroceryItem, onClick: () -> Unit, onLongClick: () ->
             modifier = Modifier.heightIn(min = 40.dp).padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ItemIcon(item.icon, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+            ItemIcon(item.icon, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.secondary)
             Spacer(Modifier.width(6.dp))
             Text(groceryName(item.name), style = MaterialTheme.typography.bodyMedium)
             if (item.isStaple) {

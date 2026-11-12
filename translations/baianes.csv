@@ -248,6 +248,8 @@ feature/chores,weekly_chores_title,one,This week: %d chore done,Essa semana: %d 
 feature/chores,weekly_chores_title,other,This week: %d chores done,Essa semana: %d corres feitos
 feature/chores,weekly_chores_body,,"Good work, everyone!","Mandaram bem, galera!"
 feature/chores,cheer_waiting,,Well done! A parent will check it,Arretado! Mainha ou painho vai conferir
+feature/chores,hero_all_done,,All done for today,Tudo feito por hoje
+feature/chores,hero_groceries,,Groceries,Feira
 feature/family,family_invite_hint,,Share this code so others can ask to join:,Mande este código pra galera pedir pra entrar:
 feature/family,family_share_invite,,Share invite code,Mandar o código de convite
 feature/family,family_invite_message,,Join the %1$s family on Nos Corre! with the code %2$s,Entra na família %1$s no Nos Corre! com o código %2$s
@@ -303,6 +305,10 @@ feature/family,alert_on_my_way_hint,,"When someone taps ""On my way home"" (need
 feature/family,alert_shopping,,At the shop,No mercado
 feature/family,alert_shopping_hint,,"When someone starts shopping, so you can add what's missing (needs ntfy)","Quando alguém começa a feira, pra você adicionar o que falta (precisa do ntfy)"
 feature/family,language_section,,Language,Idioma
+feature/family,appearance_section,,Look,Aparência
+feature/family,appearance_system,,Same as the phone,Igual ao celular
+feature/family,appearance_light,,Light,Claro
+feature/family,appearance_dark,,Dark,Escuro
 feature/family,alert_morning,,Morning summary,Resumo da manhã
 feature/family,alert_morning_hint,,"At 8:00, what needs doing today","Às 8:00, o que tem pra fazer hoje"
 feature/family,alert_weekly,,Week in review,Resumo da semana

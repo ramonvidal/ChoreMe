@@ -43,6 +43,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.choreme.core.model.AlertKind
 import com.choreme.core.model.QuietHours
 import com.choreme.core.settings.AppLanguage
+import com.choreme.core.settings.ThemeMode
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.RadioButton
 import androidx.compose.ui.semantics.Role
@@ -52,7 +53,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-private enum class Fold { LANGUAGE, ALERTS, QUIET, INSTANT, UPDATES }
+private enum class Fold { LANGUAGE, APPEARANCE, ALERTS, QUIET, INSTANT, UPDATES }
 
 /** "This phone": each part folded to one line with its current state, opened with a tap. */
 @Composable
@@ -88,6 +89,33 @@ internal fun PhoneSettings(viewModel: PhoneSettingsViewModel = hiltViewModel()) 
                     RadioButton(selected = option == language, onClick = null)
                     Spacer(Modifier.width(12.dp))
                     Text(option.label, style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+        }
+
+        val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
+        val modeLabels = mapOf(
+            ThemeMode.SYSTEM to stringResource(R.string.appearance_system),
+            ThemeMode.LIGHT to stringResource(R.string.appearance_light),
+            ThemeMode.DARK to stringResource(R.string.appearance_dark),
+        )
+        FoldRow(
+            title = stringResource(R.string.appearance_section),
+            summary = modeLabels.getValue(themeMode),
+            open = open == Fold.APPEARANCE,
+            onToggle = { toggle(Fold.APPEARANCE) },
+        ) {
+            ThemeMode.entries.forEach { option ->
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .selectable(selected = option == themeMode, role = Role.RadioButton) { viewModel.setThemeMode(option) }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(selected = option == themeMode, onClick = null)
+                    Spacer(Modifier.width(12.dp))
+                    Text(modeLabels.getValue(option), style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
@@ -131,7 +159,7 @@ internal fun PhoneSettings(viewModel: PhoneSettingsViewModel = hiltViewModel()) 
         ) {
             if (endpoint != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    ItemIcon(CoreUiR.drawable.ic_bolt, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+                    ItemIcon(CoreUiR.drawable.ic_bolt, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.secondary)
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(R.string.instant_on))
                 }

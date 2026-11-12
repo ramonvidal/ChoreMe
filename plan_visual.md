@@ -76,7 +76,17 @@ component shapes are re-created in Nos Corre!'s own `:core:ui`, so every tab pic
 - **Widget**: page colour and ink; the yellow only as the title accent (Glance themes are limited).
 - **Play Store assets**: screenshots and feature graphics redone in the new look (last, phase R6).
 
-## 5. Questions for the owner (needed before mock-ups)
+## 5. Decisions (answered by the owner, 12 November 2026)
+
+1. Dark mode **stays**, with a setting under Family > This phone > Look: same as the phone / light / dark.
+2. The main action is charcoal (yellow in the dark look); green stays for "yours", "done" and points.
+3. The mascot is the **house of the launcher icon** (`Mascot()` in `:core:ui`).
+4. Chores gets the yellow hero card with the progress ring and one button (it replaces the + button).
+5. The icon stays as it is. Its art is lemon yellow (`#FDE003`), the brand yellow is amber (`#FEC204`); changing the
+   launcher background alone would show a seam, so it is left alone.
+6. **All tabs**, in phases R1 to R6.
+
+The questions as asked (kept for the record):
 
 1. **Dark mode.** BoraTreino is light-only. Nos Corre! follows the phone today. Keep dark mode (needs a dark Sunny
    palette: yellow stays, page `#121212`) or become light-only like BoraTreino? Recommendation: keep dark mode; it costs

@@ -1,103 +1,118 @@
 package com.choreme.core.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.choreme.core.ui.R
 
 /*
- * "Soft cards": a light grey page, plain white cards, black and grey text, and one green
- * used only for the main action and the selected tab. Red only means urgent. Font: Figtree
- * (SIL Open Font License, bundled in res/font; license in assets/licenses).
+ * "Sunny", the look of the owner's other app (Bora pro Treino!): a warm off-white page, plain white cards, a
+ * yellow brand colour for what is selected, charcoal ink for text and the main button, green only for "yours",
+ * "done" and points, pink sparingly, red only for urgent and errors. Yellow never carries white text: ink on
+ * yellow. Font: Figtree (SIL Open Font License, bundled in res/font; license in assets/licenses).
  */
 
-private val Green = Color(0xFF2E6B52)
+/** The Sunny palette. */
+object Sunny {
+    val Brand = Color(0xFFFEC204)
+    val BrandSoft = Color(0xFFFFF1B8)
+    val Ink = Color(0xFF1F1B16)
+    val Page = Color(0xFFFAF7F0)
+    val Card = Color(0xFFFFFFFF)
+    val Tile = Color(0xFFF3EEE3)
+    val Line = Color(0xFFEEE8DC)
+    val Outline = Color(0xFFD9D1C1)
+    val Muted = Color(0xFF6B645A)
+    val Ok = Color(0xFF2E6B52)
+    val OkSoft = Color(0xFFDDEBE4)
+    val Pink = Color(0xFFE6397F)
+    val PinkSoft = Color(0xFFFDE3EE)
+    val Error = Color(0xFFB42318)
+}
 
 private val LightColors = lightColorScheme(
-    primary = Green,
+    // The main button and the text: charcoal. What is selected: yellow (primaryContainer).
+    primary = Sunny.Ink,
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFE4EFE9),
-    onPrimaryContainer = Color(0xFF173D2E),
-    // Neutral on purpose: everything that isn't the main action stays black and grey.
-    secondary = Color(0xFF4A4A47),
+    primaryContainer = Sunny.Brand,
+    onPrimaryContainer = Sunny.Ink,
+    // Green: yours, done, points.
+    secondary = Sunny.Ok,
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFFECECE9),
-    onSecondaryContainer = Color(0xFF1C1C1C),
-    tertiary = Color(0xFF4A4A47),
+    secondaryContainer = Sunny.OkSoft,
+    onSecondaryContainer = Color(0xFF173D2E),
+    tertiary = Sunny.Pink,
     onTertiary = Color.White,
-    tertiaryContainer = Color(0xFFECECE9),
-    onTertiaryContainer = Color(0xFF1C1C1C),
-    background = Color(0xFFF4F4F2),
-    onBackground = Color(0xFF1C1C1C),
-    surface = Color(0xFFF4F4F2),
-    onSurface = Color(0xFF1C1C1C),
-    surfaceVariant = Color(0xFFECECE9),
-    onSurfaceVariant = Color(0xFF636360),
-    surfaceContainerLowest = Color.White,
-    surfaceContainerLow = Color.White,
-    surfaceContainer = Color.White,
-    surfaceContainerHigh = Color.White,
-    surfaceContainerHighest = Color.White,
-    outline = Color(0xFFBDBDB8),
-    outlineVariant = Color(0xFFE2E2DF),
-    error = Color(0xFFB42318),
+    tertiaryContainer = Sunny.PinkSoft,
+    onTertiaryContainer = Color(0xFF7A1240),
+    background = Sunny.Page,
+    onBackground = Sunny.Ink,
+    surface = Sunny.Page,
+    onSurface = Sunny.Ink,
+    surfaceVariant = Sunny.Tile,
+    onSurfaceVariant = Sunny.Muted,
+    surfaceContainerLowest = Sunny.Card,
+    surfaceContainerLow = Sunny.Card,
+    surfaceContainer = Sunny.Card,
+    surfaceContainerHigh = Sunny.Card,
+    surfaceContainerHighest = Sunny.Tile,
+    outline = Sunny.Outline,
+    outlineVariant = Sunny.Line,
+    error = Sunny.Error,
     onError = Color.White,
     errorContainer = Color(0xFFFDECEC),
     onErrorContainer = Color(0xFF7A1A12),
-    // Black for the one "add" button on a screen, apart from the green one.
-    inverseSurface = Color(0xFF1C1C1C),
+    inverseSurface = Sunny.Ink,
     inverseOnSurface = Color.White,
-    inversePrimary = Color(0xFF8FCBAE),
+    inversePrimary = Sunny.Brand,
 )
 
+// The same look after dark: the yellow stays, the page turns warm charcoal, the main button is yellow with ink.
 private val DarkColors = darkColorScheme(
-    primary = Color(0xFF8FCBAE),
-    onPrimary = Color(0xFF0B3524),
-    primaryContainer = Color(0xFF1F4A38),
-    onPrimaryContainer = Color(0xFFCDEBDC),
-    secondary = Color(0xFFC6C6C2),
-    onSecondary = Color(0xFF2A2A28),
-    secondaryContainer = Color(0xFF2E2E2C),
-    onSecondaryContainer = Color(0xFFE6E6E2),
-    tertiary = Color(0xFFC6C6C2),
-    onTertiary = Color(0xFF2A2A28),
-    tertiaryContainer = Color(0xFF2E2E2C),
-    onTertiaryContainer = Color(0xFFE6E6E2),
-    background = Color(0xFF121212),
-    onBackground = Color(0xFFE8E8E5),
-    surface = Color(0xFF121212),
-    onSurface = Color(0xFFE8E8E5),
-    surfaceVariant = Color(0xFF2A2A28),
-    onSurfaceVariant = Color(0xFFB0B0AB),
-    surfaceContainerLowest = Color(0xFF1E1E1D),
-    surfaceContainerLow = Color(0xFF1E1E1D),
-    surfaceContainer = Color(0xFF1E1E1D),
-    surfaceContainerHigh = Color(0xFF242423),
-    surfaceContainerHighest = Color(0xFF2A2A28),
-    outline = Color(0xFF6E6E6A),
-    outlineVariant = Color(0xFF353533),
+    primary = Sunny.Brand,
+    onPrimary = Sunny.Ink,
+    primaryContainer = Sunny.Brand,
+    onPrimaryContainer = Sunny.Ink,
+    secondary = Color(0xFF8FCBAE),
+    onSecondary = Color(0xFF0B3524),
+    secondaryContainer = Color(0xFF1F4A38),
+    onSecondaryContainer = Color(0xFFCDEBDC),
+    tertiary = Color(0xFFF5A3C5),
+    onTertiary = Color(0xFF5A0F2E),
+    tertiaryContainer = Color(0xFF5A1F3B),
+    onTertiaryContainer = Color(0xFFFDE3EE),
+    background = Color(0xFF14120F),
+    onBackground = Color(0xFFEFEAE0),
+    surface = Color(0xFF14120F),
+    onSurface = Color(0xFFEFEAE0),
+    surfaceVariant = Color(0xFF2C2924),
+    onSurfaceVariant = Color(0xFFB8B1A4),
+    surfaceContainerLowest = Color(0xFF1F1D19),
+    surfaceContainerLow = Color(0xFF1F1D19),
+    surfaceContainer = Color(0xFF1F1D19),
+    surfaceContainerHigh = Color(0xFF26231F),
+    surfaceContainerHighest = Color(0xFF2C2924),
+    outline = Color(0xFF6F685C),
+    outlineVariant = Color(0xFF38342D),
     error = Color(0xFFFFB4AB),
     onError = Color(0xFF690005),
     errorContainer = Color(0xFF5C1A15),
     onErrorContainer = Color(0xFFFFDAD5),
-    inverseSurface = Color(0xFFE8E8E5),
-    inverseOnSurface = Color(0xFF1C1C1C),
-    inversePrimary = Green,
+    inverseSurface = Color(0xFFEFEAE0),
+    inverseOnSurface = Sunny.Ink,
+    inversePrimary = Sunny.Ink,
 )
 
 val Figtree = FontFamily(
@@ -107,50 +122,50 @@ val Figtree = FontFamily(
     Font(R.font.figtree_bold, FontWeight.Bold),
 )
 
-private fun TextStyle.plain(weight: FontWeight? = null) = copy(fontFamily = Figtree, fontWeight = weight ?: fontWeight)
-
-private val Base = Typography()
+private fun style(size: Int, weight: FontWeight) = TextStyle(
+    fontFamily = Figtree,
+    fontWeight = weight,
+    fontSize = size.sp,
+    lineHeight = (size * 1.3f).sp,
+)
 
 private val PlainTypography = Typography(
-    displayLarge = Base.displayLarge.plain(FontWeight.Bold),
-    displayMedium = Base.displayMedium.plain(FontWeight.Bold),
-    displaySmall = Base.displaySmall.plain(FontWeight.Bold),
-    headlineLarge = Base.headlineLarge.plain(FontWeight.Bold),
-    headlineMedium = Base.headlineMedium.plain(FontWeight.Bold),
-    headlineSmall = Base.headlineSmall.plain(FontWeight.Bold),
-    titleLarge = Base.titleLarge.plain(FontWeight.SemiBold),
-    titleMedium = Base.titleMedium.plain(FontWeight.SemiBold),
-    titleSmall = Base.titleSmall.plain(FontWeight.SemiBold),
-    bodyLarge = Base.bodyLarge.plain(),
-    bodyMedium = Base.bodyMedium.plain(),
-    bodySmall = Base.bodySmall.plain(),
-    labelLarge = Base.labelLarge.plain(FontWeight.SemiBold),
-    labelMedium = Base.labelMedium.plain(FontWeight.SemiBold),
-    labelSmall = Base.labelSmall.plain(FontWeight.Medium),
+    displayLarge = style(32, FontWeight.Bold),
+    displayMedium = style(32, FontWeight.Bold),
+    displaySmall = style(28, FontWeight.Bold),
+    headlineLarge = style(30, FontWeight.Bold),
+    headlineMedium = style(28, FontWeight.Bold),
+    headlineSmall = style(22, FontWeight.Bold),
+    titleLarge = style(20, FontWeight.SemiBold),
+    titleMedium = style(16, FontWeight.SemiBold),
+    titleSmall = style(14, FontWeight.SemiBold),
+    bodyLarge = style(16, FontWeight.Normal),
+    bodyMedium = style(15, FontWeight.Normal),
+    bodySmall = style(13, FontWeight.Normal),
+    labelLarge = style(14, FontWeight.SemiBold),
+    labelMedium = style(13, FontWeight.SemiBold),
+    labelSmall = style(12, FontWeight.Medium),
 )
 
+// One card style everywhere: 20 dp (Card's default shape is "medium").
 private val PlainShapes = Shapes(
-    extraSmall = RoundedCornerShape(6.dp),
-    small = RoundedCornerShape(10.dp),
-    medium = RoundedCornerShape(14.dp),
-    large = RoundedCornerShape(14.dp),
-    extraLarge = RoundedCornerShape(20.dp),
+    extraSmall = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(12.dp),
+    medium = RoundedCornerShape(20.dp),
+    large = RoundedCornerShape(20.dp),
+    extraLarge = RoundedCornerShape(28.dp),
 )
 
-/** [dynamicColor] (the phone's wallpaper colors) is off: the app has its own look. */
+/**
+ * [darkTheme] is chosen by the caller (the phone's setting, or the person's choice under This phone).
+ * [dynamicColor] is kept only so callers that pass it keep compiling: the app never takes the wallpaper's colors.
+ */
+@Suppress("UNUSED_PARAMETER")
 @Composable
 fun ChoreMeTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColors
-        else -> LightColors
-    }
-    MaterialTheme(colorScheme = colorScheme, typography = PlainTypography, shapes = PlainShapes, content = content)
+    MaterialTheme(colorScheme = if (darkTheme) DarkColors else LightColors, typography = PlainTypography, shapes = PlainShapes, content = content)
 }

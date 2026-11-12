@@ -98,6 +98,9 @@ import com.choreme.core.ui.HeaderLine
 import com.choreme.core.ui.SectionLabel
 import com.choreme.core.ui.ItemIcon
 import com.choreme.core.ui.MemberAvatar
+import com.choreme.core.ui.HeroCard
+import com.choreme.core.ui.NosButton
+import com.choreme.core.ui.NosButtonStyle
 import com.choreme.core.ui.RoomFilterRow
 import com.choreme.core.ui.RoomTag
 import com.choreme.core.ui.TabHeader
@@ -193,7 +196,7 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item(key = "header") {
-                ChoresHeader(state, onOpenGroceries)
+                ChoresHeader(state, onOpenGroceries, onAdd = { adding = true })
             }
             // Only once some chore belongs to a room: all, only those of rooms, or only the others.
             if (state.hasRoomTasks) {
@@ -310,17 +313,6 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
             }
         }
 
-        // Anyone who notices something can add it, kids included.
-        if (state.me != null) {
-            // Black, so it never looks like a chore's own button.
-            FloatingActionButton(
-                onClick = { adding = true },
-                containerColor = MaterialTheme.colorScheme.inverseSurface,
-                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-            ) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_chore)) }
-        }
         SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp))
         CheerBubble(cheer, onGone = { cheer = null }, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 88.dp))
     }
@@ -494,30 +486,33 @@ private fun AskForNotificationPermission() {
     }
 }
 
-/** "Chores", and one grey line: what needs doing and what's on the grocery list. */
+/**
+ * The yellow card at the top: today's date, how many chores need doing (or "all done"), what's yours and on
+ * the grocery list, a ring for how much of today is done, and the one button: add a chore.
+ */
 @Composable
-internal fun ChoresHeader(state: ChoresUiState, onOpenGroceries: () -> Unit) {
+internal fun ChoresHeader(state: ChoresUiState, onOpenGroceries: () -> Unit, onAdd: () -> Unit) {
     val toDo = state.board.toDo.size
-    TabHeader(title = stringResource(R.string.chores_title), modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)) {
-        // Wraps whole pieces onto a new line with big text, never single letters.
-        FlowRow {
-            HeaderLine(pluralStringResource(R.plurals.summary_to_do, toDo, toDo))
-            val mine = state.board.mine.size
-            if (mine > 0) {
-                HeaderLine(" · ")
-                Text(
-                    pluralStringResource(R.plurals.summary_yours, mine, mine),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
-            if (state.groceriesToBuy > 0) {
-                HeaderLine(" · ")
-                HeaderLine(
-                    stringResource(R.string.groceries_link, state.groceriesToBuy),
-                    modifier = Modifier.clickable(onClick = onOpenGroceries),
-                )
-            }
+    val mine = state.board.mine.size
+    val done = state.board.doneToday.size
+    val total = done + toDo + mine
+    val date = remember(state.today) {
+        state.today.format(DateTimeFormatter.ofPattern("EEEE, d MMMM")).replaceFirstChar { it.uppercase() }
+    }
+    val parts = buildList {
+        if (mine > 0) add(pluralStringResource(R.plurals.summary_yours, mine, mine))
+        if (state.groceriesToBuy > 0) add(stringResource(R.string.groceries_link, state.groceriesToBuy))
+    }
+    HeroCard(
+        title = if (toDo + mine == 0) stringResource(R.string.hero_all_done) else pluralStringResource(R.plurals.summary_to_do, toDo, toDo),
+        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
+        kicker = date,
+        line = parts.joinToString(" · ").ifEmpty { null },
+        progress = if (total > 0) done.toFloat() / total else null,
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (state.me != null) NosButton(stringResource(R.string.add_chore), onAdd, Modifier.weight(1f))
+            if (state.groceriesToBuy > 0) NosButton(stringResource(R.string.hero_groceries), onOpenGroceries, style = NosButtonStyle.Tonal)
         }
     }
 }
@@ -607,12 +602,12 @@ internal fun ChoreCard(
     val colors = MaterialTheme.colorScheme
     val cardColor = when {
         chore.urgent -> lerp(CardDefaults.cardColors().containerColor, colors.error, 0.06f)
-        mine -> lerp(CardDefaults.cardColors().containerColor, colors.primary, 0.08f)
+        mine -> lerp(CardDefaults.cardColors().containerColor, colors.secondary, 0.08f)
         else -> CardDefaults.cardColors().containerColor
     }
     val edge = when {
         chore.urgent -> BorderStroke(1.5.dp, colors.error)
-        mine -> BorderStroke(1.5.dp, colors.primary)
+        mine -> BorderStroke(1.5.dp, colors.secondary)
         else -> null
     }
 
@@ -716,14 +711,14 @@ private fun SwipeHint(direction: SwipeToDismissBoxValue, action: String) {
         Modifier
             .fillMaxSize()
             .clip(MaterialTheme.shapes.medium)
-            .background(if (right) colors.primary else colors.surfaceVariant)
+            .background(if (right) colors.secondary else colors.surfaceVariant)
             .padding(horizontal = 20.dp),
         contentAlignment = if (right) Alignment.CenterStart else Alignment.CenterEnd,
     ) {
         Text(
             if (right) action else stringResource(R.string.swipe_more),
             style = MaterialTheme.typography.titleSmall,
-            color = if (right) colors.onPrimary else colors.onSurface,
+            color = if (right) colors.onSecondary else colors.onSurface,
         )
     }
 }
@@ -786,7 +781,7 @@ internal fun CompactRow(chore: Chore, trailing: String, onClick: () -> Unit, don
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (done) {
-            ItemIcon(CoreUiR.drawable.ic_check_circle, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+            ItemIcon(CoreUiR.drawable.ic_check_circle, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.secondary)
             Spacer(Modifier.width(12.dp))
         }
         Text(choreTitle(chore.title), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)

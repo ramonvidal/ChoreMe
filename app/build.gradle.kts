@@ -81,6 +81,7 @@ dependencies {
     implementation(projects.core.data)
     implementation(projects.core.ui)
     implementation(projects.core.push)
+    implementation(projects.core.settings)
     implementation(projects.core.update)
     implementation(projects.feature.onboarding)
     implementation(projects.feature.chores)
