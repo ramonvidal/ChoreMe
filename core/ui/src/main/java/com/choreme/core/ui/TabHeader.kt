@@ -89,12 +89,12 @@ fun HeaderLine(text: String, modifier: Modifier = Modifier) {
     Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = modifier)
 }
 
-/** A small spaced-out title over a group of cards ("NEEDS DOING", "TODAY", "MEMBERS"). */
+/** A small, slightly spaced title over a group of cards ("Needs doing", "Today", "Members"). */
 @Composable
 fun SectionLabel(text: String, modifier: Modifier = Modifier) {
     Text(
-        text.uppercase(),
-        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 0.8.sp),
+        text,
+        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 0.4.sp),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = modifier.padding(start = 4.dp, top = 16.dp, bottom = 4.dp),
     )

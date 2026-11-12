@@ -59,7 +59,7 @@ class ChoreCardsScreenshotTest {
             ChoreMeTheme(darkTheme = false, dynamicColor = false) {
                 Surface {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        ChoresHeader(state.copy(chores = listOf(leak, dishes, laundry, hoover), board = buildTodayBoard(listOf(leak, dishes, laundry, hoover), today, "mom"), groceriesToBuy = 5), onOpenGroceries = {})
+                        ChoresHeader(state.copy(chores = listOf(leak, dishes, laundry, hoover), board = buildTodayBoard(listOf(leak, dishes, laundry, hoover), today, "mom"), groceriesToBuy = 5), onOpenGroceries = {}, onAdd = {})
                         HomeCard(homeScene(14, overdue = 0, urgent = 0, toDo = 3), onClick = {})
                         ChoreCard(trash, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         ChoreCard(hoover, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {}, mine = true)
