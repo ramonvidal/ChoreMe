@@ -12,6 +12,9 @@ import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.material3.ColorProviders
+import com.choreme.core.ui.theme.ChoreMeDarkColors
+import com.choreme.core.ui.theme.ChoreMeLightColors
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.action.clickable
@@ -71,7 +74,10 @@ class ChoreWidgetReceiver : GlanceAppWidgetReceiver() {
 internal class ChoreWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val data = load(context)
-        provideContent { GlanceTheme { Content(context, data) } }
+        provideContent {
+            // The app's own colours, not the wallpaper's.
+            GlanceTheme(colors = ColorProviders(light = ChoreMeLightColors, dark = ChoreMeDarkColors)) { Content(context, data) }
+        }
     }
 
     private suspend fun load(context: Context): WidgetData {

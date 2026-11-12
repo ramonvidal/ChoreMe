@@ -42,7 +42,8 @@ object Sunny {
     val Error = Color(0xFFB42318)
 }
 
-private val LightColors = lightColorScheme(
+/** The light and dark colours, public for the home-screen widget, which draws with its own theme. */
+val ChoreMeLightColors = lightColorScheme(
     // The main button and the text: charcoal. What is selected: yellow (primaryContainer).
     primary = Sunny.Ink,
     onPrimary = Color.White,
@@ -80,7 +81,7 @@ private val LightColors = lightColorScheme(
 )
 
 // The same look after dark: the yellow stays, the page turns warm charcoal, the main button is yellow with ink.
-private val DarkColors = darkColorScheme(
+val ChoreMeDarkColors = darkColorScheme(
     primary = Sunny.Brand,
     onPrimary = Sunny.Ink,
     primaryContainer = Sunny.Brand,
@@ -167,5 +168,5 @@ fun ChoreMeTheme(
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(colorScheme = if (darkTheme) DarkColors else LightColors, typography = PlainTypography, shapes = PlainShapes, content = content)
+    MaterialTheme(colorScheme = if (darkTheme) ChoreMeDarkColors else ChoreMeLightColors, typography = PlainTypography, shapes = PlainShapes, content = content)
 }
