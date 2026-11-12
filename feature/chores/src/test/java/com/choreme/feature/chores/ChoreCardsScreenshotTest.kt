@@ -78,7 +78,8 @@ class ChoreCardsScreenshotTest {
         compose.onNodeWithText("Wash the dishes").assertExists()
         compose.onNodeWithText("Urgent").assertExists()
         compose.onNodeWithText("2 points").assertExists()
-        compose.onNodeWithText("1 is yours").assertExists()
+        // The hero card joins "1 is yours" and the grocery count in one line.
+        compose.onNodeWithText("1 is yours", substring = true).assertExists()
         compose.onNodeWithText("You and Mia are on it").assertExists()
         compose.onNodeWithText("On it · 4 points").assertExists()
         compose.onNodeWithText("Every month on the 5th until 31 Dec 2027").assertExists()

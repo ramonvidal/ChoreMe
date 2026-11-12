@@ -117,7 +117,7 @@ class ChoresTabScreenshotTest {
     @Config(qualifiers = "pt-rBR-w411dp-h1800dp")
     fun baianes() {
         shoot("tab-chores-baianes", mom, dark = false)
-        compose.onNodeWithText("Corres").assertExists()
+        compose.onNodeWithText("pra fazer", substring = true).assertExists()
         // A ready-made chore added in English shows in Baianês.
         compose.onNodeWithText("Lavar os pratos").assertExists()
     }
