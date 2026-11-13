@@ -125,8 +125,9 @@ internal fun FamilyContent(
     actionState: ActionState,
     signOutNeedsApprovalAgain: Boolean,
     actions: FamilyActions,
-    phoneSettings: @Composable () -> Unit,
     weeklyPlan: @Composable () -> Unit = {},
+    // Last, so a trailing lambda is still "This phone".
+    phoneSettings: @Composable () -> Unit,
 ) {
     var showAddKid by rememberSaveable { mutableStateOf(false) }
     var confirmSignOut by rememberSaveable { mutableStateOf(false) }
