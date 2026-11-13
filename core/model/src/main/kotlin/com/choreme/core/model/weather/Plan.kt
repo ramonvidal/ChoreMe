@@ -6,8 +6,9 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 
 /**
- * One regular trip or outing in a grown-up's week: "Mon to Fri 8:00, to Work, by bike, 30 minutes".
- * [placeId] is a saved place of the family (the Map tab); the forecast is asked for it and for home.
+ * One regular trip or outing in a grown-up's week: "Mon to Fri 8:00, to Work, by bike, 40 minutes".
+ * [placeId] is a saved place of the family (the Map tab) and its name is the title: the app needs no more than
+ * the name to know where to ask the forecast (at the place and at home).
  */
 data class PlanEntry(
     val id: String,
@@ -25,8 +26,11 @@ data class PlanEntry(
     fun isOn(day: DayOfWeek) = day in days
 
     companion object {
-        const val DEFAULT_MINUTES = 30
+        /** A usual trip takes 30 to 50 minutes; the forecast window uses the middle. */
+        const val DEFAULT_MINUTES = 40
         const val MIN_MINUTES = 5
+        /** Quick choices in the editor. */
+        val MINUTE_CHOICES = listOf(30, 40, 50, 60)
         const val MAX_MINUTES = 12 * 60
         const val MAX_TITLE = 40
     }

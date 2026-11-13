@@ -27,6 +27,8 @@ object ModuleRules {
         ":core:settings" to setOf(":core:model"),
         // Updating the app itself from the project's release page.
         ":core:update" to setOf(":core:model"),
+        // Forecasts for the places and times of the family's routine (Open-Meteo, free, no key).
+        ":core:weather" to setOf(":core:model"),
     )
 
     val PURE_KOTLIN: Set<String> = setOf(":core:model")
