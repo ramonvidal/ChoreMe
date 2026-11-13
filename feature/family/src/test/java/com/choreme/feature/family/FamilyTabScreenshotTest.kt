@@ -1,6 +1,9 @@
 package com.choreme.feature.family
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
@@ -22,6 +25,12 @@ import com.choreme.core.model.session.SessionState
 import com.choreme.core.ui.ActionState
 import com.choreme.core.ui.theme.ChoreMeTheme
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.choreme.core.model.location.GeoPoint
+import com.choreme.core.model.location.Place
+import com.choreme.core.model.weather.PlanEntry
+import com.choreme.core.model.weather.TripMode
+import java.time.DayOfWeek
+import java.time.LocalTime
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -135,5 +144,34 @@ class FamilyTabScreenshotTest {
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     fun storePt() {
         shoot("store-6-family-pt", dark = false)
+    }
+
+    /** The weekly plan section: a few trips, and the editor's button for a parent. */
+    @Test
+    fun weeklyPlan() {
+        val places = listOf(
+            Place("home", "Home", GeoPoint(52.5, 13.4), 100),
+            Place("work", "Work", GeoPoint(52.52, 13.45), 100),
+            Place("gym", "Gym", GeoPoint(52.51, 13.42), 100),
+        )
+        val ramon = Member("ramon", "Ramon", Role.PARENT)
+        val ana = Member("ana", "Ana", Role.PARENT)
+        val entries = listOf(
+            PlanEntry("a", "ramon", "Work", setOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY), LocalTime.of(8, 0), 40, TripMode.BIKE, "work"),
+            PlanEntry("b", "ana", "Gym", setOf(DayOfWeek.TUESDAY, DayOfWeek.THURSDAY), LocalTime.of(18, 30), 50, TripMode.WALK, "gym"),
+            PlanEntry("c", "ramon", "Gym", setOf(DayOfWeek.SATURDAY), LocalTime.of(10, 0), 30, TripMode.CAR, "gym"),
+        )
+        compose.setContent {
+            ChoreMeTheme(darkTheme = false, dynamicColor = false) {
+                Surface(Modifier.fillMaxSize()) {
+                    Column(Modifier.padding(16.dp)) {
+                        WeeklyPlanContent(WeeklyPlanState(entries, places, listOf(ramon, ana), isParent = true, myMemberId = "ramon"), onSave = {}, onDelete = {})
+                    }
+                }
+            }
+        }
+        compose.onNodeWithText("Weekdays", substring = true).assertExists()
+        compose.onNodeWithText("Add a trip").assertExists()
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/tab-family-plan.png")
     }
 }

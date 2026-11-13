@@ -96,6 +96,7 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
             setPointsEnabled = { viewModel.setPointsEnabled(it) },
         ),
         phoneSettings = { PhoneSettings() },
+        weeklyPlan = { WeeklyPlan() },
     )
 }
 
@@ -125,6 +126,7 @@ internal fun FamilyContent(
     signOutNeedsApprovalAgain: Boolean,
     actions: FamilyActions,
     phoneSettings: @Composable () -> Unit,
+    weeklyPlan: @Composable () -> Unit = {},
 ) {
     var showAddKid by rememberSaveable { mutableStateOf(false) }
     var confirmSignOut by rememberSaveable { mutableStateOf(false) }
@@ -221,6 +223,9 @@ internal fun FamilyContent(
             item { SectionLabel(stringResource(R.string.week_title)) }
             item(key = "week") { WeekSection(state.week) }
         }
+
+        item { SectionLabel(stringResource(R.string.plan_title)) }
+        item(key = "weekly-plan") { weeklyPlan() }
 
         item { SectionLabel(stringResource(R.string.this_phone_title)) }
         item(key = "this-phone") { phoneSettings() }

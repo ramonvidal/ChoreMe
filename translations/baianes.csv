@@ -391,6 +391,28 @@ feature/family,message_channel,,Family messages,Recados da família
 feature/family,message_channel_description,,When someone sends a message to the whole family,Quando alguém manda um recado pra família toda
 feature/family,alert_messages,,Family messages,Recados da família
 feature/family,alert_messages_hint,,When someone sends a message to everyone,Quando alguém manda um recado pra todo mundo
+feature/family,plan_title,,Weekly plan,Plano da semana
+feature/family,plan_hint,,The regular trips of the week. The little house on the Chores tab tells the weather for them.,Os trajetos de sempre da semana. A casinha da aba Corres diz o tempo pra eles.
+feature/family,plan_empty,,"No trips yet. Add the regular ones, like going to work or to the gym.","Ainda sem trajetos. Adicione os de sempre, tipo ir pro trabalho ou pra academia."
+feature/family,plan_no_places,,"Save your places (home, work, gym) on the Map tab first, then add trips here.","Salve seus lugares (casa, trabalho, academia) na aba Mapa primeiro, depois adicione os trajetos aqui."
+feature/family,plan_add,,Add a trip,Adicionar trajeto
+feature/family,plan_edit,,Edit trip,Editar trajeto
+feature/family,plan_place,,Where to,Pra onde
+feature/family,plan_who,,Who,Quem
+feature/family,plan_days,,Days,Dias
+feature/family,plan_weekdays,,Weekdays,Dias úteis
+feature/family,plan_weekend,,Weekend,Fim de semana
+feature/family,plan_every_day,,Every day,Todo dia
+feature/family,plan_time,,Leaves at %1$s,Sai às %1$s
+feature/family,plan_duration,,How long,Quanto tempo
+feature/family,plan_minutes,,%1$d min,%1$d min
+feature/family,plan_mode,,How,Como
+feature/family,mode_walk,,On foot,A pé
+feature/family,mode_bike,,Bike,Bicicleta
+feature/family,mode_car,,Car,Carro
+feature/family,mode_transit,,Bus or train,Ônibus ou metrô
+feature/family,mode_other,,Other,Outro
+feature/family,plan_delete,,Delete trip,Excluir trajeto
 feature/groceries,grocery_quick_add,,Out of something? Type it here,Acabou alguma coisa? Escreva aqui
 feature/groceries,grocery_to_buy,,To buy (%1$d),Pra comprar (%1$d)
 feature/groceries,grocery_restock,,Restock usuals (%1$d),Repor o de sempre (%1$d)
