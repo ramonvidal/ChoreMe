@@ -76,7 +76,7 @@ internal data class HomeWeatherState(
 
 /** Fetches the weather for the card every half hour while the tab is open. */
 @HiltViewModel
-class HomeWeatherViewModel @Inject constructor(
+class HomeWeatherViewModel @Inject internal constructor(
     families: FamilyRepository,
     plans: PlanRepository,
     locations: LocationRepository,
