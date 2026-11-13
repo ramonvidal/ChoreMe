@@ -9,6 +9,11 @@ import com.choreme.core.push.PushRegistration
 import com.choreme.core.settings.AppearanceSettings
 import com.choreme.core.settings.NotificationSettings
 import com.choreme.core.settings.ThemeMode
+import com.choreme.core.settings.WeatherSettings
+import com.choreme.core.model.weather.RainUnit
+import com.choreme.core.model.weather.SpeedUnit
+import com.choreme.core.model.weather.TemperatureUnit
+import com.choreme.core.model.weather.WeatherUnits
 import com.choreme.core.update.UpdateRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
@@ -33,7 +38,14 @@ class PhoneSettingsViewModel @Inject constructor(
     private val push: PushRegistration,
     private val updates: UpdateRepository,
     private val appearance: AppearanceSettings,
+    private val weatherSettings: WeatherSettings,
 ) : ViewModel() {
+    val weatherUnits: StateFlow<WeatherUnits> = weatherSettings.units
+
+    fun setTemperatureUnit(unit: TemperatureUnit) = weatherSettings.setTemperature(unit)
+    fun setSpeedUnit(unit: SpeedUnit) = weatherSettings.setSpeed(unit)
+    fun setRainUnit(unit: RainUnit) = weatherSettings.setRain(unit)
+
     val themeMode: StateFlow<ThemeMode> = appearance.mode
 
     fun setThemeMode(mode: ThemeMode) = appearance.set(mode)

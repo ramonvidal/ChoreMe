@@ -127,6 +127,12 @@
     <string name="mode_transit">Ônibus ou metrô</string>
     <string name="mode_other">Outro</string>
     <string name="plan_delete">Excluir trajeto</string>
+    <string name="units_section">Unidades do tempo</string>
+    <string name="units_temperature">Temperatura</string>
+    <string name="units_wind">Vento</string>
+    <string name="units_rain">Chuva</string>
+    <string name="alert_weather">Tempo de manhã</string>
+    <string name="alert_weather_hint">Às 7h, o tempo pros trajetos da família no dia e avisos de temporal</string>
     <plurals name="member_devices">
         <item quantity="one">%d aparelho</item>
         <item quantity="other">%d aparelhos</item>

@@ -18,6 +18,8 @@ enum class AlertKind {
     MESSAGES,
     /** Sunday evening: the week's points, by person. */
     WEEKLY_SUMMARY,
+    /** Early morning: the weather for the family's regular trips of the day, and storm warnings. */
+    WEATHER,
 }
 
 /** A nightly window when notifications arrive silently, e.g. 22:00 to 07:00. */

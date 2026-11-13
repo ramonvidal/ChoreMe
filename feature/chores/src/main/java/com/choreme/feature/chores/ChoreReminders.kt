@@ -12,12 +12,14 @@ import java.time.LocalTime
 import java.util.concurrent.TimeUnit
 
 /**
- * Daily morning summary of the chores due, and Sunday evening's week in review, posted by each phone itself. The free Firebase
+ * Daily morning summary of the chores due, the weather for the day's trips, and Sunday evening's week in review, posted by each phone itself. The free Firebase
  * plan can't send pushes from a server, so this is how reminders work for now (see PLAN.md).
  */
 object ChoreReminders {
     private const val WORK_NAME = "chore-morning-reminder"
     private val REMINDER_TIME: LocalTime = LocalTime.of(8, 0)
+    private const val WEATHER_WORK_NAME = "weather-morning"
+    private val WEATHER_TIME: LocalTime = LocalTime.of(7, 0)
     private const val WEEKLY_WORK_NAME = "chore-weekly-summary"
     private val WEEKLY_TIME: LocalTime = LocalTime.of(19, 0)
 
@@ -29,6 +31,12 @@ object ChoreReminders {
             .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
             .build()
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request)
+        // Early morning: the weather for the family's trips of the day.
+        val weather = PeriodicWorkRequestBuilder<WeatherMorningWorker>(1, TimeUnit.DAYS)
+            .setInitialDelay(untilNext(WEATHER_TIME).toMillis(), TimeUnit.MILLISECONDS)
+            .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+            .build()
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(WEATHER_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, weather)
         // Every evening; the worker only posts on Sundays.
         val weekly = PeriodicWorkRequestBuilder<WeeklySummaryWorker>(1, TimeUnit.DAYS)
             .setInitialDelay(untilNext(WEEKLY_TIME).toMillis(), TimeUnit.MILLISECONDS)

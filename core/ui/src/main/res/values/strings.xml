@@ -68,4 +68,9 @@
     <string name="concern_uv">Strong sun</string>
     <string name="concern_fog">Fog</string>
     <string name="weather_leave_earlier">leave %1$d min earlier</string>
+    <string name="extreme_storm">Thunderstorms expected</string>
+    <string name="extreme_heat">Heat wave: stay cool and drink water</string>
+    <string name="extreme_frost">Hard frost: ice and bitter cold</string>
+    <string name="extreme_gale">Gale-force wind expected</string>
+    <string name="extreme_rain">Torrential rain expected</string>
 </resources>

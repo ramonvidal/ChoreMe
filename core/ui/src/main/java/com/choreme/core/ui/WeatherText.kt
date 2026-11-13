@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.StringRes
 import com.choreme.core.model.weather.Advice
 import com.choreme.core.model.weather.Concern
+import com.choreme.core.model.weather.Extreme
 import com.choreme.core.model.weather.Gear
 import com.choreme.core.model.weather.Sky
 import com.choreme.core.model.weather.SpeedUnit
@@ -68,3 +69,14 @@ private fun concernText(context: Context, concern: Concern, advice: Advice, unit
     Concern.UV -> context.getString(R.string.concern_uv)
     Concern.FOG -> context.getString(R.string.concern_fog)
 }
+
+/** Weather bad enough to warn everyone about. */
+@get:StringRes
+val Extreme.label: Int
+    get() = when (this) {
+        Extreme.STORM -> R.string.extreme_storm
+        Extreme.HEAT_WAVE -> R.string.extreme_heat
+        Extreme.HARD_FROST -> R.string.extreme_frost
+        Extreme.GALE -> R.string.extreme_gale
+        Extreme.TORRENTIAL_RAIN -> R.string.extreme_rain
+    }

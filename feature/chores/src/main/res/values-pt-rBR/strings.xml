@@ -149,6 +149,9 @@
     <string name="weather_nothing_planned">Nenhum compromisso pro resto de hoje.</string>
     <string name="weather_needs_place">Salve seu cafofo na aba Mapa pra ver o tempo aqui.</string>
     <string name="weather_credit">Dados do tempo: Open-Meteo.com (CC BY 4.0)</string>
+    <string name="weather_channel">Tempo de manhã</string>
+    <string name="weather_channel_description">O tempo pros trajetos de sempre da família no dia, e avisos de temporal</string>
+    <string name="weather_morning_title">Hoje: %1$s</string>
     <plurals name="overdue_days">
         <item quantity="one">%d dia atrasado</item>
         <item quantity="other">%d dias atrasado</item>

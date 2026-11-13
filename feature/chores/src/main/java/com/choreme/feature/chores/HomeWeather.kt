@@ -28,15 +28,12 @@ import androidx.lifecycle.viewModelScope
 import com.choreme.core.data.FamilyRepository
 import com.choreme.core.data.LocationRepository
 import com.choreme.core.data.PlanRepository
-import com.choreme.core.location.DeviceLocation
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.model.weather.Advice
 import com.choreme.core.model.weather.PlanEntry
 import com.choreme.core.model.weather.Sky
 import com.choreme.core.model.weather.WeatherHour
 import com.choreme.core.model.weather.WeatherUnits
-import com.choreme.core.model.weather.homePlace
-import com.choreme.core.model.weather.momentsOn
 import com.choreme.core.settings.WeatherSettings
 import com.choreme.core.ui.degrees
 import com.choreme.core.ui.describe
@@ -85,7 +82,7 @@ class HomeWeatherViewModel @Inject constructor(
     locations: LocationRepository,
     private val weather: WeatherRepository,
     settings: WeatherSettings,
-    private val device: DeviceLocation,
+    private val day: DayWeather,
 ) : ViewModel() {
     private class Inputs(
         val plans: List<PlanEntry>,
@@ -111,20 +108,10 @@ class HomeWeatherViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeWeatherState())
 
     private suspend fun compute(inputs: Inputs): HomeWeatherState {
-        // Where it's raining on us: the phone's own (approximate) position, else the family's home on the map.
-        val home = device.current()?.point ?: homePlace(inputs.places)?.center
-            ?: return HomeWeatherState(loading = false, units = inputs.units, needsPlace = true)
+        val home = day.home(inputs.places) ?: return HomeWeatherState(loading = false, units = inputs.units, needsPlace = true)
         val now = LocalDateTime.now()
-        val today = now.toLocalDate()
         val current = weather.forecast(home)?.at(now)
-        val hoursByEntry = inputs.plans
-            .filter { it.isOn(today.dayOfWeek) }
-            .associate { entry ->
-                val from = today.atTime(entry.start)
-                val points = listOfNotNull(home, inputs.places.firstOrNull { it.id == entry.placeId }?.center)
-                entry.id to weather.hoursFor(points, from, from.plusMinutes(entry.minutes.toLong()))
-            }
-        val moments = momentsOn(today, inputs.plans) { entry, _, _ -> hoursByEntry[entry.id].orEmpty() }
+        val moments = day.moments(now.toLocalDate(), inputs.plans, inputs.places, home)
             .filter { it.end.isAfter(now) }
             .map { MomentLine(inputs.names[it.entry.memberId].orEmpty(), it.entry.title, it.entry.start, it.advice) }
         return HomeWeatherState(loading = false, now = current, units = inputs.units, moments = moments)

@@ -64,6 +64,11 @@
     <string name="concern_uv">Sol forte</string>
     <string name="concern_fog">Neblina</string>
     <string name="weather_leave_earlier">saia %1$d min mais cedo</string>
+    <string name="extreme_storm">Temporal a caminho</string>
+    <string name="extreme_heat">Onda de calor: se refresque e beba água</string>
+    <string name="extreme_frost">Geada forte: gelo e frio de rachar</string>
+    <string name="extreme_gale">Ventania forte a caminho</string>
+    <string name="extreme_rain">Chuva torrencial a caminho</string>
     <plurals name="points">
         <item quantity="one">%d ponto</item>
         <item quantity="other">%d pontos</item>

@@ -44,6 +44,10 @@ import com.choreme.core.model.AlertKind
 import com.choreme.core.model.QuietHours
 import com.choreme.core.settings.AppLanguage
 import com.choreme.core.settings.ThemeMode
+import com.choreme.core.model.weather.RainUnit
+import com.choreme.core.model.weather.SpeedUnit
+import com.choreme.core.model.weather.TemperatureUnit
+import com.choreme.core.ui.NosChip
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.RadioButton
 import androidx.compose.ui.semantics.Role
@@ -53,7 +57,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-private enum class Fold { LANGUAGE, APPEARANCE, ALERTS, QUIET, INSTANT, UPDATES }
+private enum class Fold { LANGUAGE, APPEARANCE, UNITS, ALERTS, QUIET, INSTANT, UPDATES }
 
 /** "This phone": each part folded to one line with its current state, opened with a tap. */
 @Composable
@@ -118,6 +122,18 @@ internal fun PhoneSettings(viewModel: PhoneSettingsViewModel = hiltViewModel()) 
                     Text(modeLabels.getValue(option), style = MaterialTheme.typography.bodyLarge)
                 }
             }
+        }
+
+        val units by viewModel.weatherUnits.collectAsStateWithLifecycle()
+        FoldRow(
+            title = stringResource(R.string.units_section),
+            summary = "${units.temperature.symbol} · ${units.speed.symbol} · ${units.rain.symbol}",
+            open = open == Fold.UNITS,
+            onToggle = { toggle(Fold.UNITS) },
+        ) {
+            UnitChoices(stringResource(R.string.units_temperature), TemperatureUnit.entries, units.temperature, { it.symbol }, viewModel::setTemperatureUnit)
+            UnitChoices(stringResource(R.string.units_wind), SpeedUnit.entries, units.speed, { it.symbol }, viewModel::setSpeedUnit)
+            UnitChoices(stringResource(R.string.units_rain), RainUnit.entries, units.rain, { it.symbol }, viewModel::setRainUnit)
         }
 
         val quiet = settings.quietHours
@@ -210,6 +226,21 @@ internal fun PhoneSettings(viewModel: PhoneSettingsViewModel = hiltViewModel()) 
     }
 }
 
+/** A row of chips to pick one unit: temperature, wind or rain. */
+@Composable
+private fun <T> UnitChoices(title: String, options: List<T>, selected: T, symbol: (T) -> String, onPick: (T) -> Unit) {
+    Column(Modifier.padding(vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(title, style = MaterialTheme.typography.labelLarge)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            options.forEach { option -> NosChip(symbol(option), option == selected, { onPick(option) }) }
+        }
+    }
+}
+
+private val SpeedUnit.symbol: String get() = when (this) { SpeedUnit.KMH -> "km/h"; SpeedUnit.MPH -> "mph"; SpeedUnit.MS -> "m/s" }
+private val RainUnit.symbol: String get() = if (this == RainUnit.MM) "mm" else "in"
+private val TemperatureUnit.symbol: String get() = if (this == TemperatureUnit.CELSIUS) "°C" else "°F"
+
 @Composable
 private fun FoldRow(title: String, summary: String, open: Boolean, onToggle: () -> Unit, content: @Composable () -> Unit) {
     Column {
@@ -268,4 +299,5 @@ private val ALERTS = listOf(
     Triple(AlertKind.SHOPPING, R.string.alert_shopping, R.string.alert_shopping_hint),
     Triple(AlertKind.MORNING_SUMMARY, R.string.alert_morning, R.string.alert_morning_hint),
     Triple(AlertKind.WEEKLY_SUMMARY, R.string.alert_weekly, R.string.alert_weekly_hint),
+    Triple(AlertKind.WEATHER, R.string.alert_weather, R.string.alert_weather_hint),
 )
