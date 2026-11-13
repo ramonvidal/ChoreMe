@@ -41,6 +41,9 @@ import androidx.compose.ui.unit.dp
  * material buttons, cards and chips themselves, so the look stays the same everywhere.
  */
 
+/** True inside a [HeroCard]: its buttons are charcoal with white text, whatever the look, so they never melt into the yellow. */
+val LocalOnBrand = androidx.compose.runtime.compositionLocalOf { false }
+
 /** The three button levels: at most one [Filled] per screen, [Tonal] (soft yellow) and [Text] for the rest. */
 enum class NosButtonStyle { Filled, Tonal, Text }
 
@@ -69,14 +72,23 @@ fun NosButton(
         ) { label() }
         else -> {
             val tonal = style == NosButtonStyle.Tonal
+            val onBrand = LocalOnBrand.current
             Button(
                 onClick = onClick,
                 modifier = modifier.heightIn(min = 52.dp),
                 enabled = enabled,
                 shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (tonal) softYellow() else scheme.primary,
-                    contentColor = if (tonal) scheme.onSurface else scheme.onPrimary,
+                    containerColor = when {
+                        tonal -> if (onBrand) com.choreme.core.ui.theme.Sunny.BrandSoft else softYellow()
+                        onBrand -> com.choreme.core.ui.theme.Sunny.Ink
+                        else -> scheme.primary
+                    },
+                    contentColor = when {
+                        tonal -> if (onBrand) com.choreme.core.ui.theme.Sunny.Ink else scheme.onSurface
+                        onBrand -> Color.White
+                        else -> scheme.onPrimary
+                    },
                 ),
             ) { label() }
         }
@@ -184,7 +196,7 @@ fun HeroCard(
                 }
             }
         }
-        content()
+        androidx.compose.runtime.CompositionLocalProvider(LocalOnBrand provides true) { content() }
     }
 }
 
