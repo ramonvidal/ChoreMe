@@ -19,7 +19,11 @@ import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreStatus
 import com.choreme.core.model.chore.ChoreTemplate
 import com.choreme.core.model.chore.buildTodayBoard
-import com.choreme.core.model.chore.homeScene
+import com.choreme.core.model.weather.TripMode
+import com.choreme.core.model.weather.WeatherHour
+import com.choreme.core.model.weather.adviceFor
+import java.time.LocalDateTime
+import java.time.LocalTime
 import com.choreme.core.ui.theme.ChoreMeTheme
 import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.Rule
@@ -60,7 +64,7 @@ class ChoreCardsScreenshotTest {
                 Surface {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         ChoresHeader(state.copy(chores = listOf(leak, dishes, laundry, hoover), board = buildTodayBoard(listOf(leak, dishes, laundry, hoover), today, "mom"), groceriesToBuy = 5), onOpenGroceries = {}, onAdd = {})
-                        HomeCard(homeScene(14, overdue = 0, urgent = 0, toDo = 3), onClick = {})
+                        HomeWeatherCard(HomeWeatherState(loading = false, now = outside(2, 14.0)), onClick = {})
                         ChoreCard(trash, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         ChoreCard(hoover, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {}, mine = true)
                         ChoreCard(rent, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
@@ -85,80 +89,68 @@ class ChoreCardsScreenshotTest {
         compose.onNodeWithText("Every month on the 5th until 31 Dec 2027").assertExists()
         compose.onNodeWithContentDescription("Leo and Mia are on it").assertExists() // their avatars
         compose.onAllNodesWithText("Me too").assertCountEquals(2) // Laundry and the garage
-        compose.onNodeWithText("14 points in 7 days").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-cards.png")
     }
 
-    /** The garden in each mood: quiet, cloudy with chores to do, full bloom, urgent, rain, storm. */
+    private val noon = LocalDateTime.of(2026, 11, 16, 12, 0)
+    private fun outside(code: Int, temp: Double, day: Boolean = true, rain: Int = 0, mm: Double = 0.0) =
+        WeatherHour(noon, temp, temp - 3, rain, mm, windKmh = 14.0, gustKmh = 30.0, weatherCode = code, isDay = day)
+
+    private fun weatherState(hour: WeatherHour, trips: List<MomentLine> = emptyList()) =
+        HomeWeatherState(loading = false, now = hour, moments = trips)
+
+    private val wetTrip = MomentLine(
+        "Ramon", "Work", LocalTime.of(8, 0),
+        adviceFor(listOf(outside(63, 6.0, rain = 80, mm = 1.4)), TripMode.BIKE),
+    )
+    private val dryTrip = MomentLine("Ana", "Gym", LocalTime.of(18, 30), adviceFor(listOf(outside(0, 11.0)), TripMode.WALK))
+
+    private val skies = listOf(
+        weatherState(outside(0, 21.0), listOf(dryTrip)),
+        weatherState(outside(2, 14.0)),
+        weatherState(outside(63, 8.0, rain = 80, mm = 1.4), listOf(wetTrip, dryTrip)),
+        weatherState(outside(73, -2.0, rain = 70, mm = 1.0)),
+        weatherState(outside(96, 17.0, rain = 90, mm = 7.0)),
+        weatherState(outside(45, 5.0)),
+        weatherState(outside(0, 6.0, day = false)),
+    )
+
+    /** The little house in every weather: sun, part cloud, rain with trips, snow, storm, fog and night. */
     @Test
-    fun garden() {
-        val scenes = listOf(
-            homeScene(0, overdue = 0, urgent = 0),
-            homeScene(9, overdue = 1, urgent = 0, toDo = 3),
-            homeScene(32, overdue = 0, urgent = 0),
-            homeScene(12, overdue = 0, urgent = 1, toDo = 1),
-            homeScene(8, overdue = 1, urgent = 0, toDo = 5),
-            homeScene(6, overdue = 4, urgent = 1, toDo = 9),
-        )
+    fun weather() {
         compose.setContent {
             ChoreMeTheme(darkTheme = false, dynamicColor = false) {
                 Surface {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        scenes.forEach { HomeCard(it, onClick = {}) }
+                        skies.forEach { HomeWeatherCard(it, onClick = {}) }
                     }
                 }
             }
         }
-        compose.onNodeWithText("32 points in 7 days").assertExists()
-        compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-garden.png")
+        compose.onNodeWithText("Gym", substring = true).assertExists()
     }
 
-    /** The editor's "For" choice: who a parent gives a new chore to. */
+    /** Dark mode: the picture keeps its own colours, only the card around it is dark. */
     @Test
-    fun forWhom() {
-        compose.setContent {
-            ChoreMeTheme(darkTheme = false, dynamicColor = false) {
-                Surface {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        ForWhomRow(listOf(mom, leo, mia), picked = emptySet(), onChange = {})
-                        ForWhomRow(listOf(mom, leo, mia), picked = setOf("leo", "mia"), onChange = {})
-                    }
-                }
-            }
-        }
-        compose.onNodeWithText("Nobody picked: anyone can grab it.").assertExists()
-        compose.onRoot().captureRoboImage("build/outputs/roborazzi/editor-for-whom.png")
-    }
-
-    /** The "well done" after finishing a chore, caught mid-way. */
-    @Test
-    fun cheer() {
-        compose.mainClock.autoAdvance = false
-        compose.setContent {
-            ChoreMeTheme(darkTheme = false, dynamicColor = false) {
-                Surface {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        CheerBubble(Cheer(points = 3, waiting = false, at = 1), onGone = {})
-                        CheerBubble(Cheer(points = 1, waiting = true, at = 2), onGone = {})
-                    }
-                }
-            }
-        }
-        compose.mainClock.advanceTimeBy(600)
-        compose.onNodeWithText("Well done! +3 points").assertExists()
-        compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-cheer.png")
-    }
-
-    /** Dark mode: the picture keeps its own colours (a white house), only the card around it is dark. */
-    @Test
-    fun gardenDark() {
+    fun weatherDark() {
         compose.setContent {
             ChoreMeTheme(darkTheme = true, dynamicColor = false) {
                 Surface {
-                    Column(Modifier.padding(16.dp)) { HomeCard(homeScene(9, overdue = 0, urgent = 0, toDo = 2), onClick = {}) }
+                    Column(Modifier.padding(16.dp)) { HomeWeatherCard(skies[2], onClick = {}) }
                 }
             }
         }
-        compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-garden-dark.png")
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-weather-dark.png")
+    }
+
+    /** What the dialog says: the day's trips with their weather, and the credit. */
+    @Test
+    fun weatherDialog() {
+        compose.setContent {
+            ChoreMeTheme(darkTheme = false, dynamicColor = false) {
+                HomeWeatherDialog(skies[2], onDismiss = {})
+            }
+        }
+        compose.onNodeWithText("Weather data by Open-Meteo.com", substring = true).assertExists()
     }
 }

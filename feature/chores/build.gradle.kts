@@ -11,6 +11,9 @@ dependencies {
     // Telling the family's other phones when a chore is added.
     implementation(projects.core.push)
     implementation(projects.core.settings)
+    // The weather outside, shown by the little house.
+    implementation(projects.core.weather)
+    implementation(projects.core.location)
     // Putting a chore on the family calendar.
     implementation(projects.core.calendar)
     // Morning reminders.

@@ -46,6 +46,30 @@ core/ui,room_tag,,#rooms,#cômodos
 core/ui,room_filter_all,,All,Todos
 core/ui,room_filter_rooms,,Rooms,Cômodos
 core/ui,room_filter_no_room,,No room,Sem cômodo
+core/ui,sky_clear,,Clear,Céu limpo
+core/ui,sky_partly_cloudy,,Partly cloudy,Parcialmente nublado
+core/ui,sky_cloudy,,Cloudy,Nublado
+core/ui,sky_fog,,Fog,Neblina
+core/ui,sky_drizzle,,Drizzle,Garoa
+core/ui,sky_rain,,Rain,Chuva
+core/ui,sky_snow,,Snow,Neve
+core/ui,sky_storm,,Thunderstorm,Trovoada
+core/ui,gear_umbrella,,Umbrella,Guarda-chuva
+core/ui,gear_rain_jacket,,Rain jacket,Capa de chuva
+core/ui,gear_warm_jacket,,Warm jacket,Casaco quente
+core/ui,gear_sun_protection,,Sun protection,Protetor solar
+core/ui,concern_rain,,Rain %1$d%%,Chuva %1$d%%
+core/ui,concern_heavy_rain,,Heavy rain,Chuva forte
+core/ui,concern_snow,,Snow,Neve
+core/ui,concern_ice,,Ice on the way,Gelo no caminho
+core/ui,concern_frost,,"Frost, %1$s","Geada, %1$s"
+core/ui,concern_cold,,"Cold, %1$s","Frio, %1$s"
+core/ui,concern_heat,,"Hot, %1$s","Calorão, %1$s"
+core/ui,concern_wind,,"Windy, gusts %1$s","Ventania, rajadas de %1$s"
+core/ui,concern_storm,,Storm,Temporal
+core/ui,concern_uv,,Strong sun,Sol forte
+core/ui,concern_fog,,Fog,Neblina
+core/ui,weather_leave_earlier,,leave %1$d min earlier,saia %1$d min mais cedo
 feature/agenda,agenda_title,,Agenda,Agenda
 feature/agenda,permission_title,,Show your family calendar,Mostrar a agenda da família
 feature/agenda,permission_body,,"Nos Corre! shows the calendars already on this phone, like a shared Google Calendar, next to your chores. Events you add here go to that calendar, and Google sends the alerts to everyone who shares it.","O Nos Corre! mostra as agendas que já estão neste celular, como uma Agenda Google dividida, junto dos corres. Os eventos que você adiciona aqui vão pra essa agenda, e o Google manda os avisos pra todo mundo que divide ela."
@@ -250,6 +274,15 @@ feature/chores,weekly_chores_body,,"Good work, everyone!","Mandaram bem, galera!
 feature/chores,cheer_waiting,,Well done! A parent will check it,Arretado! Mainha ou painho vai conferir
 feature/chores,hero_all_done,,All done for today,Tudo feito por hoje
 feature/chores,hero_groceries,,Groceries,Feira
+feature/chores,weather_title,,Weather,Tempo
+feature/chores,weather_loading,,Checking the sky…,Olhando o céu…
+feature/chores,weather_unavailable,,No forecast right now. Check the connection.,Sem previsão agora. Veja a conexão.
+feature/chores,weather_feels_like,,feels like %1$s,sensação de %1$s
+feature/chores,weather_wind,,wind %1$s,vento %1$s
+feature/chores,weather_all_good,,all good,tá de boa
+feature/chores,weather_nothing_planned,,No trips planned for the rest of today.,Nenhum compromisso pro resto de hoje.
+feature/chores,weather_needs_place,,Save your home on the Map tab to see the weather here.,Salve seu cafofo na aba Mapa pra ver o tempo aqui.
+feature/chores,weather_credit,,Weather data by Open-Meteo.com (CC BY 4.0),Dados do tempo: Open-Meteo.com (CC BY 4.0)
 feature/family,family_invite_hint,,Share this code so others can ask to join:,Mande este código pra galera pedir pra entrar:
 feature/family,family_share_invite,,Share invite code,Mandar o código de convite
 feature/family,family_invite_message,,Join the %1$s family on Nos Corre! with the code %2$s,Entra na família %1$s no Nos Corre! com o código %2$s

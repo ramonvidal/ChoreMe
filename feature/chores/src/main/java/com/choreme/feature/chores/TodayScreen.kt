@@ -117,14 +117,20 @@ import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun TodayScreen(onOpenGroceries: () -> Unit, viewModel: ChoresViewModel = hiltViewModel()) {
+internal fun TodayScreen(
+    onOpenGroceries: () -> Unit,
+    viewModel: ChoresViewModel = hiltViewModel(),
+    weatherViewModel: HomeWeatherViewModel = hiltViewModel(),
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val reminders by viewModel.reminders.collectAsStateWithLifecycle()
+    val weather by weatherViewModel.state.collectAsStateWithLifecycle()
     AskForNotificationPermission()
     ChoresContent(
         state = state,
         reminders = reminders,
         onOpenGroceries = onOpenGroceries,
+        weather = weather,
         actions = ChoresActions(
             claim = { viewModel.claim(it) },
             unclaim = { viewModel.unclaim(it) },
@@ -169,7 +175,13 @@ internal class ChoresActions(
 
 /** The whole tab, drawn from [state] alone, so it can be screenshotted without Firebase. */
 @Composable
-internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>, onOpenGroceries: () -> Unit, actions: ChoresActions) {
+internal fun ChoresContent(
+    state: ChoresUiState,
+    reminders: Map<String, Instant>,
+    onOpenGroceries: () -> Unit,
+    actions: ChoresActions,
+    weather: HomeWeatherState = HomeWeatherState(),
+) {
     var cheer by remember { mutableStateOf<Cheer?>(null) }
     val haptics = LocalHapticFeedback.current
     // A small "well done" each time a chore is finished: a tick, the points, a little buzz.
@@ -208,7 +220,7 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
                 }
                 !state.hasChores -> item(key = "empty") { EmptyChores(state.isParent) }
                 else -> {
-                    item(key = "home") { HomeCard(state.scene, showPoints = state.pointsOn, onClick = { showHome = true }) }
+                    item(key = "home") { HomeWeatherCard(weather, onClick = { showHome = true }) }
                     val board = state.board
                     val choreCard: @Composable (Chore, Boolean) -> Unit = { chore, mine ->
                         ChoreCard(
@@ -370,7 +382,7 @@ internal fun ChoresContent(state: ChoresUiState, reminders: Map<String, Instant>
             onDismiss = { remindFor = null },
         )
     }
-    if (showHome) HomeDialog(state.scene, if (state.pointsOn) state.week else emptyList(), showPoints = state.pointsOn, onDismiss = { showHome = false })
+    if (showHome) HomeWeatherDialog(weather, onDismiss = { showHome = false })
     doneByFor?.let { chore ->
         PeopleDialog(
             title = stringResource(R.string.done_by_title),

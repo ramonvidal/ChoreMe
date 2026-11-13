@@ -9,19 +9,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -30,96 +17,39 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import com.choreme.core.model.chore.HomeScene
-import com.choreme.core.model.chore.MemberWeek
-import com.choreme.core.model.chore.Weather
-import kotlin.math.ceil
-import com.choreme.core.ui.R as CoreUiR
+import com.choreme.core.model.weather.Sky
 
-/** "Our home" at the top of the Chores tab: the picture and one line. Tap for the week's points. */
-@Composable
-internal fun HomeCard(scene: HomeScene, showPoints: Boolean = true, onClick: () -> Unit) {
-    Card(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
-        HomePicture(scene, Modifier.fillMaxWidth().height(112.dp))
-        Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 12.dp)) {
-            Text(stringResource(R.string.home_title), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-            if (showPoints) {
-                Text(
-                    pluralStringResource(R.plurals.home_points, scene.points, scene.points),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
-}
+/** What it is like outside, for the little house: the sky, and whether the sun is up. */
+internal data class WeatherLook(val sky: Sky = Sky.CLEAR, val isDay: Boolean = true)
 
-/** The bigger picture, what it means, and (with points on) everyone's points this week. */
-@Composable
-internal fun HomeDialog(scene: HomeScene, week: List<MemberWeek>, showPoints: Boolean = true, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.home_title)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Card { HomePicture(scene, Modifier.fillMaxWidth().height(150.dp)) }
-                Text(stringResource(homeMood(scene)), style = MaterialTheme.typography.bodyLarge)
-                Text(
-                    stringResource(if (showPoints) R.string.home_hint else R.string.home_hint_plain),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                if (week.isNotEmpty()) {
-                    Column {
-                        week.forEachIndexed { index, (member, _) ->
-                            if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                            val points = week[index].points
-                            Row(Modifier.padding(vertical = 8.dp)) {
-                                Text(member.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                                Text(pluralStringResource(CoreUiR.plurals.points, points, points), style = MaterialTheme.typography.titleSmall)
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.home_close)) } },
-    )
-}
-
-private fun homeMood(scene: HomeScene): Int = when {
-    scene.weather == Weather.STORM -> R.string.home_mood_storm
-    scene.weather == Weather.RAIN -> R.string.home_mood_rain
-    scene.tired -> R.string.home_mood_tired
-    scene.weather == Weather.CLOUDY -> R.string.home_mood_cloudy
-    scene.fullBloom -> R.string.home_mood_bloom
-    scene.points == 0 -> R.string.home_mood_start
-    !scene.lightsOn -> R.string.home_mood_overdue
-    else -> R.string.home_mood_growing
+/** How gloomy each sky is, 0 (sun) to 3 (storm): the steps the sky, clouds and rain are drawn in. */
+private fun gloomOf(sky: Sky): Float = when (sky) {
+    Sky.CLEAR -> 0f
+    Sky.PARTLY_CLOUDY -> 0.6f
+    Sky.CLOUDY, Sky.FOG -> 1f
+    Sky.SNOW -> 1.2f
+    Sky.DRIZZLE -> 1.5f
+    Sky.RAIN -> 2f
+    Sky.STORM -> 3f
 }
 
 /**
- * "Our home" as 8-bit pixel art: a fixed grid of big square pixels, a few flat colours, and
- * animations that step a few frames a second like an old console. It shows the same things
- * as before: each chore to do is a weed in the grass (overgrown once overdue), finishing one
- * pulls it and plants flowers, the tree grows with the last 7 days' points, the windows are
- * lit and the chimney smokes while nothing is overdue, and the weather turns from sun to
- * clouds, rain and a storm with lightning as chores pile up.
+ * The little house as 8-bit pixel art: a fixed grid of big square pixels, a few flat colours, and animations that step
+ * a few frames a second like an old console. It shows the real weather outside: sun with blinking rays, clouds, pixel
+ * rain, snow, fog, a storm with lightning, and at night a moon and stars with the windows lit.
  */
 @Composable
-internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
-    // Counted up and down, so a new flower grows in and a pulled weed shrinks away, in steps.
-    val flowers by animateFloatAsState(scene.flowers.toFloat(), tween(900), label = "flowers")
-    val weeds by animateFloatAsState(scene.weeds.toFloat(), tween(700), label = "weeds")
-    val gloom by animateFloatAsState(scene.weather.ordinal.toFloat(), tween(1500), label = "gloom")
+internal fun HomePicture(look: WeatherLook, modifier: Modifier = Modifier) {
+    val gloom by animateFloatAsState(gloomOf(look.sky), tween(1500), label = "gloom")
+    val night by animateFloatAsState(if (look.isDay) 0f else 1f, tween(1500), label = "night")
     val motion = rememberInfiniteTransition(label = "garden")
     // 8 frames a second, like an old game: everything moves in whole pixels.
     val frame by motion.animateValue(0, FRAMES, Int.VectorConverter, infiniteRepeatable(tween(FRAMES * 125, easing = LinearEasing)), label = "frame")
     val fall by motion.animateValue(0, 64, Int.VectorConverter, infiniteRepeatable(tween(64 * 40, easing = LinearEasing)), label = "rain")
-    val storm = scene.weather == Weather.STORM
+    val storm = look.sky == Sky.STORM
+    val snow = look.sky == Sky.SNOW
+    val fog = look.sky == Sky.FOG
+    val lit = !look.isDay || look.sky == Sky.RAIN || storm || look.sky == Sky.DRIZZLE
 
     Canvas(modifier) {
         val cell = size.height / ROWS
@@ -128,28 +58,37 @@ internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
         val ground = ROWS - 5
         val mid = cols / 2
 
-        // Sky, in bands that darken with the weather; grass with a checked texture.
-        val sky = when {
-            gloom <= 1f -> lerp(Sky, Overcast, gloom)
+        // Sky, darker with the weather and black-blue at night; grass with a checked texture, white under snow.
+        val daySky = when {
+            gloom <= 1f -> lerp(DaySky, Overcast, gloom)
             gloom <= 2f -> lerp(Overcast, Rainy, gloom - 1f)
             else -> lerp(Rainy, Stormy, gloom - 2f)
         }
-        drawRect(sky, size = Size(size.width, ground * cell))
-        val mud = (gloom / 3f) * 0.55f
-        val grass = lerp(Grass, Mud, mud)
-        val grassDark = lerp(GrassDark, MudDark, mud)
-        drawRect(grass, Offset(0f, ground * cell), Size(size.width, size.height - ground * cell))
+        drawRect(lerp(daySky, NightSky, night * 0.9f), size = Size(size.width, ground * cell))
+        val snowCover = if (snow) 0.85f else 0f
+        val mud = (gloom / 3f) * 0.35f
+        val grass = lerp(lerp(Grass, Mud, mud), SnowGround, snowCover)
+        val grassDark = lerp(lerp(GrassDark, MudDark, mud), SnowDark, snowCover)
+        val dim = night * 0.35f
+        drawRect(lerp(grass, NightSky, dim), Offset(0f, ground * cell), Size(size.width, size.height - ground * cell))
         for (x in -1..cols) {
             if (x % 2 == 0) grid.px(grassDark, x, ground)
             for (y in ground + 2 until ROWS) if ((x + y) % 4 == 0) grid.px(grassDark, x, y)
         }
 
-        // The sun, rays blinking, fading behind the clouds.
-        val sunAlpha = (1f - gloom / 1.5f).coerceIn(0f, 1f)
+        // The sun by day, fading behind the clouds; the moon and a few twinkling stars by night.
+        val sunAlpha = ((1f - gloom / 1.5f) * (1f - night)).coerceIn(0f, 1f)
         if (sunAlpha > 0f) grid.sun(cols - 7, 2, frame % 4 < 2, sunAlpha)
+        val moonAlpha = (night * (1f - gloom / 2.2f)).coerceIn(0f, 1f)
+        if (moonAlpha > 0f) {
+            grid.sprite(MOON, cols - 8, 3, mapOf('M' to Moon), moonAlpha)
+            Stars.forEachIndexed { i, (x, y) ->
+                if ((frame / 3 + i) % 4 != 0) grid.px(Star, (cols * x).toInt(), y, alpha = moonAlpha)
+            }
+        }
 
         // Clouds drift a pixel at a time; more and darker as the weather turns.
-        val cloudColor = lerp(Cloud, StormCloud, ((gloom - 1f) / 2f).coerceIn(0f, 1f))
+        val cloudColor = lerp(lerp(Cloud, StormCloud, ((gloom - 1f) / 2f).coerceIn(0f, 1f)), NightSky, night * 0.5f)
         CloudSpots.forEachIndexed { i, (x, y) ->
             val alpha = (gloom * CloudSpots.size / 3f - i).coerceIn(0f, 1f)
             if (alpha > 0f) {
@@ -158,49 +97,43 @@ internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
             }
         }
 
-        // Pixel rain, heavier in a storm.
-        val drops = ((gloom - 1f).coerceIn(0f, 2f) * 10f).toInt()
-        repeat(drops) { i ->
-            val x = (i * 37 + 5) % cols
-            val y = 6 + (fall + i * 11) % (ground - 6)
-            grid.px(RainDrop, x, y, h = 2)
+        // Pixel rain (heavier in a storm) or slowly falling snow.
+        if (snow) {
+            repeat(22) { i ->
+                val x = (i * 29 + 7 + (fall + i) / 16) % cols
+                val y = 4 + (fall / 2 + i * 7) % (ground - 4)
+                grid.px(Flake, x, y)
+            }
+        } else {
+            val drops = ((gloom - 1f).coerceIn(0f, 2f) * 10f).toInt()
+            repeat(drops) { i ->
+                val x = (i * 37 + 5) % cols
+                val y = 6 + (fall + i * 11) % (ground - 6)
+                grid.px(RainDrop, x, y, h = 2)
+            }
         }
 
-        // The house: red roof, chimney, white walls, two windows, a green door.
+        // The house: red roof, chimney, white walls, two windows, a green door. Windows glow when it is dark or wet.
         val left = mid - HOUSE_WIDTH / 2
         val top = ground - HOUSE_HEIGHT
-        grid.house(left, top, lit = scene.lightsOn)
-        // Smoke from the chimney while all is well.
-        if (scene.lightsOn && !storm) {
+        grid.house(left, top, lit = lit)
+        if (!storm && !snow) {
             repeat(3) { k ->
                 val step = (frame / 2 + k * 3) % 9
                 if (step < 6) grid.px(Smoke, left + 12 + (step / 3) % 2, top - 1 - step, alpha = 1f - step / 7f)
             }
         }
 
-        // A tree that grows in three sizes with the points, bending in the storm.
-        val treeSize = when {
-            scene.growth >= 0.67f -> 2
-            scene.growth >= 0.34f -> 1
-            else -> 0
-        }
+        // A tree, white with snow, bending in the storm.
         val wind = if (storm) (if (frame % 4 < 2) 1 else 2) else 0
-        grid.tree(left - 9, ground - 1, treeSize, if (scene.tired) lerp(Leaf, Tired, 0.5f) else Leaf, wind)
+        grid.tree(left - 9, ground - 1, 2, lerp(Leaf, SnowGround, snowCover * 0.8f), wind)
 
-        // Flowers by the house, one per point; a new one grows a pixel at a time.
-        val slots = flowerSlots(left, cols)
-        slots.take(ceil(flowers).toInt()).forEachIndexed { i, x ->
-            val grown = (flowers - i).coerceIn(0f, 1f)
-            val bob = if (storm) 1 else if ((frame / 4 + i) % 2 == 0) 0 else 1
-            grid.flower(x, ground - 1, stem = 2 + i % 2, grown, Petals[i % Petals.size], scene.tired, if (scene.tired) 1 else bob)
-        }
-
-        // Weeds in the grass in front, one per chore waiting today; overgrown once overdue.
-        val weedGap = cols / HomeScene.MAX_WEEDS
-        repeat(ceil(weeds).toInt()) { i ->
-            val grown = (weeds - i).coerceIn(0f, 1f)
-            val slot = HomeScene.MAX_WEEDS / 2 + if (i % 2 == 0) i / 2 else -(i / 2 + 1)
-            grid.weed(weedGap * slot + weedGap / 2, ROWS - 1, i < scene.overgrown, grown, (frame / 2 + i) % 2)
+        // A few flowers by the house (not under snow), nodding a pixel at a time.
+        if (!snow) {
+            flowerSlots(left, cols).take(6).forEachIndexed { i, x ->
+                val bob = if (storm) 1 else if ((frame / 4 + i) % 2 == 0) 0 else 1
+                grid.flower(x, ground - 1, stem = 2 + i % 2, 1f, Petals[i % Petals.size], false, bob)
+            }
         }
 
         // Lightning: a pixel bolt and a flash of the whole picture, now and then in a storm.
@@ -208,8 +141,13 @@ internal fun HomePicture(scene: HomeScene, modifier: Modifier = Modifier) {
             grid.sprite(BOLT, (cols * 0.66f).toInt(), 5, mapOf('Y' to Lamp))
             drawRect(Color.White, alpha = if (frame == LIGHTNING_FRAMES.first) 0.45f else 0.2f)
         }
+
+        // Fog: a pale veil over everything.
+        if (fog) drawRect(Color.White, alpha = 0.38f)
     }
 }
+
+private val Stars = listOf(0.12f to 3, 0.3f to 6, 0.47f to 2, 0.62f to 5, 0.8f to 8, 0.22f to 10)
 
 /** Flower columns either side of the house, alternating sides, three pixels apart. */
 private fun flowerSlots(houseLeft: Int, cols: Int): List<Int> {
@@ -343,6 +281,14 @@ private val CLOUD = listOf(
     ".XXXXXXX.",
 )
 
+private val MOON = listOf(
+    ".MMM.",
+    "MM...",
+    "MM...",
+    "MM...",
+    ".MMM.",
+)
+
 private val BOLT = listOf(
     "..YY",
     ".YY.",
@@ -356,7 +302,7 @@ private val BOLT = listOf(
 private val CloudSpots = listOf(0.34f to 1, 0.74f to 3, 0.08f to 2, 0.55f to 0, 0.88f to 6, 0.2f to 6)
 
 // A small, flat palette, the same in light and dark mode.
-private val Sky = Color(0xFF9ED8F2)
+private val DaySky = Color(0xFF9ED8F2)
 private val Overcast = Color(0xFFB9C3CB)
 private val Rainy = Color(0xFF8E9AA6)
 private val Stormy = Color(0xFF4B5563)
@@ -386,4 +332,10 @@ private val Tired = Color(0xFFB8AE92)
 private val Weed = Color(0xFF8A8A3A)
 private val WeedDark = Color(0xFF5E5A26)
 private val Seed = Color(0xFF9C6B3A)
+private val NightSky = Color(0xFF1B2540)
+private val Moon = Color(0xFFF5F0C8)
+private val Star = Color(0xFFFFFFFF)
+private val SnowGround = Color(0xFFF1F6FA)
+private val SnowDark = Color(0xFFD5E1EA)
+private val Flake = Color(0xFFFFFFFF)
 private val Petals = listOf(Color(0xFFFF6F61), Color(0xFFFFFFFF), Color(0xFFB98AE0), Color(0xFFFFC93C))

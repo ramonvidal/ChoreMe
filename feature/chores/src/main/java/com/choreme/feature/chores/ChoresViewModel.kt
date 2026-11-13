@@ -21,13 +21,11 @@ import com.choreme.core.model.chore.ChoreStatus
 import com.choreme.core.model.chore.ChoreTemplate
 import com.choreme.core.model.chore.Recurrence
 import com.choreme.core.model.chore.SavedChore
-import com.choreme.core.model.chore.HomeScene
 import com.choreme.core.model.chore.ChoreChoice
 import com.choreme.core.model.chore.choreChoices
 import com.choreme.core.model.chore.guessTemplate
 import com.choreme.core.model.chore.mostUsed
 import com.choreme.core.model.chore.MemberWeek
-import com.choreme.core.model.chore.homeScene
 import com.choreme.core.model.chore.savedChoreToUpdate
 import com.choreme.core.model.chore.weekStart
 import com.choreme.core.model.chore.weeklySummary
@@ -110,9 +108,6 @@ data class ChoresUiState(
 
     /** Parents tidy up any saved chore; others only their own. */
     fun canRemove(saved: SavedChore) = isParent || saved.createdBy == me?.id
-
-    // Without points the garden grows with how many chores got done (a chore is worth about two points).
-    val scene: HomeScene get() = homeScene(if (pointsOn) weekPoints else weekFinished * 2, chores, today)
 
     /** What the editor offers: ready-made chores, then saved ones; and the family's most used. */
     val choices: List<ChoreChoice> get() = choreChoices(savedChores)
