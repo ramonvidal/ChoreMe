@@ -29,7 +29,6 @@ import com.choreme.core.data.FamilyRepository
 import com.choreme.core.data.LocationRepository
 import com.choreme.core.data.PlanRepository
 import com.choreme.core.location.DeviceLocation
-import com.choreme.core.model.location.GeoPoint
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.model.weather.Advice
 import com.choreme.core.model.weather.PlanEntry
@@ -113,7 +112,7 @@ class HomeWeatherViewModel @Inject constructor(
 
     private suspend fun compute(inputs: Inputs): HomeWeatherState {
         // Where it's raining on us: the phone's own (approximate) position, else the family's home on the map.
-        val home: GeoPoint? = device.current()?.point ?: homePlace(inputs.places)?.center
+        val home = device.current()?.point ?: homePlace(inputs.places)?.center
             ?: return HomeWeatherState(loading = false, units = inputs.units, needsPlace = true)
         val now = LocalDateTime.now()
         val today = now.toLocalDate()
