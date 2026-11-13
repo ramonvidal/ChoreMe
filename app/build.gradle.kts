@@ -87,12 +87,10 @@ dependencies {
     implementation(projects.feature.home)
     implementation(projects.feature.chores)
     implementation(projects.feature.groceries)
-    implementation(projects.feature.agenda)
     implementation(projects.feature.map)
     implementation(projects.feature.widget)
     implementation(projects.feature.update)
     implementation(projects.feature.family)
-    implementation(projects.feature.rooms)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

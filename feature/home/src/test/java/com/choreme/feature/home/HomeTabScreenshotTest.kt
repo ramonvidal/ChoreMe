@@ -65,7 +65,7 @@ class HomeTabScreenshotTest {
     private fun shoot(name: String, state: HomeUiState, dark: Boolean) {
         compose.setContent {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
-                Surface(Modifier.fillMaxSize()) { HomeContent(state, onOpenChores = {}, onOpenGroceries = {}) }
+                Surface(Modifier.fillMaxSize()) { HomeContent(state, onOpenChores = {}, onAddChore = {}, onOpenGroceries = {}, onAddEvent = {}) }
             }
         }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")

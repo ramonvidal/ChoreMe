@@ -119,6 +119,8 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun TodayScreen(
     onOpenGroceries: () -> Unit,
+    openAdd: Boolean = false,
+    onOpenAddHandled: () -> Unit = {},
     viewModel: ChoresViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -128,6 +130,8 @@ internal fun TodayScreen(
         state = state,
         reminders = reminders,
         onOpenGroceries = onOpenGroceries,
+        openAdd = openAdd,
+        onOpenAddHandled = onOpenAddHandled,
         actions = ChoresActions(
             claim = { viewModel.claim(it) },
             unclaim = { viewModel.unclaim(it) },
@@ -177,6 +181,8 @@ internal fun ChoresContent(
     reminders: Map<String, Instant>,
     onOpenGroceries: () -> Unit,
     actions: ChoresActions,
+    openAdd: Boolean = false,
+    onOpenAddHandled: () -> Unit = {},
 ) {
     var cheer by remember { mutableStateOf<Cheer?>(null) }
     val haptics = LocalHapticFeedback.current
@@ -187,6 +193,8 @@ internal fun ChoresContent(
     }
     var editing by remember { mutableStateOf<Chore?>(null) }
     var adding by remember { mutableStateOf(false) }
+    // Asked for from Home's Add menu.
+    LaunchedEffect(openAdd) { if (openAdd) { adding = true; onOpenAddHandled() } }
     var doneByFor by remember { mutableStateOf<Chore?>(null) }
     var assigning by remember { mutableStateOf<Chore?>(null) }
     var remindFor by remember { mutableStateOf<Chore?>(null) }

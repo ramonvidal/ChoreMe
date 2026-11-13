@@ -205,4 +205,109 @@
     <string name="cheer_waiting">Well done! A parent will check it</string>
     <string name="hero_all_done">All done for today</string>
     <string name="hero_groceries">Groceries</string>
+    <string name="rooms_title">Rooms</string>
+    <plurals name="rooms_count">
+        <item quantity="one">%d room</item>
+        <item quantity="other">%d rooms</item>
+    </plurals>
+    <plurals name="rooms_late">
+        <item quantity="one">%d task is late</item>
+        <item quantity="other">%d tasks are late</item>
+    </plurals>
+    <string name="rooms_empty_title">Your home, room by room</string>
+    <string name="rooms_empty_body">Add the rooms you look after, with the tasks that keep them tidy. Each room shows when it was last done and when it\'s due again.</string>
+    <string name="rooms_empty_body_kid">A parent can add the rooms of the house here.</string>
+    <string name="rooms_add">Add a room</string>
+
+    <string name="room_new">New room</string>
+    <string name="room_edit">Edit room</string>
+    <string name="room_back">Back</string>
+    <string name="room_name">Name</string>
+    <string name="room_name_hint">Bathroom 1</string>
+    <string name="room_type">Kind of room</string>
+    <string name="room_description">Notes (optional)</string>
+    <string name="room_photo_add">Add a picture</string>
+    <string name="room_photo_change">Change picture</string>
+    <string name="room_photo_remove">Use the drawing</string>
+    <string name="room_photo_failed">Couldn\'t use that picture. Try another one.</string>
+    <string name="room_delete">Delete room</string>
+    <string name="room_delete_title">Delete %1$s?</string>
+    <plurals name="room_delete_body">
+        <item quantity="one">The room and its %d task go away for good.</item>
+        <item quantity="other">The room and its %d tasks go away for good.</item>
+    </plurals>
+
+    <string name="room_tasks">Tasks</string>
+    <string name="room_no_tasks">No tasks yet. Add what keeps this room in shape, like cleaning it every week.</string>
+    <string name="room_no_tasks_kid">No tasks yet.</string>
+    <string name="room_no_tasks_short">No tasks yet</string>
+    <string name="room_never_done">Not done yet</string>
+    <string name="room_last_done">Last done %1$s</string>
+    <string name="room_next">Next: %1$s, %2$s</string>
+    <string name="room_done">Done</string>
+    <string name="room_waiting_approval">Waiting for a parent</string>
+    <string name="room_add_task">Add a task</string>
+
+    <string name="task_ideas">Ideas</string>
+    <string name="task_name">Task</string>
+    <string name="task_repeat">Repeat</string>
+    <string name="task_last_done">Last done</string>
+    <string name="task_last_unknown">Not sure</string>
+    <string name="task_remove">Remove task</string>
+    <string name="task_due_today">Due today</string>
+    <plurals name="task_due_in">
+        <item quantity="one">Due in %d day</item>
+        <item quantity="other">Due in %d days</item>
+    </plurals>
+    <plurals name="task_late_by">
+        <item quantity="one">%d day late</item>
+        <item quantity="other">%d days late</item>
+    </plurals>
+    <plurals name="tasks_late">
+        <item quantity="one">%d task late</item>
+        <item quantity="other">%d tasks late</item>
+    </plurals>
+
+    <string name="ago_today">today</string>
+    <string name="ago_yesterday">yesterday</string>
+    <plurals name="ago_days">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
+    <plurals name="every_days">
+        <item quantity="one">every day</item>
+        <item quantity="other">every %d days</item>
+    </plurals>
+    <plurals name="every_days_choice">
+        <item quantity="one">Every day</item>
+        <item quantity="other">Every %d days</item>
+    </plurals>
+
+    <string name="room_type_living_room">Living room</string>
+    <string name="room_type_bedroom">Bedroom</string>
+    <string name="room_type_kids_room">Kids\' room</string>
+    <string name="room_type_bathroom">Bathroom</string>
+    <string name="room_type_kitchen">Kitchen</string>
+    <string name="room_type_dining_room">Dining room</string>
+    <string name="room_type_office">Office</string>
+    <string name="room_type_laundry">Laundry</string>
+    <string name="room_type_garage">Garage</string>
+    <string name="room_type_garden">Garden</string>
+    <string name="room_type_balcony">Balcony</string>
+    <string name="room_type_hallway">Hallway</string>
+    <string name="room_type_other">Something else</string>
+
+    <string name="idea_change_sheets">Change the sheets</string>
+    <string name="idea_dust">Dust</string>
+    <string name="idea_mop">Mop the floor</string>
+    <string name="idea_sweep">Sweep the floor</string>
+    <string name="idea_windows">Clean the windows</string>
+    <string name="idea_clean_fridge">Clean the fridge</string>
+    <string name="idea_clean_oven">Clean the oven</string>
+    <string name="idea_clean_toilet">Clean the toilet</string>
+    <string name="idea_wash_towels">Wash the towels</string>
+    <string name="idea_declutter">Declutter</string>
+    <string name="idea_mow_lawn">Mow the lawn</string>
+    <string name="tab_chores">Chores</string>
+    <string name="tab_rooms">Rooms</string>
 </resources>

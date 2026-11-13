@@ -1,4 +1,4 @@
-package com.choreme.feature.rooms
+package com.choreme.feature.chores
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable

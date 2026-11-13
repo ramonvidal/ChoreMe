@@ -7,7 +7,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
@@ -43,8 +42,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.choreme.feature.agenda.AGENDA_ROUTE
-import com.choreme.feature.agenda.agendaScreen
 import com.choreme.feature.chores.TODAY_ROUTE
 import com.choreme.feature.chores.todayScreen
 import com.choreme.feature.family.FAMILY_ROUTE
@@ -55,8 +52,7 @@ import com.choreme.feature.groceries.GROCERIES_ROUTE
 import com.choreme.feature.groceries.groceriesScreen
 import com.choreme.feature.map.MAP_ROUTE
 import com.choreme.feature.map.mapScreen
-import com.choreme.feature.rooms.ROOMS_ROUTE
-import com.choreme.feature.rooms.roomsScreen
+import com.choreme.feature.chores.ADD_CHORE_KEY
 import com.choreme.feature.update.UpdateBanner
 
 enum class TopLevelDestination(
@@ -68,8 +64,6 @@ enum class TopLevelDestination(
     Home(HOME_ROUTE, R.string.nav_home, Icons.Filled.Home),
     Today(TODAY_ROUTE, R.string.nav_today, Icons.Filled.CheckCircle),
     Groceries(GROCERIES_ROUTE, R.string.nav_groceries, Icons.Filled.ShoppingCart),
-    Rooms(ROOMS_ROUTE, R.string.nav_rooms, iconRes = CoreUiR.drawable.ic_nav_rooms),
-    Agenda(AGENDA_ROUTE, R.string.nav_agenda, Icons.Filled.DateRange),
     Places(MAP_ROUTE, R.string.nav_map, Icons.Filled.Place),
     Family(FAMILY_ROUTE, R.string.nav_family, Icons.Filled.Person),
 }
@@ -154,12 +148,15 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0, choresBadge: Int = 0, groceries
         ) {
             homeScreen(
                 onOpenChores = { navController.navigateToTab(TopLevelDestination.Today.route) },
+                onAddChore = {
+                    navController.navigateToTab(TopLevelDestination.Today.route)
+                    // Tells the Chores tab to open its "something needs doing" sheet.
+                    runCatching { navController.getBackStackEntry(TopLevelDestination.Today.route).savedStateHandle[ADD_CHORE_KEY] = true }
+                },
                 onOpenGroceries = { navController.navigateToTab(TopLevelDestination.Groceries.route) },
             )
             todayScreen(onOpenGroceries = { navController.navigateToTab(TopLevelDestination.Groceries.route) })
             groceriesScreen()
-            roomsScreen()
-            agendaScreen()
             mapScreen()
             familyScreen()
         }

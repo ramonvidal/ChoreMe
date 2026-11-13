@@ -1,4 +1,4 @@
-package com.choreme.feature.rooms
+package com.choreme.feature.chores
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult

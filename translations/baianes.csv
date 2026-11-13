@@ -76,47 +76,6 @@ core/ui,extreme_heat,,Heat wave: stay cool and drink water,Onda de calor: se ref
 core/ui,extreme_frost,,Hard frost: ice and bitter cold,Geada forte: gelo e frio de rachar
 core/ui,extreme_gale,,Gale-force wind expected,Ventania forte a caminho
 core/ui,extreme_rain,,Torrential rain expected,Chuva torrencial a caminho
-feature/agenda,agenda_title,,Agenda,Agenda
-feature/agenda,permission_title,,Show your family calendar,Mostrar a agenda da família
-feature/agenda,permission_body,,"Nos Corre! shows the calendars already on this phone, like a shared Google Calendar, next to your chores. Events you add here go to that calendar, and Google sends the alerts to everyone who shares it.","O Nos Corre! mostra as agendas que já estão neste celular, como uma Agenda Google dividida, junto dos corres. Os eventos que você adiciona aqui vão pra essa agenda, e o Google manda os avisos pra todo mundo que divide ela."
-feature/agenda,permission_allow,,Allow calendar access,Permitir acesso à agenda
-feature/agenda,no_calendars,,There are no calendars on this phone. Add a Google account with the family calendar in the phone's settings to see it here. Repeating and planned chores still show below.,Não tem nenhuma agenda neste celular. Adicione nas configurações do celular uma conta do Google com a agenda da família pra ver aqui. Os corres que repetem ou estão marcados aparecem aqui embaixo do mesmo jeito.
-feature/agenda,choose_title,,Which calendars should the agenda show?,Quais agendas mostrar?
-feature/agenda,choose_hint,,This choice is only for this phone.,Essa escolha vale só pra este celular.
-feature/agenda,choose_save,,Show these,Mostrar essas
-feature/agenda,change_calendars,,Change,Mudar
-feature/agenda,read_only,,read only,só leitura
-feature/agenda,all_day,,All day,O dia todo
-feature/agenda,time_range,,%1$s – %2$s,%1$s – %2$s
-feature/agenda,nothing_today,,Nothing planned today,Nada marcado hoje
-feature/agenda,chore_due,,Chore,Corre
-feature/agenda,open_failed,,No calendar app to open this event,Nenhum app de agenda pra abrir esse evento
-feature/agenda,add_event,,Add event,Adicionar evento
-feature/agenda,event_title,,What's happening,O que vai rolar
-feature/agenda,event_calendar,,Calendar,Agenda
-feature/agenda,event_day,,Day,Dia
-feature/agenda,event_pick_day,,Pick a day,Escolher um dia
-feature/agenda,event_all_day,,All day,O dia todo
-feature/agenda,event_starts,,Starts at %1$s,Começa às %1$s
-feature/agenda,event_change_time,,Change,Mudar
-feature/agenda,event_duration,,How long,Quanto tempo
-feature/agenda,event_alert,,Alert,Aviso
-feature/agenda,event_alert_evening_before,,The evening before at %1$s,Na noite anterior às %1$s
-feature/agenda,event_alert_minutes,one,%d minute before,%d minuto antes
-feature/agenda,event_alert_minutes,other,%d minutes before,%d minutos antes
-feature/agenda,event_alert_hour,,1 hour before,1 hora antes
-feature/agenda,event_alert_day,,1 day before,1 dia antes
-feature/agenda,duration_minutes,,%1$d min,%1$d min
-feature/agenda,duration_hours,one,%d hour,%d hora
-feature/agenda,duration_hours,other,%d hours,%d horas
-feature/agenda,today,,Today,Hoje
-feature/agenda,tomorrow,,Tomorrow,Amanhã
-feature/agenda,ok,,OK,OK
-feature/agenda,view_list,,Next 2 weeks,Próximas 2 semanas
-feature/agenda,view_month,,Month,Mês
-feature/agenda,previous_month,,Previous month,Mês anterior
-feature/agenda,next_month,,Next month,Próximo mês
-feature/agenda,nothing_this_day,,Nothing on this day,Nada nesse dia
 feature/chores,section_awaiting,,Waiting for a parent's OK,Esperando o OK de mainha ou painho
 feature/chores,section_to_do,,Needs doing,Pra fazer
 feature/chores,section_later,,Later (%1$d),Mais pra frente (%1$d)
@@ -280,6 +239,87 @@ feature/chores,weekly_chores_body,,"Good work, everyone!","Mandaram bem, galera!
 feature/chores,cheer_waiting,,Well done! A parent will check it,Arretado! Mainha ou painho vai conferir
 feature/chores,hero_all_done,,All done for today,Tudo feito por hoje
 feature/chores,hero_groceries,,Groceries,Feira
+feature/chores,rooms_title,,Rooms,Cômodos
+feature/chores,rooms_count,one,%d room,%d cômodo
+feature/chores,rooms_count,other,%d rooms,%d cômodos
+feature/chores,rooms_late,one,%d task is late,%d tarefa atrasada
+feature/chores,rooms_late,other,%d tasks are late,%d tarefas atrasadas
+feature/chores,rooms_empty_title,,"Your home, room by room","Sua casa, cômodo por cômodo"
+feature/chores,rooms_empty_body,,"Add the rooms you look after, with the tasks that keep them tidy. Each room shows when it was last done and when it's due again.","Adicione os cômodos que vocês cuidam, com as tarefas que mantêm tudo em ordem. Cada cômodo mostra quando foi feito pela última vez e quando vence de novo."
+feature/chores,rooms_empty_body_kid,,A parent can add the rooms of the house here.,Um dos pais pode adicionar aqui os cômodos da casa.
+feature/chores,rooms_add,,Add a room,Adicionar cômodo
+feature/chores,room_new,,New room,Novo cômodo
+feature/chores,room_edit,,Edit room,Editar cômodo
+feature/chores,room_back,,Back,Voltar
+feature/chores,room_name,,Name,Nome
+feature/chores,room_name_hint,,Bathroom 1,Banheiro 1
+feature/chores,room_type,,Kind of room,Tipo de cômodo
+feature/chores,room_description,,Notes (optional),Observações (opcional)
+feature/chores,room_photo_add,,Add a picture,Adicionar foto
+feature/chores,room_photo_change,,Change picture,Trocar foto
+feature/chores,room_photo_remove,,Use the drawing,Usar o desenho
+feature/chores,room_photo_failed,,Couldn't use that picture. Try another one.,Não deu pra usar essa foto. Tente outra.
+feature/chores,room_delete,,Delete room,Excluir cômodo
+feature/chores,room_delete_title,,Delete %1$s?,Excluir %1$s?
+feature/chores,room_delete_body,one,The room and its %d task go away for good.,O cômodo e a sua %d tarefa somem de vez.
+feature/chores,room_delete_body,other,The room and its %d tasks go away for good.,O cômodo e as suas %d tarefas somem de vez.
+feature/chores,room_tasks,,Tasks,Tarefas
+feature/chores,room_no_tasks,,"No tasks yet. Add what keeps this room in shape, like cleaning it every week.","Ainda sem tarefas. Adicione o que mantém o cômodo em dia, como limpar toda semana."
+feature/chores,room_no_tasks_kid,,No tasks yet.,Ainda sem tarefas.
+feature/chores,room_no_tasks_short,,No tasks yet,Ainda sem tarefas
+feature/chores,room_never_done,,Not done yet,Ainda não foi feito
+feature/chores,room_last_done,,Last done %1$s,Feito por último %1$s
+feature/chores,room_next,,"Next: %1$s, %2$s","Próxima: %1$s, %2$s"
+feature/chores,room_done,,Done,Feito
+feature/chores,room_waiting_approval,,Waiting for a parent,Esperando os pais
+feature/chores,room_add_task,,Add a task,Adicionar tarefa
+feature/chores,task_ideas,,Ideas,Ideias
+feature/chores,task_name,,Task,Tarefa
+feature/chores,task_repeat,,Repeat,Repetir
+feature/chores,task_last_done,,Last done,Feito por último
+feature/chores,task_last_unknown,,Not sure,Não lembro
+feature/chores,task_remove,,Remove task,Remover tarefa
+feature/chores,task_due_today,,Due today,Pra hoje
+feature/chores,task_due_in,one,Due in %d day,Daqui a %d dia
+feature/chores,task_due_in,other,Due in %d days,Daqui a %d dias
+feature/chores,task_late_by,one,%d day late,%d dia de atraso
+feature/chores,task_late_by,other,%d days late,%d dias de atraso
+feature/chores,tasks_late,one,%d task late,%d tarefa atrasada
+feature/chores,tasks_late,other,%d tasks late,%d tarefas atrasadas
+feature/chores,ago_today,,today,hoje
+feature/chores,ago_yesterday,,yesterday,ontem
+feature/chores,ago_days,one,%d day ago,há %d dia
+feature/chores,ago_days,other,%d days ago,há %d dias
+feature/chores,every_days,one,every day,todo dia
+feature/chores,every_days,other,every %d days,a cada %d dias
+feature/chores,every_days_choice,one,Every day,Todo dia
+feature/chores,every_days_choice,other,Every %d days,A cada %d dias
+feature/chores,room_type_living_room,,Living room,Sala
+feature/chores,room_type_bedroom,,Bedroom,Quarto
+feature/chores,room_type_kids_room,,Kids' room,Quarto dos guris
+feature/chores,room_type_bathroom,,Bathroom,Banheiro
+feature/chores,room_type_kitchen,,Kitchen,Cozinha
+feature/chores,room_type_dining_room,,Dining room,Sala de jantar
+feature/chores,room_type_office,,Office,Escritório
+feature/chores,room_type_laundry,,Laundry,Lavanderia
+feature/chores,room_type_garage,,Garage,Garagem
+feature/chores,room_type_garden,,Garden,Jardim
+feature/chores,room_type_balcony,,Balcony,Varanda
+feature/chores,room_type_hallway,,Hallway,Corredor
+feature/chores,room_type_other,,Something else,Outro
+feature/chores,idea_change_sheets,,Change the sheets,Trocar os lençóis
+feature/chores,idea_dust,,Dust,Tirar o pó
+feature/chores,idea_mop,,Mop the floor,Passar pano no chão
+feature/chores,idea_sweep,,Sweep the floor,Varrer o chão
+feature/chores,idea_windows,,Clean the windows,Limpar as janelas
+feature/chores,idea_clean_fridge,,Clean the fridge,Limpar a geladeira
+feature/chores,idea_clean_oven,,Clean the oven,Limpar o forno
+feature/chores,idea_clean_toilet,,Clean the toilet,Limpar o vaso
+feature/chores,idea_wash_towels,,Wash the towels,Lavar as toalhas
+feature/chores,idea_declutter,,Declutter,Desentulhar
+feature/chores,idea_mow_lawn,,Mow the lawn,Cortar a grama
+feature/chores,tab_chores,,Chores,Corres
+feature/chores,tab_rooms,,Rooms,Cômodos
 feature/family,family_invite_hint,,Share this code so others can ask to join:,Mande este código pra galera pedir pra entrar:
 feature/family,family_share_invite,,Share invite code,Mandar o código de convite
 feature/family,family_invite_message,,Join the %1$s family on Nos Corre! with the code %2$s,Entra na família %1$s no Nos Corre! com o código %2$s
@@ -388,28 +428,6 @@ feature/family,message_channel,,Family messages,Recados da família
 feature/family,message_channel_description,,When someone sends a message to the whole family,Quando alguém manda um recado pra família toda
 feature/family,alert_messages,,Family messages,Recados da família
 feature/family,alert_messages_hint,,When someone sends a message to everyone,Quando alguém manda um recado pra todo mundo
-feature/family,plan_title,,Weekly plan,Plano da semana
-feature/family,plan_hint,,The regular trips of the week. The little house on the Chores tab tells the weather for them.,Os trajetos de sempre da semana. A casinha da aba Corres diz o tempo pra eles.
-feature/family,plan_empty,,"No trips yet. Add the regular ones, like going to work or to the gym.","Ainda sem trajetos. Adicione os de sempre, tipo ir pro trabalho ou pra academia."
-feature/family,plan_no_places,,"Save your places (home, work, gym) on the Map tab first, then add trips here.","Salve seus lugares (casa, trabalho, academia) na aba Mapa primeiro, depois adicione os trajetos aqui."
-feature/family,plan_add,,Add a trip,Adicionar trajeto
-feature/family,plan_edit,,Edit trip,Editar trajeto
-feature/family,plan_place,,Where to,Pra onde
-feature/family,plan_who,,Who,Quem
-feature/family,plan_days,,Days,Dias
-feature/family,plan_weekdays,,Weekdays,Dias úteis
-feature/family,plan_weekend,,Weekend,Fim de semana
-feature/family,plan_every_day,,Every day,Todo dia
-feature/family,plan_time,,Leaves at %1$s,Sai às %1$s
-feature/family,plan_duration,,How long,Quanto tempo
-feature/family,plan_minutes,,%1$d min,%1$d min
-feature/family,plan_mode,,How,Como
-feature/family,mode_walk,,On foot,A pé
-feature/family,mode_bike,,Bike,Bicicleta
-feature/family,mode_car,,Car,Carro
-feature/family,mode_transit,,Bus or train,Ônibus ou metrô
-feature/family,mode_other,,Other,Outro
-feature/family,plan_delete,,Delete trip,Excluir trajeto
 feature/family,units_section,,Weather units,Unidades do tempo
 feature/family,units_temperature,,Temperature,Temperatura
 feature/family,units_wind,,Wind,Vento
@@ -490,6 +508,76 @@ feature/home,home_timeline,,The day,O dia
 feature/home,home_all_day,,All day,O dia todo
 feature/home,home_nothing_title,,A quiet day,Dia tranquilo
 feature/home,home_nothing_body,,"No events and no trips today. Trips come from the weekly plan, events from the family calendar.","Nenhum compromisso nem trajeto hoje. Os trajetos vêm do plano da semana, os compromissos da agenda da família."
+feature/home,agenda_title,,Agenda,Agenda
+feature/home,permission_title,,Show your family calendar,Mostrar a agenda da família
+feature/home,permission_body,,"Nos Corre! shows the calendars already on this phone, like a shared Google Calendar, next to your chores. Events you add here go to that calendar, and Google sends the alerts to everyone who shares it.","O Nos Corre! mostra as agendas que já estão neste celular, como uma Agenda Google dividida, junto dos corres. Os eventos que você adiciona aqui vão pra essa agenda, e o Google manda os avisos pra todo mundo que divide ela."
+feature/home,permission_allow,,Allow calendar access,Permitir acesso à agenda
+feature/home,no_calendars,,There are no calendars on this phone. Add a Google account with the family calendar in the phone's settings to see it here. Repeating and planned chores still show below.,Não tem nenhuma agenda neste celular. Adicione nas configurações do celular uma conta do Google com a agenda da família pra ver aqui. Os corres que repetem ou estão marcados aparecem aqui embaixo do mesmo jeito.
+feature/home,choose_title,,Which calendars should the agenda show?,Quais agendas mostrar?
+feature/home,choose_hint,,This choice is only for this phone.,Essa escolha vale só pra este celular.
+feature/home,choose_save,,Show these,Mostrar essas
+feature/home,change_calendars,,Change,Mudar
+feature/home,read_only,,read only,só leitura
+feature/home,all_day,,All day,O dia todo
+feature/home,time_range,,%1$s – %2$s,%1$s – %2$s
+feature/home,nothing_today,,Nothing planned today,Nada marcado hoje
+feature/home,chore_due,,Chore,Corre
+feature/home,open_failed,,No calendar app to open this event,Nenhum app de agenda pra abrir esse evento
+feature/home,add_event,,Add event,Adicionar evento
+feature/home,event_title,,What's happening,O que vai rolar
+feature/home,event_calendar,,Calendar,Agenda
+feature/home,event_day,,Day,Dia
+feature/home,event_pick_day,,Pick a day,Escolher um dia
+feature/home,event_all_day,,All day,O dia todo
+feature/home,event_starts,,Starts at %1$s,Começa às %1$s
+feature/home,event_change_time,,Change,Mudar
+feature/home,event_duration,,How long,Quanto tempo
+feature/home,event_alert,,Alert,Aviso
+feature/home,event_alert_evening_before,,The evening before at %1$s,Na noite anterior às %1$s
+feature/home,event_alert_minutes,one,%d minute before,%d minuto antes
+feature/home,event_alert_minutes,other,%d minutes before,%d minutos antes
+feature/home,event_alert_hour,,1 hour before,1 hora antes
+feature/home,event_alert_day,,1 day before,1 dia antes
+feature/home,duration_minutes,,%1$d min,%1$d min
+feature/home,duration_hours,one,%d hour,%d hora
+feature/home,duration_hours,other,%d hours,%d horas
+feature/home,today,,Today,Hoje
+feature/home,tomorrow,,Tomorrow,Amanhã
+feature/home,ok,,OK,OK
+feature/home,view_list,,Next 2 weeks,Próximas 2 semanas
+feature/home,view_month,,Month,Mês
+feature/home,previous_month,,Previous month,Mês anterior
+feature/home,next_month,,Next month,Próximo mês
+feature/home,nothing_this_day,,Nothing on this day,Nada nesse dia
+feature/home,plan_title,,Weekly plan,Plano da semana
+feature/home,plan_hint,,The regular trips of the week. The little house on the Chores tab tells the weather for them.,Os trajetos de sempre da semana. A casinha da aba Corres diz o tempo pra eles.
+feature/home,plan_empty,,"No trips yet. Add the regular ones, like going to work or to the gym.","Ainda sem trajetos. Adicione os de sempre, tipo ir pro trabalho ou pra academia."
+feature/home,plan_no_places,,"Save your places (home, work, gym) on the Map tab first, then add trips here.","Salve seus lugares (casa, trabalho, academia) na aba Mapa primeiro, depois adicione os trajetos aqui."
+feature/home,plan_add,,Add a trip,Adicionar trajeto
+feature/home,plan_edit,,Edit trip,Editar trajeto
+feature/home,plan_place,,Where to,Pra onde
+feature/home,plan_who,,Who,Quem
+feature/home,plan_days,,Days,Dias
+feature/home,plan_weekdays,,Weekdays,Dias úteis
+feature/home,plan_weekend,,Weekend,Fim de semana
+feature/home,plan_every_day,,Every day,Todo dia
+feature/home,plan_time,,Leaves at %1$s,Sai às %1$s
+feature/home,plan_duration,,How long,Quanto tempo
+feature/home,plan_minutes,,%1$d min,%1$d min
+feature/home,plan_mode,,How,Como
+feature/home,mode_walk,,On foot,A pé
+feature/home,mode_bike,,Bike,Bicicleta
+feature/home,mode_car,,Car,Carro
+feature/home,mode_transit,,Bus or train,Ônibus ou metrô
+feature/home,mode_other,,Other,Outro
+feature/home,plan_delete,,Delete trip,Excluir trajeto
+feature/home,home_add,,Add,Adicionar
+feature/home,home_add_chore,,Something needs doing,Tem coisa pra fazer
+feature/home,home_add_grocery,,Out of something,Acabou algo
+feature/home,home_add_event,,New event,Novo compromisso
+feature/home,home_tab_today,,Today,Hoje
+feature/home,home_tab_agenda,,Agenda,Agenda
+feature/home,home_tab_week,,Week,Semana
 feature/map,share_title,,Share my location,Dividir minha localização
 feature/map,share_body_off,,Off. The family can't see where you are.,Desligado. A família não vê onde você tá.
 feature/map,share_body_on,,"On. The family sees roughly where you are, updated every 15 minutes or so. Turn it off any time.","Ligado. A família vê mais ou menos onde você tá, atualizado de 15 em 15 minutos mais ou menos. Desligue quando quiser."
@@ -574,85 +662,6 @@ feature/onboarding,awaiting_cancel,,Cancel request,Cancelar pedido
 feature/onboarding,firebase_missing_title,,Sync isn't set up,A sincronização não tá configurada
 feature/onboarding,firebase_missing_body,,"This build has no Firebase configuration, so family sharing can't work. Add app/google-services.json as described in the README and rebuild.","Esta versão não tem a configuração do Firebase, então a família não sincroniza. Adicione app/google-services.json como explica o README e gere de novo."
 feature/onboarding,error_sign_in,,Couldn't sign in. Check your connection and try again.,Não deu pra entrar. Veja a internet e tente de novo.
-feature/rooms,rooms_title,,Rooms,Cômodos
-feature/rooms,rooms_count,one,%d room,%d cômodo
-feature/rooms,rooms_count,other,%d rooms,%d cômodos
-feature/rooms,rooms_late,one,%d task is late,%d tarefa atrasada
-feature/rooms,rooms_late,other,%d tasks are late,%d tarefas atrasadas
-feature/rooms,rooms_empty_title,,"Your home, room by room","Sua casa, cômodo por cômodo"
-feature/rooms,rooms_empty_body,,"Add the rooms you look after, with the tasks that keep them tidy. Each room shows when it was last done and when it's due again.","Adicione os cômodos que vocês cuidam, com as tarefas que mantêm tudo em ordem. Cada cômodo mostra quando foi feito pela última vez e quando vence de novo."
-feature/rooms,rooms_empty_body_kid,,A parent can add the rooms of the house here.,Um dos pais pode adicionar aqui os cômodos da casa.
-feature/rooms,rooms_add,,Add a room,Adicionar cômodo
-feature/rooms,room_new,,New room,Novo cômodo
-feature/rooms,room_edit,,Edit room,Editar cômodo
-feature/rooms,room_back,,Back,Voltar
-feature/rooms,room_name,,Name,Nome
-feature/rooms,room_name_hint,,Bathroom 1,Banheiro 1
-feature/rooms,room_type,,Kind of room,Tipo de cômodo
-feature/rooms,room_description,,Notes (optional),Observações (opcional)
-feature/rooms,room_photo_add,,Add a picture,Adicionar foto
-feature/rooms,room_photo_change,,Change picture,Trocar foto
-feature/rooms,room_photo_remove,,Use the drawing,Usar o desenho
-feature/rooms,room_photo_failed,,Couldn't use that picture. Try another one.,Não deu pra usar essa foto. Tente outra.
-feature/rooms,room_delete,,Delete room,Excluir cômodo
-feature/rooms,room_delete_title,,Delete %1$s?,Excluir %1$s?
-feature/rooms,room_delete_body,one,The room and its %d task go away for good.,O cômodo e a sua %d tarefa somem de vez.
-feature/rooms,room_delete_body,other,The room and its %d tasks go away for good.,O cômodo e as suas %d tarefas somem de vez.
-feature/rooms,room_tasks,,Tasks,Tarefas
-feature/rooms,room_no_tasks,,"No tasks yet. Add what keeps this room in shape, like cleaning it every week.","Ainda sem tarefas. Adicione o que mantém o cômodo em dia, como limpar toda semana."
-feature/rooms,room_no_tasks_kid,,No tasks yet.,Ainda sem tarefas.
-feature/rooms,room_no_tasks_short,,No tasks yet,Ainda sem tarefas
-feature/rooms,room_never_done,,Not done yet,Ainda não foi feito
-feature/rooms,room_last_done,,Last done %1$s,Feito por último %1$s
-feature/rooms,room_next,,"Next: %1$s, %2$s","Próxima: %1$s, %2$s"
-feature/rooms,room_done,,Done,Feito
-feature/rooms,room_waiting_approval,,Waiting for a parent,Esperando os pais
-feature/rooms,room_add_task,,Add a task,Adicionar tarefa
-feature/rooms,task_ideas,,Ideas,Ideias
-feature/rooms,task_name,,Task,Tarefa
-feature/rooms,task_repeat,,Repeat,Repetir
-feature/rooms,task_last_done,,Last done,Feito por último
-feature/rooms,task_last_unknown,,Not sure,Não lembro
-feature/rooms,task_remove,,Remove task,Remover tarefa
-feature/rooms,task_due_today,,Due today,Pra hoje
-feature/rooms,task_due_in,one,Due in %d day,Daqui a %d dia
-feature/rooms,task_due_in,other,Due in %d days,Daqui a %d dias
-feature/rooms,task_late_by,one,%d day late,%d dia de atraso
-feature/rooms,task_late_by,other,%d days late,%d dias de atraso
-feature/rooms,tasks_late,one,%d task late,%d tarefa atrasada
-feature/rooms,tasks_late,other,%d tasks late,%d tarefas atrasadas
-feature/rooms,ago_today,,today,hoje
-feature/rooms,ago_yesterday,,yesterday,ontem
-feature/rooms,ago_days,one,%d day ago,há %d dia
-feature/rooms,ago_days,other,%d days ago,há %d dias
-feature/rooms,every_days,one,every day,todo dia
-feature/rooms,every_days,other,every %d days,a cada %d dias
-feature/rooms,every_days_choice,one,Every day,Todo dia
-feature/rooms,every_days_choice,other,Every %d days,A cada %d dias
-feature/rooms,room_type_living_room,,Living room,Sala
-feature/rooms,room_type_bedroom,,Bedroom,Quarto
-feature/rooms,room_type_kids_room,,Kids' room,Quarto dos guris
-feature/rooms,room_type_bathroom,,Bathroom,Banheiro
-feature/rooms,room_type_kitchen,,Kitchen,Cozinha
-feature/rooms,room_type_dining_room,,Dining room,Sala de jantar
-feature/rooms,room_type_office,,Office,Escritório
-feature/rooms,room_type_laundry,,Laundry,Lavanderia
-feature/rooms,room_type_garage,,Garage,Garagem
-feature/rooms,room_type_garden,,Garden,Jardim
-feature/rooms,room_type_balcony,,Balcony,Varanda
-feature/rooms,room_type_hallway,,Hallway,Corredor
-feature/rooms,room_type_other,,Something else,Outro
-feature/rooms,idea_change_sheets,,Change the sheets,Trocar os lençóis
-feature/rooms,idea_dust,,Dust,Tirar o pó
-feature/rooms,idea_mop,,Mop the floor,Passar pano no chão
-feature/rooms,idea_sweep,,Sweep the floor,Varrer o chão
-feature/rooms,idea_windows,,Clean the windows,Limpar as janelas
-feature/rooms,idea_clean_fridge,,Clean the fridge,Limpar a geladeira
-feature/rooms,idea_clean_oven,,Clean the oven,Limpar o forno
-feature/rooms,idea_clean_toilet,,Clean the toilet,Limpar o vaso
-feature/rooms,idea_wash_towels,,Wash the towels,Lavar as toalhas
-feature/rooms,idea_declutter,,Declutter,Desentulhar
-feature/rooms,idea_mow_lawn,,Mow the lawn,Cortar a grama
 feature/update,update_available,,Nos Corre! %1$s is available,Saiu o Nos Corre! %1$s
 feature/update,update_install,,Install,Instalar
 feature/update,update_later,,Later,Depois

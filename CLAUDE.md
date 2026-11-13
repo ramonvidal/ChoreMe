@@ -23,7 +23,7 @@ in the way and what you propose, before writing the code.
 | `:core:update` | Updating the app itself: checks the GitHub release page, downloads the APK, hands it to Android's installer | `:core:model` |
 | `:core:weather` | The weather forecast for the places and times of the family's routine (Open-Meteo: free, no key; only coordinates rounded to about 1 km leave the phone) | `:core:model` |
 | `:core:push` | Free instant wake-up pings between family phones (UnifiedPush, e.g. the ntfy app). Pings carry no family data; features react through `PushListener` | `:core:model` |
-| `:feature:<name>` | One tab or flow: `onboarding`, `home`, `chores`, `groceries`, `rooms`, `agenda`, `map`, `family` (with "This phone" settings), `widget`, `update` | `:core:*` only |
+| `:feature:<name>` | One tab or flow: `onboarding`, `home` (Casa: the weather house, the day, Agenda and the weekly plan as sub-tabs), `chores` (with Rooms as a sub-tab), `groceries`, `map`, `family` (with "This phone" settings), `widget`, `update` | `:core:*` only |
 | `:app` | Wires features together: activity, root screen, navigation | anything; nothing depends on it |
 
 - **Features never depend on each other.** What two features share moves down into

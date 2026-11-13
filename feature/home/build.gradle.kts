@@ -15,6 +15,8 @@ dependencies {
     implementation(projects.core.location)
     implementation(projects.core.settings)
     // The morning weather notification.
+    // Asking for calendar permission.
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)

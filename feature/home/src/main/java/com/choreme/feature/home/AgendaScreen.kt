@@ -1,4 +1,4 @@
-package com.choreme.feature.agenda
+package com.choreme.feature.home
 
 import com.choreme.core.ui.choreTitle
 import android.content.ActivityNotFoundException
@@ -76,7 +76,7 @@ import java.time.format.FormatStyle
 import java.util.Locale
 
 @Composable
-internal fun AgendaScreen(viewModel: AgendaViewModel = hiltViewModel()) {
+internal fun AgendaScreen(addRequest: Int = 0, viewModel: AgendaViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val actionState by viewModel.actionState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -86,6 +86,7 @@ internal fun AgendaScreen(viewModel: AgendaViewModel = hiltViewModel()) {
     AgendaContent(
         state = state,
         error = actionState.error,
+        addRequest = addRequest,
         actions = AgendaActions(
             choose = { viewModel.choose(it) },
             showView = { viewModel.showView(it) },
@@ -119,9 +120,11 @@ internal class AgendaActions(
 
 /** The whole tab, drawn from [state] alone, so it can be screenshotted without a phone's calendars. */
 @Composable
-internal fun AgendaContent(state: AgendaUiState, error: Int?, actions: AgendaActions) {
+internal fun AgendaContent(state: AgendaUiState, error: Int?, actions: AgendaActions, addRequest: Int = 0) {
     var choosing by rememberSaveable { mutableStateOf(false) }
     var adding by rememberSaveable { mutableStateOf(false) }
+    // "Add > New event" on the Today sub-tab opens the dialog here.
+    androidx.compose.runtime.LaunchedEffect(addRequest) { if (addRequest > 0 && state.writableSelected.isNotEmpty()) adding = true }
     val open = actions.open
 
     if (state.needsChoice || choosing) {

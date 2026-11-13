@@ -7,6 +7,6 @@ import androidx.navigation.compose.composable
 const val HOME_ROUTE = "home"
 
 /** The callbacks let the app take people to the chores and the grocery list without this feature knowing about them. */
-fun NavGraphBuilder.homeScreen(onOpenChores: () -> Unit, onOpenGroceries: () -> Unit) {
-    composable(HOME_ROUTE) { HomeScreen(onOpenChores, onOpenGroceries) }
+fun NavGraphBuilder.homeScreen(onOpenChores: () -> Unit, onAddChore: () -> Unit, onOpenGroceries: () -> Unit) {
+    composable(HOME_ROUTE) { HomeScreen(onOpenChores, onAddChore, onOpenGroceries) }
 }

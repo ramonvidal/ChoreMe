@@ -1,4 +1,4 @@
-package com.choreme.feature.rooms
+package com.choreme.feature.chores
 
 import android.content.Context
 import android.graphics.Bitmap

@@ -1,4 +1,4 @@
-package com.choreme.feature.rooms
+package com.choreme.feature.chores
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

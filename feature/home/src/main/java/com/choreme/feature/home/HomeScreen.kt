@@ -1,6 +1,15 @@
 package com.choreme.feature.home
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.runtime.mutableIntStateOf
+import com.choreme.core.ui.PillTab
+import com.choreme.core.ui.TabHeader
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,16 +46,54 @@ import com.choreme.core.ui.describe
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
+private enum class HomeTab { TODAY, AGENDA, WEEK }
+
+/** Casa: the sub-tabs Today (the weather house and the day), Agenda (the family calendar) and Week (the regular trips). */
 @Composable
-internal fun HomeScreen(onOpenChores: () -> Unit, onOpenGroceries: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+internal fun HomeScreen(
+    onOpenChores: () -> Unit,
+    onAddChore: () -> Unit,
+    onOpenGroceries: () -> Unit,
+    viewModel: HomeViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    HomeContent(state, onOpenChores, onOpenGroceries)
+    var tab by rememberSaveable { mutableStateOf(HomeTab.TODAY) }
+    // Counts the "New event" requests, so the Agenda sub-tab opens its dialog once per request.
+    var newEvent by rememberSaveable { mutableIntStateOf(0) }
+    Column(Modifier.fillMaxSize()) {
+        Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            PillTab(stringResource(R.string.home_tab_today), tab == HomeTab.TODAY, { tab = HomeTab.TODAY })
+            PillTab(stringResource(R.string.home_tab_agenda), tab == HomeTab.AGENDA, { tab = HomeTab.AGENDA })
+            PillTab(stringResource(R.string.home_tab_week), tab == HomeTab.WEEK, { tab = HomeTab.WEEK })
+        }
+        when (tab) {
+            HomeTab.TODAY -> HomeContent(
+                state,
+                onOpenChores = onOpenChores,
+                onAddChore = onAddChore,
+                onOpenGroceries = onOpenGroceries,
+                onAddEvent = { newEvent++; tab = HomeTab.AGENDA },
+            )
+            HomeTab.AGENDA -> AgendaScreen(addRequest = newEvent)
+            HomeTab.WEEK -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+                TabHeader(stringResource(R.string.plan_title))
+                Box(Modifier.padding(top = 8.dp)) { WeeklyPlan() }
+            }
+        }
+    }
 }
 
 /** The Home tab, drawn from [state] alone so it can be screenshotted: the weather house, the day's card and its timeline. */
 @Composable
-internal fun HomeContent(state: HomeUiState, onOpenChores: () -> Unit, onOpenGroceries: () -> Unit) {
+internal fun HomeContent(
+    state: HomeUiState,
+    onOpenChores: () -> Unit,
+    onAddChore: () -> Unit,
+    onOpenGroceries: () -> Unit,
+    onAddEvent: () -> Unit,
+) {
     var showWeather by rememberSaveable { mutableStateOf(false) }
+    var addMenu by remember { mutableStateOf(false) }
     val timeline = state.timeline
     val date = remember(state.date) {
         state.date.format(DateTimeFormatter.ofPattern("EEEE, d MMMM")).replaceFirstChar { it.uppercase() }
@@ -67,11 +114,21 @@ internal fun HomeContent(state: HomeUiState, onOpenChores: () -> Unit, onOpenGro
                     kicker = date,
                     line = summaryLine(timeline),
                 ) {
+                    // The one filled button: the three things done every day.
+                    Box {
+                        NosButton(stringResource(R.string.home_add), { addMenu = true }, Modifier.fillMaxWidth())
+                        DropdownMenu(expanded = addMenu, onDismissRequest = { addMenu = false }) {
+                            DropdownMenuItem(text = { Text(stringResource(R.string.home_add_chore)) }, onClick = { addMenu = false; onAddChore() })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.home_add_grocery)) }, onClick = { addMenu = false; onOpenGroceries() })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.home_add_event)) }, onClick = { addMenu = false; onAddEvent() })
+                        }
+                    }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         NosButton(
                             stringResource(R.string.home_open_chores, timeline.choreCount),
                             onOpenChores,
                             Modifier.weight(1f),
+                            style = NosButtonStyle.Tonal,
                         )
                         NosButton(
                             stringResource(R.string.home_open_groceries, timeline.groceriesToBuy),

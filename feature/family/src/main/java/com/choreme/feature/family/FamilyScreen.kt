@@ -96,7 +96,6 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
             setPointsEnabled = { viewModel.setPointsEnabled(it) },
         ),
         phoneSettings = { PhoneSettings() },
-        weeklyPlan = { WeeklyPlan() },
     )
 }
 
@@ -125,8 +124,6 @@ internal fun FamilyContent(
     actionState: ActionState,
     signOutNeedsApprovalAgain: Boolean,
     actions: FamilyActions,
-    weeklyPlan: @Composable () -> Unit = {},
-    // Last, so a trailing lambda is still "This phone".
     phoneSettings: @Composable () -> Unit,
 ) {
     var showAddKid by rememberSaveable { mutableStateOf(false) }
@@ -224,9 +221,6 @@ internal fun FamilyContent(
             item { SectionLabel(stringResource(R.string.week_title)) }
             item(key = "week") { WeekSection(state.week) }
         }
-
-        item { SectionLabel(stringResource(R.string.plan_title)) }
-        item(key = "weekly-plan") { weeklyPlan() }
 
         item { SectionLabel(stringResource(R.string.this_phone_title)) }
         item(key = "this-phone") { phoneSettings() }

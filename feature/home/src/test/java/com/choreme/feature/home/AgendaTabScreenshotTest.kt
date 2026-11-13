@@ -1,4 +1,4 @@
-package com.choreme.feature.agenda
+package com.choreme.feature.home
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
