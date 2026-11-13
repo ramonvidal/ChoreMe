@@ -127,7 +127,7 @@ class ChoreCardsScreenshotTest {
                 }
             }
         }
-        compose.onNodeWithText("Gym", substring = true).assertExists()
+        compose.onAllNodesWithText("Gym", substring = true).assertCountEquals(2) // two cards have the gym trip
     }
 
     /** Dark mode: the picture keeps its own colours, only the card around it is dark. */
