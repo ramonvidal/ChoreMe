@@ -1,7 +1,7 @@
 # Family weather: "will it rain when I leave for work on Monday?"
 
-Status: **discussion draft**, nothing is built. Section 9 lists the questions to settle first; section 10 is a menu of
-ideas to explore. Written 13 November 2026.
+Status: **decisions taken (13 November 2026), building starts with W1**. Section 9 records the owner's answers;
+section 10 marks which ideas were accepted.
 
 ## 1. The idea in one paragraph
 
@@ -131,7 +131,7 @@ Phases:
 
 | Phase | What | Done when |
 |---|---|---|
-| W0 | Answers to section 9; two or three static mock-ups of the hero line, "My week" and the notification | owner approves the pictures |
+| W0 | Answers to section 9 (done); the CI screenshots serve as mock-ups | owner looks at them after W4 |
 | W1 | Pure model + advice rules + tests (no Android, no network) | `./gradlew :core:model:test` green |
 | W2 | `:core:weather`: client, parsing, cache; rules checked against recorded responses | unit tests with saved JSON, no live calls in CI |
 | W3 | Manual plan: editor, storage, Firestore rules and emulator tests, the "My week" screen | owner sets a Monday trip and sees its forecast |
@@ -140,20 +140,34 @@ Phases:
 | W6 | Weather-aware chores, family view, widget line | |
 | W7 | Wording EN and Baianês, privacy policy and Data safety update, Play screenshots | |
 
-## 9. Questions for the owner
+## 9. Decisions (answered by the owner, 13 November 2026)
 
-1. **Where does the family live and which languages and units?** (Berlin? Brazil? Both?) Decides the first fallback, degrees,
-   km/h and how rain is worded.
-2. **Manual first, or learning first?** The plan above starts manual (works for kids, no privacy cost) and adds
-   suggestions after. Agreed?
-3. **Whose routine?** Only yours, every adult, kids as well (set by a parent)? Who may see whose plan?
-4. **Which moments matter most?** Going to work, school run, kids outdoors, weekend plans, laundry, garden, bike?
-   This decides what the first version shows.
-5. **When should it notify?** Evening before, morning, only if it changes? Silent unless bad weather?
-6. **Is it fine to send approximate coordinates (about 1 km) to Open-Meteo** and to say so in the privacy policy?
-7. **Weather at the start, the end, or the whole trip?** (Simplest: the hour of leaving and the hour of arriving.)
-8. **Budget of effort.** Is "advice from the forecast" enough, or do you also want history ("it rains 6 of 10 Mondays at
-   8:00 in November" from past data, which Open-Meteo offers as an archive)?
+1. **Units:** degrees Celsius and km/h by default, **changeable in the settings** (this phone): temperature C or F,
+   wind km/h, mph or m/s, rain mm or inches.
+2. **Manual plan first**, learning from places after.
+3. **Whose routine:** every adult (parents). Kids are not tracked; a parent can add a kid's school run by hand if wanted.
+4. **Moments that matter:** work, bike rides, the gym, the weekend.
+5. **One morning notification** that sums up the weather for **every important moment of that day**, not a separate
+   alert for each.
+6. **Approximate coordinates (about 1 km) may be sent to the weather service**, and the privacy policy says so.
+7. **The whole trip counts:** the weather at the start, at the end and in between (hour by hour over the trip's length).
+8. **Forecast only**, no history statistics.
+
+Ideas (section 10): **yes** to "leave earlier", **yes** to the seasonal pause of habits, **yes** to the family morning
+card, **no** to the Sunday weekly outlook, **yes** to the extreme-weather alerts, **yes** to air quality and pollen.
+Laundry drying day: yes (it was in the same list as rain-aware chores).
+
+**The little house changes job.** The "Our home" picture at the top of Chores (the pixel house and garden that used to
+react to how many chores waited) now shows the **real weather outside**: sun, clouds, rain, snow, storm, fog, night with
+lit windows. Next to it: the temperature now and the day's moments ("8:00 work: rain 70 %, umbrella"). The chore-driven
+parts (weeds, flowers, "tired garden", the week's points dialog) go away; the weekly points stay on the Family tab.
+Tapping the card opens the day in detail.
+
+Where the "outside" weather comes from: the phone's approximate position, else the family's saved place called Home,
+else a prompt to name Home on the map.
+
+Still open (decide while building, small): which saved place is "work" and "gym" (each trip points at a saved place, so
+the Map tab's places are the list to pick from), and whether bike trips need a "how long" field (default 30 minutes).
 
 ## 10. Ideas to explore (a menu, not a promise)
 
