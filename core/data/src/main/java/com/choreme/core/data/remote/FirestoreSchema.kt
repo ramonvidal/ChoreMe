@@ -32,6 +32,7 @@ object FirestoreSchema {
     const val LISTS = "lists"
     const val MESSAGES = "messages"
     const val ROOMS = "rooms"
+    const val PLANS = "plans"
 
     const val FAMILY_ID = "familyId"
     const val FAMILY_NAME = "familyName"
@@ -89,6 +90,13 @@ object FirestoreSchema {
 
     /** On a chore: the room it looks after (rooms collection). */
     const val ROOM_ID = "roomId"
+
+    // Plans (regular trips for the weather)
+    const val DAYS = "days"
+    const val START = "start"
+    const val MINUTES = "minutes"
+    const val MODE = "mode"
+    const val LEARNED = "learned"
 
     // Rooms
     const val DESCRIPTION = "description"

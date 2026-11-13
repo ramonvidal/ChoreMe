@@ -567,6 +567,26 @@ describe('family news, notes, lists, chore log and away', () => {
     await assertFails(setDoc(fam(parent('alice'), 'chores', 'c3'), { ...task, roomId: 'x'.repeat(41) }));
   });
 
+  test('plans: everyone reads the family\'s trips, only parents write them', async () => {
+    const trip = { memberId: 'alice', title: 'Work', days: [1, 2, 3, 4, 5], start: '08:00', minutes: 40, mode: 'BIKE', placeId: 'work', learned: false };
+    await assertSucceeds(setDoc(fam(parent('alice'), 'plans', 'p1'), trip));
+    // A parent can add a child's school run.
+    await assertSucceeds(setDoc(fam(parent('alice'), 'plans', 'p2'), { ...trip, memberId: 'member-kid1', title: 'School', mode: 'WALK' }));
+    await assertFails(setDoc(fam(parent('alice'), 'plans', 'bad1'), { ...trip, days: [] }));
+    await assertFails(setDoc(fam(parent('alice'), 'plans', 'bad2'), { ...trip, days: [0, 8] }));
+    await assertFails(setDoc(fam(parent('alice'), 'plans', 'bad3'), { ...trip, minutes: 2 }));
+    await assertFails(setDoc(fam(parent('alice'), 'plans', 'bad4'), { ...trip, mode: 'ROCKET' }));
+    await assertFails(setDoc(fam(parent('alice'), 'plans', 'bad5'), { ...trip, title: '' }));
+    await assertFails(setDoc(fam(parent('alice'), 'plans', 'bad6'), { ...trip, start: '8:00' }));
+    await assertFails(setDoc(fam(kidDevice('kid1'), 'plans', 'kid'), trip));
+    await assertFails(updateDoc(fam(kidDevice('kid1'), 'plans', 'p1'), { minutes: 50 }));
+    await assertFails(deleteDoc(fam(kidDevice('kid1'), 'plans', 'p1')));
+    await assertSucceeds(getDocs(collection(kidDevice('kid2'), 'families', FAMILY, 'plans')));
+    await assertFails(getDocs(collection(parent('mallory'), 'families', FAMILY, 'plans')));
+    await assertSucceeds(updateDoc(fam(parent('alice'), 'plans', 'p1'), { minutes: 50 }));
+    await assertSucceeds(deleteDoc(fam(parent('alice'), 'plans', 'p1')));
+  });
+
   test('lists: anyone makes one; items can be on it', async () => {
     await assertSucceeds(setDoc(fam(kidDevice('kid1'), 'lists', 'pharmacy'), { name: 'Pharmacy', createdBy: 'member-kid1' }));
     await assertFails(setDoc(fam(kidDevice('kid1'), 'lists', 'x'), { name: '', createdBy: 'member-kid1' }));

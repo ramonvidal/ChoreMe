@@ -73,6 +73,18 @@ service cloud.firestore {
         && (!('photo' in d) || d.photo == null || (d.photo is bytes && d.photo.size() <= 150000));
     }
 
+    // A regular trip in a grown-up's week: "Mon to Fri 8:00, to Work, by bike". The title is the place's name.
+    function validPlan(d) {
+      return d.memberId is string && d.memberId.size() > 0 && d.memberId.size() <= 40
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 40
+        && d.days is list && d.days.size() >= 1 && d.days.size() <= 7 && d.days.hasOnly([1, 2, 3, 4, 5, 6, 7])
+        && d.start is string && d.start.size() == 5
+        && d.minutes is int && d.minutes >= 5 && d.minutes <= 720
+        && d.mode in ['WALK', 'BIKE', 'CAR', 'TRANSIT', 'OTHER']
+        && (!('placeId' in d) || d.placeId == null || (d.placeId is string && d.placeId.size() <= 40))
+        && (!('learned' in d) || d.learned is bool);
+    }
+
     function myMemberId(f) {
       return get(membershipPath(f)).data.memberId;
     }
@@ -317,6 +329,14 @@ service cloud.firestore {
       match /rooms/{roomId} {
         allow read: if isMember(f);
         allow create, update: if isParent(f) && validRoom(request.resource.data);
+        allow delete: if isParent(f);
+      }
+
+      // Regular trips for the weather ("Monday 8:00, to Work"). Everyone sees them (the morning card for the
+      // family); parents write them, for themselves or for a child's school run.
+      match /plans/{planId} {
+        allow read: if isMember(f);
+        allow create, update: if isParent(f) && validPlan(request.resource.data);
         allow delete: if isParent(f);
       }
 
