@@ -84,6 +84,7 @@ dependencies {
     implementation(projects.core.settings)
     implementation(projects.core.update)
     implementation(projects.feature.onboarding)
+    implementation(projects.feature.home)
     implementation(projects.feature.chores)
     implementation(projects.feature.groceries)
     implementation(projects.feature.agenda)

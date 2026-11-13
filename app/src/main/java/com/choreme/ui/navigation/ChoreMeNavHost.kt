@@ -6,6 +6,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -47,6 +48,8 @@ import com.choreme.feature.agenda.agendaScreen
 import com.choreme.feature.chores.TODAY_ROUTE
 import com.choreme.feature.chores.todayScreen
 import com.choreme.feature.family.FAMILY_ROUTE
+import com.choreme.feature.home.HOME_ROUTE
+import com.choreme.feature.home.homeScreen
 import com.choreme.feature.family.familyScreen
 import com.choreme.feature.groceries.GROCERIES_ROUTE
 import com.choreme.feature.groceries.groceriesScreen
@@ -62,7 +65,8 @@ enum class TopLevelDestination(
     val icon: ImageVector? = null,
     @DrawableRes val iconRes: Int = 0,
 ) {
-    Today(TODAY_ROUTE, R.string.nav_today, Icons.Filled.Home),
+    Home(HOME_ROUTE, R.string.nav_home, Icons.Filled.Home),
+    Today(TODAY_ROUTE, R.string.nav_today, Icons.Filled.CheckCircle),
     Groceries(GROCERIES_ROUTE, R.string.nav_groceries, Icons.Filled.ShoppingCart),
     Rooms(ROOMS_ROUTE, R.string.nav_rooms, iconRes = CoreUiR.drawable.ic_nav_rooms),
     Agenda(AGENDA_ROUTE, R.string.nav_agenda, Icons.Filled.DateRange),
@@ -145,9 +149,13 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0, choresBadge: Int = 0, groceries
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = TopLevelDestination.Today.route,
+            startDestination = TopLevelDestination.Home.route,
             modifier = Modifier.padding(innerPadding),
         ) {
+            homeScreen(
+                onOpenChores = { navController.navigateToTab(TopLevelDestination.Today.route) },
+                onOpenGroceries = { navController.navigateToTab(TopLevelDestination.Groceries.route) },
+            )
             todayScreen(onOpenGroceries = { navController.navigateToTab(TopLevelDestination.Groceries.route) })
             groceriesScreen()
             roomsScreen()

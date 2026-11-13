@@ -109,8 +109,6 @@ class ChoresTabScreenshotTest {
     fun withoutPoints() {
         shoot("tab-chores-no-points", mom, dark = false, pointsOn = false)
         compose.onAllNodesWithText("points", substring = true).assertCountEquals(0)
-        // The little house now shows the weather (still loading in this test).
-        compose.onNodeWithText("Checking the sky…").assertExists()
     }
 
     /** In Baianês (Brazilian Portuguese, Bahia style). */

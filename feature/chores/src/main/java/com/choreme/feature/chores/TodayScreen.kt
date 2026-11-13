@@ -120,17 +120,14 @@ import kotlinx.coroutines.launch
 internal fun TodayScreen(
     onOpenGroceries: () -> Unit,
     viewModel: ChoresViewModel = hiltViewModel(),
-    weatherViewModel: HomeWeatherViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val reminders by viewModel.reminders.collectAsStateWithLifecycle()
-    val weather by weatherViewModel.state.collectAsStateWithLifecycle()
     AskForNotificationPermission()
     ChoresContent(
         state = state,
         reminders = reminders,
         onOpenGroceries = onOpenGroceries,
-        weather = weather,
         actions = ChoresActions(
             claim = { viewModel.claim(it) },
             unclaim = { viewModel.unclaim(it) },
@@ -180,7 +177,6 @@ internal fun ChoresContent(
     reminders: Map<String, Instant>,
     onOpenGroceries: () -> Unit,
     actions: ChoresActions,
-    weather: HomeWeatherState = HomeWeatherState(),
 ) {
     var cheer by remember { mutableStateOf<Cheer?>(null) }
     val haptics = LocalHapticFeedback.current
@@ -194,7 +190,6 @@ internal fun ChoresContent(
     var doneByFor by remember { mutableStateOf<Chore?>(null) }
     var assigning by remember { mutableStateOf<Chore?>(null) }
     var remindFor by remember { mutableStateOf<Chore?>(null) }
-    var showHome by remember { mutableStateOf(false) }
     var showLater by rememberSaveable { mutableStateOf(false) }
 
     val snackbar = remember { SnackbarHostState() }
@@ -220,7 +215,6 @@ internal fun ChoresContent(
                 }
                 !state.hasChores -> item(key = "empty") { EmptyChores(state.isParent) }
                 else -> {
-                    item(key = "home") { HomeWeatherCard(weather, onClick = { showHome = true }) }
                     val board = state.board
                     val choreCard: @Composable (Chore, Boolean) -> Unit = { chore, mine ->
                         ChoreCard(
@@ -382,7 +376,6 @@ internal fun ChoresContent(
             onDismiss = { remindFor = null },
         )
     }
-    if (showHome) HomeWeatherDialog(weather, onDismiss = { showHome = false })
     doneByFor?.let { chore ->
         PeopleDialog(
             title = stringResource(R.string.done_by_title),

@@ -1,4 +1,4 @@
-package com.choreme.feature.chores
+package com.choreme.feature.home
 
 import com.choreme.core.location.DeviceLocation
 import com.choreme.core.model.location.GeoPoint

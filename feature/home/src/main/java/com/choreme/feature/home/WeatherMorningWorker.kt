@@ -1,4 +1,4 @@
-package com.choreme.feature.chores
+package com.choreme.feature.home
 
 import android.Manifest
 import android.app.NotificationChannel
@@ -105,7 +105,7 @@ internal class WeatherMorningWorker @AssistedInject constructor(
             PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
         val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, CHANNEL_ID))
-            .setSmallIcon(R.drawable.ic_notification_chores)
+            .setSmallIcon(R.drawable.ic_notification_home)
             .setContentTitle(title)
             .setContentText(lines.first())
             .setStyle(NotificationCompat.BigTextStyle().bigText(lines.joinToString("\n")))

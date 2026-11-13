@@ -1,4 +1,4 @@
-package com.choreme.feature.chores
+package com.choreme.feature.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,40 +23,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.choreme.core.data.FamilyRepository
-import com.choreme.core.data.LocationRepository
-import com.choreme.core.data.PlanRepository
-import com.choreme.core.model.session.SessionState
 import com.choreme.core.model.weather.Advice
-import com.choreme.core.model.weather.PlanEntry
 import com.choreme.core.model.weather.Sky
 import com.choreme.core.model.weather.WeatherHour
 import com.choreme.core.model.weather.WeatherUnits
-import com.choreme.core.settings.WeatherSettings
 import com.choreme.core.ui.degrees
 import com.choreme.core.ui.describe
 import com.choreme.core.ui.label
 import com.choreme.core.ui.windText
-import com.choreme.core.weather.WeatherRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.stateIn
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.minutes
 
 /** One moment of today for the card: who, where (the saved place's name), when, and what to know about the weather. */
 internal data class MomentLine(val who: String, val title: String, val time: LocalTime, val advice: Advice)
@@ -72,50 +49,6 @@ internal data class HomeWeatherState(
     val needsPlace: Boolean = false,
 ) {
     val look: WeatherLook get() = WeatherLook(now?.sky ?: Sky.CLEAR, now?.isDay ?: true)
-}
-
-/** Fetches the weather for the card every half hour while the tab is open. */
-@HiltViewModel
-class HomeWeatherViewModel @Inject internal constructor(
-    families: FamilyRepository,
-    plans: PlanRepository,
-    locations: LocationRepository,
-    private val weather: WeatherRepository,
-    settings: WeatherSettings,
-    private val day: DayWeather,
-) : ViewModel() {
-    private class Inputs(
-        val plans: List<PlanEntry>,
-        val places: List<com.choreme.core.model.location.Place>,
-        val names: Map<String, String>,
-        val units: WeatherUnits,
-    )
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    internal val state: StateFlow<HomeWeatherState> = families.session
-        .filterIsInstance<SessionState.InFamily>()
-        .flatMapLatest { session ->
-            val refresh = flow { while (true) { emit(Unit); delay(30.minutes) } }
-            combine(
-                plans.observe(session.familyId),
-                locations.observePlaces(session.familyId),
-                families.observeMembers(session.familyId),
-                settings.units,
-                refresh,
-            ) { entries, places, members, units, _ -> Inputs(entries, places, members.associate { it.id to it.name }, units) }
-                .mapLatest { compute(it) }
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeWeatherState())
-
-    private suspend fun compute(inputs: Inputs): HomeWeatherState {
-        val home = day.home(inputs.places) ?: return HomeWeatherState(loading = false, units = inputs.units, needsPlace = true)
-        val now = LocalDateTime.now()
-        val current = weather.forecast(home)?.at(now)
-        val moments = day.moments(now.toLocalDate(), inputs.plans, inputs.places, home)
-            .filter { it.end.isAfter(now) }
-            .map { MomentLine(inputs.names[it.entry.memberId].orEmpty(), it.entry.title, it.entry.start, it.advice) }
-        return HomeWeatherState(loading = false, now = current, units = inputs.units, moments = moments)
-    }
 }
 
 /** The little house with the real weather, the temperature and the next trips. Tap for the day. */
@@ -219,6 +152,6 @@ internal fun HomeWeatherDialog(state: HomeWeatherState, onDismiss: () -> Unit) {
                 Text(stringResource(R.string.weather_credit), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.home_close)) } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.weather_close)) } },
     )
 }

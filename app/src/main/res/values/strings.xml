@@ -1,4 +1,5 @@
 <resources>
+    <string name="nav_home">Home</string>
     <string name="nav_today">Chores</string>
     <string name="nav_groceries">Groceries</string>
     <string name="nav_rooms">Rooms</string>

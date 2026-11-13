@@ -205,16 +205,4 @@
     <string name="cheer_waiting">Well done! A parent will check it</string>
     <string name="hero_all_done">All done for today</string>
     <string name="hero_groceries">Groceries</string>
-    <string name="weather_title">Weather</string>
-    <string name="weather_loading">Checking the sky…</string>
-    <string name="weather_unavailable">No forecast right now. Check the connection.</string>
-    <string name="weather_feels_like">feels like %1$s</string>
-    <string name="weather_wind">wind %1$s</string>
-    <string name="weather_all_good">all good</string>
-    <string name="weather_nothing_planned">No trips planned for the rest of today.</string>
-    <string name="weather_needs_place">Save your home on the Map tab to see the weather here.</string>
-    <string name="weather_credit">Weather data by Open-Meteo.com (CC BY 4.0)</string>
-    <string name="weather_channel">Weather in the morning</string>
-    <string name="weather_channel_description">The weather for the family\'s regular trips of the day, and storm warnings</string>
-    <string name="weather_morning_title">Today: %1$s</string>
 </resources>

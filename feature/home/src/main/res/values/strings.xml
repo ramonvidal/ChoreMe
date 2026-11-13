@@ -1,0 +1,34 @@
+<resources>
+    <string name="weather_title">Weather</string>
+    <string name="weather_loading">Checking the sky…</string>
+    <string name="weather_unavailable">No forecast right now. Check the connection.</string>
+    <string name="weather_feels_like">feels like %1$s</string>
+    <string name="weather_wind">wind %1$s</string>
+    <string name="weather_all_good">all good</string>
+    <string name="weather_nothing_planned">No trips planned for the rest of today.</string>
+    <string name="weather_needs_place">Save your home on the Map tab to see the weather here.</string>
+    <string name="weather_credit">Weather data by Open-Meteo.com (CC BY 4.0)</string>
+    <string name="weather_channel">Weather in the morning</string>
+    <string name="weather_channel_description">The weather for the family\'s regular trips of the day, and storm warnings</string>
+    <string name="weather_morning_title">Today: %1$s</string>
+    <string name="weather_close">Close</string>
+    <string name="home_today">Today</string>
+    <string name="home_open_chores">Chores (%1$d)</string>
+    <string name="home_open_groceries">Groceries (%1$d)</string>
+    <plurals name="home_chores">
+        <item quantity="one">%d chore</item>
+        <item quantity="other">%d chores</item>
+    </plurals>
+    <plurals name="home_events">
+        <item quantity="one">%d event</item>
+        <item quantity="other">%d events</item>
+    </plurals>
+    <plurals name="home_groceries">
+        <item quantity="one">%d item to buy</item>
+        <item quantity="other">%d items to buy</item>
+    </plurals>
+    <string name="home_timeline">The day</string>
+    <string name="home_all_day">All day</string>
+    <string name="home_nothing_title">A quiet day</string>
+    <string name="home_nothing_body">No events and no trips today. Trips come from the weekly plan, events from the family calendar.</string>
+</resources>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Baianês. Made from translations/baianes.csv by translations/i18n.py: edit the table, not this file. -->
+<resources>
+    <string name="weather_title">Tempo</string>
+    <string name="weather_loading">Olhando o céu…</string>
+    <string name="weather_unavailable">Sem previsão agora. Veja a conexão.</string>
+    <string name="weather_feels_like">sensação de %1$s</string>
+    <string name="weather_wind">vento %1$s</string>
+    <string name="weather_all_good">tá de boa</string>
+    <string name="weather_nothing_planned">Nenhum compromisso pro resto de hoje.</string>
+    <string name="weather_needs_place">Salve seu cafofo na aba Mapa pra ver o tempo aqui.</string>
+    <string name="weather_credit">Dados do tempo: Open-Meteo.com (CC BY 4.0)</string>
+    <string name="weather_channel">Tempo de manhã</string>
+    <string name="weather_channel_description">O tempo pros trajetos de sempre da família no dia, e avisos de temporal</string>
+    <string name="weather_morning_title">Hoje: %1$s</string>
+    <string name="weather_close">Fechar</string>
+    <string name="home_today">Hoje</string>
+    <string name="home_open_chores">Corres (%1$d)</string>
+    <string name="home_open_groceries">Feira (%1$d)</string>
+    <string name="home_timeline">O dia</string>
+    <string name="home_all_day">O dia todo</string>
+    <string name="home_nothing_title">Dia tranquilo</string>
+    <string name="home_nothing_body">Nenhum compromisso nem trajeto hoje. Os trajetos vêm do plano da semana, os compromissos da agenda da família.</string>
+    <plurals name="home_chores">
+        <item quantity="one">%d corre</item>
+        <item quantity="other">%d corres</item>
+    </plurals>
+    <plurals name="home_events">
+        <item quantity="one">%d compromisso</item>
+        <item quantity="other">%d compromissos</item>
+    </plurals>
+    <plurals name="home_groceries">
+        <item quantity="one">%d item pra comprar</item>
+        <item quantity="other">%d itens pra comprar</item>
+    </plurals>
+</resources>

@@ -1,4 +1,4 @@
-package com.choreme.feature.chores
+package com.choreme.feature.home
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
