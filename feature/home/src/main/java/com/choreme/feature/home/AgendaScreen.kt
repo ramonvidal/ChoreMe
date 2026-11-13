@@ -142,16 +142,15 @@ internal fun AgendaContent(state: AgendaUiState, error: Int?, actions: AgendaAct
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
         Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            TabHeader(stringResource(R.string.agenda_title)) {
-                if (state.hasPermission && state.calendars.isNotEmpty()) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        HeaderLine(
-                            state.selected.orEmpty().mapNotNull(state::calendarName).joinToString(),
-                            modifier = Modifier.weight(1f, fill = false),
-                        )
-                        HeaderLine(" · ")
-                        HeaderLine(stringResource(R.string.change_calendars), modifier = Modifier.clickable { choosing = true })
-                    }
+            // The sub-tab already says "Agenda": only which calendars are shown, and a way to change them.
+            if (state.hasPermission && state.calendars.isNotEmpty()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    HeaderLine(
+                        state.selected.orEmpty().mapNotNull(state::calendarName).joinToString(),
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    HeaderLine(" · ")
+                    HeaderLine(stringResource(R.string.change_calendars), modifier = Modifier.clickable { choosing = true })
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

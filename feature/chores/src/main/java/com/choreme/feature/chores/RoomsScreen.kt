@@ -162,14 +162,14 @@ private fun RoomList(state: RoomsUiState, onOpen: (String) -> Unit, onAdd: () ->
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item(key = "header") {
-                TabHeader(stringResource(R.string.rooms_title), Modifier.padding(top = 16.dp, bottom = 4.dp)) {
-                    if (state.rooms.isNotEmpty()) {
-                        val late = state.rooms.sumOf { it.lateCount(state.today) }
-                        HeaderLine(
-                            if (late > 0) pluralStringResource(R.plurals.rooms_late, late, late)
-                            else pluralStringResource(R.plurals.rooms_count, state.rooms.size, state.rooms.size),
-                        )
-                    }
+                // The sub-tab already says "Rooms": only how many there are, or how many tasks are late.
+                if (state.rooms.isNotEmpty()) {
+                    val late = state.rooms.sumOf { it.lateCount(state.today) }
+                    HeaderLine(
+                        if (late > 0) pluralStringResource(R.plurals.rooms_late, late, late)
+                        else pluralStringResource(R.plurals.rooms_count, state.rooms.size, state.rooms.size),
+                        modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
+                    )
                 }
             }
             if (state.rooms.isEmpty() && !state.loading) {
