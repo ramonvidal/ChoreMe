@@ -226,10 +226,6 @@
     <string name="room_name_hint">Bathroom 1</string>
     <string name="room_type">Kind of room</string>
     <string name="room_description">Notes (optional)</string>
-    <string name="room_photo_add">Add a picture</string>
-    <string name="room_photo_change">Change picture</string>
-    <string name="room_photo_remove">Use the drawing</string>
-    <string name="room_photo_failed">Couldn\'t use that picture. Try another one.</string>
     <string name="room_delete">Delete room</string>
     <string name="room_delete_title">Delete %1$s?</string>
     <plurals name="room_delete_body">

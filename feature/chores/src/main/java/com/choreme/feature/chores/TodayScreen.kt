@@ -101,13 +101,10 @@ import com.choreme.core.ui.MemberAvatar
 import com.choreme.core.ui.HeroCard
 import com.choreme.core.ui.NosButton
 import com.choreme.core.ui.NosButtonStyle
-import com.choreme.core.ui.RoomFilterRow
-import com.choreme.core.ui.RoomTag
 import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.icon
 import java.time.Instant
 import java.time.LocalTime
-import com.choreme.core.model.chore.RoomFilter
 import com.choreme.core.model.chore.SavedChore
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -148,7 +145,6 @@ internal fun TodayScreen(
             remind = { chore, time -> viewModel.remind(chore, time) },
             cancelReminder = { viewModel.cancelReminder(it) },
             addToCalendar = { viewModel.addToCalendar(it) },
-            setRoomFilter = { viewModel.setRoomFilter(it) },
         ),
     )
 }
@@ -171,7 +167,6 @@ internal class ChoresActions(
     val remind: (Chore, LocalTime) -> LocalDateTime = { _, time -> LocalDateTime.now().with(time) },
     val cancelReminder: (Chore) -> Unit = {},
     val addToCalendar: suspend (Chore) -> CalendarResult? = { null },
-    val setRoomFilter: (RoomFilter) -> Unit = {},
 )
 
 /** The whole tab, drawn from [state] alone, so it can be screenshotted without Firebase. */
@@ -212,10 +207,6 @@ internal fun ChoresContent(
         ) {
             item(key = "header") {
                 ChoresHeader(state, onOpenGroceries, onAdd = { adding = true })
-            }
-            // Only once some chore belongs to a room: all, only those of rooms, or only the others.
-            if (state.hasRoomTasks) {
-                item(key = "room-filter") { RoomFilterRow(state.roomFilter, actions.setRoomFilter) }
             }
             when {
                 state.loading -> item(key = "loading") {
@@ -591,7 +582,6 @@ internal fun ChoreCard(
             chore.reportedBy == me.id -> add(stringResource(R.string.reported_by_you))
             chore.reportedBy != null -> state.nameOf(chore.reportedBy)?.let { add(stringResource(R.string.reported_by, it)) }
         }
-        chore.roomId?.let { state.roomNames[it] }?.let { add(it) }
         if (overdueDays > 0) add(pluralStringResource(R.plurals.overdue_days, overdueDays, overdueDays))
         if (overdueDays < 0) add(dayLabel(chore.dueDate, state.today))
         if (chore.recurrence != Recurrence.Once) {
@@ -644,10 +634,9 @@ internal fun ChoreCard(
                 colors = CardDefaults.cardColors(containerColor = cardColor),
                 border = edge,
             ) {
-                // A task of a room carries a small "#rooms" flag in the top right corner.
                 Box {
                 Row(
-                    Modifier.padding(start = 16.dp, end = 16.dp, top = if (chore.roomId != null) 22.dp else 14.dp, bottom = 14.dp),
+                    Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
@@ -681,7 +670,6 @@ internal fun ChoreCard(
                         border = BorderStroke(1.dp, colors.outline),
                     ) { Text(stringResource(main.first)) }
                 }
-                if (chore.roomId != null) RoomTag(Modifier.align(Alignment.TopEnd), corner = true)
                 }
             }
         }

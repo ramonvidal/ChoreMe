@@ -79,7 +79,6 @@ import com.choreme.core.ui.SectionLabel
 import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.choreTitle
 import com.choreme.core.ui.icon
-import com.choreme.core.ui.picture
 import java.time.LocalDate
 
 @Composable
@@ -195,18 +194,6 @@ private fun RoomList(state: RoomsUiState, onOpen: (String) -> Unit, onAdd: () ->
     }
 }
 
-/** The room's own photo, or the standard floor plan for its kind. */
-@Composable
-internal fun RoomPicture(room: Room, modifier: Modifier = Modifier) {
-    val bitmap = remember(room.photo) { room.photo?.toBitmap() }
-    val backdrop = modifier.background(MaterialTheme.colorScheme.surfaceContainerHigh)
-    if (bitmap != null) {
-        Image(bitmap.asImageBitmap(), contentDescription = null, modifier = backdrop, contentScale = ContentScale.Crop)
-    } else {
-        Image(painterResource(room.type.picture), contentDescription = null, modifier = backdrop, contentScale = ContentScale.Fit)
-    }
-}
-
 @Composable
 private fun RoomCard(overview: RoomOverview, today: LocalDate, onClick: () -> Unit) {
     val room = overview.room
@@ -214,7 +201,6 @@ private fun RoomCard(overview: RoomOverview, today: LocalDate, onClick: () -> Un
         Modifier.fillMaxWidth().clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
     ) {
-        RoomPicture(room, Modifier.fillMaxWidth().aspectRatio(CARD_RATIO))
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ItemIcon(room.type.icon, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -261,18 +247,13 @@ private fun RoomDetail(overview: RoomOverview, state: RoomsUiState, actions: Roo
     var addingTask by rememberSaveable { mutableStateOf(false) }
     var editingTaskId by rememberSaveable { mutableStateOf<String?>(null) }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        Box {
-            RoomPicture(room, Modifier.fillMaxWidth().aspectRatio(DETAIL_RATIO))
-            // Dark round buttons with a light icon, so they stand out from any picture.
-            val buttonColors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.inverseSurface,
-                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-            )
-            FilledIconButton(onClick = onBack, Modifier.padding(12.dp), colors = buttonColors) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            androidx.compose.material3.IconButton(onClick = onBack) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.room_back))
             }
+            androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
             if (state.canManage) {
-                FilledIconButton(onClick = onEdit, Modifier.align(Alignment.TopEnd).padding(12.dp), colors = buttonColors) {
+                androidx.compose.material3.IconButton(onClick = onEdit) {
                     Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.room_edit))
                 }
             }
@@ -400,37 +381,16 @@ private fun RoomEditorDialog(
     onDelete: (() -> Unit)? = null,
     taskCount: Int = 0,
 ) {
-    val context = LocalContext.current
     var name by rememberSaveable { mutableStateOf(room?.name.orEmpty()) }
     var type by rememberSaveable { mutableStateOf(room?.type ?: RoomType.BATHROOM) }
     var description by rememberSaveable { mutableStateOf(room?.description.orEmpty()) }
-    var photo by remember { mutableStateOf(room?.photo) }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
-    var photoFailed by remember { mutableStateOf(false) }
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) {
-            val read = readRoomPhoto(context, uri)
-            photoFailed = read == null
-            if (read != null) photo = read
-        }
-    }
-    val preview = Room(id = room?.id.orEmpty(), name = name, type = type, photo = photo)
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(if (room == null) R.string.room_new else R.string.room_edit)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                RoomPicture(preview, Modifier.fillMaxWidth().aspectRatio(CARD_RATIO).clip(MaterialTheme.shapes.medium))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }) {
-                        Text(stringResource(if (photo == null) R.string.room_photo_add else R.string.room_photo_change))
-                    }
-                    if (photo != null) TextButton(onClick = { photo = null }) { Text(stringResource(R.string.room_photo_remove)) }
-                }
-                if (photoFailed) {
-                    Text(stringResource(R.string.room_photo_failed), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-                }
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it.take(Room.MAX_NAME) },
@@ -469,7 +429,7 @@ private fun RoomEditorDialog(
         confirmButton = {
             Button(
                 enabled = name.isNotBlank(),
-                onClick = { onSave((room ?: Room(id = "", name = "")).copy(name = name.trim(), type = type, description = description.trim(), photo = photo)) },
+                onClick = { onSave((room ?: Room(id = "", name = "")).copy(name = name.trim(), type = type, description = description.trim())) },
             ) { Text(stringResource(CoreUiR.string.save)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(CoreUiR.string.cancel)) } },
@@ -576,6 +536,3 @@ private fun TaskDialog(
     )
 }
 
-// The standard pictures are 4:3.
-private const val CARD_RATIO = 4f / 3f
-private const val DETAIL_RATIO = 4f / 3f

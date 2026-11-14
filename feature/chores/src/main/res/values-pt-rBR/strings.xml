@@ -152,10 +152,6 @@
     <string name="room_name_hint">Banheiro 1</string>
     <string name="room_type">Tipo de cômodo</string>
     <string name="room_description">Observações (opcional)</string>
-    <string name="room_photo_add">Adicionar foto</string>
-    <string name="room_photo_change">Trocar foto</string>
-    <string name="room_photo_remove">Usar o desenho</string>
-    <string name="room_photo_failed">Não deu pra usar essa foto. Tente outra.</string>
     <string name="room_delete">Excluir cômodo</string>
     <string name="room_delete_title">Excluir %1$s?</string>
     <string name="room_tasks">Tarefas</string>

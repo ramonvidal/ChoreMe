@@ -91,26 +91,6 @@ class RoomsTabScreenshotTest {
     @Test
     fun detailDark() = shoot("tab-rooms-detail-dark", state, dark = true, open = "bath1")
 
-    /** Every kind of room's standard picture, two by two, to check them by eye. */
-    @Test
-    fun sketches() {
-        compose.setContent {
-            ChoreMeTheme(darkTheme = false, dynamicColor = false) {
-                Surface(Modifier.fillMaxSize()) {
-                    Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        RoomType.entries.chunked(2).forEach { pair ->
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                pair.forEach { RoomPicture(Room("x", "x", it), Modifier.weight(1f).aspectRatio(4f / 3f)) }
-                                if (pair.size == 1) Spacer(Modifier.weight(1f))
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        compose.onRoot().captureRoboImage("build/outputs/roborazzi/room-sketches.png")
-    }
-
     // Google Play screenshots: 1080 x 1920, in English and in Baianês.
     @Test
     @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")

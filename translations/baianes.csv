@@ -255,10 +255,6 @@ feature/chores,room_name,,Name,Nome
 feature/chores,room_name_hint,,Bathroom 1,Banheiro 1
 feature/chores,room_type,,Kind of room,Tipo de cômodo
 feature/chores,room_description,,Notes (optional),Observações (opcional)
-feature/chores,room_photo_add,,Add a picture,Adicionar foto
-feature/chores,room_photo_change,,Change picture,Trocar foto
-feature/chores,room_photo_remove,,Use the drawing,Usar o desenho
-feature/chores,room_photo_failed,,Couldn't use that picture. Try another one.,Não deu pra usar essa foto. Tente outra.
 feature/chores,room_delete,,Delete room,Excluir cômodo
 feature/chores,room_delete_title,,Delete %1$s?,Excluir %1$s?
 feature/chores,room_delete_body,one,The room and its %d task go away for good.,O cômodo e a sua %d tarefa somem de vez.

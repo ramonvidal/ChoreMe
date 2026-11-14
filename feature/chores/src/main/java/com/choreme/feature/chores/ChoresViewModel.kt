@@ -9,7 +9,6 @@ import com.choreme.core.calendar.CalendarRepository
 import com.choreme.core.data.ChoreRepository
 import com.choreme.core.data.FamilyRepository
 import com.choreme.core.data.GroceryRepository
-import com.choreme.core.data.RoomRepository
 import com.choreme.core.data.PushEndpointRepository
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
@@ -58,7 +57,6 @@ import java.time.LocalDate
 import com.choreme.core.model.chore.RoomFilter
 import com.choreme.core.model.chore.choreDone
 import com.choreme.core.model.chore.filteredBy
-import com.choreme.core.model.chore.hasRoomTasks
 import com.choreme.core.model.chore.nextReminderTime
 import java.time.Instant
 import java.time.LocalDateTime
@@ -79,13 +77,7 @@ data class ChoresUiState(
     val savedChores: List<SavedChore> = emptyList(),
     /** Whether the family plays with points; off, they show nowhere. */
     val pointsOn: Boolean = true,
-    /** The family's rooms by id, so a task of a room says which ("Bathroom 1"). */
-    val roomNames: Map<String, String> = emptyMap(),
-    /** Show all chores, only those that belong to a room, or only the others. */
-    val roomFilter: RoomFilter = RoomFilter.ALL,
 ) {
-    /** The filter is only offered once some chore belongs to a room. */
-    val hasRoomTasks get() = chores.hasRoomTasks
     val isParent get() = me?.role == Role.PARENT
     val hasChores get() = chores.isNotEmpty()
     /** Everyone at home, for "who's doing it" and "who did it" (someone away can't have). */
@@ -137,7 +129,6 @@ class ChoresViewModel @Inject internal constructor(
     families: FamilyRepository,
     private val chores: ChoreRepository,
     groceries: GroceryRepository,
-    rooms: RoomRepository,
     private val endpoints: PushEndpointRepository,
     private val push: PushSender,
     private val calendar: CalendarRepository,
@@ -156,12 +147,6 @@ class ChoresViewModel @Inject internal constructor(
 
     fun cancelReminder(chore: Chore) = timedReminders.cancel(chore.id)
 
-    private val roomFilter = MutableStateFlow(RoomFilter.ALL)
-
-    fun setRoomFilter(filter: RoomFilter) {
-        roomFilter.value = filter
-    }
-
     private val baseState: Flow<ChoresUiState> = families.session
         .filterIsInstance<SessionState.InFamily>()
         .flatMapLatest { session ->
@@ -173,8 +158,8 @@ class ChoresViewModel @Inject internal constructor(
                     chores.observeSavedChores(session.familyId),
                     ::Data,
                 ),
-                combine(families.observeFamily(session.familyId), rooms.observe(session.familyId).onStart { emit(emptyList()) }, ::Pair),
-            ) { (allChores, members, groceryItems, saved), (family, roomList) ->
+                families.observeFamily(session.familyId),
+            ) { (allChores, members, groceryItems, saved), family ->
                 val today = LocalDate.now()
                 ChoresUiState(
                     loading = false,
@@ -182,25 +167,18 @@ class ChoresViewModel @Inject internal constructor(
                     me = members.firstOrNull { it.id == session.memberId }
                         ?: Member(session.memberId, name = "", role = session.role),
                     today = today,
-                    board = buildTodayBoard(allChores, today, session.memberId),
+                    // The tasks of a room live under the Rooms sub-tab, so this board is the house's own chores.
+                    board = buildTodayBoard(allChores.filteredBy(RoomFilter.NO_ROOM), today, session.memberId),
                     chores = allChores,
                     members = members.associateBy { it.id },
                     groceriesToBuy = groceryItems.groceriesToBuy(),
                     savedChores = saved,
                     pointsOn = family?.pointsEnabled ?: true,
-                    roomNames = roomList.associate { it.id to it.name },
                 )
             }
         }
 
-    val uiState: StateFlow<ChoresUiState> = combine(baseState, roomFilter) { state, filter ->
-        // Falls back to everything when no chore belongs to a room any more, so the board is never stuck empty.
-        val shown = if (state.hasRoomTasks) filter else RoomFilter.ALL
-        state.copy(
-            roomFilter = shown,
-            board = buildTodayBoard(state.chores.filteredBy(shown), state.today, state.me?.id),
-        )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ChoresUiState())
+    val uiState: StateFlow<ChoresUiState> = baseState.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ChoresUiState())
 
     fun claim(chore: Chore) = change(chore) { me, _ -> claim(me) }
     fun unclaim(chore: Chore) = change(chore) { me, _ -> unclaim(me) }
