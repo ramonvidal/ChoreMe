@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -69,7 +71,7 @@ class WeekAheadScreenshotTest {
         }
         compose.onNodeWithText("Plan trips on the Map tab").assertExists()
         compose.onNodeWithText("Trips are planned on the Map tab.").assertExists()
-        compose.onNodeWithText("good for drying", substring = true).assertExists()
+        compose.onAllNodesWithText("good for drying", substring = true).assertCountEquals(2) // the 3rd and 4th days
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/tab-home-week.png")
     }
 }
