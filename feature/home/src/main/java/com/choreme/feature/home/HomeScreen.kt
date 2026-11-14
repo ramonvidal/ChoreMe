@@ -18,6 +18,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.Alignment
+import com.choreme.core.model.chore.Chore
+import com.choreme.core.ui.ItemIcon
+import com.choreme.core.ui.choreTitle
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -117,6 +125,10 @@ internal fun HomeContent(
         // The little house with the real weather, first.
         item(key = "weather") { HomeWeatherCard(state.weather, onClick = { showWeather = true }) }
 
+        if (timeline != null && timeline.urgent.isNotEmpty()) {
+            item(key = "urgent") { UrgentCard(timeline.urgent, onClick = onOpenChores) }
+        }
+
         if (timeline != null) {
             item(key = "day") {
                 HeroCard(
@@ -162,6 +174,27 @@ internal fun HomeContent(
 
     if (showWeather) HomeWeatherDialog(state.weather, onDismiss = { showWeather = false })
 }
+
+/** The chores marked urgent, red and first under the weather, so they are not missed. Tap to open the Chores tab. */
+@Composable
+private fun UrgentCard(urgent: List<Chore>, onClick: () -> Unit) {
+    val shown = urgent.take(MAX_URGENT_SHOWN)
+    Card(
+        Modifier.fillMaxWidth().clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer),
+    ) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            ItemIcon(CoreUiR.drawable.ic_priority_high, Modifier.size(28.dp), tint = MaterialTheme.colorScheme.error)
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(pluralStringResource(R.plurals.home_urgent, urgent.size, urgent.size), style = MaterialTheme.typography.titleMedium)
+                shown.forEach { Text(choreTitle(it.title), style = MaterialTheme.typography.bodyMedium) }
+                if (urgent.size > shown.size) Text(stringResource(R.string.home_urgent_more, urgent.size - shown.size), style = MaterialTheme.typography.bodySmall)
+            }
+        }
+    }
+}
+
+private const val MAX_URGENT_SHOWN = 3
 
 @Composable
 private fun summaryLine(timeline: DayTimeline): String = listOf(

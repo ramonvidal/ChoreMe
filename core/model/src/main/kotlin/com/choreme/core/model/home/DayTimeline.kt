@@ -2,6 +2,7 @@ package com.choreme.core.model.home
 
 import com.choreme.core.model.agenda.CalendarEvent
 import com.choreme.core.model.agenda.days
+import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.TodayBoard
 import com.choreme.core.model.weather.Moment
 import java.time.LocalDate
@@ -33,6 +34,8 @@ data class DayTimeline(
     val groceriesToBuy: Int,
     /** Tasks of the rooms due today or earlier, counted apart from the house's own chores. */
     val roomTasks: Int = 0,
+    /** The chores marked urgent that are waiting (the house's and the rooms'), to stand out on the Home tab. */
+    val urgent: List<Chore> = emptyList(),
 ) {
     val eventCount: Int get() = allDay.size + entries.count { it is EventEntry }
     val choreCount: Int get() = choresToDo + choresMine
@@ -69,5 +72,6 @@ fun dayTimeline(
         choresMine = board.mine.size,
         groceriesToBuy = groceriesToBuy,
         roomTasks = roomBoard?.let { it.toDo.size + it.mine.size } ?: 0,
+        urgent = (board.toDo + board.mine + roomBoard?.toDo.orEmpty() + roomBoard?.mine.orEmpty()).filter { it.urgent }.distinctBy { it.id },
     )
 }

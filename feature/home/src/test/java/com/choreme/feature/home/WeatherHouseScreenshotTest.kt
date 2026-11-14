@@ -71,7 +71,8 @@ class WeatherHouseScreenshotTest {
                 }
             }
         }
-        compose.onAllNodesWithText("Gym", substring = true).assertCountEquals(3) // three cards have the gym trip
+        // The trips are listed once, under "The day" on the Home tab; the card is the weather outside only.
+        compose.onAllNodesWithText("Gym", substring = true).assertCountEquals(0)
         compose.onNodeWithText("High pollen", substring = true).assertExists()
         compose.onNodeWithText("good day to dry", substring = true).assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-weather.png")

@@ -32,6 +32,7 @@
     <string name="home_today">Hoje</string>
     <string name="home_open_chores">Corres (%1$d)</string>
     <string name="home_open_groceries">Feira (%1$d)</string>
+    <string name="home_urgent_more">e mais %d</string>
     <string name="home_timeline">O dia</string>
     <string name="home_all_day">O dia todo</string>
     <string name="home_nothing_title">Dia tranquilo</string>
@@ -82,6 +83,10 @@
     <plurals name="home_chores">
         <item quantity="one">%d corre</item>
         <item quantity="other">%d corres</item>
+    </plurals>
+    <plurals name="home_urgent">
+        <item quantity="one">%d corre urgente</item>
+        <item quantity="other">%d corres urgentes</item>
     </plurals>
     <plurals name="home_rooms">
         <item quantity="one">%d tarefa de cômodo</item>

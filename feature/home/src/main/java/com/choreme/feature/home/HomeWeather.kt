@@ -97,14 +97,7 @@ internal fun HomeWeatherCard(state: HomeWeatherState, onClick: () -> Unit) {
                     )
                     state.drying?.let { Text(dryingText(it), style = MaterialTheme.typography.bodyMedium) }
                     state.air.lines().forEach { Text(stringResource(it), style = MaterialTheme.typography.bodyMedium) }
-                    state.moments.take(2).forEach { MomentText(it, state.units, context) }
-                    if (state.moments.isEmpty()) {
-                        Text(
-                            stringResource(R.string.weather_nothing_planned),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
+                    // The trips and their weather are listed once, under "The day"; the card is the weather outside.
                 }
             }
         }

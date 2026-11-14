@@ -87,4 +87,15 @@ class DayTimelineTest {
         assertEquals(2, timeline.roomTasks)
         assertEquals(0, dayTimeline(monday, emptyList(), emptyList(), emptyMap(), board, 0, zone).roomTasks)
     }
+
+    @Test
+    fun `urgent chores of the house and the rooms are listed once`() {
+        val leak = chore("leak").copy(urgent = true)
+        val fuse = chore("fuse").copy(urgent = true)
+        val houseBoard = TodayBoard(emptyList(), listOf(leak, chore("a")), emptyList(), emptyList(), mine = listOf(leak))
+        val roomBoard = TodayBoard(emptyList(), listOf(fuse), emptyList(), emptyList(), mine = emptyList())
+        val timeline = dayTimeline(monday, emptyList(), emptyList(), emptyMap(), houseBoard, 0, zone, roomBoard)
+        assertEquals(listOf("leak", "fuse"), timeline.urgent.map { it.id })
+        assertTrue(dayTimeline(monday, emptyList(), emptyList(), emptyMap(), board, 0, zone).urgent.isEmpty())
+    }
 }

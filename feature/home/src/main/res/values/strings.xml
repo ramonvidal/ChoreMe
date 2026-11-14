@@ -34,6 +34,11 @@
         <item quantity="one">%d chore</item>
         <item quantity="other">%d chores</item>
     </plurals>
+    <plurals name="home_urgent">
+        <item quantity="one">%d urgent chore</item>
+        <item quantity="other">%d urgent chores</item>
+    </plurals>
+    <string name="home_urgent_more">and %d more</string>
     <plurals name="home_rooms">
         <item quantity="one">%d room task</item>
         <item quantity="other">%d room tasks</item>

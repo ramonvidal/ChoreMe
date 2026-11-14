@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.home.DayTimeline
 import com.choreme.core.model.home.EventEntry
 import com.choreme.core.model.home.TripEntry
@@ -57,6 +58,7 @@ class HomeTabScreenshotTest {
         choresMine = 1,
         groceriesToBuy = 5,
         roomTasks = 2,
+        urgent = listOf(Chore("u1", "Water leak under the sink", dueDate = monday, urgent = true), Chore("u2", "Fix the fuse", dueDate = monday, urgent = true)),
     )
 
     private val state = HomeUiState(
@@ -80,6 +82,10 @@ class HomeTabScreenshotTest {
         shoot("tab-home", state, dark = false)
         compose.onAllNodesWithText("Today").assertCountEquals(2)
         compose.onNodeWithText("Dentist: Mia").assertExists()
+        compose.onNodeWithText("2 urgent chores").assertExists()
+        compose.onNodeWithText("Water leak under the sink").assertExists()
+        // The gym trip shows once (in the day list), not again on the weather card.
+        compose.onAllNodesWithText("Gym", substring = true).assertCountEquals(1)
         compose.onNodeWithText("4 chores · 2 room tasks", substring = true).assertExists()
         compose.onNodeWithText("Grandma visits").assertExists()
     }
