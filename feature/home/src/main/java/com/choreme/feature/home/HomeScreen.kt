@@ -70,6 +70,7 @@ internal fun HomeScreen(
     onOpenChores: () -> Unit,
     onAddChore: () -> Unit,
     onOpenGroceries: () -> Unit,
+    onOpenMap: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -87,10 +88,7 @@ internal fun HomeScreen(
                 onAddEvent = { newEvent++; tab = HomeTab.AGENDA },
             )
             HomeTab.AGENDA -> AgendaScreen(addRequest = newEvent)
-            HomeTab.WEEK -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-                TabHeader(stringResource(R.string.plan_title))
-                Box(Modifier.padding(top = 8.dp)) { WeeklyPlan() }
-            }
+            HomeTab.WEEK -> WeekAheadScreen(onPlanTrips = onOpenMap)
         }
     }
 }
@@ -168,6 +166,7 @@ internal fun HomeContent(
 @Composable
 private fun summaryLine(timeline: DayTimeline): String = listOf(
     pluralStringResource(R.plurals.home_chores, timeline.choreCount, timeline.choreCount),
+    pluralStringResource(R.plurals.home_rooms, timeline.roomTasks, timeline.roomTasks),
     pluralStringResource(R.plurals.home_events, timeline.eventCount, timeline.eventCount),
     pluralStringResource(R.plurals.home_groceries, timeline.groceriesToBuy, timeline.groceriesToBuy),
 ).joinToString(" · ")

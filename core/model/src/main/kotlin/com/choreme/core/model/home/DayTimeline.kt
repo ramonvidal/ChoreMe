@@ -31,13 +31,18 @@ data class DayTimeline(
     /** Chores this person said they would do. */
     val choresMine: Int,
     val groceriesToBuy: Int,
+    /** Tasks of the rooms due today or earlier, counted apart from the house's own chores. */
+    val roomTasks: Int = 0,
 ) {
     val eventCount: Int get() = allDay.size + entries.count { it is EventEntry }
     val choreCount: Int get() = choresToDo + choresMine
     val isEmpty: Boolean get() = allDay.isEmpty() && entries.isEmpty()
 }
 
-/** Builds [DayTimeline] for [date] from what the phone knows. [names] gives member names for the trips. */
+/**
+ * Builds [DayTimeline] for [date] from what the phone knows. [names] gives member names for the trips; [board] is the
+ * house's own chores and [roomBoard] the tasks of the rooms, counted apart.
+ */
 fun dayTimeline(
     date: LocalDate,
     events: List<CalendarEvent>,
@@ -46,6 +51,7 @@ fun dayTimeline(
     board: TodayBoard,
     groceriesToBuy: Int,
     zone: ZoneId,
+    roomBoard: TodayBoard? = null,
 ): DayTimeline {
     val today = events.filter { date in it.days(zone) }
     val timedEvents = today.filter { !it.allDay }.map { event ->
@@ -62,5 +68,6 @@ fun dayTimeline(
         choresToDo = board.toDo.size,
         choresMine = board.mine.size,
         groceriesToBuy = groceriesToBuy,
+        roomTasks = roomBoard?.let { it.toDo.size + it.mine.size } ?: 0,
     )
 }

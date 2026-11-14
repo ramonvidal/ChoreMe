@@ -10,7 +10,9 @@ import com.choreme.core.data.GroceryRepository
 import com.choreme.core.data.LocationRepository
 import com.choreme.core.data.PlanRepository
 import com.choreme.core.model.agenda.CalendarEvent
+import com.choreme.core.model.chore.RoomFilter
 import com.choreme.core.model.chore.buildTodayBoard
+import com.choreme.core.model.chore.filteredBy
 import com.choreme.core.model.grocery.GroceryItem
 import com.choreme.core.model.grocery.groceriesToBuy
 import com.choreme.core.model.home.DayTimeline
@@ -123,8 +125,10 @@ class HomeViewModel @Inject internal constructor(
         }.orEmpty()
         val drying = dryingTip(laundryDue(data.chores, today), outlook)
         val weatherState = HomeWeatherState(loading = false, now = current, units = inputs.units, moments = upcoming, air = air, drying = drying, needsPlace = home == null)
-        val board = buildTodayBoard(data.chores, today, inputs.memberId)
-        val timeline = dayTimeline(today, data.events, allMoments, inputs.names, board, data.groceries.groceriesToBuy(), ZoneId.systemDefault())
+        // The house's own chores and the tasks of the rooms are counted apart, as the Chores tab keeps them apart.
+        val board = buildTodayBoard(data.chores.filteredBy(RoomFilter.NO_ROOM), today, inputs.memberId)
+        val roomBoard = buildTodayBoard(data.chores.filteredBy(RoomFilter.ROOMS), today, inputs.memberId)
+        val timeline = dayTimeline(today, data.events, allMoments, inputs.names, board, data.groceries.groceriesToBuy(), ZoneId.systemDefault(), roomBoard)
         return HomeUiState(loading = false, date = today, weather = weatherState, timeline = timeline)
     }
 }

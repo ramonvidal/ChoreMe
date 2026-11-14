@@ -1,4 +1,4 @@
-package com.choreme.feature.home
+package com.choreme.feature.map
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,16 +38,6 @@ import com.choreme.core.model.Member
 import com.choreme.core.model.Role
 import com.choreme.core.model.location.Place
 import com.choreme.core.model.session.SessionState
-import com.choreme.core.model.weather.DayOutlook
-import com.choreme.core.model.weather.DryingQuality
-import com.choreme.core.model.weather.WeatherUnits
-import com.choreme.core.model.weather.dayOutlook
-import com.choreme.core.settings.WeatherSettings
-import com.choreme.core.ui.degrees
-import com.choreme.core.ui.describe
-import com.choreme.core.ui.label
-import com.choreme.core.weather.WeatherRepository
-import kotlinx.coroutines.flow.mapLatest
 import java.time.LocalDate
 import com.choreme.core.location.RoutineLog
 import com.choreme.core.model.weather.PauseReason
@@ -79,15 +69,12 @@ import java.time.format.TextStyle
 import java.util.Locale
 import javax.inject.Inject
 
-internal data class WeeklyPlanState(
+internal data class TripPlanState(
     val entries: List<PlanEntry> = emptyList(),
     val places: List<Place> = emptyList(),
     val members: List<Member> = emptyList(),
     val isParent: Boolean = false,
     val myMemberId: String = "",
-    /** The next days with their sky and the trips' weather; empty until a forecast arrives. */
-    val outlook: List<DayOutlook> = emptyList(),
-    val units: WeatherUnits = WeatherUnits(),
     /** Habits noticed from this phone's own visits, for a parent to add to the plan or turn down. */
     val suggestions: List<RoutineSuggestion> = emptyList(),
     /** Entries left out of the weather for now, with why (their owner is away, or a habit gone unseen). */
@@ -98,13 +85,10 @@ internal data class WeeklyPlanState(
 
 /** The family's regular trips for the weather. Everyone sees them; parents add and change them. */
 @HiltViewModel
-class WeeklyPlanViewModel @Inject internal constructor(
+class TripPlanViewModel @Inject internal constructor(
     families: FamilyRepository,
     private val plans: PlanRepository,
     locations: LocationRepository,
-    private val weather: WeatherRepository,
-    private val day: DayWeather,
-    private val settings: WeatherSettings,
     private val routine: RoutineLog,
 ) : ViewModel() {
     private val refresh = MutableStateFlow(0)
@@ -112,10 +96,10 @@ class WeeklyPlanViewModel @Inject internal constructor(
     private var familyId: String? = null
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    internal val state: StateFlow<WeeklyPlanState> = session.flatMapLatest { s ->
+    internal val state: StateFlow<TripPlanState> = session.flatMapLatest { s ->
         familyId = s.familyId
         combine(plans.observe(s.familyId), locations.observePlaces(s.familyId), families.observeMembers(s.familyId)) { entries, places, members ->
-            WeeklyPlanState(
+            TripPlanState(
                 entries = entries.sortedWith(compareBy({ it.memberId }, { it.start }, { it.title.lowercase() })),
                 places = places.sortedBy { it.name.lowercase() },
                 members = members,
@@ -123,12 +107,10 @@ class WeeklyPlanViewModel @Inject internal constructor(
                 myMemberId = s.memberId,
             )
         }
-    }.combine(settings.units) { state, units -> state.copy(units = units) }
-        .combine(refresh) { state, _ -> state.copy(suggestions = suggestionsFor(state), paused = pausedEntries(state.entries, state.members, LocalDate.now(), state.myMemberId, routine.lastVisits())) }
-        .mapLatest { state -> state.copy(outlook = outlookOf(state)) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeeklyPlanState())
+    }.combine(refresh) { state, _ -> state.copy(suggestions = suggestionsFor(state), paused = pausedEntries(state.entries, state.members, LocalDate.now(), state.myMemberId, routine.lastVisits())) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TripPlanState())
 
-    private fun suggestionsFor(state: WeeklyPlanState): List<RoutineSuggestion> {
+    private fun suggestionsFor(state: TripPlanState): List<RoutineSuggestion> {
         if (!state.isParent) return emptyList()
         val ignore = setOfNotNull(homePlace(state.places)?.id)
         val dismissed = routine.dismissed()
@@ -141,16 +123,6 @@ class WeeklyPlanViewModel @Inject internal constructor(
         refresh.value++
     }
 
-    private suspend fun outlookOf(state: WeeklyPlanState): List<DayOutlook> {
-        val home = day.home(state.places) ?: return emptyList()
-        val forecast = weather.forecast(home) ?: return emptyList()
-        val today = LocalDate.now()
-        return (0 until OUTLOOK_DAYS).mapNotNull { offset ->
-            val date = today.plusDays(offset.toLong())
-            dayOutlook(date, forecast.hours, day.moments(date, state.entries.filter { it.id !in state.paused }, state.places, home))
-        }
-    }
-
     internal fun save(entry: PlanEntry) {
         familyId?.let { plans.save(it, entry) }
     }
@@ -160,18 +132,16 @@ class WeeklyPlanViewModel @Inject internal constructor(
     }
 }
 
-private const val OUTLOOK_DAYS = 7
-
-/** "Weekly plan" on the Family tab: the regular trips the weather is told for, and a button to add one. */
+/** "Trips" sub-tab of the Map: the regular trips the weather is told for, and a button to add one. */
 @Composable
-internal fun WeeklyPlan(viewModel: WeeklyPlanViewModel = hiltViewModel()) {
+internal fun TripPlan(viewModel: TripPlanViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    WeeklyPlanContent(state, onSave = viewModel::save, onDelete = viewModel::delete, onNotNow = viewModel::notNow)
+    TripPlanContent(state, onSave = viewModel::save, onDelete = viewModel::delete, onNotNow = viewModel::notNow)
 }
 
 @Composable
-internal fun WeeklyPlanContent(
-    state: WeeklyPlanState,
+internal fun TripPlanContent(
+    state: TripPlanState,
     onSave: (PlanEntry) -> Unit,
     onDelete: (PlanEntry) -> Unit,
     onNotNow: (RoutineSuggestion) -> Unit = {},
@@ -181,7 +151,6 @@ internal fun WeeklyPlanContent(
     val time = remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT) }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (state.outlook.isNotEmpty()) WeekAhead(state)
         if (state.suggestions.isNotEmpty()) {
             Noticed(state, onAdd = { onSave(it.toEntry(state)) }, onNotNow = onNotNow)
         }
@@ -231,7 +200,7 @@ internal fun WeeklyPlanContent(
     }
 }
 
-private fun RoutineSuggestion.toEntry(state: WeeklyPlanState) = PlanEntry(
+private fun RoutineSuggestion.toEntry(state: TripPlanState) = PlanEntry(
     id = java.util.UUID.randomUUID().toString(),
     memberId = state.myMemberId,
     title = state.places.firstOrNull { it.id == placeId }?.name.orEmpty(),
@@ -243,7 +212,7 @@ private fun RoutineSuggestion.toEntry(state: WeeklyPlanState) = PlanEntry(
 
 /** Habits noticed from this phone's own visits: add one to the plan, or say "not now". */
 @Composable
-private fun Noticed(state: WeeklyPlanState, onAdd: (RoutineSuggestion) -> Unit, onNotNow: (RoutineSuggestion) -> Unit) {
+private fun Noticed(state: TripPlanState, onAdd: (RoutineSuggestion) -> Unit, onNotNow: (RoutineSuggestion) -> Unit) {
     val time = remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT) }
     NosCard(Modifier.fillMaxWidth()) {
         Text(stringResource(R.string.routine_title), style = MaterialTheme.typography.titleSmall)
@@ -257,45 +226,7 @@ private fun Noticed(state: WeeklyPlanState, onAdd: (RoutineSuggestion) -> Unit, 
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 NosButton(stringResource(R.string.routine_add), onClick = { onAdd(suggestion) }, style = NosButtonStyle.Tonal)
-                NosButton(stringResource(R.string.routine_not_now), onClick = { onNotNow(suggestion) }, style = NosButtonStyle.Text)
-            }
-        }
-    }
-}
-
-/** The next days: the sky, the warmth and the chance of rain, with each trip of that day and its weather under it. */
-@Composable
-private fun WeekAhead(state: WeeklyPlanState) {
-    val context = LocalContext.current
-    val time = remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT) }
-    NosCard(Modifier.fillMaxWidth()) {
-        Text(stringResource(R.string.week_title), style = MaterialTheme.typography.titleSmall)
-        state.outlook.forEach { day ->
-            HorizontalDivider(Modifier.padding(vertical = 6.dp), color = MaterialTheme.colorScheme.surfaceVariant)
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "${day.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())} ${day.date.dayOfMonth}",
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.weight(1f),
-                )
-                Text(
-                    listOf(
-                        stringResource(day.sky.label),
-                        "${state.units.degrees(day.lowC)} / ${state.units.degrees(day.highC)}",
-                        if (day.rainChance >= 30) stringResource(R.string.week_rain, day.rainChance) else null,
-                        if (day.drying == DryingQuality.GOOD) stringResource(R.string.week_drying) else null,
-                    ).filterNotNull().joinToString(" · "),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-            day.moments.forEach { moment ->
-                val who = if (moment.entry.memberId == state.myMemberId) "" else " (${state.nameOf(moment.entry.memberId)})"
-                val advice = moment.advice.describe(context, state.units).ifEmpty { stringResource(R.string.weather_all_good) }
-                Text(
-                    "${moment.entry.start.format(time)} ${moment.entry.title}$who: $advice",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (moment.advice.isQuiet) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
-                )
+                NosButton(stringResource(R.string.not_now), onClick = { onNotNow(suggestion) }, style = NosButtonStyle.Text)
             }
         }
     }
@@ -324,7 +255,7 @@ private val TripMode.label: Int
 /** Adds or changes one trip: where to (a saved place), who, which days, when, how long and how. */
 @Composable
 private fun TripDialog(
-    state: WeeklyPlanState,
+    state: TripPlanState,
     entry: PlanEntry?,
     onDismiss: () -> Unit,
     onSave: (PlanEntry) -> Unit,

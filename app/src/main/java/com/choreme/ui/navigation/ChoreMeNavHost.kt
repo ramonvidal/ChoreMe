@@ -154,6 +154,7 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0, choresBadge: Int = 0, groceries
                     runCatching { navController.getBackStackEntry(TopLevelDestination.Today.route).savedStateHandle[ADD_CHORE_KEY] = true }
                 },
                 onOpenGroceries = { navController.navigateToTab(TopLevelDestination.Groceries.route) },
+                onOpenMap = { navController.navigateToTab(TopLevelDestination.Places.route) },
             )
             todayScreen(onOpenGroceries = { navController.navigateToTab(TopLevelDestination.Groceries.route) })
             groceriesScreen()

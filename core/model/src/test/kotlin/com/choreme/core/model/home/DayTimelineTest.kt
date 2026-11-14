@@ -79,4 +79,12 @@ class DayTimelineTest {
     fun `an empty day is empty`() {
         assertTrue(dayTimeline(monday, emptyList(), emptyList(), emptyMap(), board, 0, zone).isEmpty)
     }
+
+    @Test
+    fun `room tasks are counted apart from the house's chores`() {
+        val roomBoard = TodayBoard(emptyList(), listOf(chore("r1"), chore("r2")), emptyList(), emptyList(), mine = emptyList())
+        val timeline = dayTimeline(monday, emptyList(), emptyList(), emptyMap(), board, 0, zone, roomBoard)
+        assertEquals(2, timeline.roomTasks)
+        assertEquals(0, dayTimeline(monday, emptyList(), emptyList(), emptyMap(), board, 0, zone).roomTasks)
+    }
 }

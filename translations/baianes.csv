@@ -495,14 +495,12 @@ feature/home,drying_today,,Laundry is due and today is a good day to dry it outs
 feature/home,drying_wait,,Laundry is due: the best day to hang it out is %1$s,Tem roupa pra lavar: o melhor dia pra estender é %1$s
 feature/home,drying_indoors,,"Laundry is due, but no dry day is coming: dry it indoors","Tem roupa pra lavar, mas não vem dia seco: seque dentro de casa"
 feature/home,week_drying,,good for drying,bom pra secar roupa
-feature/home,routine_title,,We noticed a habit,A gente notou um costume
-feature/home,routine_hint,,From the places this phone visited in the last weeks. Stays on this phone.,Pelos lugares que esse telefone visitou nas últimas semanas. Fica só nesse aparelho.
-feature/home,routine_line,,%1$s · %2$s around %3$s (%4$d times lately),%1$s · %2$s por volta de %3$s (%4$d vezes ultimamente)
-feature/home,routine_add,,Add to the plan,Botar no plano
-feature/home,routine_not_now,,Not now,Agora não
-feature/home,plan_paused_away,,Paused while they are away,Em pausa enquanto a pessoa tá fora
-feature/home,plan_paused_unseen,,Paused: not seen for 3 weeks (it comes back when you go again),Em pausa: faz 3 semanas que não aparece lá (volta quando você for de novo)
+feature/home,ok,,OK,OK
 feature/home,week_title,,The week ahead,A semana que vem
+feature/home,week_unavailable,,No forecast for the week yet. Save your home on the Map tab and check your connection.,Ainda sem previsão da semana. Salve sua casa na aba Mapa e veja a conexão.
+feature/home,week_trips_hint,,Trips are planned on the Map tab.,Os trajetos são planejados na aba Mapa.
+feature/home,week_no_trips,,"No trips planned yet. Add the regular ones (work, gym) on the Map tab and the weather will tell you about them.","Ainda sem trajetos. Bote os de sempre (trabalho, academia) na aba Mapa que o tempo avisa vocês."
+feature/home,week_plan_trips,,Plan trips on the Map tab,Planejar trajetos na aba Mapa
 feature/home,week_rain,,rain %1$d%%,chuva %1$d%%
 feature/home,weather_credit,,Weather data by Open-Meteo.com (CC BY 4.0),Dados do tempo: Open-Meteo.com (CC BY 4.0)
 feature/home,weather_channel,,Weather in the morning,Tempo de manhã
@@ -514,6 +512,8 @@ feature/home,home_open_chores,,Chores (%1$d),Corres (%1$d)
 feature/home,home_open_groceries,,Groceries (%1$d),Feira (%1$d)
 feature/home,home_chores,one,%d chore,%d corre
 feature/home,home_chores,other,%d chores,%d corres
+feature/home,home_rooms,one,%d room task,%d tarefa de cômodo
+feature/home,home_rooms,other,%d room tasks,%d tarefas de cômodo
 feature/home,home_events,one,%d event,%d compromisso
 feature/home,home_events,other,%d events,%d compromissos
 feature/home,home_groceries,one,%d item to buy,%d item pra comprar
@@ -557,34 +557,11 @@ feature/home,duration_hours,one,%d hour,%d hora
 feature/home,duration_hours,other,%d hours,%d horas
 feature/home,today,,Today,Hoje
 feature/home,tomorrow,,Tomorrow,Amanhã
-feature/home,ok,,OK,OK
 feature/home,view_list,,Next 2 weeks,Próximas 2 semanas
 feature/home,view_month,,Month,Mês
 feature/home,previous_month,,Previous month,Mês anterior
 feature/home,next_month,,Next month,Próximo mês
 feature/home,nothing_this_day,,Nothing on this day,Nada nesse dia
-feature/home,plan_title,,Weekly plan,Plano da semana
-feature/home,plan_hint,,The regular trips of the week. The little house on the Chores tab tells the weather for them.,Os trajetos de sempre da semana. A casinha da aba Corres diz o tempo pra eles.
-feature/home,plan_empty,,"No trips yet. Add the regular ones, like going to work or to the gym.","Ainda sem trajetos. Adicione os de sempre, tipo ir pro trabalho ou pra academia."
-feature/home,plan_no_places,,"Save your places (home, work, gym) on the Map tab first, then add trips here.","Salve seus lugares (casa, trabalho, academia) na aba Mapa primeiro, depois adicione os trajetos aqui."
-feature/home,plan_add,,Add a trip,Adicionar trajeto
-feature/home,plan_edit,,Edit trip,Editar trajeto
-feature/home,plan_place,,Where to,Pra onde
-feature/home,plan_who,,Who,Quem
-feature/home,plan_days,,Days,Dias
-feature/home,plan_weekdays,,Weekdays,Dias úteis
-feature/home,plan_weekend,,Weekend,Fim de semana
-feature/home,plan_every_day,,Every day,Todo dia
-feature/home,plan_time,,Leaves at %1$s,Sai às %1$s
-feature/home,plan_duration,,How long,Quanto tempo
-feature/home,plan_minutes,,%1$d min,%1$d min
-feature/home,plan_mode,,How,Como
-feature/home,mode_walk,,On foot,A pé
-feature/home,mode_bike,,Bike,Bicicleta
-feature/home,mode_car,,Car,Carro
-feature/home,mode_transit,,Bus or train,Ônibus ou metrô
-feature/home,mode_other,,Other,Outro
-feature/home,plan_delete,,Delete trip,Excluir trajeto
 feature/home,home_add,,Add,Adicionar
 feature/home,home_add_chore,,Something needs doing,Tem coisa pra fazer
 feature/home,home_add_grocery,,Out of something,Acabou algo
@@ -652,6 +629,37 @@ feature/map,live_channel,,Sharing while you move,Compartilhando em movimento
 feature/map,live_channel_description,,Shown only while you're on the move and sharing your location with the family,Só aparece quando você tá em movimento e compartilhando sua localização com a família
 feature/map,live_title,,Sharing your location,Compartilhando sua localização
 feature/map,live_text,,"While you're on the move, so the family can follow your way","Enquanto você tá na estrada, pra galera acompanhar seu caminho"
+feature/map,routine_title,,We noticed a habit,A gente notou um costume
+feature/map,routine_hint,,From the places this phone visited in the last weeks. Stays on this phone.,Pelos lugares que esse telefone visitou nas últimas semanas. Fica só nesse aparelho.
+feature/map,routine_line,,%1$s · %2$s around %3$s (%4$d times lately),%1$s · %2$s por volta de %3$s (%4$d vezes ultimamente)
+feature/map,routine_add,,Add to the plan,Botar no plano
+feature/map,plan_paused_away,,Paused while they are away,Em pausa enquanto a pessoa tá fora
+feature/map,plan_paused_unseen,,Paused: not seen for 3 weeks (it comes back when you go again),Em pausa: faz 3 semanas que não aparece lá (volta quando você for de novo)
+feature/map,ok,,OK,OK
+feature/map,plan_title,,Weekly plan,Plano da semana
+feature/map,plan_hint,,The regular trips of the week. The Home tab tells the weather for them.,Os trajetos de sempre da semana. A aba Casa avisa o tempo pra eles.
+feature/map,plan_empty,,"No trips yet. Add the regular ones, like going to work or to the gym.","Ainda sem trajetos. Adicione os de sempre, tipo ir pro trabalho ou pra academia."
+feature/map,plan_no_places,,"Save your places (home, work, gym) on the map first, then add trips here.","Salve seus lugares (casa, trabalho, academia) no mapa primeiro, depois adicione trajetos aqui."
+feature/map,plan_add,,Add a trip,Adicionar trajeto
+feature/map,plan_edit,,Edit trip,Editar trajeto
+feature/map,plan_place,,Where to,Pra onde
+feature/map,plan_who,,Who,Quem
+feature/map,plan_days,,Days,Dias
+feature/map,plan_weekdays,,Weekdays,Dias úteis
+feature/map,plan_weekend,,Weekend,Fim de semana
+feature/map,plan_every_day,,Every day,Todo dia
+feature/map,plan_time,,Leaves at %1$s,Sai às %1$s
+feature/map,plan_duration,,How long,Quanto tempo
+feature/map,plan_minutes,,%1$d min,%1$d min
+feature/map,plan_mode,,How,Como
+feature/map,mode_walk,,On foot,A pé
+feature/map,mode_bike,,Bike,Bicicleta
+feature/map,mode_car,,Car,Carro
+feature/map,mode_transit,,Bus or train,Ônibus ou metrô
+feature/map,mode_other,,Other,Outro
+feature/map,plan_delete,,Delete trip,Excluir trajeto
+feature/map,tab_map,,Map,Mapa
+feature/map,tab_trips,,Trips,Trajetos
 feature/onboarding,sign_in_tagline,,"Chores, groceries and the family calendar, shared by everyone at home.","Os corres, a feira e a agenda da família, divididos com todo mundo de casa."
 feature/onboarding,sign_in_google,,Sign in with Google,Entrar com o Google
 feature/onboarding,sign_in_kid,,I'm a kid,Sou guri

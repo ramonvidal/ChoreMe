@@ -7,5 +7,5 @@ import androidx.navigation.compose.composable
 const val MAP_ROUTE = "map"
 
 fun NavGraphBuilder.mapScreen() {
-    composable(MAP_ROUTE) { MapScreen() }
+    composable(MAP_ROUTE) { MapTabs() }
 }

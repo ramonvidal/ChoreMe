@@ -56,6 +56,7 @@ class HomeTabScreenshotTest {
         choresToDo = 3,
         choresMine = 1,
         groceriesToBuy = 5,
+        roomTasks = 2,
     )
 
     private val state = HomeUiState(
@@ -79,6 +80,7 @@ class HomeTabScreenshotTest {
         shoot("tab-home", state, dark = false)
         compose.onAllNodesWithText("Today").assertCountEquals(2)
         compose.onNodeWithText("Dentist: Mia").assertExists()
+        compose.onNodeWithText("4 chores · 2 room tasks", substring = true).assertExists()
         compose.onNodeWithText("Grandma visits").assertExists()
     }
 

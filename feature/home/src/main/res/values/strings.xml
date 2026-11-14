@@ -15,14 +15,12 @@
     <string name="drying_wait">Laundry is due: the best day to hang it out is %1$s</string>
     <string name="drying_indoors">Laundry is due, but no dry day is coming: dry it indoors</string>
     <string name="week_drying">good for drying</string>
-    <string name="routine_title">We noticed a habit</string>
-    <string name="routine_hint">From the places this phone visited in the last weeks. Stays on this phone.</string>
-    <string name="routine_line">%1$s · %2$s around %3$s (%4$d times lately)</string>
-    <string name="routine_add">Add to the plan</string>
-    <string name="routine_not_now">Not now</string>
-    <string name="plan_paused_away">Paused while they are away</string>
-    <string name="plan_paused_unseen">Paused: not seen for 3 weeks (it comes back when you go again)</string>
+    <string name="ok">OK</string>
     <string name="week_title">The week ahead</string>
+    <string name="week_unavailable">No forecast for the week yet. Save your home on the Map tab and check your connection.</string>
+    <string name="week_trips_hint">Trips are planned on the Map tab.</string>
+    <string name="week_no_trips">No trips planned yet. Add the regular ones (work, gym) on the Map tab and the weather will tell you about them.</string>
+    <string name="week_plan_trips">Plan trips on the Map tab</string>
     <string name="week_rain">rain %1$d%%</string>
     <string name="weather_credit">Weather data by Open-Meteo.com (CC BY 4.0)</string>
     <string name="weather_channel">Weather in the morning</string>
@@ -35,6 +33,10 @@
     <plurals name="home_chores">
         <item quantity="one">%d chore</item>
         <item quantity="other">%d chores</item>
+    </plurals>
+    <plurals name="home_rooms">
+        <item quantity="one">%d room task</item>
+        <item quantity="other">%d room tasks</item>
     </plurals>
     <plurals name="home_events">
         <item quantity="one">%d event</item>
@@ -87,34 +89,11 @@
     </plurals>
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>
-    <string name="ok">OK</string>
     <string name="view_list">Next 2 weeks</string>
     <string name="view_month">Month</string>
     <string name="previous_month">Previous month</string>
     <string name="next_month">Next month</string>
     <string name="nothing_this_day">Nothing on this day</string>
-    <string name="plan_title">Weekly plan</string>
-    <string name="plan_hint">The regular trips of the week. The little house on the Chores tab tells the weather for them.</string>
-    <string name="plan_empty">No trips yet. Add the regular ones, like going to work or to the gym.</string>
-    <string name="plan_no_places">Save your places (home, work, gym) on the Map tab first, then add trips here.</string>
-    <string name="plan_add">Add a trip</string>
-    <string name="plan_edit">Edit trip</string>
-    <string name="plan_place">Where to</string>
-    <string name="plan_who">Who</string>
-    <string name="plan_days">Days</string>
-    <string name="plan_weekdays">Weekdays</string>
-    <string name="plan_weekend">Weekend</string>
-    <string name="plan_every_day">Every day</string>
-    <string name="plan_time">Leaves at %1$s</string>
-    <string name="plan_duration">How long</string>
-    <string name="plan_minutes">%1$d min</string>
-    <string name="plan_mode">How</string>
-    <string name="mode_walk">On foot</string>
-    <string name="mode_bike">Bike</string>
-    <string name="mode_car">Car</string>
-    <string name="mode_transit">Bus or train</string>
-    <string name="mode_other">Other</string>
-    <string name="plan_delete">Delete trip</string>
     <string name="home_add">Add</string>
     <string name="home_add_chore">Something needs doing</string>
     <string name="home_add_grocery">Out of something</string>
