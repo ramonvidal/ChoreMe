@@ -1,6 +1,7 @@
 package com.choreme.feature.home
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -65,7 +66,7 @@ class HomeTabScreenshotTest {
     private fun shoot(name: String, state: HomeUiState, dark: Boolean) {
         compose.setContent {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
-                Surface(Modifier.fillMaxSize()) { HomeContent(state, onOpenChores = {}, onAddChore = {}, onOpenGroceries = {}, onAddEvent = {}) }
+                Surface(Modifier.fillMaxSize()) { Column { HomeSubTabs(0) {}; HomeContent(state, onOpenChores = {}, onAddChore = {}, onOpenGroceries = {}, onAddEvent = {}) } }
             }
         }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")
@@ -87,4 +88,13 @@ class HomeTabScreenshotTest {
         shoot("tab-home-quiet", state.copy(timeline = timeline.copy(allDay = emptyList(), entries = emptyList(), choresToDo = 0, choresMine = 0, groceriesToBuy = 0)), dark = false)
         compose.onNodeWithText("A quiet day").assertExists()
     }
+
+    // Google Play screenshots: 1080 x 1920, in English and in Baianês.
+    @Test
+    @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")
+    fun storeEn() = shoot("store-1-home-en", state, dark = false)
+
+    @Test
+    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
+    fun storePt() = shoot("store-1-home-pt", state, dark = false)
 }

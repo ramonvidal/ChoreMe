@@ -25,11 +25,7 @@ import com.choreme.core.model.chore.ChoreChoice
 import com.choreme.core.model.chore.choreChoices
 import com.choreme.core.model.chore.guessTemplate
 import com.choreme.core.model.chore.mostUsed
-import com.choreme.core.model.chore.MemberWeek
 import com.choreme.core.model.chore.savedChoreToUpdate
-import com.choreme.core.model.chore.weekStart
-import com.choreme.core.model.chore.weeklySummary
-import com.choreme.core.model.chore.familyPoints
 import com.choreme.core.model.chore.join
 import com.choreme.core.model.chore.assign
 import com.choreme.core.model.chore.TodayBoard
@@ -81,12 +77,6 @@ data class ChoresUiState(
     val groceriesToBuy: Int = 0,
     /** Hand-typed chores kept as quick picks. */
     val savedChores: List<SavedChore> = emptyList(),
-    /** Everyone's finishes in the last 7 days, for the garden. */
-    val week: List<MemberWeek> = emptyList(),
-    /** The family's points in the last 7 days; a chore done together counts once. */
-    val weekPoints: Int = 0,
-    /** Chores finished in the last 7 days, for the garden when the family plays without points. */
-    val weekFinished: Int = 0,
     /** Whether the family plays with points; off, they show nowhere. */
     val pointsOn: Boolean = true,
     /** The family's rooms by id, so a task of a room says which ("Bathroom 1"). */
@@ -135,7 +125,6 @@ private data class Data(
     val members: List<Member>,
     val groceryItems: List<com.choreme.core.model.grocery.GroceryItem>,
     val saved: List<SavedChore>,
-    val finished: List<com.choreme.core.model.chore.ChoreDone>,
 )
 
 sealed interface CalendarResult {
@@ -182,11 +171,10 @@ class ChoresViewModel @Inject internal constructor(
                     families.observeMembers(session.familyId),
                     groceries.observeItems(session.familyId),
                     chores.observeSavedChores(session.familyId),
-                    chores.observeFinished(session.familyId, weekStart(LocalDate.now())).onStart { emit(emptyList()) },
                     ::Data,
                 ),
                 combine(families.observeFamily(session.familyId), rooms.observe(session.familyId).onStart { emit(emptyList()) }, ::Pair),
-            ) { (allChores, members, groceryItems, saved, finished), (family, roomList) ->
+            ) { (allChores, members, groceryItems, saved), (family, roomList) ->
                 val today = LocalDate.now()
                 ChoresUiState(
                     loading = false,
@@ -199,9 +187,6 @@ class ChoresViewModel @Inject internal constructor(
                     members = members.associateBy { it.id },
                     groceriesToBuy = groceryItems.groceriesToBuy(),
                     savedChores = saved,
-                    week = weeklySummary(finished, members, today),
-                    weekPoints = familyPoints(finished, today),
-                    weekFinished = finished.size,
                     pointsOn = family?.pointsEnabled ?: true,
                     roomNames = roomList.associate { it.id to it.name },
                 )

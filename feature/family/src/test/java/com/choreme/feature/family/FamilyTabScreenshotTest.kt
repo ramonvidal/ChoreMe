@@ -137,12 +137,12 @@ class FamilyTabScreenshotTest {
     @Test
     @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")
     fun storeEn() {
-        shoot("store-6-family-en", dark = false)
+        shoot("store-7-family-en", dark = false)
     }
 
     @Test
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     fun storePt() {
-        shoot("store-6-family-pt", dark = false)
+        shoot("store-7-family-pt", dark = false)
     }
 }

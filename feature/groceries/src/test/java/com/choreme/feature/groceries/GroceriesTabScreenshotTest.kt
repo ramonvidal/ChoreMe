@@ -93,12 +93,12 @@ class GroceriesTabScreenshotTest {
     @Test
     @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")
     fun storeEn() {
-        shoot("store-2-groceries-en", state, dark = false)
+        shoot("store-3-groceries-en", state, dark = false)
     }
 
     @Test
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     fun storePt() {
-        shoot("store-2-groceries-pt", state, dark = false)
+        shoot("store-3-groceries-pt", state, dark = false)
     }
 }

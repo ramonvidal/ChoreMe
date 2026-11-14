@@ -140,3 +140,12 @@ fun RoomFilterRow(selected: com.choreme.core.model.chore.RoomFilter, onSelect: (
         PillTab(androidx.compose.ui.res.stringResource(R.string.room_filter_no_room), selected == com.choreme.core.model.chore.RoomFilter.NO_ROOM, { onSelect(com.choreme.core.model.chore.RoomFilter.NO_ROOM) })
     }
 }
+
+
+/** The sub-tabs of a main tab (Today / Agenda / Week, Chores / Rooms): yellow pills in a row under the screen's top edge. */
+@Composable
+fun SubTabs(labels: List<String>, selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
+    Row(modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        labels.forEachIndexed { index, label -> PillTab(label, index == selected, { onSelect(index) }) }
+    }
+}

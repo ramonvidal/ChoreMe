@@ -500,33 +500,28 @@ private fun AskForNotificationPermission() {
 }
 
 /**
- * The yellow card at the top: today's date, how many chores need doing (or "all done"), what's yours and on
- * the grocery list, a ring for how much of today is done, and the one button: add a chore.
+ * The top of the chore list: how many need doing and what is yours (the day's whole summary is on Home), and the one
+ * button: add a chore.
  */
 @Composable
 internal fun ChoresHeader(state: ChoresUiState, onOpenGroceries: () -> Unit, onAdd: () -> Unit) {
     val toDo = state.board.toDo.size
     val mine = state.board.mine.size
-    val done = state.board.doneToday.size
-    val total = done + toDo + mine
-    val date = remember(state.today) {
-        state.today.format(DateTimeFormatter.ofPattern("EEEE, d MMMM")).replaceFirstChar { it.uppercase() }
-    }
     val parts = buildList {
         if (mine > 0) add(pluralStringResource(R.plurals.summary_yours, mine, mine))
         if (state.groceriesToBuy > 0) add(stringResource(R.string.groceries_link, state.groceriesToBuy))
     }
-    HeroCard(
-        title = if (toDo + mine == 0) stringResource(R.string.hero_all_done) else pluralStringResource(R.plurals.summary_to_do, toDo, toDo),
-        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
-        kicker = date,
-        line = parts.joinToString(" · ").ifEmpty { null },
-        progress = if (total > 0) done.toFloat() / total else null,
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            if (state.me != null) NosButton(stringResource(R.string.add_chore), onAdd, Modifier.weight(1f))
-            if (state.groceriesToBuy > 0) NosButton(stringResource(R.string.hero_groceries), onOpenGroceries, style = NosButtonStyle.Tonal)
+    Row(Modifier.padding(top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                if (toDo + mine == 0) stringResource(R.string.hero_all_done) else pluralStringResource(R.plurals.summary_to_do, toDo, toDo),
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            if (parts.isNotEmpty()) {
+                HeaderLine(parts.joinToString(" · "), modifier = Modifier.clickable(enabled = state.groceriesToBuy > 0 && mine == 0, onClick = onOpenGroceries))
+            }
         }
+        if (state.me != null) NosButton(stringResource(R.string.add_chore_short), onAdd)
     }
 }
 

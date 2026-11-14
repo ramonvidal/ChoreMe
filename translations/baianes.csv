@@ -320,6 +320,7 @@ feature/chores,idea_declutter,,Declutter,Desentulhar
 feature/chores,idea_mow_lawn,,Mow the lawn,Cortar a grama
 feature/chores,tab_chores,,Chores,Corres
 feature/chores,tab_rooms,,Rooms,Cômodos
+feature/chores,add_chore_short,,Add,Adicionar
 feature/family,family_invite_hint,,Share this code so others can ask to join:,Mande este código pra galera pedir pra entrar:
 feature/family,family_share_invite,,Share invite code,Mandar o código de convite
 feature/family,family_invite_message,,Join the %1$s family on Nos Corre! with the code %2$s,Entra na família %1$s no Nos Corre! com o código %2$s

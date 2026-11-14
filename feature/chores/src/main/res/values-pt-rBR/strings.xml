@@ -203,6 +203,7 @@
     <string name="idea_mow_lawn">Cortar a grama</string>
     <string name="tab_chores">Corres</string>
     <string name="tab_rooms">Cômodos</string>
+    <string name="add_chore_short">Adicionar</string>
     <plurals name="overdue_days">
         <item quantity="one">%d dia atrasado</item>
         <item quantity="other">%d dias atrasado</item>

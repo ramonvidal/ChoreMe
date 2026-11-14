@@ -14,9 +14,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.choreme.core.ui.PillTab
+import com.choreme.core.ui.SubTabs
 
 private enum class ChoresTab { CHORES, ROOMS }
+
+/** Chores / Rooms under the top edge. */
+@Composable
+internal fun ChoresSubTabs(selected: Int, onSelect: (Int) -> Unit) {
+    SubTabs(listOf(stringResource(R.string.tab_chores), stringResource(R.string.tab_rooms)), selected, onSelect)
+}
 
 /** The Chores tab: the chore list, and the rooms of the house as its second sub-tab. */
 @Composable
@@ -25,10 +31,7 @@ internal fun ChoresTabs(onOpenGroceries: () -> Unit, addRequested: Boolean, onAd
     // "Add > Something needs doing" from Home: show the list, where the sheet opens.
     LaunchedEffect(addRequested) { if (addRequested) tab = ChoresTab.CHORES }
     Column(Modifier.fillMaxSize()) {
-        Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            PillTab(stringResource(R.string.tab_chores), tab == ChoresTab.CHORES, { tab = ChoresTab.CHORES })
-            PillTab(stringResource(R.string.tab_rooms), tab == ChoresTab.ROOMS, { tab = ChoresTab.ROOMS })
-        }
+        ChoresSubTabs(tab.ordinal) { tab = ChoresTab.entries[it] }
         when (tab) {
             ChoresTab.CHORES -> TodayScreen(onOpenGroceries, openAdd = addRequested, onOpenAddHandled = onAddHandled)
             ChoresTab.ROOMS -> RoomsScreen()

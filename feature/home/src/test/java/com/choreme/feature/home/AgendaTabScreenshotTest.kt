@@ -2,6 +2,7 @@ package com.choreme.feature.home
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -61,7 +62,7 @@ class AgendaTabScreenshotTest {
     private fun shoot(name: String, state: AgendaUiState, dark: Boolean) {
         compose.setContent {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
-                Surface(Modifier.fillMaxSize()) { AgendaContent(state, error = null, actions = AgendaActions()) }
+                Surface(Modifier.fillMaxSize()) { Column { HomeSubTabs(1) {}; AgendaContent(state, error = null, actions = AgendaActions()) } }
             }
         }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")
@@ -89,12 +90,12 @@ class AgendaTabScreenshotTest {
     @Test
     @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")
     fun storeEn() {
-        shoot("store-5-agenda-en", state, dark = false)
+        shoot("store-6-agenda-en", state, dark = false)
     }
 
     @Test
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     fun storePt() {
-        shoot("store-5-agenda-pt", state, dark = false)
+        shoot("store-6-agenda-pt", state, dark = false)
     }
 }

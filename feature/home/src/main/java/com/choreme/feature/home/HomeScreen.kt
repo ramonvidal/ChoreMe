@@ -8,7 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.mutableIntStateOf
-import com.choreme.core.ui.PillTab
+import com.choreme.core.ui.SubTabs
 import com.choreme.core.ui.TabHeader
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
@@ -48,6 +48,16 @@ import java.time.format.FormatStyle
 
 private enum class HomeTab { TODAY, AGENDA, WEEK }
 
+/** Today / Agenda / Week under the top edge. */
+@Composable
+internal fun HomeSubTabs(selected: Int, onSelect: (Int) -> Unit) {
+    SubTabs(
+        listOf(stringResource(R.string.home_tab_today), stringResource(R.string.home_tab_agenda), stringResource(R.string.home_tab_week)),
+        selected,
+        onSelect,
+    )
+}
+
 /** Casa: the sub-tabs Today (the weather house and the day), Agenda (the family calendar) and Week (the regular trips). */
 @Composable
 internal fun HomeScreen(
@@ -61,11 +71,7 @@ internal fun HomeScreen(
     // Counts the "New event" requests, so the Agenda sub-tab opens its dialog once per request.
     var newEvent by rememberSaveable { mutableIntStateOf(0) }
     Column(Modifier.fillMaxSize()) {
-        Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            PillTab(stringResource(R.string.home_tab_today), tab == HomeTab.TODAY, { tab = HomeTab.TODAY })
-            PillTab(stringResource(R.string.home_tab_agenda), tab == HomeTab.AGENDA, { tab = HomeTab.AGENDA })
-            PillTab(stringResource(R.string.home_tab_week), tab == HomeTab.WEEK, { tab = HomeTab.WEEK })
-        }
+        HomeSubTabs(tab.ordinal) { tab = HomeTab.entries[it] }
         when (tab) {
             HomeTab.TODAY -> HomeContent(
                 state,

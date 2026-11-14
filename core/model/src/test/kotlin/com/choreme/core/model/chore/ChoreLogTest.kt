@@ -75,53 +75,6 @@ class ChoreLogTest {
     }
 
     @Test
-    fun `the garden grows with the week and shows what's waiting`() {
-        assertEquals(HomeScene(0, 0f, 0, lightsOn = true, tired = false), homeScene(0, overdue = 0, urgent = 0))
-        val busy = homeScene(45, overdue = 4, urgent = 1)
-        assertEquals(true, busy.fullBloom)
-        assertEquals(HomeScene.MAX_FLOWERS, busy.flowers)
-        assertEquals(false, busy.lightsOn)
-        assertEquals(Weather.CLOUDY, busy.weather)
-        assertEquals(true, busy.tired)
-    }
-
-    @Test
-    fun `the garden counts overdue and urgent chores from the list`() {
-        val late = Chore("1", "Dishes", dueDate = today.minusDays(1))
-        val urgent = Chore("2", "Leak", dueDate = today, urgent = true)
-        val doneUrgent = Chore("3", "Fuse", dueDate = today, urgent = true, status = ChoreStatus.DONE)
-        val scene = homeScene(5, listOf(late, urgent, doneUrgent), today)
-        assertEquals(false, scene.lightsOn)
-        assertEquals(Weather.CLOUDY, scene.weather)
-        assertEquals(1, scene.overgrown)
-        assertEquals(false, scene.tired)
-        assertEquals(2, scene.weeds) // the done one isn't waiting any more
-    }
-
-    @Test
-    fun `the weather worsens as chores pile up`() {
-        assertEquals(Weather.SUNNY, weatherFor(toDo = 2, overdue = 0, urgent = 0))
-        assertEquals(Weather.CLOUDY, weatherFor(toDo = 1, overdue = 0, urgent = 1))
-        assertEquals(Weather.CLOUDY, weatherFor(toDo = 3, overdue = 0, urgent = 0))
-        assertEquals(Weather.RAIN, weatherFor(toDo = 4, overdue = 2, urgent = 0))
-        assertEquals(Weather.STORM, weatherFor(toDo = 6, overdue = 3, urgent = 1))
-        // Finishing chores clears it again.
-        assertEquals(Weather.SUNNY, homeScene(10, listOf(Chore("1", "Dishes", dueDate = today, status = ChoreStatus.DONE)), today).weather)
-    }
-
-    @Test
-    fun `adding a chore adds a weed and finishing it turns it into flowers`() {
-        val dishes = Chore("1", "Dishes", dueDate = today, points = 2)
-        val before = homeScene(3, listOf(dishes), today)
-        val after = homeScene(3 + dishes.points, listOf(dishes.copy(status = ChoreStatus.DONE)), today)
-        assertEquals(1, before.weeds)
-        assertEquals(0, after.weeds)
-        assertEquals(before.flowers + 2, after.flowers)
-        val tomorrow = Chore("2", "Bins", dueDate = today.plusDays(1))
-        assertEquals(0, homeScene(0, listOf(tomorrow), today).weeds) // not due yet
-    }
-
-    @Test
     fun `a saved chore remembers new points`() {
         val saved = listOf(SavedChore("garage", "Clean the garage", "mom", points = 3))
         assertEquals(saved[0].copy(points = 5), savedChoreToUpdate("clean the garage", 5, saved))

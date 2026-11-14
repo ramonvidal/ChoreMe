@@ -310,4 +310,5 @@
     <string name="idea_mow_lawn">Mow the lawn</string>
     <string name="tab_chores">Chores</string>
     <string name="tab_rooms">Rooms</string>
+    <string name="add_chore_short">Add</string>
 </resources>

@@ -60,7 +60,7 @@ class RoomsTabScreenshotTest {
     private fun shoot(name: String, state: RoomsUiState, dark: Boolean, open: String? = null) {
         compose.setContent {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
-                Surface(Modifier.fillMaxSize()) { RoomsContent(state, RoomsActions(), openRoomId = open) }
+                Surface(Modifier.fillMaxSize()) { Column { ChoresSubTabs(1) {}; RoomsContent(state, RoomsActions(), openRoomId = open) } }
             }
         }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")
@@ -115,24 +115,24 @@ class RoomsTabScreenshotTest {
     @Test
     @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")
     fun storeEn() {
-        shoot("store-3-rooms-en", state, dark = false)
+        shoot("store-4-rooms-en", state, dark = false)
     }
 
     @Test
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     fun storePt() {
-        shoot("store-3-rooms-pt", state, dark = false)
+        shoot("store-4-rooms-pt", state, dark = false)
     }
 
     @Test
     @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")
     fun storeDetailEn() {
-        shoot("store-4-room-en", state, dark = false, open = "bath1")
+        shoot("store-5-room-en", state, dark = false, open = "bath1")
     }
 
     @Test
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     fun storeDetailPt() {
-        shoot("store-4-room-pt", state, dark = false, open = "bath1")
+        shoot("store-5-room-pt", state, dark = false, open = "bath1")
     }
 }

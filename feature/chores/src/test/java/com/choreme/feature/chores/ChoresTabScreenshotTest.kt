@@ -2,6 +2,8 @@ package com.choreme.feature.chores
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -20,8 +22,6 @@ import com.choreme.core.model.chore.ChoreStatus
 import com.choreme.core.model.chore.ChoreTemplate
 import com.choreme.core.model.chore.Recurrence
 import com.choreme.core.model.chore.buildTodayBoard
-import com.choreme.core.model.chore.familyPoints
-import com.choreme.core.model.chore.weeklySummary
 import com.choreme.core.ui.theme.ChoreMeTheme
 import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.Rule
@@ -72,9 +72,6 @@ class ChoresTabScreenshotTest {
         chores = chores,
         members = members.associateBy { it.id },
         groceriesToBuy = 5,
-        week = weeklySummary(log, members, today),
-        weekPoints = familyPoints(log, today),
-        weekFinished = log.size,
         pointsOn = pointsOn,
         roomNames = mapOf("kitchen" to "Kitchen"),
     )
@@ -84,7 +81,7 @@ class ChoresTabScreenshotTest {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
                 CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
                 Surface(Modifier.fillMaxSize()) {
-                    ChoresContent(state(me, pointsOn), reminders = emptyMap(), onOpenGroceries = {}, actions = ChoresActions())
+                    Column { ChoresSubTabs(0) {}; ChoresContent(state(me, pointsOn), reminders = emptyMap(), onOpenGroceries = {}, actions = ChoresActions()) }
                 }
             }
             }
@@ -146,13 +143,13 @@ class ChoresTabScreenshotTest {
     @Test
     @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")
     fun storeEn() {
-        shoot("store-1-chores-en", mom, dark = false)
+        shoot("store-2-chores-en", mom, dark = false)
     }
 
     @Test
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     fun storePt() {
-        shoot("store-1-chores-pt", mom, dark = false)
+        shoot("store-2-chores-pt", mom, dark = false)
     }
 }
 
