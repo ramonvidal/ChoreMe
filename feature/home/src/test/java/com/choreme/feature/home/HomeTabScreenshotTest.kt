@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -75,7 +77,7 @@ class HomeTabScreenshotTest {
     @Test
     fun day() {
         shoot("tab-home", state, dark = false)
-        compose.onNodeWithText("Today").assertExists()
+        compose.onAllNodesWithText("Today").assertCountEquals(2)
         compose.onNodeWithText("Dentist: Mia").assertExists()
         compose.onNodeWithText("Grandma visits").assertExists()
     }
