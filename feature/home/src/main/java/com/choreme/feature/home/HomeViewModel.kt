@@ -17,6 +17,8 @@ import com.choreme.core.model.home.DayTimeline
 import com.choreme.core.model.home.dayTimeline
 import com.choreme.core.model.location.Place
 import com.choreme.core.model.session.SessionState
+import com.choreme.core.model.weather.AirNote
+import com.choreme.core.model.weather.airNote
 import com.choreme.core.model.weather.PlanEntry
 import com.choreme.core.model.weather.WeatherUnits
 import com.choreme.core.settings.WeatherSettings
@@ -106,7 +108,8 @@ class HomeViewModel @Inject internal constructor(
         val allMoments = home?.let { day.moments(today, inputs.plans, inputs.places, it) }.orEmpty()
         val upcoming = allMoments.filter { it.end.isAfter(now) }
             .map { MomentLine(inputs.names[it.entry.memberId].orEmpty(), it.entry.title, it.entry.start, it.advice) }
-        val weatherState = HomeWeatherState(loading = false, now = current, units = inputs.units, moments = upcoming, needsPlace = home == null)
+        val air = home?.let { airNote(weather.air(it)?.between(now, now.plusHours(12)).orEmpty()) } ?: AirNote()
+        val weatherState = HomeWeatherState(loading = false, now = current, units = inputs.units, moments = upcoming, air = air, needsPlace = home == null)
         val board = buildTodayBoard(data.chores, today, inputs.memberId)
         val timeline = dayTimeline(today, data.events, allMoments, inputs.names, board, data.groceries.groceriesToBuy(), ZoneId.systemDefault())
         return HomeUiState(loading = false, date = today, weather = weatherState, timeline = timeline)

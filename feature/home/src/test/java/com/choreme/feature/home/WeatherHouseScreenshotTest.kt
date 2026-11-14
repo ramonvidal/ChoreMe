@@ -12,6 +12,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.choreme.core.model.weather.AirLevel
+import com.choreme.core.model.weather.AirNote
+import com.choreme.core.model.weather.PollenLevel
 import com.choreme.core.model.weather.TripMode
 import com.choreme.core.model.weather.WeatherHour
 import com.choreme.core.model.weather.adviceFor
@@ -52,6 +55,7 @@ class WeatherHouseScreenshotTest {
         weatherState(outside(96, 17.0, rain = 90, mm = 7.0)),
         weatherState(outside(45, 5.0)),
         weatherState(outside(0, 6.0, day = false)),
+        weatherState(outside(1, 19.0), listOf(dryTrip)).copy(air = AirNote(AirLevel.POOR, PollenLevel.HIGH)),
     )
 
     /** The little house in every weather: sun, part cloud, rain with trips, snow, storm, fog and night. */
@@ -66,7 +70,8 @@ class WeatherHouseScreenshotTest {
                 }
             }
         }
-        compose.onAllNodesWithText("Gym", substring = true).assertCountEquals(2) // two cards have the gym trip
+        compose.onAllNodesWithText("Gym", substring = true).assertCountEquals(3) // three cards have the gym trip
+        compose.onNodeWithText("High pollen", substring = true).assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/today-weather.png")
     }
 

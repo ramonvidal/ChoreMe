@@ -2,6 +2,8 @@ package com.choreme.core.weather
 
 import android.content.Context
 import com.choreme.core.model.location.GeoPoint
+import com.choreme.core.model.weather.AirForecast
+import com.choreme.core.model.weather.AirHour
 import com.choreme.core.model.weather.Forecast
 import com.choreme.core.model.weather.WeatherHour
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -27,6 +29,7 @@ import kotlin.math.roundToLong
 class WeatherRepository @Inject constructor(@ApplicationContext context: Context) {
     private val prefs = context.getSharedPreferences("weather", Context.MODE_PRIVATE)
     private val memory = ConcurrentHashMap<String, Forecast>()
+    private val airMemory = ConcurrentHashMap<String, AirForecast>()
 
     /** The forecast for [point], or null when there is none and none could be fetched. */
     suspend fun forecast(point: GeoPoint, now: Instant = Instant.now()): Forecast? = withContext(Dispatchers.IO) {
@@ -52,6 +55,35 @@ class WeatherRepository @Inject constructor(@ApplicationContext context: Context
     suspend fun hoursFor(points: List<GeoPoint>, from: LocalDateTime, to: LocalDateTime): List<WeatherHour> =
         points.distinctBy { key(it) }.flatMap { point -> forecast(point)?.between(from, to).orEmpty() }
 
+    /** The air quality and pollen for [point] (same rounded coordinates, same cache rules), or null when unknown. */
+    suspend fun air(point: GeoPoint, now: Instant = Instant.now()): AirForecast? = withContext(Dispatchers.IO) {
+        val key = "air:" + key(point)
+        val cached = airMemory[key] ?: readAirDisk(key)?.also { airMemory[key] = it }
+        if (cached != null && Duration.between(cached.fetchedAt, now) < FRESH_FOR) return@withContext cached
+        val coarse = coarse(point)
+        val url = String.format(
+            Locale.ROOT, "%s?latitude=%.2f&longitude=%.2f&hourly=%s&timezone=auto&forecast_days=%d",
+            AIR_ENDPOINT, coarse.latitude, coarse.longitude, AirParser.HOURLY_FIELDS, AIR_DAYS,
+        )
+        val fresh = runCatching { get(url) }.getOrNull()?.let { raw ->
+            runCatching { AirParser.parse(raw, now) }.getOrNull()?.also {
+                airMemory[key] = it
+                prefs.edit().putString(key, raw).putLong("$key@", now.toEpochMilli()).apply()
+            }
+        }
+        fresh ?: cached?.takeIf { Duration.between(it.fetchedAt, now) < STALE_LIMIT }
+    }
+
+    /** The air of a whole trip, at every place it touches, like [hoursFor]. */
+    suspend fun airFor(points: List<GeoPoint>, from: LocalDateTime, to: LocalDateTime): List<AirHour> =
+        points.distinctBy { key(it) }.flatMap { point -> air(point)?.between(from, to).orEmpty() }
+
+    private fun readAirDisk(key: String): AirForecast? {
+        val raw = prefs.getString(key, null) ?: return null
+        val at = prefs.getLong("$key@", 0L).takeIf { it > 0 } ?: return null
+        return runCatching { AirParser.parse(raw, Instant.ofEpochMilli(at)) }.getOrNull()
+    }
+
     private fun readDisk(key: String): Forecast? {
         val raw = prefs.getString(key, null) ?: return null
         val at = prefs.getLong("$key@", 0L).takeIf { it > 0 } ?: return null
@@ -60,11 +92,16 @@ class WeatherRepository @Inject constructor(@ApplicationContext context: Context
 
     private fun download(point: GeoPoint): String {
         val coarse = coarse(point)
-        val url = String.format(
-            Locale.ROOT,
-            "%s?latitude=%.2f&longitude=%.2f&hourly=%s&timezone=auto&forecast_days=%d&wind_speed_unit=kmh",
-            ENDPOINT, coarse.latitude, coarse.longitude, OpenMeteoParser.HOURLY_FIELDS, FORECAST_DAYS,
+        return get(
+            String.format(
+                Locale.ROOT,
+                "%s?latitude=%.2f&longitude=%.2f&hourly=%s&timezone=auto&forecast_days=%d&wind_speed_unit=kmh",
+                ENDPOINT, coarse.latitude, coarse.longitude, OpenMeteoParser.HOURLY_FIELDS, FORECAST_DAYS,
+            ),
         )
+    }
+
+    private fun get(url: String): String {
         val connection = URL(url).openConnection() as HttpURLConnection
         connection.connectTimeout = TIMEOUT_MS
         connection.readTimeout = TIMEOUT_MS
@@ -79,7 +116,9 @@ class WeatherRepository @Inject constructor(@ApplicationContext context: Context
 
     internal companion object {
         const val ENDPOINT = "https://api.open-meteo.com/v1/forecast"
+        const val AIR_ENDPOINT = "https://air-quality-api.open-meteo.com/v1/air-quality"
         const val FORECAST_DAYS = 7
+        const val AIR_DAYS = 3
         private const val TIMEOUT_MS = 10_000
         private val FRESH_FOR: Duration = Duration.ofHours(2)
         private val STALE_LIMIT: Duration = Duration.ofHours(12)

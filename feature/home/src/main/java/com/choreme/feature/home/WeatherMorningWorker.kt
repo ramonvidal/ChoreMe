@@ -19,7 +19,9 @@ import com.choreme.core.data.LocationRepository
 import com.choreme.core.data.PlanRepository
 import com.choreme.core.model.AlertKind
 import com.choreme.core.model.session.SessionState
+import com.choreme.core.model.weather.AirNote
 import com.choreme.core.model.weather.Extreme
+import com.choreme.core.model.weather.airNote
 import com.choreme.core.model.weather.Moment
 import com.choreme.core.model.weather.WeatherUnits
 import com.choreme.core.model.weather.extremesIn
@@ -69,10 +71,11 @@ internal class WeatherMorningWorker @AssistedInject constructor(
         val forecast = weather.forecast(home) ?: return Result.retry()
         val extremes = extremesIn(forecast.between(now, now.plusHours(24)))
         val moments = day.moments(now.toLocalDate(), entries, places, home).filter { it.end.isAfter(now) }
-        if (moments.isEmpty() && extremes.isEmpty()) return Result.success()
+        val air = airNote(weather.air(home)?.between(now, now.plusHours(12)).orEmpty())
+        if (moments.isEmpty() && extremes.isEmpty() && air.isQuiet) return Result.success()
 
         val names = members.associate { it.id to it.name }
-        show(forecast.at(now)?.let { units.units.value.degrees(it.temperatureC) + " · " + applicationContext.getString(it.sky.label) }, moments, extremes, names, session.memberId)
+        show(air, forecast.at(now)?.let { units.units.value.degrees(it.temperatureC) + " · " + applicationContext.getString(it.sky.label) }, moments, extremes, names, session.memberId)
         return Result.success()
     }
 
@@ -81,7 +84,7 @@ internal class WeatherMorningWorker @AssistedInject constructor(
         PackageManager.PERMISSION_GRANTED
 
     @Suppress("MissingPermission") // Checked in canNotify().
-    private fun show(now: String?, moments: List<Moment>, extremes: Set<Extreme>, names: Map<String, String>, me: String) {
+    private fun show(air: AirNote, now: String?, moments: List<Moment>, extremes: Set<Extreme>, names: Map<String, String>, me: String) {
         val context = applicationContext
         val manager = context.getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(
@@ -93,6 +96,7 @@ internal class WeatherMorningWorker @AssistedInject constructor(
         // Own trips first, then the others', each in the order of the day.
         val lines = buildList {
             extremes.forEach { add(context.getString(it.label)) }
+            air.lines().forEach { add(context.getString(it)) }
             moments.sortedWith(compareBy({ it.entry.memberId != me }, { it.start })).forEach { moment ->
                 val who = if (moment.entry.memberId == me) "" else " (${names[moment.entry.memberId].orEmpty()})"
                 val advice = moment.advice.describe(context, unit).ifEmpty { context.getString(R.string.weather_all_good) }

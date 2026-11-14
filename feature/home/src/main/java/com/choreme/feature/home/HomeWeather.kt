@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.choreme.core.model.weather.Advice
+import com.choreme.core.model.weather.AirNote
 import com.choreme.core.model.weather.Sky
 import com.choreme.core.model.weather.WeatherHour
 import com.choreme.core.model.weather.WeatherUnits
@@ -45,6 +46,8 @@ internal data class HomeWeatherState(
     val now: WeatherHour? = null,
     val units: WeatherUnits = WeatherUnits(),
     val moments: List<MomentLine> = emptyList(),
+    /** The air and pollen for the next hours; says nothing on an ordinary day. */
+    val air: AirNote = AirNote(),
     /** No position and no saved place: the family has to save its home on the Map tab. */
     val needsPlace: Boolean = false,
 ) {
@@ -89,6 +92,7 @@ internal fun HomeWeatherCard(state: HomeWeatherState, onClick: () -> Unit) {
                             .joinToString(" · "),
                         style = MaterialTheme.typography.titleSmall,
                     )
+                    state.air.lines().forEach { Text(stringResource(it), style = MaterialTheme.typography.bodyMedium) }
                     state.moments.take(2).forEach { MomentText(it, state.units, context) }
                     if (state.moments.isEmpty()) {
                         Text(
@@ -134,6 +138,7 @@ internal fun HomeWeatherDialog(state: HomeWeatherState, onDismiss: () -> Unit) {
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
+                state.air.lines().forEach { Text(stringResource(it), style = MaterialTheme.typography.bodyMedium) }
                 if (state.moments.isEmpty()) {
                     Text(stringResource(R.string.weather_nothing_planned), style = MaterialTheme.typography.bodyMedium)
                 } else {

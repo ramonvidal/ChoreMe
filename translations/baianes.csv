@@ -491,6 +491,10 @@ feature/home,weather_wind,,wind %1$s,vento %1$s
 feature/home,weather_all_good,,all good,tá de boa
 feature/home,weather_nothing_planned,,No trips planned for the rest of today.,Nenhum compromisso pro resto de hoje.
 feature/home,weather_needs_place,,Save your home on the Map tab to see the weather here.,Salve seu cafofo na aba Mapa pra ver o tempo aqui.
+feature/home,weather_air_poor,,Poor air quality: people with asthma or allergies should take it easy outside,"Ar ruim: quem tem asma ou alergia, maneire lá fora, viu?"
+feature/home,weather_air_very_poor,,Very poor air quality: stay indoors if you can,"Ar muito ruim: fique em casa se puder, painho"
+feature/home,weather_pollen_moderate,,"Moderate pollen: allergy sufferers, take care","Pólen moderado: alérgico, se cuide"
+feature/home,weather_pollen_high,,"High pollen: allergy sufferers, take your medicine and keep the windows shut","Pólen alto: alérgico, tome o remédio e feche as janelas"
 feature/home,weather_credit,,Weather data by Open-Meteo.com (CC BY 4.0),Dados do tempo: Open-Meteo.com (CC BY 4.0)
 feature/home,weather_channel,,Weather in the morning,Tempo de manhã
 feature/home,weather_channel_description,,"The weather for the family's regular trips of the day, and storm warnings","O tempo pros trajetos de sempre da família no dia, e avisos de temporal"
