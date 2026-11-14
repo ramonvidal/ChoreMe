@@ -495,6 +495,10 @@ feature/home,weather_air_poor,,Poor air quality: people with asthma or allergies
 feature/home,weather_air_very_poor,,Very poor air quality: stay indoors if you can,"Ar muito ruim: fique em casa se puder, painho"
 feature/home,weather_pollen_moderate,,"Moderate pollen: allergy sufferers, take care","Pólen moderado: alérgico, se cuide"
 feature/home,weather_pollen_high,,"High pollen: allergy sufferers, take your medicine and keep the windows shut","Pólen alto: alérgico, tome o remédio e feche as janelas"
+feature/home,drying_today,,Laundry is due and today is a good day to dry it outside,Tem roupa pra lavar e hoje o dia tá bom pra secar lá fora
+feature/home,drying_wait,,Laundry is due: the best day to hang it out is %1$s,Tem roupa pra lavar: o melhor dia pra estender é %1$s
+feature/home,drying_indoors,,"Laundry is due, but no dry day is coming: dry it indoors","Tem roupa pra lavar, mas não vem dia seco: seque dentro de casa"
+feature/home,week_drying,,good for drying,bom pra secar roupa
 feature/home,week_title,,The week ahead,A semana que vem
 feature/home,week_rain,,rain %1$d%%,chuva %1$d%%
 feature/home,weather_credit,,Weather data by Open-Meteo.com (CC BY 4.0),Dados do tempo: Open-Meteo.com (CC BY 4.0)

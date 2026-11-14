@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.choreme.core.model.weather.Advice
 import com.choreme.core.model.weather.AirNote
+import com.choreme.core.model.weather.DryingTip
 import com.choreme.core.model.weather.Sky
 import com.choreme.core.model.weather.WeatherHour
 import com.choreme.core.model.weather.WeatherUnits
@@ -48,6 +49,8 @@ internal data class HomeWeatherState(
     val moments: List<MomentLine> = emptyList(),
     /** The air and pollen for the next hours; says nothing on an ordinary day. */
     val air: AirNote = AirNote(),
+    /** What to do with the washing, only while laundry is waiting. */
+    val drying: DryingTip? = null,
     /** No position and no saved place: the family has to save its home on the Map tab. */
     val needsPlace: Boolean = false,
 ) {
@@ -92,6 +95,7 @@ internal fun HomeWeatherCard(state: HomeWeatherState, onClick: () -> Unit) {
                             .joinToString(" · "),
                         style = MaterialTheme.typography.titleSmall,
                     )
+                    state.drying?.let { Text(dryingText(it), style = MaterialTheme.typography.bodyMedium) }
                     state.air.lines().forEach { Text(stringResource(it), style = MaterialTheme.typography.bodyMedium) }
                     state.moments.take(2).forEach { MomentText(it, state.units, context) }
                     if (state.moments.isEmpty()) {
@@ -105,6 +109,16 @@ internal fun HomeWeatherCard(state: HomeWeatherState, onClick: () -> Unit) {
             }
         }
     }
+}
+
+@Composable
+private fun dryingText(tip: DryingTip): String = when (tip) {
+    DryingTip.HangToday -> stringResource(R.string.drying_today)
+    is DryingTip.WaitFor -> stringResource(
+        R.string.drying_wait,
+        tip.date.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, java.util.Locale.getDefault()),
+    )
+    DryingTip.Indoors -> stringResource(R.string.drying_indoors)
 }
 
 @Composable
@@ -138,6 +152,7 @@ internal fun HomeWeatherDialog(state: HomeWeatherState, onDismiss: () -> Unit) {
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
+                state.drying?.let { Text(dryingText(it), style = MaterialTheme.typography.bodyMedium) }
                 state.air.lines().forEach { Text(stringResource(it), style = MaterialTheme.typography.bodyMedium) }
                 if (state.moments.isEmpty()) {
                     Text(stringResource(R.string.weather_nothing_planned), style = MaterialTheme.typography.bodyMedium)

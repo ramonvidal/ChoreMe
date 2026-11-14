@@ -39,6 +39,7 @@ import com.choreme.core.model.Role
 import com.choreme.core.model.location.Place
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.model.weather.DayOutlook
+import com.choreme.core.model.weather.DryingQuality
 import com.choreme.core.model.weather.WeatherUnits
 import com.choreme.core.model.weather.dayOutlook
 import com.choreme.core.settings.WeatherSettings
@@ -208,6 +209,7 @@ private fun WeekAhead(state: WeeklyPlanState) {
                         stringResource(day.sky.label),
                         "${state.units.degrees(day.lowC)} / ${state.units.degrees(day.highC)}",
                         if (day.rainChance >= 30) stringResource(R.string.week_rain, day.rainChance) else null,
+                        if (day.drying == DryingQuality.GOOD) stringResource(R.string.week_drying) else null,
                     ).filterNotNull().joinToString(" · "),
                     style = MaterialTheme.typography.bodyMedium,
                 )

@@ -13,6 +13,10 @@
     <string name="weather_air_very_poor">Ar muito ruim: fique em casa se puder, painho</string>
     <string name="weather_pollen_moderate">Pólen moderado: alérgico, se cuide</string>
     <string name="weather_pollen_high">Pólen alto: alérgico, tome o remédio e feche as janelas</string>
+    <string name="drying_today">Tem roupa pra lavar e hoje o dia tá bom pra secar lá fora</string>
+    <string name="drying_wait">Tem roupa pra lavar: o melhor dia pra estender é %1$s</string>
+    <string name="drying_indoors">Tem roupa pra lavar, mas não vem dia seco: seque dentro de casa</string>
+    <string name="week_drying">bom pra secar roupa</string>
     <string name="week_title">A semana que vem</string>
     <string name="week_rain">chuva %1$d%%</string>
     <string name="weather_credit">Dados do tempo: Open-Meteo.com (CC BY 4.0)</string>

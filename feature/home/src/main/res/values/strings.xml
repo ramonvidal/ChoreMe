@@ -11,6 +11,10 @@
     <string name="weather_air_very_poor">Very poor air quality: stay indoors if you can</string>
     <string name="weather_pollen_moderate">Moderate pollen: allergy sufferers, take care</string>
     <string name="weather_pollen_high">High pollen: allergy sufferers, take your medicine and keep the windows shut</string>
+    <string name="drying_today">Laundry is due and today is a good day to dry it outside</string>
+    <string name="drying_wait">Laundry is due: the best day to hang it out is %1$s</string>
+    <string name="drying_indoors">Laundry is due, but no dry day is coming: dry it indoors</string>
+    <string name="week_drying">good for drying</string>
     <string name="week_title">The week ahead</string>
     <string name="week_rain">rain %1$d%%</string>
     <string name="weather_credit">Weather data by Open-Meteo.com (CC BY 4.0)</string>

@@ -11,6 +11,8 @@ data class DayOutlook(
     /** The highest chance of rain in the daytime, 0 to 100. */
     val rainChance: Int,
     val moments: List<Moment>,
+    /** How good the day is for drying washing outside (from 9:00 to 17:00). */
+    val drying: DryingQuality = DryingQuality.POOR,
 )
 
 /** The daytime hours the picture of a day is taken from. */
@@ -36,5 +38,6 @@ fun dayOutlook(date: LocalDate, hours: List<WeatherHour>, moments: List<Moment>)
         highC = today.maxOf { it.temperatureC },
         rainChance = day.maxOf { it.rainProbability },
         moments = moments,
+        drying = dryingQuality(today.filter { it.time.hour in 9..17 }),
     )
 }
