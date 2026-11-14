@@ -3,6 +3,7 @@ package com.choreme.feature.map
 import com.choreme.core.data.LocationRepository
 import com.choreme.core.data.PushEndpointRepository
 import com.choreme.core.location.DeviceFix
+import com.choreme.core.location.RoutineLog
 import com.choreme.core.model.location.MemberLocation
 import com.choreme.core.model.location.Place
 import com.choreme.core.model.location.currentPlace
@@ -24,6 +25,7 @@ internal class PresenceTracker @Inject constructor(
     private val store: PresenceStore,
     private val endpoints: PushEndpointRepository,
     private val push: PushSender,
+    private val routine: RoutineLog,
 ) {
     suspend fun share(familyId: String, memberId: String, fix: DeviceFix, places: List<Place>? = null) {
         val next = MemberLocation(memberId, fix.point, fix.accuracyMeters, fix.at)
@@ -42,6 +44,8 @@ internal class PresenceTracker @Inject constructor(
             // Wake the other phones up so they show it now rather than at their next check.
             if (events.isNotEmpty()) push.ping(endpoints.othersThan(familyId, memberId), PushKinds.PLACE_EVENTS)
         }
+        // Arriving somewhere new is one more visit for the habits this phone's owner might want in the plan.
+        if (store.isPlaceKnown && now != null && now.id != previous?.id) routine.recordArrival(now.id, fix.at)
         store.lastPlaceId = now?.id
     }
 

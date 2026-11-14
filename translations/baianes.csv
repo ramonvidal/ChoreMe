@@ -499,6 +499,11 @@ feature/home,drying_today,,Laundry is due and today is a good day to dry it outs
 feature/home,drying_wait,,Laundry is due: the best day to hang it out is %1$s,Tem roupa pra lavar: o melhor dia pra estender é %1$s
 feature/home,drying_indoors,,"Laundry is due, but no dry day is coming: dry it indoors","Tem roupa pra lavar, mas não vem dia seco: seque dentro de casa"
 feature/home,week_drying,,good for drying,bom pra secar roupa
+feature/home,routine_title,,We noticed a habit,A gente notou um costume
+feature/home,routine_hint,,From the places this phone visited in the last weeks. Stays on this phone.,Pelos lugares que esse telefone visitou nas últimas semanas. Fica só nesse aparelho.
+feature/home,routine_line,,%1$s · %2$s around %3$s (%4$d times lately),%1$s · %2$s por volta de %3$s (%4$d vezes ultimamente)
+feature/home,routine_add,,Add to the plan,Botar no plano
+feature/home,routine_not_now,,Not now,Agora não
 feature/home,week_title,,The week ahead,A semana que vem
 feature/home,week_rain,,rain %1$d%%,chuva %1$d%%
 feature/home,weather_credit,,Weather data by Open-Meteo.com (CC BY 4.0),Dados do tempo: Open-Meteo.com (CC BY 4.0)

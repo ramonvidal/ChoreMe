@@ -16,6 +16,7 @@ import com.choreme.core.model.location.GeoPoint
 import com.choreme.core.model.location.Place
 import com.choreme.core.model.weather.DayOutlook
 import com.choreme.core.model.weather.PlanEntry
+import com.choreme.core.model.weather.RoutineSuggestion
 import com.choreme.core.model.weather.WeatherHour
 import com.choreme.core.model.weather.dayOutlook
 import com.choreme.core.model.weather.momentsOn
@@ -70,7 +71,7 @@ class WeeklyPlanScreenshotTest {
             ChoreMeTheme(darkTheme = false, dynamicColor = false) {
                 Surface(Modifier.fillMaxSize()) {
                     Column(Modifier.padding(16.dp)) {
-                        WeeklyPlanContent(WeeklyPlanState(entries, places, listOf(ramon, ana), isParent = true, myMemberId = "ramon", outlook = outlook(entries)), onSave = {}, onDelete = {})
+                        WeeklyPlanContent(WeeklyPlanState(entries, places, listOf(ramon, ana), isParent = true, myMemberId = "ramon", outlook = outlook(entries), suggestions = listOf(RoutineSuggestion("gym", setOf(DayOfWeek.WEDNESDAY), LocalTime.of(18, 0), 4))), onSave = {}, onDelete = {})
                     }
                 }
             }
@@ -78,6 +79,8 @@ class WeeklyPlanScreenshotTest {
         compose.onNodeWithText("Weekdays", substring = true).assertExists()
         compose.onNodeWithText("Add a trip").assertExists()
         compose.onNodeWithText("The week ahead").assertExists()
+        compose.onNodeWithText("We noticed a habit").assertExists()
+        compose.onNodeWithText("Add to the plan").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/tab-home-week.png")
     }
 }

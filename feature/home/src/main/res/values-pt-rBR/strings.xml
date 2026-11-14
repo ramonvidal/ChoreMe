@@ -17,6 +17,11 @@
     <string name="drying_wait">Tem roupa pra lavar: o melhor dia pra estender é %1$s</string>
     <string name="drying_indoors">Tem roupa pra lavar, mas não vem dia seco: seque dentro de casa</string>
     <string name="week_drying">bom pra secar roupa</string>
+    <string name="routine_title">A gente notou um costume</string>
+    <string name="routine_hint">Pelos lugares que esse telefone visitou nas últimas semanas. Fica só nesse aparelho.</string>
+    <string name="routine_line">%1$s · %2$s por volta de %3$s (%4$d vezes ultimamente)</string>
+    <string name="routine_add">Botar no plano</string>
+    <string name="routine_not_now">Agora não</string>
     <string name="week_title">A semana que vem</string>
     <string name="week_rain">chuva %1$d%%</string>
     <string name="weather_credit">Dados do tempo: Open-Meteo.com (CC BY 4.0)</string>

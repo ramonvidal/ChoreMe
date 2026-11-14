@@ -49,7 +49,12 @@ import com.choreme.core.ui.label
 import com.choreme.core.weather.WeatherRepository
 import kotlinx.coroutines.flow.mapLatest
 import java.time.LocalDate
+import com.choreme.core.location.RoutineLog
 import com.choreme.core.model.weather.PlanEntry
+import com.choreme.core.model.weather.RoutineSuggestion
+import com.choreme.core.model.weather.homePlace
+import com.choreme.core.model.weather.learnRoutine
+import kotlinx.coroutines.flow.MutableStateFlow
 import com.choreme.core.model.weather.TripMode
 import com.choreme.core.ui.NosButton
 import com.choreme.core.ui.NosButtonStyle
@@ -81,6 +86,8 @@ internal data class WeeklyPlanState(
     /** The next days with their sky and the trips' weather; empty until a forecast arrives. */
     val outlook: List<DayOutlook> = emptyList(),
     val units: WeatherUnits = WeatherUnits(),
+    /** Habits noticed from this phone's own visits, for a parent to add to the plan or turn down. */
+    val suggestions: List<RoutineSuggestion> = emptyList(),
 ) {
     fun nameOf(memberId: String) = members.firstOrNull { it.id == memberId }?.name.orEmpty()
 }
@@ -94,7 +101,9 @@ class WeeklyPlanViewModel @Inject internal constructor(
     private val weather: WeatherRepository,
     private val day: DayWeather,
     private val settings: WeatherSettings,
+    private val routine: RoutineLog,
 ) : ViewModel() {
+    private val refresh = MutableStateFlow(0)
     private val session = families.session.filterIsInstance<SessionState.InFamily>()
     private var familyId: String? = null
 
@@ -111,8 +120,22 @@ class WeeklyPlanViewModel @Inject internal constructor(
             )
         }
     }.combine(settings.units) { state, units -> state.copy(units = units) }
+        .combine(refresh) { state, _ -> state.copy(suggestions = suggestionsFor(state)) }
         .mapLatest { state -> state.copy(outlook = outlookOf(state)) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeeklyPlanState())
+
+    private fun suggestionsFor(state: WeeklyPlanState): List<RoutineSuggestion> {
+        if (!state.isParent) return emptyList()
+        val ignore = setOfNotNull(homePlace(state.places)?.id)
+        val dismissed = routine.dismissed()
+        return learnRoutine(routine.visits(), state.entries, state.myMemberId, ignore, LocalDate.now())
+            .filter { it.key !in dismissed && state.places.any { place -> place.id == it.placeId } }
+    }
+
+    internal fun notNow(suggestion: RoutineSuggestion) {
+        routine.dismiss(suggestion.key)
+        refresh.value++
+    }
 
     private suspend fun outlookOf(state: WeeklyPlanState): List<DayOutlook> {
         val home = day.home(state.places) ?: return emptyList()
@@ -139,17 +162,25 @@ private const val OUTLOOK_DAYS = 7
 @Composable
 internal fun WeeklyPlan(viewModel: WeeklyPlanViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    WeeklyPlanContent(state, onSave = viewModel::save, onDelete = viewModel::delete)
+    WeeklyPlanContent(state, onSave = viewModel::save, onDelete = viewModel::delete, onNotNow = viewModel::notNow)
 }
 
 @Composable
-internal fun WeeklyPlanContent(state: WeeklyPlanState, onSave: (PlanEntry) -> Unit, onDelete: (PlanEntry) -> Unit) {
+internal fun WeeklyPlanContent(
+    state: WeeklyPlanState,
+    onSave: (PlanEntry) -> Unit,
+    onDelete: (PlanEntry) -> Unit,
+    onNotNow: (RoutineSuggestion) -> Unit = {},
+) {
     var editing by remember { mutableStateOf<PlanEntry?>(null) }
     var adding by rememberSaveable { mutableStateOf(false) }
     val time = remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT) }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (state.outlook.isNotEmpty()) WeekAhead(state)
+        if (state.suggestions.isNotEmpty()) {
+            Noticed(state, onAdd = { onSave(it.toEntry(state)) }, onNotNow = onNotNow)
+        }
         Text(stringResource(R.string.plan_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         NosCard(Modifier.fillMaxWidth()) {
             if (state.entries.isEmpty()) {
@@ -186,6 +217,38 @@ internal fun WeeklyPlanContent(state: WeeklyPlanState, onSave: (PlanEntry) -> Un
             onSave = { onSave(it); editing = null },
             onDelete = { onDelete(entry); editing = null },
         )
+    }
+}
+
+private fun RoutineSuggestion.toEntry(state: WeeklyPlanState) = PlanEntry(
+    id = java.util.UUID.randomUUID().toString(),
+    memberId = state.myMemberId,
+    title = state.places.firstOrNull { it.id == placeId }?.name.orEmpty(),
+    days = days,
+    start = start,
+    placeId = placeId,
+    learned = true,
+)
+
+/** Habits noticed from this phone's own visits: add one to the plan, or say "not now". */
+@Composable
+private fun Noticed(state: WeeklyPlanState, onAdd: (RoutineSuggestion) -> Unit, onNotNow: (RoutineSuggestion) -> Unit) {
+    val time = remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT) }
+    NosCard(Modifier.fillMaxWidth()) {
+        Text(stringResource(R.string.routine_title), style = MaterialTheme.typography.titleSmall)
+        Text(stringResource(R.string.routine_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        state.suggestions.forEach { suggestion ->
+            val place = state.places.firstOrNull { it.id == suggestion.placeId }?.name.orEmpty()
+            HorizontalDivider(Modifier.padding(vertical = 6.dp), color = MaterialTheme.colorScheme.surfaceVariant)
+            Text(
+                stringResource(R.string.routine_line, place, daysSummary(suggestion.days), suggestion.start.format(time), suggestion.times),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                NosButton(stringResource(R.string.routine_add), onClick = { onAdd(suggestion) }, style = NosButtonStyle.Tonal)
+                NosButton(stringResource(R.string.routine_not_now), onClick = { onNotNow(suggestion) }, style = NosButtonStyle.Text)
+            }
+        }
     }
 }
 

@@ -15,6 +15,11 @@
     <string name="drying_wait">Laundry is due: the best day to hang it out is %1$s</string>
     <string name="drying_indoors">Laundry is due, but no dry day is coming: dry it indoors</string>
     <string name="week_drying">good for drying</string>
+    <string name="routine_title">We noticed a habit</string>
+    <string name="routine_hint">From the places this phone visited in the last weeks. Stays on this phone.</string>
+    <string name="routine_line">%1$s · %2$s around %3$s (%4$d times lately)</string>
+    <string name="routine_add">Add to the plan</string>
+    <string name="routine_not_now">Not now</string>
     <string name="week_title">The week ahead</string>
     <string name="week_rain">rain %1$d%%</string>
     <string name="weather_credit">Weather data by Open-Meteo.com (CC BY 4.0)</string>

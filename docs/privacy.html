@@ -19,6 +19,7 @@
 <tr><td>Weekly plan: the regular trips parents add (a saved place, days, time, how long, how you travel, whose it is).</td><td>To tell the family the weather for those trips.</td><td>Cloud Firestore, readable only by your family</td></tr>
 <tr><td>The approximate position of your phone or of a saved place (rounded to about 1 km), only to ask for the weather forecast, the air quality and the pollen count.</td><td>To show the weather outside and for your family's trips.</td><td>Sent to the free weather service Open-Meteo, with no name, account or family ID. Not stored by the app's servers.</td></tr>
 <tr><td>A notification address (a URL) for each phone that uses the free ntfy app for instant alerts.</td><td>To wake the phone for alerts. The wake-up carries no family data.</td><td>Cloud Firestore</td></tr>
+<tr><td>A list of when this phone arrived at the family's saved places (the last two months), only if you share your location.</td><td>To notice habits (such as "Gym on Tuesdays") and offer to add them to the weekly plan.</td><td>Only on your phone. Never sent anywhere.</td></tr>
 <tr><td>Calendar events, if you allow calendar access.</td><td>To show the agenda and to add events you create.</td><td>Only on your phone and its calendar account (for example Google Calendar). Not sent to the app's servers.</td></tr>
 <tr><td>Settings of this phone (alerts, quiet hours, language, reminders).</td><td>To remember your choices.</td><td>Only on your phone</td></tr>
 </table>
