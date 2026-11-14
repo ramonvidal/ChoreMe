@@ -8,6 +8,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.mutableIntStateOf
+import com.choreme.core.ui.R as CoreUiR
+import com.choreme.core.ui.SubTab
 import com.choreme.core.ui.SubTabs
 import com.choreme.core.ui.TabHeader
 import androidx.compose.foundation.layout.Row
@@ -52,7 +54,11 @@ private enum class HomeTab { TODAY, AGENDA, WEEK }
 @Composable
 internal fun HomeSubTabs(selected: Int, onSelect: (Int) -> Unit) {
     SubTabs(
-        listOf(stringResource(R.string.home_tab_today), stringResource(R.string.home_tab_agenda), stringResource(R.string.home_tab_week)),
+        listOf(
+            SubTab(stringResource(R.string.home_tab_today), CoreUiR.drawable.ic_tab_today),
+            SubTab(stringResource(R.string.home_tab_agenda), CoreUiR.drawable.ic_tab_agenda),
+            SubTab(stringResource(R.string.home_tab_week), CoreUiR.drawable.ic_tab_week),
+        ),
         selected,
         onSelect,
     )

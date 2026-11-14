@@ -11,7 +11,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -142,10 +147,55 @@ fun RoomFilterRow(selected: com.choreme.core.model.chore.RoomFilter, onSelect: (
 }
 
 
-/** The sub-tabs of a main tab (Today / Agenda / Week, Chores / Rooms): yellow pills in a row under the screen's top edge. */
+/** What a sub-tab is called and drawn as. */
+class SubTab(val label: String, @androidx.annotation.DrawableRes val icon: Int)
+
+/**
+ * The sub-tabs of a tab (Today / Agenda / Week, Chores / Rooms) as one bar edge to edge: a thin border, a divider
+ * between the parts, the chosen one yellow and bold, each with its picture. With the phone's text turned way up the
+ * picture sits above the words so nothing is cut off. A line under the bar separates it from the page.
+ */
 @Composable
-fun SubTabs(labels: List<String>, selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
-    Row(modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        labels.forEachIndexed { index, label -> PillTab(label, index == selected, { onSelect(index) }) }
+fun SubTabs(tabs: List<SubTab>, selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
+    val line = MaterialTheme.colorScheme.outline
+    val stacked = androidx.compose.ui.platform.LocalDensity.current.fontScale > 1.3f
+    Column(modifier.padding(top = 12.dp)) {
+        Row(
+            Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
+                .height(androidx.compose.foundation.layout.IntrinsicSize.Min)
+                .clip(RoundedCornerShape(14.dp))
+                .border(1.5.dp, line, RoundedCornerShape(14.dp)),
+        ) {
+            tabs.forEachIndexed { index, tab ->
+                if (index > 0) Box(Modifier.width(1.5.dp).fillMaxHeight().background(line))
+                val on = index == selected
+                val color = if (on) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                val content: @Composable () -> Unit = {
+                    androidx.compose.material3.Icon(painterResource(tab.icon), contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
+                    Text(
+                        tab.label,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = if (on) FontWeight.Bold else FontWeight.Medium,
+                        color = color,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    )
+                }
+                val cell = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .background(if (on) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
+                    .selectable(selected = on, onClick = { onSelect(index) }, role = Role.Tab)
+                    .padding(horizontal = 4.dp, vertical = 10.dp)
+                if (stacked) {
+                    Column(cell, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) { content() }
+                } else {
+                    Row(cell, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)) { content() }
+                }
+            }
+        }
+        androidx.compose.material3.HorizontalDivider(Modifier.padding(top = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
     }
 }
