@@ -495,6 +495,8 @@ feature/home,weather_air_poor,,Poor air quality: people with asthma or allergies
 feature/home,weather_air_very_poor,,Very poor air quality: stay indoors if you can,"Ar muito ruim: fique em casa se puder, painho"
 feature/home,weather_pollen_moderate,,"Moderate pollen: allergy sufferers, take care","Pólen moderado: alérgico, se cuide"
 feature/home,weather_pollen_high,,"High pollen: allergy sufferers, take your medicine and keep the windows shut","Pólen alto: alérgico, tome o remédio e feche as janelas"
+feature/home,week_title,,The week ahead,A semana que vem
+feature/home,week_rain,,rain %1$d%%,chuva %1$d%%
 feature/home,weather_credit,,Weather data by Open-Meteo.com (CC BY 4.0),Dados do tempo: Open-Meteo.com (CC BY 4.0)
 feature/home,weather_channel,,Weather in the morning,Tempo de manhã
 feature/home,weather_channel_description,,"The weather for the family's regular trips of the day, and storm warnings","O tempo pros trajetos de sempre da família no dia, e avisos de temporal"

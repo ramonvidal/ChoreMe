@@ -13,6 +13,8 @@
     <string name="weather_air_very_poor">Ar muito ruim: fique em casa se puder, painho</string>
     <string name="weather_pollen_moderate">Pólen moderado: alérgico, se cuide</string>
     <string name="weather_pollen_high">Pólen alto: alérgico, tome o remédio e feche as janelas</string>
+    <string name="week_title">A semana que vem</string>
+    <string name="week_rain">chuva %1$d%%</string>
     <string name="weather_credit">Dados do tempo: Open-Meteo.com (CC BY 4.0)</string>
     <string name="weather_channel">Tempo de manhã</string>
     <string name="weather_channel_description">O tempo pros trajetos de sempre da família no dia, e avisos de temporal</string>

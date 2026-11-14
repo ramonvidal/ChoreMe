@@ -38,6 +38,16 @@ import com.choreme.core.model.Member
 import com.choreme.core.model.Role
 import com.choreme.core.model.location.Place
 import com.choreme.core.model.session.SessionState
+import com.choreme.core.model.weather.DayOutlook
+import com.choreme.core.model.weather.WeatherUnits
+import com.choreme.core.model.weather.dayOutlook
+import com.choreme.core.settings.WeatherSettings
+import com.choreme.core.ui.degrees
+import com.choreme.core.ui.describe
+import com.choreme.core.ui.label
+import com.choreme.core.weather.WeatherRepository
+import kotlinx.coroutines.flow.mapLatest
+import java.time.LocalDate
 import com.choreme.core.model.weather.PlanEntry
 import com.choreme.core.model.weather.TripMode
 import com.choreme.core.ui.NosButton
@@ -67,16 +77,22 @@ internal data class WeeklyPlanState(
     val members: List<Member> = emptyList(),
     val isParent: Boolean = false,
     val myMemberId: String = "",
+    /** The next days with their sky and the trips' weather; empty until a forecast arrives. */
+    val outlook: List<DayOutlook> = emptyList(),
+    val units: WeatherUnits = WeatherUnits(),
 ) {
     fun nameOf(memberId: String) = members.firstOrNull { it.id == memberId }?.name.orEmpty()
 }
 
 /** The family's regular trips for the weather. Everyone sees them; parents add and change them. */
 @HiltViewModel
-class WeeklyPlanViewModel @Inject constructor(
+class WeeklyPlanViewModel @Inject internal constructor(
     families: FamilyRepository,
     private val plans: PlanRepository,
     locations: LocationRepository,
+    private val weather: WeatherRepository,
+    private val day: DayWeather,
+    private val settings: WeatherSettings,
 ) : ViewModel() {
     private val session = families.session.filterIsInstance<SessionState.InFamily>()
     private var familyId: String? = null
@@ -93,7 +109,19 @@ class WeeklyPlanViewModel @Inject constructor(
                 myMemberId = s.memberId,
             )
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeeklyPlanState())
+    }.combine(settings.units) { state, units -> state.copy(units = units) }
+        .mapLatest { state -> state.copy(outlook = outlookOf(state)) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeeklyPlanState())
+
+    private suspend fun outlookOf(state: WeeklyPlanState): List<DayOutlook> {
+        val home = day.home(state.places) ?: return emptyList()
+        val forecast = weather.forecast(home) ?: return emptyList()
+        val today = LocalDate.now()
+        return (0 until OUTLOOK_DAYS).mapNotNull { offset ->
+            val date = today.plusDays(offset.toLong())
+            dayOutlook(date, forecast.hours, day.moments(date, state.entries, state.places, home))
+        }
+    }
 
     internal fun save(entry: PlanEntry) {
         familyId?.let { plans.save(it, entry) }
@@ -103,6 +131,8 @@ class WeeklyPlanViewModel @Inject constructor(
         familyId?.let { plans.delete(it, entry.id) }
     }
 }
+
+private const val OUTLOOK_DAYS = 7
 
 /** "Weekly plan" on the Family tab: the regular trips the weather is told for, and a button to add one. */
 @Composable
@@ -118,6 +148,7 @@ internal fun WeeklyPlanContent(state: WeeklyPlanState, onSave: (PlanEntry) -> Un
     val time = remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT) }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (state.outlook.isNotEmpty()) WeekAhead(state)
         Text(stringResource(R.string.plan_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         NosCard(Modifier.fillMaxWidth()) {
             if (state.entries.isEmpty()) {
@@ -154,6 +185,43 @@ internal fun WeeklyPlanContent(state: WeeklyPlanState, onSave: (PlanEntry) -> Un
             onSave = { onSave(it); editing = null },
             onDelete = { onDelete(entry); editing = null },
         )
+    }
+}
+
+/** The next days: the sky, the warmth and the chance of rain, with each trip of that day and its weather under it. */
+@Composable
+private fun WeekAhead(state: WeeklyPlanState) {
+    val context = LocalContext.current
+    val time = remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT) }
+    NosCard(Modifier.fillMaxWidth()) {
+        Text(stringResource(R.string.week_title), style = MaterialTheme.typography.titleSmall)
+        state.outlook.forEach { day ->
+            HorizontalDivider(Modifier.padding(vertical = 6.dp), color = MaterialTheme.colorScheme.surfaceVariant)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "${day.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())} ${day.date.dayOfMonth}",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    listOf(
+                        stringResource(day.sky.label),
+                        "${state.units.degrees(day.lowC)} / ${state.units.degrees(day.highC)}",
+                        if (day.rainChance >= 30) stringResource(R.string.week_rain, day.rainChance) else null,
+                    ).filterNotNull().joinToString(" · "),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            day.moments.forEach { moment ->
+                val who = if (moment.entry.memberId == state.myMemberId) "" else " (${state.nameOf(moment.entry.memberId)})"
+                val advice = moment.advice.describe(context, state.units).ifEmpty { stringResource(R.string.weather_all_good) }
+                Text(
+                    "${moment.entry.start.format(time)} ${moment.entry.title}$who: $advice",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (moment.advice.isQuiet) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        }
     }
 }
 
