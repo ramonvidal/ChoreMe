@@ -20,6 +20,8 @@
     <string name="routine_line">%1$s · %2$s around %3$s (%4$d times lately)</string>
     <string name="routine_add">Add to the plan</string>
     <string name="routine_not_now">Not now</string>
+    <string name="plan_paused_away">Paused while they are away</string>
+    <string name="plan_paused_unseen">Paused: not seen for 3 weeks (it comes back when you go again)</string>
     <string name="week_title">The week ahead</string>
     <string name="week_rain">rain %1$d%%</string>
     <string name="weather_credit">Weather data by Open-Meteo.com (CC BY 4.0)</string>

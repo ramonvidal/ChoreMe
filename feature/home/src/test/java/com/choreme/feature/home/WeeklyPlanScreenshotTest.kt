@@ -15,6 +15,7 @@ import com.choreme.core.model.Role
 import com.choreme.core.model.location.GeoPoint
 import com.choreme.core.model.location.Place
 import com.choreme.core.model.weather.DayOutlook
+import com.choreme.core.model.weather.PauseReason
 import com.choreme.core.model.weather.PlanEntry
 import com.choreme.core.model.weather.RoutineSuggestion
 import com.choreme.core.model.weather.WeatherHour
@@ -71,7 +72,7 @@ class WeeklyPlanScreenshotTest {
             ChoreMeTheme(darkTheme = false, dynamicColor = false) {
                 Surface(Modifier.fillMaxSize()) {
                     Column(Modifier.padding(16.dp)) {
-                        WeeklyPlanContent(WeeklyPlanState(entries, places, listOf(ramon, ana), isParent = true, myMemberId = "ramon", outlook = outlook(entries), suggestions = listOf(RoutineSuggestion("gym", setOf(DayOfWeek.WEDNESDAY), LocalTime.of(18, 0), 4))), onSave = {}, onDelete = {})
+                        WeeklyPlanContent(WeeklyPlanState(entries, places, listOf(ramon, ana), isParent = true, myMemberId = "ramon", outlook = outlook(entries), suggestions = listOf(RoutineSuggestion("gym", setOf(DayOfWeek.WEDNESDAY), LocalTime.of(18, 0), 4)), paused = mapOf("b" to PauseReason.AWAY, "c" to PauseReason.UNSEEN)), onSave = {}, onDelete = {})
                     }
                 }
             }
@@ -80,6 +81,8 @@ class WeeklyPlanScreenshotTest {
         compose.onNodeWithText("Add a trip").assertExists()
         compose.onNodeWithText("The week ahead").assertExists()
         compose.onNodeWithText("We noticed a habit").assertExists()
+        compose.onNodeWithText("Paused while they are away").assertExists()
+        compose.onNodeWithText("Paused: not seen", substring = true).assertExists()
         compose.onNodeWithText("Add to the plan").assertExists()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/tab-home-week.png")
     }

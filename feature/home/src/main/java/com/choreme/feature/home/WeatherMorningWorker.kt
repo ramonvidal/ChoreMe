@@ -17,7 +17,9 @@ import com.choreme.core.data.FamilyRepository
 import com.choreme.core.data.FirebaseAvailability
 import com.choreme.core.data.LocationRepository
 import com.choreme.core.data.PlanRepository
+import com.choreme.core.location.RoutineLog
 import com.choreme.core.model.AlertKind
+import com.choreme.core.model.weather.activeEntries
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.model.weather.AirNote
 import com.choreme.core.model.weather.Extreme
@@ -56,6 +58,7 @@ internal class WeatherMorningWorker @AssistedInject constructor(
     private val day: DayWeather,
     private val units: WeatherSettings,
     private val notifications: NotificationSettings,
+    private val routine: RoutineLog,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
@@ -70,7 +73,7 @@ internal class WeatherMorningWorker @AssistedInject constructor(
         val now = LocalDateTime.now()
         val forecast = weather.forecast(home) ?: return Result.retry()
         val extremes = extremesIn(forecast.between(now, now.plusHours(24)))
-        val moments = day.moments(now.toLocalDate(), entries, places, home).filter { it.end.isAfter(now) }
+        val moments = day.moments(now.toLocalDate(), activeEntries(entries, members, now.toLocalDate(), session.memberId, routine.lastVisits()), places, home).filter { it.end.isAfter(now) }
         val air = airNote(weather.air(home)?.between(now, now.plusHours(12)).orEmpty())
         if (moments.isEmpty() && extremes.isEmpty() && air.isQuiet) return Result.success()
 

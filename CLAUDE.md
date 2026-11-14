@@ -18,7 +18,7 @@ in the way and what you propose, before writing the code.
 | `:core:data` | Firebase: auth and Firestore repositories | `:core:model` |
 | `:core:ui` | Theme, shared composables, strings used by more than one feature, error messages | `:core:model` |
 | `:core:calendar` | The phone's calendars (Android `CalendarContract`): read events, add events with alerts | `:core:model` |
-| `:core:location` | The phone's own position (fused location provider), location permissions, the "share my location" switch | `:core:model` |
+| `:core:location` | The phone's own position (fused location provider), location permissions, the "share my location" switch, this phone's own log of visits (habits; never uploaded) | `:core:model` |
 | `:core:settings` | This phone's choices: which alerts it shows, quiet hours. Read by the features' workers | `:core:model` |
 | `:core:update` | Updating the app itself: checks the GitHub release page, downloads the APK, hands it to Android's installer | `:core:model` |
 | `:core:weather` | The weather forecast, air quality and pollen for the places and times of the family's routine (Open-Meteo: free, no key; only coordinates rounded to about 1 km leave the phone) | `:core:model` |

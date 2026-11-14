@@ -4,6 +4,7 @@ import android.content.Context
 import com.choreme.core.model.weather.Visit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,7 +23,7 @@ class RoutineLog @Inject constructor(@ApplicationContext context: Context) {
         val lines = (prefs.getString(VISITS, "").orEmpty().lines().filter { it.isNotBlank() } + "${at.toEpochMilli()}|$placeId")
             .filter { it.substringBefore('|').toLongOrNull()?.let { ms -> ms >= keep } == true }
             .takeLast(MAX_VISITS)
-        prefs.edit().putString(VISITS, lines.joinToString("\n")).apply()
+        prefs.edit().putString(VISITS, lines.joinToString("\n")).putLong(LAST + placeId, at.toEpochMilli()).apply()
     }
 
     @Synchronized
@@ -32,6 +33,13 @@ class RoutineLog @Inject constructor(@ApplicationContext context: Context) {
             val place = line.substringAfter('|', "").takeIf { it.isNotEmpty() } ?: return@mapNotNull null
             Visit(place, Instant.ofEpochMilli(ms).atZone(zone).toLocalDateTime())
         }
+
+    /** The day this phone last arrived at each place, kept even after the visits themselves are forgotten. */
+    fun lastVisits(zone: ZoneId = ZoneId.systemDefault()): Map<String, LocalDate> =
+        prefs.all.mapNotNull { (key, value) ->
+            if (!key.startsWith(LAST) || value !is Long) null
+            else key.removePrefix(LAST) to Instant.ofEpochMilli(value).atZone(zone).toLocalDate()
+        }.toMap()
 
     /** Habits the person turned down, by their [com.choreme.core.model.weather.RoutineSuggestion.key]. */
     fun dismissed(): Set<String> = prefs.getStringSet(DISMISSED, emptySet()).orEmpty().toSet()
@@ -50,6 +58,7 @@ class RoutineLog @Inject constructor(@ApplicationContext context: Context) {
     private companion object {
         const val VISITS = "visits"
         const val DISMISSED = "dismissed"
+        const val LAST = "last_"
         const val KEEP_DAYS = 60L
         const val MAX_VISITS = 500
     }

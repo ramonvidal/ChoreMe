@@ -50,7 +50,9 @@ import com.choreme.core.weather.WeatherRepository
 import kotlinx.coroutines.flow.mapLatest
 import java.time.LocalDate
 import com.choreme.core.location.RoutineLog
+import com.choreme.core.model.weather.PauseReason
 import com.choreme.core.model.weather.PlanEntry
+import com.choreme.core.model.weather.pausedEntries
 import com.choreme.core.model.weather.RoutineSuggestion
 import com.choreme.core.model.weather.homePlace
 import com.choreme.core.model.weather.learnRoutine
@@ -88,6 +90,8 @@ internal data class WeeklyPlanState(
     val units: WeatherUnits = WeatherUnits(),
     /** Habits noticed from this phone's own visits, for a parent to add to the plan or turn down. */
     val suggestions: List<RoutineSuggestion> = emptyList(),
+    /** Entries left out of the weather for now, with why (their owner is away, or a habit gone unseen). */
+    val paused: Map<String, PauseReason> = emptyMap(),
 ) {
     fun nameOf(memberId: String) = members.firstOrNull { it.id == memberId }?.name.orEmpty()
 }
@@ -120,7 +124,7 @@ class WeeklyPlanViewModel @Inject internal constructor(
             )
         }
     }.combine(settings.units) { state, units -> state.copy(units = units) }
-        .combine(refresh) { state, _ -> state.copy(suggestions = suggestionsFor(state)) }
+        .combine(refresh) { state, _ -> state.copy(suggestions = suggestionsFor(state), paused = pausedEntries(state.entries, state.members, LocalDate.now(), state.myMemberId, routine.lastVisits())) }
         .mapLatest { state -> state.copy(outlook = outlookOf(state)) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeeklyPlanState())
 
@@ -143,7 +147,7 @@ class WeeklyPlanViewModel @Inject internal constructor(
         val today = LocalDate.now()
         return (0 until OUTLOOK_DAYS).mapNotNull { offset ->
             val date = today.plusDays(offset.toLong())
-            dayOutlook(date, forecast.hours, day.moments(date, state.entries, state.places, home))
+            dayOutlook(date, forecast.hours, day.moments(date, state.entries.filter { it.id !in state.paused }, state.places, home))
         }
     }
 
@@ -195,6 +199,13 @@ internal fun WeeklyPlanContent(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    state.paused[entry.id]?.let { reason ->
+                        Text(
+                            stringResource(if (reason == PauseReason.AWAY) R.string.plan_paused_away else R.string.plan_paused_unseen),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
             }
         }

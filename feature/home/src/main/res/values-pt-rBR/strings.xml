@@ -22,6 +22,8 @@
     <string name="routine_line">%1$s · %2$s por volta de %3$s (%4$d vezes ultimamente)</string>
     <string name="routine_add">Botar no plano</string>
     <string name="routine_not_now">Agora não</string>
+    <string name="plan_paused_away">Em pausa enquanto a pessoa tá fora</string>
+    <string name="plan_paused_unseen">Em pausa: faz 3 semanas que não aparece lá (volta quando você for de novo)</string>
     <string name="week_title">A semana que vem</string>
     <string name="week_rain">chuva %1$d%%</string>
     <string name="weather_credit">Dados do tempo: Open-Meteo.com (CC BY 4.0)</string>

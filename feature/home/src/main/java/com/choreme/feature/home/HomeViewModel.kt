@@ -17,7 +17,9 @@ import com.choreme.core.model.home.DayTimeline
 import com.choreme.core.model.home.dayTimeline
 import com.choreme.core.model.location.Place
 import com.choreme.core.model.session.SessionState
+import com.choreme.core.location.RoutineLog
 import com.choreme.core.model.weather.AirNote
+import com.choreme.core.model.weather.activeEntries
 import com.choreme.core.model.weather.DRYING_LOOKAHEAD
 import com.choreme.core.model.weather.dayOutlook
 import com.choreme.core.model.weather.dryingTip
@@ -66,6 +68,7 @@ class HomeViewModel @Inject internal constructor(
     private val weather: WeatherRepository,
     settings: WeatherSettings,
     private val day: DayWeather,
+    private val routine: RoutineLog,
 ) : ViewModel() {
     private class Inputs(
         val memberId: String,
@@ -86,7 +89,9 @@ class HomeViewModel @Inject internal constructor(
                 families.observeMembers(session.familyId),
                 settings.units,
                 refresh,
-            ) { entries, places, members, units, _ -> Inputs(session.memberId, entries, places, members.associate { it.id to it.name }, units) }
+            ) { entries, places, members, units, _ ->
+                val active = activeEntries(entries, members, LocalDate.now(), session.memberId, routine.lastVisits())
+                Inputs(session.memberId, active, places, members.associate { it.id to it.name }, units) }
             val events = combine(choice.selected, refresh) { selected, _ -> selected }.flatMapLatest { selected -> eventsToday(selected) }
             combine(inputs, chores.observeChores(session.familyId), groceries.observeItems(session.familyId), events, ::Data)
                 .mapLatest { compute(it) }
