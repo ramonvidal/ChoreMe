@@ -90,12 +90,12 @@ class AgendaTabScreenshotTest {
     @Test
     @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")
     fun storeEn() {
-        shoot("store-6-agenda-en", state, dark = false)
+        shoot("store-5-agenda-en", state.copy(view = AgendaView.MONTH), dark = false)
     }
 
     @Test
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     fun storePt() {
-        shoot("store-6-agenda-pt", state, dark = false)
+        shoot("store-5-agenda-pt", state.copy(view = AgendaView.MONTH), dark = false)
     }
 }

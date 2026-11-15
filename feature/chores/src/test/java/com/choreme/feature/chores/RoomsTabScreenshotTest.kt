@@ -103,16 +103,4 @@ class RoomsTabScreenshotTest {
     fun storePt() {
         shoot("store-4-rooms-pt", state, dark = false)
     }
-
-    @Test
-    @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")
-    fun storeDetailEn() {
-        shoot("store-5-room-en", state, dark = false, open = "bath1")
-    }
-
-    @Test
-    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
-    fun storeDetailPt() {
-        shoot("store-5-room-pt", state, dark = false, open = "bath1")
-    }
 }

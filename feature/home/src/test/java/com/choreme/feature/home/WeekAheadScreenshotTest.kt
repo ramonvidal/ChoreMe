@@ -56,9 +56,33 @@ class WeekAheadScreenshotTest {
         }
     }
 
+    private val state get() = WeekAheadState(outlook(), members = listOf(ramon), myMemberId = "ramon", hasTrips = true, loading = false)
+
+    private fun shootStore(name: String) {
+        compose.setContent {
+            ChoreMeTheme(darkTheme = false, dynamicColor = false) {
+                Surface(Modifier.fillMaxSize()) {
+                    Column {
+                        HomeSubTabs(2) {}
+                        WeekAheadContent(state, onPlanTrips = {})
+                    }
+                }
+            }
+        }
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")
+    }
+
+    // Google Play screenshots: 1080 x 1920, in English and in Baianês.
+    @Test
+    @Config(qualifiers = "en-w360dp-h640dp-xxhdpi")
+    fun storeEn() = shootStore("store-6-week-en")
+
+    @Test
+    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
+    fun storePt() = shootStore("store-6-week-pt")
+
     @Test
     fun weekAhead() {
-        val state = WeekAheadState(outlook(), members = listOf(ramon), myMemberId = "ramon", hasTrips = true, loading = false)
         compose.setContent {
             ChoreMeTheme(darkTheme = false, dynamicColor = false) {
                 Surface(Modifier.fillMaxSize()) {
