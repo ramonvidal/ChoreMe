@@ -9,6 +9,8 @@ plugins {
 // still builds, so CI and first-time contributors aren't blocked; sync just won't work.
 if (file("google-services.json").exists()) {
     apply(plugin = libs.plugins.google.services.get().pluginId)
+    // Crash reports go to Firebase Crashlytics (free); the person can turn them off under Settings.
+    apply(plugin = libs.plugins.firebase.crashlytics.plugin.get().pluginId)
 }
 
 android {
@@ -93,6 +95,8 @@ dependencies {
     implementation(projects.feature.family)
     implementation(projects.feature.settings)
 
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)

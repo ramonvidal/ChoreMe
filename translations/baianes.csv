@@ -709,6 +709,8 @@ feature/settings,updates_installed,,This phone has Nos Corre! %1$s.,Este celular
 feature/settings,updates_section,,App updates,Atualizações do app
 feature/settings,updates_summary,,Version %1$s,Versão %1$s
 feature/settings,updates_up_to_date,,You have the newest version.,Você tá com a versão mais nova.
+feature/settings,crash_reports,,Crash reports,Relatórios de falha
+feature/settings,crash_reports_hint,,"If the app crashes, sends an anonymous technical report so it can be fixed. No family data.","Se o app travar, manda um relatório técnico anônimo pra ele ser consertado. Sem dados da família."
 feature/update,update_available,,Nos Corre! %1$s is available,Saiu o Nos Corre! %1$s
 feature/update,update_install,,Install,Instalar
 feature/update,update_later,,Later,Depois

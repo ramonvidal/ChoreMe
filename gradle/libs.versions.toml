@@ -12,6 +12,7 @@ navigation = "2.9.1"
 composeBom = "2025.06.01"
 firebaseBom = "33.16.0"
 googleServices = "4.4.3"
+firebaseCrashlyticsPlugin = "3.0.4"
 coroutines = "1.10.2"
 credentials = "1.5.0"
 googleId = "1.1.1"
@@ -56,6 +57,7 @@ androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
@@ -95,3 +97,4 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+firebase-crashlytics-plugin = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }

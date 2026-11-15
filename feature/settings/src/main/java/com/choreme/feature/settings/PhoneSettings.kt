@@ -128,6 +128,9 @@ internal fun PhoneSettings(viewModel: PhoneSettingsViewModel = hiltViewModel()) 
         val animatedHouse by viewModel.animatedHouse.collectAsStateWithLifecycle()
         SwitchRow(stringResource(R.string.animated_house), stringResource(R.string.animated_house_hint), animatedHouse) { viewModel.setAnimatedHouse(it) }
 
+        val crashReports by viewModel.crashReports.collectAsStateWithLifecycle()
+        SwitchRow(stringResource(R.string.crash_reports), stringResource(R.string.crash_reports_hint), crashReports) { viewModel.setCrashReports(it) }
+
         val units by viewModel.weatherUnits.collectAsStateWithLifecycle()
         FoldRow(
             title = stringResource(R.string.units_section),

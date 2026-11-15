@@ -91,4 +91,6 @@
     <string name="updates_section">Atualizações do app</string>
     <string name="updates_summary">Versão %1$s</string>
     <string name="updates_up_to_date">Você tá com a versão mais nova.</string>
+    <string name="crash_reports">Relatórios de falha</string>
+    <string name="crash_reports_hint">Se o app travar, manda um relatório técnico anônimo pra ele ser consertado. Sem dados da família.</string>
 </resources>

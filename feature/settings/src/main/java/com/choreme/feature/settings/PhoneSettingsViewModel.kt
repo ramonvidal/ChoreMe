@@ -7,6 +7,7 @@ import com.choreme.core.model.AlertSettings
 import com.choreme.core.model.QuietHours
 import com.choreme.core.push.PushRegistration
 import com.choreme.core.settings.AppearanceSettings
+import com.choreme.core.settings.DiagnosticsSettings
 import com.choreme.core.settings.NotificationSettings
 import com.choreme.core.settings.ThemeMode
 import com.choreme.core.settings.WeatherSettings
@@ -39,7 +40,12 @@ class PhoneSettingsViewModel @Inject constructor(
     private val updates: UpdateRepository,
     private val appearance: AppearanceSettings,
     private val weatherSettings: WeatherSettings,
+    private val diagnostics: DiagnosticsSettings,
 ) : ViewModel() {
+    val crashReports: StateFlow<Boolean> = diagnostics.crashReports
+
+    fun setCrashReports(on: Boolean) = diagnostics.setCrashReports(on)
+
     val weatherUnits: StateFlow<WeatherUnits> = weatherSettings.units
 
     fun setTemperatureUnit(unit: TemperatureUnit) = weatherSettings.setTemperature(unit)

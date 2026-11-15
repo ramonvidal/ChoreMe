@@ -23,8 +23,10 @@ request, but Google asks to declare it as shared because it leaves the developer
 | Location: Approximate location | Yes | **Yes**, with the weather service Open-Meteo | Yes | App functionality (the weather for the phone's position and for saved places, rounded to about 1 km, sent without any account or family ID) |
 | Messages: Other in-app messages | Yes | No | Yes | App functionality (family messages and notes) |
 | App activity: Other user-generated content | Yes | No | No | App functionality (chores, groceries) |
-| Device or other IDs | Yes | No | No | App functionality (Firebase installation ID, notification address for ntfy) |
+| Device or other IDs | Yes | No | No | App functionality (Firebase installation ID, notification address for ntfy); also Crashlytics' install ID for crash reports |
+| App info and performance: Crash logs | Yes | No | **Yes** (Settings, Crash reports) | Analytics (finding and fixing crashes), through Firebase Crashlytics as service provider |
+| App info and performance: Diagnostics | Yes | No | **Yes** (same switch) | Analytics (device model, Android and app versions sent with a crash) |
 
 Not collected: financial info, health and fitness, contacts, photos and videos, audio, files,
-web browsing, app interactions for analytics, crash logs, diagnostics. Calendar events are read
+web browsing, app interactions for analytics. Calendar events are read
 and written on the phone only and are not sent to the app's servers, so they are not "collected".
