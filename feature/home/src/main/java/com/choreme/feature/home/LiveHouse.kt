@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -123,17 +124,20 @@ internal fun LiveHouse(
         }
     }
 
-    Canvas(modifier.aspectRatio(HOUSE_RATIO)) {
+    Canvas(modifier.aspectRatio(HOUSE_RATIO).clipToBounds()) {
         val px = Px(this, size.width / W)
         val time = if (moves) t else STILL_T
         drawSky(px, scene, time)
+        val shown = previewGag?.let { ActiveGag(it, time - previewAt * it.seconds) } ?: gag
+        val progress = shown?.let { ((time - it.startedAt) / it.gag.seconds).coerceIn(0f, 1f) } ?: 0f
+        // The rainbow stands behind the house; every other event is in front.
+        if (shown?.gag == Gag.RAINBOW) drawGag(px, Gag.RAINBOW, progress, scene, time)
         drawGround(px, scene, time)
         drawBackdropDecor(px, scene, time)
         drawTree(px, scene, time)
         drawHouse(px, scene, time)
         drawWeather(px, scene, time)
-        val shown = previewGag?.let { ActiveGag(it, time - previewAt * it.seconds) } ?: gag
-        if (shown != null) drawGag(px, shown.gag, ((time - shown.startedAt) / shown.gag.seconds).coerceIn(0f, 1f), scene, time)
+        if (shown != null && shown.gag != Gag.RAINBOW) drawGag(px, shown.gag, progress, scene, time)
     }
 }
 
@@ -251,7 +255,7 @@ private val Festive = listOf(Color(0xFFE63946), Color(0xFFFFD84A), Color(0xFF4EA
 /** Things of the special dates that stand on the lawn, behind the house. */
 private fun drawBackdropDecor(p: Px, s: SceneInput, t: Float) {
     when (s.occasion) {
-        Occasion.EASTER -> listOf(30f to 14f, 52f to 20f, 18f to 22f, 64f to 12f, 40f to 24f).forEachIndexed { i, (x, y) ->
+        Occasion.EASTER -> listOf(30f to 8f, 52f to 14f, 18f to 15f, 64f to 9f, 40f to 17f).forEachIndexed { i, (x, y) ->
             val c = Festive[i % Festive.size]
             p.r(x, GY + y, 4f, 5f, c); p.r(x + 1, GY + y - 1, 2f, 1f, c); p.r(x, GY + y + 2, 4f, 1f, Color.White, 0.8f)
         }
