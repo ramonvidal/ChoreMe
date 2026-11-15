@@ -68,6 +68,7 @@ internal fun PhoneSettings(viewModel: PhoneSettingsViewModel = hiltViewModel()) 
     val context = LocalContext.current
     var open by rememberSaveable { mutableStateOf<Fold?>(null) }
     var picking by remember { mutableStateOf<Boolean?>(null) } // true: start, false: end
+    var showNtfyHelp by rememberSaveable { mutableStateOf(false) }
     val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
     val toggle = { fold: Fold -> open = if (open == fold) null else fold }
 
@@ -184,9 +185,7 @@ internal fun PhoneSettings(viewModel: PhoneSettingsViewModel = hiltViewModel()) 
                 }
             } else {
                 Text(stringResource(R.string.instant_off), style = MaterialTheme.typography.bodyMedium)
-                TextButton(onClick = {
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PushRegistration.NTFY_PLAY_STORE_URL)))
-                }) { Text(stringResource(R.string.instant_install)) }
+                TextButton(onClick = { showNtfyHelp = true }) { Text(stringResource(R.string.instant_install)) }
             }
         }
         if (viewModel.canSelfUpdate) {
@@ -225,6 +224,15 @@ internal fun PhoneSettings(viewModel: PhoneSettingsViewModel = hiltViewModel()) 
                 }) { Text(stringResource(R.string.ok)) }
             },
             dismissButton = { TextButton(onClick = { picking = null }) { Text(stringResource(CoreUiR.string.cancel)) } },
+        )
+    }
+    if (showNtfyHelp) {
+        com.choreme.core.ui.NtfyHelpDialog(
+            onInstall = {
+                showNtfyHelp = false
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PushRegistration.NTFY_PLAY_STORE_URL)))
+            },
+            onDismiss = { showNtfyHelp = false },
         )
     }
 }

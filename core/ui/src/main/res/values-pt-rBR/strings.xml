@@ -69,6 +69,14 @@
     <string name="extreme_frost">Geada forte: gelo e frio de rachar</string>
     <string name="extreme_gale">Ventania forte a caminho</string>
     <string name="extreme_rain">Chuva torrencial a caminho</string>
+    <string name="ntfy_help_title">Alertas na hora com o ntfy</string>
+    <string name="ntfy_help_intro">Sem ele, os alertas podem levar de 15 a 30 minutos. Com ele, chegam em segundos. É grátis e não precisa de conta.</string>
+    <string name="ntfy_help_step1">1. Instale o app ntfy na Google Play.</string>
+    <string name="ntfy_help_step2">2. Volte pro Nos Corre!. Ele se conecta ao ntfy sozinho, em poucos segundos.</string>
+    <string name="ntfy_help_step3">3. Pronto: o status diz que os alertas na hora estão ligados.</string>
+    <string name="ntfy_help_stuck">Ainda desligado depois de um minuto? Abra o ntfy uma vez e depois abra o Nos Corre! de novo.</string>
+    <string name="ntfy_help_open">Abrir a Google Play</string>
+    <string name="ntfy_help_later">Agora não</string>
     <plurals name="points">
         <item quantity="one">%d ponto</item>
         <item quantity="other">%d pontos</item>

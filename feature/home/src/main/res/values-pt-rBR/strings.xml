@@ -6,6 +6,12 @@
     <string name="weather_unavailable">Sem previsão agora. Veja a conexão.</string>
     <string name="weather_feels_like">sensação de %1$s</string>
     <string name="weather_wind">vento %1$s</string>
+    <string name="morning_channel">Resumo da manhã</string>
+    <string name="morning_channel_description">O tempo, a agenda e os corres do dia numa notificação só</string>
+    <string name="morning_title">Bom dia · %1$s</string>
+    <string name="morning_title_plain">Bom dia</string>
+    <string name="morning_all_day">O dia todo: %1$s</string>
+    <string name="morning_chores_line">Corres: %1$s</string>
     <string name="weather_all_good">tá de boa</string>
     <string name="weather_nothing_planned">Nenhum compromisso pro resto de hoje.</string>
     <string name="weather_needs_place">Salve seu cafofo na aba Mapa pra ver o tempo aqui.</string>
@@ -25,9 +31,6 @@
     <string name="week_plan_trips">Planejar trajetos em Configurações</string>
     <string name="week_rain">chuva %1$d%%</string>
     <string name="weather_credit">Dados do tempo: Open-Meteo.com (CC BY 4.0)</string>
-    <string name="weather_channel">Tempo de manhã</string>
-    <string name="weather_channel_description">O tempo pros trajetos de sempre da família no dia, e avisos de temporal</string>
-    <string name="weather_morning_title">Hoje: %1$s</string>
     <string name="weather_close">Fechar</string>
     <string name="home_today">Hoje</string>
     <string name="home_open_chores">Corres (%1$d)</string>
@@ -80,6 +83,18 @@
     <string name="home_tab_today">Hoje</string>
     <string name="home_tab_agenda">Agenda</string>
     <string name="home_tab_week">Semana</string>
+    <plurals name="morning_mine">
+        <item quantity="one">%d é seu</item>
+        <item quantity="other">%d são seus</item>
+    </plurals>
+    <plurals name="morning_overdue">
+        <item quantity="one">%d atrasado</item>
+        <item quantity="other">%d atrasados</item>
+    </plurals>
+    <plurals name="morning_awaiting">
+        <item quantity="one">%d pra aprovar</item>
+        <item quantity="other">%d pra aprovar</item>
+    </plurals>
     <plurals name="home_chores">
         <item quantity="one">%d corre</item>
         <item quantity="other">%d corres</item>

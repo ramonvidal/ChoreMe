@@ -73,4 +73,12 @@
     <string name="extreme_frost">Hard frost: ice and bitter cold</string>
     <string name="extreme_gale">Gale-force wind expected</string>
     <string name="extreme_rain">Torrential rain expected</string>
+    <string name="ntfy_help_title">Instant alerts with ntfy</string>
+    <string name="ntfy_help_intro">Without it, alerts can take 15 to 30 minutes. With it, they arrive in seconds. It is free and needs no account.</string>
+    <string name="ntfy_help_step1">1. Install the ntfy app from Google Play.</string>
+    <string name="ntfy_help_step2">2. Come back to Nos Corre!. It connects to ntfy by itself, in a few seconds.</string>
+    <string name="ntfy_help_step3">3. Done: the status says that instant alerts are on.</string>
+    <string name="ntfy_help_stuck">Still off after a minute? Open ntfy once, then open Nos Corre! again.</string>
+    <string name="ntfy_help_open">Open Google Play</string>
+    <string name="ntfy_help_later">Not now</string>
 </resources>

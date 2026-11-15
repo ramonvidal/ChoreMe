@@ -4,6 +4,24 @@
     <string name="weather_unavailable">No forecast right now. Check the connection.</string>
     <string name="weather_feels_like">feels like %1$s</string>
     <string name="weather_wind">wind %1$s</string>
+    <string name="morning_channel">Morning summary</string>
+    <string name="morning_channel_description">The weather, the calendar and the chores of the day in one notification</string>
+    <string name="morning_title">Good morning · %1$s</string>
+    <string name="morning_title_plain">Good morning</string>
+    <string name="morning_all_day">All day: %1$s</string>
+    <string name="morning_chores_line">Chores: %1$s</string>
+    <plurals name="morning_mine">
+        <item quantity="one">%d is yours</item>
+        <item quantity="other">%d are yours</item>
+    </plurals>
+    <plurals name="morning_overdue">
+        <item quantity="one">%d overdue</item>
+        <item quantity="other">%d overdue</item>
+    </plurals>
+    <plurals name="morning_awaiting">
+        <item quantity="one">%d to approve</item>
+        <item quantity="other">%d to approve</item>
+    </plurals>
     <string name="weather_all_good">all good</string>
     <string name="weather_nothing_planned">No trips planned for the rest of today.</string>
     <string name="weather_needs_place">Save your home on the Map tab to see the weather here.</string>
@@ -23,9 +41,6 @@
     <string name="week_plan_trips">Plan trips in Settings</string>
     <string name="week_rain">rain %1$d%%</string>
     <string name="weather_credit">Weather data by Open-Meteo.com (CC BY 4.0)</string>
-    <string name="weather_channel">Weather in the morning</string>
-    <string name="weather_channel_description">The weather for the family\'s regular trips of the day, and storm warnings</string>
-    <string name="weather_morning_title">Today: %1$s</string>
     <string name="weather_close">Close</string>
     <string name="home_today">Today</string>
     <string name="home_open_chores">Chores (%1$d)</string>

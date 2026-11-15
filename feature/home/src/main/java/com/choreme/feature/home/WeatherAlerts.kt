@@ -11,17 +11,20 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.concurrent.TimeUnit
 
-/** The morning weather notification: early every day, posted by each phone itself. Scheduled by `:app` at startup. */
+/** The morning summary notification (weather, calendar, chores): early every day, posted by each phone itself. Scheduled by `:app` at startup. */
 object WeatherAlerts {
-    private const val WORK_NAME = "weather-morning"
+    private const val WORK_NAME = "morning-summary"
+    /** The weather-only notification this one replaces. */
+    private const val OLD_WORK_NAME = "weather-morning"
     private val MORNING: LocalTime = LocalTime.of(7, 0)
 
     /** Safe to call on every app start: an existing schedule is kept. */
     fun schedule(context: Context) {
-        val request = PeriodicWorkRequestBuilder<WeatherMorningWorker>(1, TimeUnit.DAYS)
+        val request = PeriodicWorkRequestBuilder<MorningSummaryWorker>(1, TimeUnit.DAYS)
             .setInitialDelay(untilNext(MORNING).toMillis(), TimeUnit.MILLISECONDS)
             .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
             .build()
+        WorkManager.getInstance(context).cancelUniqueWork(OLD_WORK_NAME)
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request)
     }
 

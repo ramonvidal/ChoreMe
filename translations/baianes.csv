@@ -77,6 +77,14 @@ core/ui,extreme_heat,,Heat wave: stay cool and drink water,Onda de calor: se ref
 core/ui,extreme_frost,,Hard frost: ice and bitter cold,Geada forte: gelo e frio de rachar
 core/ui,extreme_gale,,Gale-force wind expected,Ventania forte a caminho
 core/ui,extreme_rain,,Torrential rain expected,Chuva torrencial a caminho
+core/ui,ntfy_help_title,,Instant alerts with ntfy,Alertas na hora com o ntfy
+core/ui,ntfy_help_intro,,"Without it, alerts can take 15 to 30 minutes. With it, they arrive in seconds. It is free and needs no account.","Sem ele, os alertas podem levar de 15 a 30 minutos. Com ele, chegam em segundos. É grátis e não precisa de conta."
+core/ui,ntfy_help_step1,,1. Install the ntfy app from Google Play.,1. Instale o app ntfy na Google Play.
+core/ui,ntfy_help_step2,,"2. Come back to Nos Corre!. It connects to ntfy by itself, in a few seconds.","2. Volte pro Nos Corre!. Ele se conecta ao ntfy sozinho, em poucos segundos."
+core/ui,ntfy_help_step3,,3. Done: the status says that instant alerts are on.,3. Pronto: o status diz que os alertas na hora estão ligados.
+core/ui,ntfy_help_stuck,,"Still off after a minute? Open ntfy once, then open Nos Corre! again.",Ainda desligado depois de um minuto? Abra o ntfy uma vez e depois abra o Nos Corre! de novo.
+core/ui,ntfy_help_open,,Open Google Play,Abrir a Google Play
+core/ui,ntfy_help_later,,Not now,Agora não
 feature/chores,section_awaiting,,Waiting for a parent's OK,Esperando o OK de mainha ou painho
 feature/chores,section_to_do,,Needs doing,Pra fazer
 feature/chores,section_later,,Later (%1$d),Mais pra frente (%1$d)
@@ -162,15 +170,6 @@ feature/chores,approval_body,,Waiting for your OK,Esperando seu OK
 feature/chores,saved_chores,,Saved,Salvos
 feature/chores,saved_chore_hint,,Chores you type are saved here for next time. Long-press one to remove it.,Os corres que você escreve ficam salvos aqui pra próxima. Segure um pra tirar.
 feature/chores,remove_saved_chore,,"Remove ""%1$s"" from saved chores?","Tirar ""%1$s"" dos corres salvos?"
-feature/chores,reminder_channel,,Chore reminders,Lembretes dos corres
-feature/chores,reminder_channel_description,,A morning summary of the chores due today,Um resumo de manhã dos corres de hoje
-feature/chores,reminder_to_do,one,%d chore to do today,%d corre pra hoje
-feature/chores,reminder_to_do,other,%d chores to do today,%d corres pra hoje
-feature/chores,reminder_overdue,one,%d is late,%d atrasado
-feature/chores,reminder_overdue,other,%d are late,%d atrasados
-feature/chores,reminder_awaiting,one,%d waiting for your OK,%d esperando seu OK
-feature/chores,reminder_awaiting,other,%d waiting for your OK,%d esperando seu OK
-feature/chores,reminder_body,,Anyone can grab one in Nos Corre!.,Qualquer um pode pegar um no Nos Corre!.
 feature/chores,editor_urgent,,Urgent,Urgente
 feature/chores,editor_title_placeholder,,Type what needs doing…,Escreva o que tem pra fazer…
 feature/chores,editor_new_chore_hint,,Nothing like it yet. It'll be saved for next time.,Nada parecido ainda. Fica salvo pra próxima.
@@ -206,8 +205,6 @@ feature/chores,timed_body,,You asked to be reminded about this.,Você pediu pra 
 feature/chores,chores_title,,Chores,Corres
 feature/chores,summary_yours,one,%d is yours,%d é seu
 feature/chores,summary_yours,other,%d are yours,%d são seus
-feature/chores,reminder_mine,one,You're on %d,Você tá em %d
-feature/chores,reminder_mine,other,You're on %d,Você tá em %d
 feature/chores,summary_to_do,one,%d needs doing,%d pra fazer
 feature/chores,summary_to_do,other,%d need doing,%d pra fazer
 feature/chores,done_already,,Done already,Já fiz
@@ -428,6 +425,18 @@ feature/home,weather_loading,,Checking the sky…,Olhando o céu…
 feature/home,weather_unavailable,,No forecast right now. Check the connection.,Sem previsão agora. Veja a conexão.
 feature/home,weather_feels_like,,feels like %1$s,sensação de %1$s
 feature/home,weather_wind,,wind %1$s,vento %1$s
+feature/home,morning_channel,,Morning summary,Resumo da manhã
+feature/home,morning_channel_description,,"The weather, the calendar and the chores of the day in one notification","O tempo, a agenda e os corres do dia numa notificação só"
+feature/home,morning_title,,Good morning · %1$s,Bom dia · %1$s
+feature/home,morning_title_plain,,Good morning,Bom dia
+feature/home,morning_all_day,,All day: %1$s,O dia todo: %1$s
+feature/home,morning_chores_line,,Chores: %1$s,Corres: %1$s
+feature/home,morning_mine,one,%d is yours,%d é seu
+feature/home,morning_mine,other,%d are yours,%d são seus
+feature/home,morning_overdue,one,%d overdue,%d atrasado
+feature/home,morning_overdue,other,%d overdue,%d atrasados
+feature/home,morning_awaiting,one,%d to approve,%d pra aprovar
+feature/home,morning_awaiting,other,%d to approve,%d pra aprovar
 feature/home,weather_all_good,,all good,tá de boa
 feature/home,weather_nothing_planned,,No trips planned for the rest of today.,Nenhum compromisso pro resto de hoje.
 feature/home,weather_needs_place,,Save your home on the Map tab to see the weather here.,Salve seu cafofo na aba Mapa pra ver o tempo aqui.
@@ -447,9 +456,6 @@ feature/home,week_no_trips,,"No trips planned yet. Add the regular ones (work, g
 feature/home,week_plan_trips,,Plan trips in Settings,Planejar trajetos em Configurações
 feature/home,week_rain,,rain %1$d%%,chuva %1$d%%
 feature/home,weather_credit,,Weather data by Open-Meteo.com (CC BY 4.0),Dados do tempo: Open-Meteo.com (CC BY 4.0)
-feature/home,weather_channel,,Weather in the morning,Tempo de manhã
-feature/home,weather_channel_description,,"The weather for the family's regular trips of the day, and storm warnings","O tempo pros trajetos de sempre da família no dia, e avisos de temporal"
-feature/home,weather_morning_title,,Today: %1$s,Hoje: %1$s
 feature/home,weather_close,,Close,Fechar
 feature/home,home_today,,Today,Hoje
 feature/home,home_open_chores,,Chores (%1$d),Corres (%1$d)
@@ -616,16 +622,16 @@ feature/settings,alert_join_requests,,Join requests,Pedidos pra entrar
 feature/settings,alert_join_requests_hint,,When someone asks to join the family (parents),Quando alguém pede pra entrar na família (responsáveis)
 feature/settings,alert_messages,,Family messages,Recados da família
 feature/settings,alert_messages_hint,,When someone sends a message to everyone,Quando alguém manda um recado pra todo mundo
-feature/settings,alert_morning,,Morning summary,Resumo da manhã
-feature/settings,alert_morning_hint,,"At 8:00, what needs doing today","Às 8:00, o que tem pra fazer hoje"
+feature/settings,alert_morning,,Chores in the morning summary,Corres no resumo da manhã
+feature/settings,alert_morning_hint,,"Your chores of the day, in the notification at 7:00","Seus corres do dia, na notificação das 7h"
 feature/settings,alert_new_chores,,New chores,Corres novos
 feature/settings,alert_new_chores_hint,,When someone adds something that needs doing,Quando alguém bota uma coisa pra fazer
 feature/settings,alert_on_my_way,,On the way home,Indo pra casa
 feature/settings,alert_on_my_way_hint,,"When someone taps ""On my way home"" (needs ntfy)","Quando alguém toca em ""Tô indo pra casa"" (precisa do ntfy)"
 feature/settings,alert_shopping,,At the shop,No mercado
 feature/settings,alert_shopping_hint,,"When someone starts shopping, so you can add what's missing (needs ntfy)","Quando alguém começa a feira, pra você adicionar o que falta (precisa do ntfy)"
-feature/settings,alert_weather,,Weather in the morning,Tempo de manhã
-feature/settings,alert_weather_hint,,"At 7:00, the weather for the family's trips of the day, and storm warnings","Às 7h, o tempo pros trajetos da família no dia e avisos de temporal"
+feature/settings,alert_weather,,Weather in the morning summary,Tempo no resumo da manhã
+feature/settings,alert_weather_hint,,"The weather for the trips of the day and storm warnings, in the notification at 7:00","O tempo dos trajetos do dia e avisos de tempestade, na notificação das 7h"
 feature/settings,alert_weekly,,Week in review,Resumo da semana
 feature/settings,alert_weekly_hint,,"Sunday evening, the week's points for everyone","Domingo à noite, os pontos da semana de todo mundo"
 feature/settings,alerts_section,,Notifications,Notificações

@@ -181,6 +181,7 @@ internal fun MapContent(
 ) {
     var focus by remember { mutableStateOf<GeoPoint?>(null) }
     var addingPlace by rememberSaveable { mutableStateOf(false) }
+    var ntfyHelp by rememberSaveable { mutableStateOf(false) }
     Column(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxWidth().weight(1f)) {
             map(focus, Modifier.fillMaxSize())
@@ -247,7 +248,7 @@ internal fun MapContent(
                             state.instant.hasApp -> GreyText(stringResource(R.string.instant_connecting))
                             else -> {
                                 GreyText(stringResource(R.string.instant_off))
-                                TextButton(onClick = actions.installNtfy) { Text(stringResource(R.string.instant_install)) }
+                                TextButton(onClick = { ntfyHelp = true }) { Text(stringResource(R.string.instant_install)) }
                             }
                         }
                     }
@@ -294,6 +295,10 @@ internal fun MapContent(
             },
             dismissButton = { TextButton(onClick = { onExplainBackground(false) }) { Text(stringResource(R.string.not_now)) } },
         )
+    }
+
+    if (ntfyHelp) {
+        com.choreme.core.ui.NtfyHelpDialog(onInstall = { ntfyHelp = false; actions.installNtfy() }, onDismiss = { ntfyHelp = false })
     }
 
     if (addingPlace) {
