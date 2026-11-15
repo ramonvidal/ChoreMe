@@ -69,10 +69,11 @@ class AgendaViewModel @Inject constructor(
     chores: ChoreRepository,
 ) : ViewModel() {
     private val permission = MutableStateFlow(calendar.hasPermission())
-    private val view = MutableStateFlow(AgendaView.LIST)
+    private val view = MutableStateFlow(AgendaView.MONTH)
     private val month = MutableStateFlow(YearMonth.now())
     private val selectedDay = MutableStateFlow(LocalDate.now())
-    private val roomFilter = MutableStateFlow(RoomFilter.ALL)
+    // Opens on the month, showing the house chores (the tasks of the rooms have their own tab).
+    private val roomFilter = MutableStateFlow(RoomFilter.NO_ROOM)
 
     private val calendars = permission.flatMapLatest { granted ->
         if (granted) calendar.observeCalendars() else flowOf(emptyList())
@@ -122,7 +123,7 @@ class AgendaViewModel @Inject constructor(
             roomFilter = filter,
             hasRoomTasks = hasRooms,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AgendaUiState())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AgendaUiState(view = AgendaView.MONTH, roomFilter = RoomFilter.NO_ROOM))
 
     fun setRoomFilter(filter: RoomFilter) {
         roomFilter.value = filter
