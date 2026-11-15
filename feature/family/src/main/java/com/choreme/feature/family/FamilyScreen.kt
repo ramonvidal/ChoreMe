@@ -93,9 +93,7 @@ internal fun FamilyScreen(viewModel: FamilyViewModel = hiltViewModel()) {
             signOut = { viewModel.signOut() },
             leave = { viewModel.leave() },
             deleteMyData = { viewModel.deleteMyData { requestGoogleIdToken(context) } },
-            setPointsEnabled = { viewModel.setPointsEnabled(it) },
         ),
-        phoneSettings = { PhoneSettings() },
     )
 }
 
@@ -114,17 +112,15 @@ internal class FamilyActions(
     val signOut: () -> Unit = {},
     val leave: () -> Unit = {},
     val deleteMyData: () -> Unit = {},
-    val setPointsEnabled: (Boolean) -> Unit = {},
 )
 
-/** The whole tab, drawn from [state] alone; [phoneSettings] is "This phone", which has its own view model. */
+/** The whole tab, drawn from [state] alone. */
 @Composable
 internal fun FamilyContent(
     state: FamilyUiState,
     actionState: ActionState,
     signOutNeedsApprovalAgain: Boolean,
     actions: FamilyActions,
-    phoneSettings: @Composable () -> Unit,
 ) {
     var showAddKid by rememberSaveable { mutableStateOf(false) }
     var confirmSignOut by rememberSaveable { mutableStateOf(false) }
@@ -213,17 +209,10 @@ internal fun FamilyContent(
             }
         }
 
-        if (state.isParent) {
-            item(key = "points-setting") { PointsSetting(state.pointsOn, actions.setPointsEnabled) }
-        }
-
         if (state.isParent && state.pointsOn && state.week.isNotEmpty()) {
             item { SectionLabel(stringResource(R.string.week_title)) }
             item(key = "week") { WeekSection(state.week) }
         }
-
-        item { SectionLabel(stringResource(R.string.this_phone_title)) }
-        item(key = "this-phone") { phoneSettings() }
 
         item {
             TextButton(
@@ -396,31 +385,6 @@ private fun ProfileOption(label: String, selected: Boolean, onSelect: () -> Unit
         RadioButton(selected = selected, onClick = null)
         Spacer(Modifier.width(8.dp))
         Text(label)
-    }
-}
-
-/** For parents: whether the family plays with points. Off hides points everywhere. */
-@Composable
-internal fun PointsSetting(on: Boolean, onChange: (Boolean) -> Unit) {
-    Card(Modifier.fillMaxWidth()) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .toggleable(value = on, onValueChange = onChange, role = SemanticsRole.Switch)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.points_setting_title), style = MaterialTheme.typography.bodyLarge)
-                Text(
-                    stringResource(R.string.points_setting_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Spacer(Modifier.width(12.dp))
-            Switch(checked = on, onCheckedChange = null)
-        }
     }
 }
 

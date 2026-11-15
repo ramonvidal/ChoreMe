@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Badge
@@ -53,6 +54,8 @@ import com.choreme.feature.groceries.groceriesScreen
 import com.choreme.feature.map.MAP_ROUTE
 import com.choreme.feature.map.mapScreen
 import com.choreme.feature.chores.ADD_CHORE_KEY
+import com.choreme.feature.settings.SETTINGS_ROUTE
+import com.choreme.feature.settings.settingsScreen
 import com.choreme.feature.update.UpdateBanner
 
 enum class TopLevelDestination(
@@ -66,6 +69,7 @@ enum class TopLevelDestination(
     Groceries(GROCERIES_ROUTE, R.string.nav_groceries, Icons.Filled.ShoppingCart),
     Places(MAP_ROUTE, R.string.nav_map, Icons.Filled.Place),
     Family(FAMILY_ROUTE, R.string.nav_family, Icons.Filled.Person),
+    Settings(SETTINGS_ROUTE, R.string.nav_settings, Icons.Filled.Settings),
 }
 
 /**
@@ -127,7 +131,7 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0, choresBadge: Int = 0, groceries
                                 }
                             }
                         },
-                        label = { Text(stringResource(destination.label)) },
+                        label = { Text(stringResource(destination.label), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         colors = NavigationBarItemDefaults.colors(
                             // The selected tab: ink on a yellow rounded indicator.
                             indicatorColor = MaterialTheme.colorScheme.primaryContainer,
@@ -154,12 +158,13 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0, choresBadge: Int = 0, groceries
                     runCatching { navController.getBackStackEntry(TopLevelDestination.Today.route).savedStateHandle[ADD_CHORE_KEY] = true }
                 },
                 onOpenGroceries = { navController.navigateToTab(TopLevelDestination.Groceries.route) },
-                onOpenMap = { navController.navigateToTab(TopLevelDestination.Places.route) },
+                onOpenSettings = { navController.navigateToTab(TopLevelDestination.Settings.route) },
             )
             todayScreen(onOpenGroceries = { navController.navigateToTab(TopLevelDestination.Groceries.route) })
             groceriesScreen()
             mapScreen()
             familyScreen()
+            settingsScreen()
         }
     }
 }

@@ -18,9 +18,9 @@
     <string name="ok">OK</string>
     <string name="week_title">The week ahead</string>
     <string name="week_unavailable">No forecast for the week yet. Save your home on the Map tab and check your connection.</string>
-    <string name="week_trips_hint">Trips are planned on the Map tab.</string>
-    <string name="week_no_trips">No trips planned yet. Add the regular ones (work, gym) on the Map tab and the weather will tell you about them.</string>
-    <string name="week_plan_trips">Plan trips on the Map tab</string>
+    <string name="week_trips_hint">Trips are planned under Settings.</string>
+    <string name="week_no_trips">No trips planned yet. Add the regular ones (work, gym) under Settings and the weather will tell you about them.</string>
+    <string name="week_plan_trips">Plan trips in Settings</string>
     <string name="week_rain">rain %1$d%%</string>
     <string name="weather_credit">Weather data by Open-Meteo.com (CC BY 4.0)</string>
     <string name="weather_channel">Weather in the morning</string>

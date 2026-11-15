@@ -1,4 +1,4 @@
-package com.choreme.feature.family
+package com.choreme.feature.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

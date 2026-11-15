@@ -1,4 +1,4 @@
-package com.choreme.feature.map
+package com.choreme.feature.settings
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,7 +28,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 
-/** The trips plan (the Trips sub-tab of the Map); saved to build/outputs/roborazzi. */
+/** The trips plan (a section of the Settings tab); saved to build/outputs/roborazzi. */
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34], qualifiers = "en-w411dp-h1000dp")
 class TripPlanScreenshotTest {
@@ -53,7 +53,6 @@ class TripPlanScreenshotTest {
             ChoreMeTheme(darkTheme = false, dynamicColor = false) {
                 Surface(Modifier.fillMaxSize()) {
                     Column {
-                        MapSubTabs(1) {}
                         Column(Modifier.padding(16.dp)) { TripPlanContent(TripPlanState(entries, places, listOf(ramon, ana), isParent = true, myMemberId = "ramon", suggestions = listOf(RoutineSuggestion("gym", setOf(DayOfWeek.WEDNESDAY), LocalTime.of(18, 0), 4)), paused = mapOf("b" to PauseReason.AWAY, "c" to PauseReason.UNSEEN)), onSave = {}, onDelete = {}) }
                     }
                 }
@@ -65,6 +64,6 @@ class TripPlanScreenshotTest {
         compose.onNodeWithText("Paused while they are away").assertExists()
         compose.onNodeWithText("Paused: not seen", substring = true).assertExists()
         compose.onNodeWithText("Add to the plan").assertExists()
-        compose.onRoot().captureRoboImage("build/outputs/roborazzi/tab-map-trips.png")
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/tab-settings-trips.png")
     }
 }

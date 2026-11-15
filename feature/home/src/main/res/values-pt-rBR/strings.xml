@@ -20,9 +20,9 @@
     <string name="ok">OK</string>
     <string name="week_title">A semana que vem</string>
     <string name="week_unavailable">Ainda sem previsão da semana. Salve sua casa na aba Mapa e veja a conexão.</string>
-    <string name="week_trips_hint">Os trajetos são planejados na aba Mapa.</string>
-    <string name="week_no_trips">Ainda sem trajetos. Bote os de sempre (trabalho, academia) na aba Mapa que o tempo avisa vocês.</string>
-    <string name="week_plan_trips">Planejar trajetos na aba Mapa</string>
+    <string name="week_trips_hint">Os trajetos são planejados em Configurações.</string>
+    <string name="week_no_trips">Ainda sem trajetos. Bote os de sempre (trabalho, academia) em Configurações que o tempo avisa vocês.</string>
+    <string name="week_plan_trips">Planejar trajetos em Configurações</string>
     <string name="week_rain">chuva %1$d%%</string>
     <string name="weather_credit">Dados do tempo: Open-Meteo.com (CC BY 4.0)</string>
     <string name="weather_channel">Tempo de manhã</string>

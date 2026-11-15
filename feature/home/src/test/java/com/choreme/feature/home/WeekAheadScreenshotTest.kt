@@ -69,8 +69,8 @@ class WeekAheadScreenshotTest {
                 }
             }
         }
-        compose.onNodeWithText("Plan trips on the Map tab").assertExists()
-        compose.onNodeWithText("Trips are planned on the Map tab.").assertExists()
+        compose.onNodeWithText("Plan trips in Settings").assertExists()
+        compose.onNodeWithText("Trips are planned under Settings.").assertExists()
         compose.onAllNodesWithText("good for drying", substring = true).assertCountEquals(2) // the 3rd and 4th days
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/tab-home-week.png")
     }

@@ -91,6 +91,7 @@ dependencies {
     implementation(projects.feature.widget)
     implementation(projects.feature.update)
     implementation(projects.feature.family)
+    implementation(projects.feature.settings)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

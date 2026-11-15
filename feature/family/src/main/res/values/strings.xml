@@ -32,54 +32,6 @@
     <string name="leave_confirm">Leave the family? This phone loses access, and your location, ping address and arrival history are deleted. Chores and groceries you added stay for the family.</string>
     <string name="leave_last_confirm">You\'re the last one here. Leaving deletes the whole family: chores, groceries, places and everything else. This can\'t be undone.</string>
     <string name="delete_confirm">Leave the family and delete your Nos Corre! account? If you\'re the last one, the whole family\'s data is deleted too. This can\'t be undone.</string>
-    <!-- This phone: notifications, quiet hours, instant alerts, updates -->
-    <string name="this_phone_title">This phone</string>
-    <string name="this_phone_hint">These choices are only for this phone.</string>
-    <string name="alerts_summary">%1$d of %2$d on</string>
-    <string name="quiet_off">Off</string>
-    <string name="quiet_summary">%1$s to %2$s</string>
-    <string name="instant_summary_on">On</string>
-    <string name="instant_summary_off">Off</string>
-    <string name="updates_summary">Version %1$s</string>
-    <string name="alerts_section">Notifications</string>
-    <string name="alert_new_chores">New chores</string>
-    <string name="alert_new_chores_hint">When someone adds something that needs doing</string>
-    <string name="alert_chores_done">Chores done</string>
-    <string name="alert_chores_done_hint">When someone finishes a chore marked \"let everyone know\"</string>
-    <string name="alert_approvals">Chores to approve</string>
-    <string name="alert_approvals_hint">When a kid finishes a chore (parents)</string>
-    <string name="alert_join_requests">Join requests</string>
-    <string name="alert_join_requests_hint">When someone asks to join the family (parents)</string>
-    <string name="alert_arrivals">Arrivals and departures</string>
-    <string name="alert_arrivals_hint">When someone arrives at or leaves a saved place</string>
-    <string name="alert_on_my_way">On the way home</string>
-    <string name="alert_on_my_way_hint">When someone taps \"On my way home\" (needs ntfy)</string>
-    <string name="alert_shopping">At the shop</string>
-    <string name="alert_shopping_hint">When someone starts shopping, so you can add what\'s missing (needs ntfy)</string>
-    <string name="language_section">Language</string>
-    <string name="appearance_section">Look</string>
-    <string name="appearance_system">Same as the phone</string>
-    <string name="appearance_light">Light</string>
-    <string name="appearance_dark">Dark</string>
-    <string name="alert_morning">Morning summary</string>
-    <string name="alert_morning_hint">At 8:00, what needs doing today</string>
-    <string name="alert_weekly">Week in review</string>
-    <string name="alert_weekly_hint">Sunday evening, the week\'s points for everyone</string>
-    <string name="quiet_section">Quiet hours</string>
-    <string name="quiet_hint">Notifications still arrive, just without sound or vibration.</string>
-    <string name="quiet_from">From %1$s</string>
-    <string name="quiet_to">Until %1$s</string>
-    <string name="instant_section">Instant alerts</string>
-    <string name="instant_on">On, through ntfy. Alerts arrive within seconds.</string>
-    <string name="instant_off">Off. Install the free ntfy app to get alerts within seconds instead of within 15–30 minutes.</string>
-    <string name="instant_install">Get ntfy (free)</string>
-    <string name="updates_section">App updates</string>
-    <string name="updates_installed">This phone has Nos Corre! %1$s.</string>
-    <string name="updates_check">Check for updates</string>
-    <string name="updates_up_to_date">You have the newest version.</string>
-    <string name="updates_found">Nos Corre! %1$s is ready: tap Install at the top of the screen.</string>
-    <string name="updates_failed">Couldn\'t reach the update page. Check the connection and try again.</string>
-    <string name="ok">OK</string>
     <!-- Family board -->
     <string name="notes_title">Notes</string>
     <string name="notes_empty">Things everyone should know: the Wi-Fi password, who picks up whom, when grandma arrives.</string>
@@ -87,9 +39,6 @@
     <string name="notes_new">New note</string>
     <string name="notes_edit">Edit note</string>
     <string name="notes_placeholder">e.g. Grandma arrives Friday at 18:00</string>
-    <!-- Points setting -->
-    <string name="points_setting_title">Chore points</string>
-    <string name="points_setting_hint">Chores earn points, shown on the chores, in the week\'s summary and when someone finishes one. Turn off to hide points everywhere; everything else stays.</string>
     <!-- This week -->
     <string name="week_title">This week</string>
     <!-- Away -->
@@ -116,14 +65,4 @@
     <string name="message_remove_confirm">Remove this message for everyone?</string>
     <string name="message_channel">Family messages</string>
     <string name="message_channel_description">When someone sends a message to the whole family</string>
-    <string name="alert_messages">Family messages</string>
-    <string name="alert_messages_hint">When someone sends a message to everyone</string>
-    <string name="units_section">Weather units</string>
-    <string name="units_temperature">Temperature</string>
-    <string name="units_wind">Wind</string>
-    <string name="units_rain">Rain</string>
-    <string name="alert_weather">Weather in the morning</string>
-    <string name="alert_weather_hint">At 7:00, the weather for the family\'s trips of the day, and storm warnings</string>
-    <string name="animated_house">Animated house</string>
-    <string name="animated_house_hint">The little house on the Home tab moves: clouds, rain and small surprises. Off saves battery.</string>
 </resources>

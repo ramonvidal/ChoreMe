@@ -78,7 +78,7 @@ internal fun HomeScreen(
     onOpenChores: () -> Unit,
     onAddChore: () -> Unit,
     onOpenGroceries: () -> Unit,
-    onOpenMap: () -> Unit,
+    onOpenSettings: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -96,7 +96,7 @@ internal fun HomeScreen(
                 onAddEvent = { newEvent++; tab = HomeTab.AGENDA },
             )
             HomeTab.AGENDA -> AgendaScreen(addRequest = newEvent)
-            HomeTab.WEEK -> WeekAheadScreen(onPlanTrips = onOpenMap)
+            HomeTab.WEEK -> WeekAheadScreen(onPlanTrips = onOpenSettings)
         }
     }
 }

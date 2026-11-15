@@ -78,9 +78,7 @@ class FamilyTabScreenshotTest {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
                 CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
                 Surface(Modifier.fillMaxSize()) {
-                    FamilyContent(state, ActionState(), signOutNeedsApprovalAgain = false, actions = FamilyActions()) {
-                        Text("(This phone's settings)")
-                    }
+                    FamilyContent(state, ActionState(), signOutNeedsApprovalAgain = false, actions = FamilyActions())
                 }
             }
             }
@@ -92,7 +90,6 @@ class FamilyTabScreenshotTest {
     fun parent() {
         shoot("tab-family", dark = false)
         compose.onNodeWithText("Dinner's ready!").assertExists()
-        compose.onNodeWithText("Chore points").assertExists() // the parents' switch
         compose.onNodeWithText("This week").assertExists()
     }
 
@@ -107,11 +104,10 @@ class FamilyTabScreenshotTest {
                         ActionState(),
                         signOutNeedsApprovalAgain = false,
                         actions = FamilyActions(),
-                    ) { Text("(This phone's settings)") }
+                    )
                 }
             }
         }
-        compose.onNodeWithText("Chore points").assertExists()
         compose.onNodeWithText("This week").assertDoesNotExist()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/tab-family-no-points.png")
     }

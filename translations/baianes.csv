@@ -6,6 +6,7 @@ app,nav_rooms,,Rooms,Cômodos
 app,nav_agenda,,Agenda,Agenda
 app,nav_family,,Family,Família
 app,nav_map,,Map,Mapa
+app,nav_settings,,Settings,Ajustes
 core/ui,app_name,,Nos Corre!,Nos Corre!
 core/ui,coming_soon,,Coming soon,Já já tá aí
 core/ui,approve,,Approve,Aprovar
@@ -348,61 +349,12 @@ feature/family,delete_my_data,,Delete my data,Apagar meus dados
 feature/family,leave_confirm,,"Leave the family? This phone loses access, and your location, ping address and arrival history are deleted. Chores and groceries you added stay for the family.","Sair da família? Este celular perde o acesso, e sua localização, endereço de aviso e histórico de chegadas são apagados. Os corres e a feira que você adicionou ficam pra família."
 feature/family,leave_last_confirm,,"You're the last one here. Leaving deletes the whole family: chores, groceries, places and everything else. This can't be undone.","Você é o último aqui. Sair apaga a família inteira: corres, feira, lugares e tudo mais. Não tem volta."
 feature/family,delete_confirm,,"Leave the family and delete your Nos Corre! account? If you're the last one, the whole family's data is deleted too. This can't be undone.","Sair da família e apagar sua conta do Nos Corre!? Se você for o último, os dados da família toda também são apagados. Não tem volta."
-feature/family,this_phone_title,,This phone,Este celular
-feature/family,this_phone_hint,,These choices are only for this phone.,Essas escolhas valem só pra este celular.
-feature/family,alerts_summary,,%1$d of %2$d on,%1$d de %2$d ligados
-feature/family,quiet_off,,Off,Desligado
-feature/family,quiet_summary,,%1$s to %2$s,%1$s às %2$s
-feature/family,instant_summary_on,,On,Ligado
-feature/family,instant_summary_off,,Off,Desligado
-feature/family,updates_summary,,Version %1$s,Versão %1$s
-feature/family,alerts_section,,Notifications,Notificações
-feature/family,alert_new_chores,,New chores,Corres novos
-feature/family,alert_new_chores_hint,,When someone adds something that needs doing,Quando alguém bota uma coisa pra fazer
-feature/family,alert_chores_done,,Chores done,Corres feitos
-feature/family,alert_chores_done_hint,,"When someone finishes a chore marked ""let everyone know""","Quando alguém termina um corre marcado ""avisar a galera"""
-feature/family,alert_approvals,,Chores to approve,Corres pra aprovar
-feature/family,alert_approvals_hint,,When a kid finishes a chore (parents),Quando um guri termina um corre (responsáveis)
-feature/family,alert_join_requests,,Join requests,Pedidos pra entrar
-feature/family,alert_join_requests_hint,,When someone asks to join the family (parents),Quando alguém pede pra entrar na família (responsáveis)
-feature/family,alert_arrivals,,Arrivals and departures,Chegadas e saídas
-feature/family,alert_arrivals_hint,,When someone arrives at or leaves a saved place,Quando alguém chega ou sai de um lugar salvo
-feature/family,alert_on_my_way,,On the way home,Indo pra casa
-feature/family,alert_on_my_way_hint,,"When someone taps ""On my way home"" (needs ntfy)","Quando alguém toca em ""Tô indo pra casa"" (precisa do ntfy)"
-feature/family,alert_shopping,,At the shop,No mercado
-feature/family,alert_shopping_hint,,"When someone starts shopping, so you can add what's missing (needs ntfy)","Quando alguém começa a feira, pra você adicionar o que falta (precisa do ntfy)"
-feature/family,language_section,,Language,Idioma
-feature/family,appearance_section,,Look,Aparência
-feature/family,appearance_system,,Same as the phone,Igual ao celular
-feature/family,appearance_light,,Light,Claro
-feature/family,appearance_dark,,Dark,Escuro
-feature/family,alert_morning,,Morning summary,Resumo da manhã
-feature/family,alert_morning_hint,,"At 8:00, what needs doing today","Às 8:00, o que tem pra fazer hoje"
-feature/family,alert_weekly,,Week in review,Resumo da semana
-feature/family,alert_weekly_hint,,"Sunday evening, the week's points for everyone","Domingo à noite, os pontos da semana de todo mundo"
-feature/family,quiet_section,,Quiet hours,Horário de silêncio
-feature/family,quiet_hint,,"Notifications still arrive, just without sound or vibration.","As notificações continuam chegando, só que sem som nem vibração."
-feature/family,quiet_from,,From %1$s,Das %1$s
-feature/family,quiet_to,,Until %1$s,Até %1$s
-feature/family,instant_section,,Instant alerts,Avisos na hora
-feature/family,instant_on,,"On, through ntfy. Alerts arrive within seconds.","Ligado, pelo ntfy. Os avisos chegam em segundos."
-feature/family,instant_off,,Off. Install the free ntfy app to get alerts within seconds instead of within 15–30 minutes.,Desligado. Instale o app grátis ntfy pra receber os avisos em segundos em vez de 15–30 minutos.
-feature/family,instant_install,,Get ntfy (free),Baixar o ntfy (grátis)
-feature/family,updates_section,,App updates,Atualizações do app
-feature/family,updates_installed,,This phone has Nos Corre! %1$s.,Este celular tem o Nos Corre! %1$s.
-feature/family,updates_check,,Check for updates,Procurar atualizações
-feature/family,updates_up_to_date,,You have the newest version.,Você tá com a versão mais nova.
-feature/family,updates_found,,Nos Corre! %1$s is ready: tap Install at the top of the screen.,O Nos Corre! %1$s tá pronto: toque em Instalar lá em cima.
-feature/family,updates_failed,,Couldn't reach the update page. Check the connection and try again.,Não deu pra abrir a página de atualização. Veja a internet e tente de novo.
-feature/family,ok,,OK,OK
 feature/family,notes_title,,Notes,Recados
 feature/family,notes_empty,,"Things everyone should know: the Wi-Fi password, who picks up whom, when grandma arrives.","O que todo mundo precisa saber: a senha do Wi-Fi, quem busca quem, quando vovó chega."
 feature/family,notes_add,,Add a note,Adicionar recado
 feature/family,notes_new,,New note,Recado novo
 feature/family,notes_edit,,Edit note,Editar recado
 feature/family,notes_placeholder,,e.g. Grandma arrives Friday at 18:00,ex.: Vovó chega sexta às 18:00
-feature/family,points_setting_title,,Chore points,Pontos dos corres
-feature/family,points_setting_hint,,"Chores earn points, shown on the chores, in the week's summary and when someone finishes one. Turn off to hide points everywhere; everything else stays.","Os corres dão pontos, mostrados nos corres, no resumo da semana e quando alguém termina um. Desligue pra esconder os pontos de tudo; o resto continua igual."
 feature/family,week_title,,This week,Essa semana
 feature/family,away_until,,Away until %1$s,Fora até %1$s
 feature/family,away_title,,%1$s is away until…,%1$s tá fora até…
@@ -423,16 +375,6 @@ feature/family,message_show_less,,Show less,Ver menos
 feature/family,message_remove_confirm,,Remove this message for everyone?,Apagar esse recado pra todo mundo?
 feature/family,message_channel,,Family messages,Recados da família
 feature/family,message_channel_description,,When someone sends a message to the whole family,Quando alguém manda um recado pra família toda
-feature/family,alert_messages,,Family messages,Recados da família
-feature/family,alert_messages_hint,,When someone sends a message to everyone,Quando alguém manda um recado pra todo mundo
-feature/family,units_section,,Weather units,Unidades do tempo
-feature/family,units_temperature,,Temperature,Temperatura
-feature/family,units_wind,,Wind,Vento
-feature/family,units_rain,,Rain,Chuva
-feature/family,alert_weather,,Weather in the morning,Tempo de manhã
-feature/family,alert_weather_hint,,"At 7:00, the weather for the family's trips of the day, and storm warnings","Às 7h, o tempo pros trajetos da família no dia e avisos de temporal"
-feature/family,animated_house,,Animated house,Casa animada
-feature/family,animated_house_hint,,"The little house on the Home tab moves: clouds, rain and small surprises. Off saves battery.","A casinha da aba Casa se mexe: nuvens, chuva e pequenas surpresas. Desligada, gasta menos bateria."
 feature/groceries,grocery_quick_add,,Out of something? Type it here,Acabou alguma coisa? Escreva aqui
 feature/groceries,grocery_to_buy,,To buy (%1$d),Pra comprar (%1$d)
 feature/groceries,grocery_restock,,Restock usuals (%1$d),Repor o de sempre (%1$d)
@@ -500,9 +442,9 @@ feature/home,week_drying,,good for drying,bom pra secar roupa
 feature/home,ok,,OK,OK
 feature/home,week_title,,The week ahead,A semana que vem
 feature/home,week_unavailable,,No forecast for the week yet. Save your home on the Map tab and check your connection.,Ainda sem previsão da semana. Salve sua casa na aba Mapa e veja a conexão.
-feature/home,week_trips_hint,,Trips are planned on the Map tab.,Os trajetos são planejados na aba Mapa.
-feature/home,week_no_trips,,"No trips planned yet. Add the regular ones (work, gym) on the Map tab and the weather will tell you about them.","Ainda sem trajetos. Bote os de sempre (trabalho, academia) na aba Mapa que o tempo avisa vocês."
-feature/home,week_plan_trips,,Plan trips on the Map tab,Planejar trajetos na aba Mapa
+feature/home,week_trips_hint,,Trips are planned under Settings.,Os trajetos são planejados em Configurações.
+feature/home,week_no_trips,,"No trips planned yet. Add the regular ones (work, gym) under Settings and the weather will tell you about them.","Ainda sem trajetos. Bote os de sempre (trabalho, academia) em Configurações que o tempo avisa vocês."
+feature/home,week_plan_trips,,Plan trips in Settings,Planejar trajetos em Configurações
 feature/home,week_rain,,rain %1$d%%,chuva %1$d%%
 feature/home,weather_credit,,Weather data by Open-Meteo.com (CC BY 4.0),Dados do tempo: Open-Meteo.com (CC BY 4.0)
 feature/home,weather_channel,,Weather in the morning,Tempo de manhã
@@ -634,35 +576,7 @@ feature/map,live_channel,,Sharing while you move,Compartilhando em movimento
 feature/map,live_channel_description,,Shown only while you're on the move and sharing your location with the family,Só aparece quando você tá em movimento e compartilhando sua localização com a família
 feature/map,live_title,,Sharing your location,Compartilhando sua localização
 feature/map,live_text,,"While you're on the move, so the family can follow your way","Enquanto você tá na estrada, pra galera acompanhar seu caminho"
-feature/map,routine_title,,We noticed a habit,A gente notou um costume
-feature/map,routine_hint,,From the places this phone visited in the last weeks. Stays on this phone.,Pelos lugares que esse telefone visitou nas últimas semanas. Fica só nesse aparelho.
-feature/map,routine_line,,%1$s · %2$s around %3$s (%4$d times lately),%1$s · %2$s por volta de %3$s (%4$d vezes ultimamente)
-feature/map,routine_add,,Add to the plan,Botar no plano
-feature/map,plan_paused_away,,Paused while they are away,Em pausa enquanto a pessoa tá fora
-feature/map,plan_paused_unseen,,Paused: not seen for 3 weeks (it comes back when you go again),Em pausa: faz 3 semanas que não aparece lá (volta quando você for de novo)
-feature/map,ok,,OK,OK
 feature/map,plan_title,,Weekly plan,Plano da semana
-feature/map,plan_hint,,The regular trips of the week. The Home tab tells the weather for them.,Os trajetos de sempre da semana. A aba Casa avisa o tempo pra eles.
-feature/map,plan_empty,,"No trips yet. Add the regular ones, like going to work or to the gym.","Ainda sem trajetos. Adicione os de sempre, tipo ir pro trabalho ou pra academia."
-feature/map,plan_no_places,,"Save your places (home, work, gym) on the map first, then add trips here.","Salve seus lugares (casa, trabalho, academia) no mapa primeiro, depois adicione trajetos aqui."
-feature/map,plan_add,,Add a trip,Adicionar trajeto
-feature/map,plan_edit,,Edit trip,Editar trajeto
-feature/map,plan_place,,Where to,Pra onde
-feature/map,plan_who,,Who,Quem
-feature/map,plan_days,,Days,Dias
-feature/map,plan_weekdays,,Weekdays,Dias úteis
-feature/map,plan_weekend,,Weekend,Fim de semana
-feature/map,plan_every_day,,Every day,Todo dia
-feature/map,plan_time,,Leaves at %1$s,Sai às %1$s
-feature/map,plan_duration,,How long,Quanto tempo
-feature/map,plan_minutes,,%1$d min,%1$d min
-feature/map,plan_mode,,How,Como
-feature/map,mode_walk,,On foot,A pé
-feature/map,mode_bike,,Bike,Bicicleta
-feature/map,mode_car,,Car,Carro
-feature/map,mode_transit,,Bus or train,Ônibus ou metrô
-feature/map,mode_other,,Other,Outro
-feature/map,plan_delete,,Delete trip,Excluir trajeto
 feature/map,tab_map,,Map,Mapa
 feature/map,tab_trips,,Trips,Trajetos
 feature/onboarding,sign_in_tagline,,"Chores, groceries and the family calendar, shared by everyone at home.","Os corres, a feira e a agenda da família, divididos com todo mundo de casa."
@@ -689,6 +603,96 @@ feature/onboarding,awaiting_cancel,,Cancel request,Cancelar pedido
 feature/onboarding,firebase_missing_title,,Sync isn't set up,A sincronização não tá configurada
 feature/onboarding,firebase_missing_body,,"This build has no Firebase configuration, so family sharing can't work. Add app/google-services.json as described in the README and rebuild.","Esta versão não tem a configuração do Firebase, então a família não sincroniza. Adicione app/google-services.json como explica o README e gere de novo."
 feature/onboarding,error_sign_in,,Couldn't sign in. Check your connection and try again.,Não deu pra entrar. Veja a internet e tente de novo.
+feature/settings,settings_title,,Settings,Configurações
+feature/settings,settings_family,,Family,Família
+feature/settings,settings_trips,,Regular trips,Trajetos de sempre
+feature/settings,alert_approvals,,Chores to approve,Corres pra aprovar
+feature/settings,alert_approvals_hint,,When a kid finishes a chore (parents),Quando um guri termina um corre (responsáveis)
+feature/settings,alert_arrivals,,Arrivals and departures,Chegadas e saídas
+feature/settings,alert_arrivals_hint,,When someone arrives at or leaves a saved place,Quando alguém chega ou sai de um lugar salvo
+feature/settings,alert_chores_done,,Chores done,Corres feitos
+feature/settings,alert_chores_done_hint,,"When someone finishes a chore marked ""let everyone know""","Quando alguém termina um corre marcado ""avisar a galera"""
+feature/settings,alert_join_requests,,Join requests,Pedidos pra entrar
+feature/settings,alert_join_requests_hint,,When someone asks to join the family (parents),Quando alguém pede pra entrar na família (responsáveis)
+feature/settings,alert_messages,,Family messages,Recados da família
+feature/settings,alert_messages_hint,,When someone sends a message to everyone,Quando alguém manda um recado pra todo mundo
+feature/settings,alert_morning,,Morning summary,Resumo da manhã
+feature/settings,alert_morning_hint,,"At 8:00, what needs doing today","Às 8:00, o que tem pra fazer hoje"
+feature/settings,alert_new_chores,,New chores,Corres novos
+feature/settings,alert_new_chores_hint,,When someone adds something that needs doing,Quando alguém bota uma coisa pra fazer
+feature/settings,alert_on_my_way,,On the way home,Indo pra casa
+feature/settings,alert_on_my_way_hint,,"When someone taps ""On my way home"" (needs ntfy)","Quando alguém toca em ""Tô indo pra casa"" (precisa do ntfy)"
+feature/settings,alert_shopping,,At the shop,No mercado
+feature/settings,alert_shopping_hint,,"When someone starts shopping, so you can add what's missing (needs ntfy)","Quando alguém começa a feira, pra você adicionar o que falta (precisa do ntfy)"
+feature/settings,alert_weather,,Weather in the morning,Tempo de manhã
+feature/settings,alert_weather_hint,,"At 7:00, the weather for the family's trips of the day, and storm warnings","Às 7h, o tempo pros trajetos da família no dia e avisos de temporal"
+feature/settings,alert_weekly,,Week in review,Resumo da semana
+feature/settings,alert_weekly_hint,,"Sunday evening, the week's points for everyone","Domingo à noite, os pontos da semana de todo mundo"
+feature/settings,alerts_section,,Notifications,Notificações
+feature/settings,alerts_summary,,%1$d of %2$d on,%1$d de %2$d ligados
+feature/settings,animated_house,,Animated house,Casa animada
+feature/settings,animated_house_hint,,"The little house on the Home tab moves: clouds, rain and small surprises. Off saves battery.","A casinha da aba Casa se mexe: nuvens, chuva e pequenas surpresas. Desligada, gasta menos bateria."
+feature/settings,appearance_dark,,Dark,Escuro
+feature/settings,appearance_light,,Light,Claro
+feature/settings,appearance_section,,Look,Aparência
+feature/settings,appearance_system,,Same as the phone,Igual ao celular
+feature/settings,instant_install,,Get ntfy (free),Baixar o ntfy (grátis)
+feature/settings,instant_off,,Off. Install the free ntfy app to get alerts within seconds instead of within 15–30 minutes.,Desligado. Instale o app grátis ntfy pra receber os avisos em segundos em vez de 15–30 minutos.
+feature/settings,instant_on,,"On, through ntfy. Alerts arrive within seconds.","Ligado, pelo ntfy. Os avisos chegam em segundos."
+feature/settings,instant_section,,Instant alerts,Avisos na hora
+feature/settings,instant_summary_off,,Off,Desligado
+feature/settings,instant_summary_on,,On,Ligado
+feature/settings,language_section,,Language,Idioma
+feature/settings,mode_bike,,Bike,Bicicleta
+feature/settings,mode_car,,Car,Carro
+feature/settings,mode_other,,Other,Outro
+feature/settings,mode_transit,,Bus or train,Ônibus ou metrô
+feature/settings,mode_walk,,On foot,A pé
+feature/settings,not_now,,Not now,Agora não
+feature/settings,ok,,OK,OK
+feature/settings,plan_add,,Add a trip,Adicionar trajeto
+feature/settings,plan_days,,Days,Dias
+feature/settings,plan_delete,,Delete trip,Excluir trajeto
+feature/settings,plan_duration,,How long,Quanto tempo
+feature/settings,plan_edit,,Edit trip,Editar trajeto
+feature/settings,plan_empty,,"No trips yet. Add the regular ones, like going to work or to the gym.","Ainda sem trajetos. Adicione os de sempre, tipo ir pro trabalho ou pra academia."
+feature/settings,plan_every_day,,Every day,Todo dia
+feature/settings,plan_hint,,The regular trips of the week. The Home tab tells the weather for them.,Os trajetos de sempre da semana. A aba Casa avisa o tempo pra eles.
+feature/settings,plan_minutes,,%1$d min,%1$d min
+feature/settings,plan_mode,,How,Como
+feature/settings,plan_no_places,,"Save your places (home, work, gym) on the map first, then add trips here.","Salve seus lugares (casa, trabalho, academia) no mapa primeiro, depois adicione trajetos aqui."
+feature/settings,plan_paused_away,,Paused while they are away,Em pausa enquanto a pessoa tá fora
+feature/settings,plan_paused_unseen,,Paused: not seen for 3 weeks (it comes back when you go again),Em pausa: faz 3 semanas que não aparece lá (volta quando você for de novo)
+feature/settings,plan_place,,Where to,Pra onde
+feature/settings,plan_time,,Leaves at %1$s,Sai às %1$s
+feature/settings,plan_weekdays,,Weekdays,Dias úteis
+feature/settings,plan_weekend,,Weekend,Fim de semana
+feature/settings,plan_who,,Who,Quem
+feature/settings,points_setting_hint,,"Chores earn points, shown on the chores, in the week's summary and when someone finishes one. Turn off to hide points everywhere; everything else stays.","Os corres dão pontos, mostrados nos corres, no resumo da semana e quando alguém termina um. Desligue pra esconder os pontos de tudo; o resto continua igual."
+feature/settings,points_setting_title,,Chore points,Pontos dos corres
+feature/settings,quiet_from,,From %1$s,Das %1$s
+feature/settings,quiet_hint,,"Notifications still arrive, just without sound or vibration.","As notificações continuam chegando, só que sem som nem vibração."
+feature/settings,quiet_off,,Off,Desligado
+feature/settings,quiet_section,,Quiet hours,Horário de silêncio
+feature/settings,quiet_summary,,%1$s to %2$s,%1$s às %2$s
+feature/settings,quiet_to,,Until %1$s,Até %1$s
+feature/settings,routine_add,,Add to the plan,Botar no plano
+feature/settings,routine_hint,,From the places this phone visited in the last weeks. Stays on this phone.,Pelos lugares que esse telefone visitou nas últimas semanas. Fica só nesse aparelho.
+feature/settings,routine_line,,%1$s · %2$s around %3$s (%4$d times lately),%1$s · %2$s por volta de %3$s (%4$d vezes ultimamente)
+feature/settings,routine_title,,We noticed a habit,A gente notou um costume
+feature/settings,this_phone_hint,,These choices are only for this phone.,Essas escolhas valem só pra este celular.
+feature/settings,this_phone_title,,This phone,Este celular
+feature/settings,units_rain,,Rain,Chuva
+feature/settings,units_section,,Weather units,Unidades do tempo
+feature/settings,units_temperature,,Temperature,Temperatura
+feature/settings,units_wind,,Wind,Vento
+feature/settings,updates_check,,Check for updates,Procurar atualizações
+feature/settings,updates_failed,,Couldn't reach the update page. Check the connection and try again.,Não deu pra abrir a página de atualização. Veja a internet e tente de novo.
+feature/settings,updates_found,,Nos Corre! %1$s is ready: tap Install at the top of the screen.,O Nos Corre! %1$s tá pronto: toque em Instalar lá em cima.
+feature/settings,updates_installed,,This phone has Nos Corre! %1$s.,Este celular tem o Nos Corre! %1$s.
+feature/settings,updates_section,,App updates,Atualizações do app
+feature/settings,updates_summary,,Version %1$s,Versão %1$s
+feature/settings,updates_up_to_date,,You have the newest version.,Você tá com a versão mais nova.
 feature/update,update_available,,Nos Corre! %1$s is available,Saiu o Nos Corre! %1$s
 feature/update,update_install,,Install,Instalar
 feature/update,update_later,,Later,Depois

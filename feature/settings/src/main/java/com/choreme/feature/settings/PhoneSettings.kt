@@ -1,4 +1,4 @@
-package com.choreme.feature.family
+package com.choreme.feature.settings
 
 import com.choreme.core.ui.R as CoreUiR
 import android.content.Intent
