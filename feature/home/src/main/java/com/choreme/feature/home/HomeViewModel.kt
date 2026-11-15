@@ -20,6 +20,13 @@ import com.choreme.core.model.home.dayTimeline
 import com.choreme.core.model.location.Place
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.location.RoutineLog
+import com.choreme.core.model.home.occasionOn
+import com.choreme.core.model.home.peopleAtHome
+import com.choreme.core.model.location.MemberLocation
+import com.choreme.core.model.weather.homePlace
+import com.choreme.core.settings.AppearanceSettings
+import java.time.Instant
+import kotlinx.coroutines.flow.onStart
 import com.choreme.core.model.weather.AirNote
 import com.choreme.core.model.weather.activeEntries
 import com.choreme.core.model.weather.DRYING_LOOKAHEAD
@@ -69,9 +76,12 @@ class HomeViewModel @Inject internal constructor(
     private val choice: CalendarChoice,
     private val weather: WeatherRepository,
     settings: WeatherSettings,
+    appearance: AppearanceSettings,
     private val day: DayWeather,
     private val routine: RoutineLog,
 ) : ViewModel() {
+    private val animatedHouse = appearance.animatedHouse
+
     private class Inputs(
         val memberId: String,
         val plans: List<PlanEntry>,
@@ -95,12 +105,15 @@ class HomeViewModel @Inject internal constructor(
                 val active = activeEntries(entries, members, LocalDate.now(), session.memberId, routine.lastVisits())
                 Inputs(session.memberId, active, places, members.associate { it.id to it.name }, units) }
             val events = combine(choice.selected, refresh) { selected, _ -> selected }.flatMapLatest { selected -> eventsToday(selected) }
-            combine(inputs, chores.observeChores(session.familyId), groceries.observeItems(session.familyId), events, ::Data)
-                .mapLatest { compute(it) }
+            // Who is at home now (for the lit windows) and whether the little house moves.
+            val house = combine(locations.observeLocations(session.familyId).onStart { emit(emptyList()) }, animatedHouse, ::Pair)
+            combine(inputs, chores.observeChores(session.familyId), groceries.observeItems(session.familyId), events, house) { i, c, g, e, h ->
+                Data(i, c, g, e, h.first, h.second)
+            }.mapLatest { compute(it) }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
-    private class Data(val inputs: Inputs, val chores: List<com.choreme.core.model.chore.Chore>, val groceries: List<GroceryItem>, val events: List<CalendarEvent>)
+    private class Data(val inputs: Inputs, val chores: List<com.choreme.core.model.chore.Chore>, val groceries: List<GroceryItem>, val events: List<CalendarEvent>, val locations: List<MemberLocation>, val animated: Boolean)
 
     private fun eventsToday(selected: Set<Long>?) = if (!calendar.hasPermission() || selected.isNullOrEmpty()) {
         flowOf(emptyList())
@@ -124,11 +137,17 @@ class HomeViewModel @Inject internal constructor(
             (0..DRYING_LOOKAHEAD).mapNotNull { dayOutlook(today.plusDays(it.toLong()), forecast.hours, emptyList()) }
         }.orEmpty()
         val drying = dryingTip(laundryDue(data.chores, today), outlook)
-        val weatherState = HomeWeatherState(loading = false, now = current, units = inputs.units, moments = upcoming, air = air, drying = drying, needsPlace = home == null)
         // The house's own chores and the tasks of the rooms are counted apart, as the Chores tab keeps them apart.
         val board = buildTodayBoard(data.chores.filteredBy(RoomFilter.NO_ROOM), today, inputs.memberId)
         val roomBoard = buildTodayBoard(data.chores.filteredBy(RoomFilter.ROOMS), today, inputs.memberId)
         val timeline = dayTimeline(today, data.events, allMoments, inputs.names, board, data.groceries.groceriesToBuy(), ZoneId.systemDefault(), roomBoard)
+        val weatherState = HomeWeatherState(
+            loading = false, now = current, units = inputs.units, moments = upcoming, air = air, drying = drying, needsPlace = home == null,
+            peopleHome = peopleAtHome(data.locations, homePlace(inputs.places), Instant.now()),
+            urgent = timeline.urgent.isNotEmpty(),
+            occasion = occasionOn(today),
+            animated = data.animated,
+        )
         return HomeUiState(loading = false, date = today, weather = weatherState, timeline = timeline)
     }
 }

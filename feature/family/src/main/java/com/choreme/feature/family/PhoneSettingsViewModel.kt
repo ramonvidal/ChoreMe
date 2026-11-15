@@ -50,6 +50,10 @@ class PhoneSettingsViewModel @Inject constructor(
 
     fun setThemeMode(mode: ThemeMode) = appearance.set(mode)
 
+    val animatedHouse: StateFlow<Boolean> = appearance.animatedHouse
+
+    fun setAnimatedHouse(on: Boolean) = appearance.setAnimatedHouse(on)
+
     val settings: StateFlow<AlertSettings> = notifications.settings
     val pushEndpoint: StateFlow<String?> = push.endpoint
 

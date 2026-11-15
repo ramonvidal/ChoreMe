@@ -64,7 +64,7 @@ class HomeTabScreenshotTest {
     private val state = HomeUiState(
         loading = false,
         date = monday,
-        weather = HomeWeatherState(loading = false, now = hour(12, 8.0, 63, 80, 1.4), moments = emptyList()),
+        weather = HomeWeatherState(loading = false, now = hour(12, 8.0, 63, 80, 1.4), moments = emptyList(), hour = 11f, peopleHome = 2, urgent = true, animated = false),
         timeline = timeline,
     )
 

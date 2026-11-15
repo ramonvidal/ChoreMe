@@ -111,6 +111,8 @@
     <string name="units_rain">Chuva</string>
     <string name="alert_weather">Tempo de manhã</string>
     <string name="alert_weather_hint">Às 7h, o tempo pros trajetos da família no dia e avisos de temporal</string>
+    <string name="animated_house">Casa animada</string>
+    <string name="animated_house_hint">A casinha da aba Casa se mexe: nuvens, chuva e pequenas surpresas. Desligada, gasta menos bateria.</string>
     <plurals name="member_devices">
         <item quantity="one">%d aparelho</item>
         <item quantity="other">%d aparelhos</item>

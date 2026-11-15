@@ -18,6 +18,16 @@ class AppearanceSettings @Inject constructor(@ApplicationContext context: Contex
     private val _mode = MutableStateFlow(read())
     val mode: StateFlow<ThemeMode> = _mode.asStateFlow()
 
+    private val _animatedHouse = MutableStateFlow(prefs.getBoolean(KEY_HOUSE, true))
+
+    /** Whether the little house on the Home tab moves (clouds, rain, little events). On unless turned off. */
+    val animatedHouse: StateFlow<Boolean> = _animatedHouse.asStateFlow()
+
+    fun setAnimatedHouse(on: Boolean) {
+        prefs.edit().putBoolean(KEY_HOUSE, on).apply()
+        _animatedHouse.value = on
+    }
+
     fun set(mode: ThemeMode) {
         prefs.edit().putString(KEY_MODE, mode.name).apply()
         _mode.value = mode
@@ -28,5 +38,6 @@ class AppearanceSettings @Inject constructor(@ApplicationContext context: Contex
 
     private companion object {
         const val KEY_MODE = "theme_mode"
+        const val KEY_HOUSE = "animated_house"
     }
 }

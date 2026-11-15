@@ -40,7 +40,7 @@ class WeatherHouseScreenshotTest {
         WeatherHour(noon, temp, temp - 3, rain, mm, windKmh = 14.0, gustKmh = 30.0, weatherCode = code, isDay = day)
 
     private fun weatherState(hour: WeatherHour, trips: List<MomentLine> = emptyList()) =
-        HomeWeatherState(loading = false, now = hour, moments = trips)
+        HomeWeatherState(loading = false, now = hour, moments = trips, hour = if (hour.isDay) 12f else 22f, peopleHome = 2, animated = false)
 
     private val wetTrip = MomentLine(
         "Ramon", "Work", LocalTime.of(8, 0),

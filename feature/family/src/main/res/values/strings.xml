@@ -124,4 +124,6 @@
     <string name="units_rain">Rain</string>
     <string name="alert_weather">Weather in the morning</string>
     <string name="alert_weather_hint">At 7:00, the weather for the family\'s trips of the day, and storm warnings</string>
+    <string name="animated_house">Animated house</string>
+    <string name="animated_house_hint">The little house on the Home tab moves: clouds, rain and small surprises. Off saves battery.</string>
 </resources>

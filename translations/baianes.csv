@@ -431,6 +431,8 @@ feature/family,units_wind,,Wind,Vento
 feature/family,units_rain,,Rain,Chuva
 feature/family,alert_weather,,Weather in the morning,Tempo de manhã
 feature/family,alert_weather_hint,,"At 7:00, the weather for the family's trips of the day, and storm warnings","Às 7h, o tempo pros trajetos da família no dia e avisos de temporal"
+feature/family,animated_house,,Animated house,Casa animada
+feature/family,animated_house_hint,,"The little house on the Home tab moves: clouds, rain and small surprises. Off saves battery.","A casinha da aba Casa se mexe: nuvens, chuva e pequenas surpresas. Desligada, gasta menos bateria."
 feature/groceries,grocery_quick_add,,Out of something? Type it here,Acabou alguma coisa? Escreva aqui
 feature/groceries,grocery_to_buy,,To buy (%1$d),Pra comprar (%1$d)
 feature/groceries,grocery_restock,,Restock usuals (%1$d),Repor o de sempre (%1$d)

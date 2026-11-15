@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.choreme.core.model.home.Occasion
+import com.choreme.core.model.home.SceneInput
 import com.choreme.core.model.weather.Advice
 import com.choreme.core.model.weather.AirNote
 import com.choreme.core.model.weather.DryingTip
@@ -53,8 +55,25 @@ internal data class HomeWeatherState(
     val drying: DryingTip? = null,
     /** No position and no saved place: the family has to save its home on the Map tab. */
     val needsPlace: Boolean = false,
+    /** The hour for the picture; null means the real one (tests set it to get a steady picture). */
+    val hour: Float? = null,
+    /** How many family members are at home now: their windows are lit. */
+    val peopleHome: Int = 0,
+    /** An urgent chore is waiting: the mailbox flag is up. */
+    val urgent: Boolean = false,
+    /** The special date the house is dressed for, if any. */
+    val occasion: Occasion? = null,
+    /** Whether the picture moves (the phone's own choice). */
+    val animated: Boolean = true,
 ) {
-    val look: WeatherLook get() = WeatherLook(now?.sky ?: Sky.CLEAR, now?.isDay ?: true)
+    fun scene(hour: Float) = SceneInput(
+        hour = hour,
+        sky = now?.sky ?: Sky.CLEAR,
+        windKmh = (now?.windKmh ?: 5.0).toFloat(),
+        peopleHome = peopleHome,
+        urgent = urgent,
+        occasion = occasion,
+    )
 }
 
 /** The little house with the real weather, the temperature and the next trips. Tap for the day. */
@@ -66,7 +85,7 @@ internal fun HomeWeatherCard(state: HomeWeatherState, onClick: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
     ) {
         Box {
-            HomePicture(state.look, Modifier.fillMaxWidth().height(124.dp))
+            LiveHouse(state.scene(state.hour ?: rememberHour()), Modifier.fillMaxWidth(), animated = state.animated)
             state.now?.let { now ->
                 Text(
                     state.units.degrees(now.temperatureC),
@@ -134,7 +153,7 @@ internal fun HomeWeatherDialog(state: HomeWeatherState, onDismiss: () -> Unit) {
         title = { Text(stringResource(R.string.weather_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                HomePicture(state.look, Modifier.fillMaxWidth().height(150.dp))
+                LiveHouse(state.scene(state.hour ?: rememberHour()), Modifier.fillMaxWidth(), animated = state.animated)
                 state.now?.let { now ->
                     Text(
                         listOf(
