@@ -180,9 +180,12 @@ private fun grayOf(sky: Sky) = when (sky) {
 }
 
 private fun cloudsOf(sky: Sky) = when (sky) {
-    Sky.CLEAR -> 1; Sky.PARTLY_CLOUDY -> 3; Sky.CLOUDY -> 6; Sky.FOG -> 4
-    Sky.SNOW -> 5; Sky.DRIZZLE -> 5; Sky.RAIN -> 6; Sky.STORM -> 6
+    Sky.CLEAR -> 1; Sky.PARTLY_CLOUDY -> 4; Sky.CLOUDY -> 16; Sky.FOG -> 8
+    Sky.SNOW -> 12; Sky.DRIZZLE -> 14; Sky.RAIN -> 16; Sky.STORM -> 18
 }
+
+/** Skies that are all cloud: the clouds are bigger and cover the whole sky, with a grey ceiling above them. */
+private fun overcast(sky: Sky) = sky == Sky.CLOUDY || sky == Sky.RAIN || sky == Sky.STORM || sky == Sky.DRIZZLE || sky == Sky.SNOW
 
 private val dry = setOf(Sky.CLEAR, Sky.PARTLY_CLOUDY)
 private fun SceneInput.dark() = !isDay
@@ -217,10 +220,12 @@ private fun drawSky(p: Px, s: SceneInput, t: Float) {
     }
     // clouds drift with the wind
     val cloud = if (s.dark()) lerp(Color(0xFFC8CDE1), Color(0xFF3C4664), 0.6f) else lerp(Color.White, Color(0xFF969BA5), min(1f, gray * 1.4f))
+    val heavy = overcast(s.sky)
+    if (heavy) p.r(0f, 0f, W.toFloat(), 14f, cloud, 0.55f)
     for (i in 0 until cloudsOf(s.sky)) {
         val x = wrap(hash(i, 4) * (W + 40) + t * (1.5f + 2.5f * hash(i, 5)) * s.wind, W + 40f) - 24
-        val y = 6 + hash(i, 6) * 22
-        val sc = 1 + hash(i, 7) * 0.8f
+        val y = if (heavy) -2 + hash(i, 6) * (GY - 30) else 6 + hash(i, 6) * 22
+        val sc = if (heavy) 1.5f + hash(i, 7) * 1.2f else 1 + hash(i, 7) * 0.8f
         val w = (14 * sc).roundToInt()
         p.r(x + 2, y + 3, w.toFloat(), 4f, cloud); p.r(x + 5, y, (w - 6).toFloat(), 4f, cloud); p.r(x, y + 4, (w + 4).toFloat(), 3f, cloud)
     }

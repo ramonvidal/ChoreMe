@@ -79,6 +79,7 @@ class LiveHouseScreenshotTest {
             scene(15f, Sky.PARTLY_CLOUDY) to (Gag.RAINBOW to 0.5f),
             scene(23f) to (Gag.SHOOTING_STAR to 0.4f),
             scene(11f) to (Gag.BUTTERFLY to 0.4f),
+            scene(11f, Sky.CLOUDY) to (null to 0f),
             scene(22f, Sky.RAIN, urgent = true) to (null to 0f),
             scene(16f, Sky.STORM, people = 3) to (null to 0f),
         ),
