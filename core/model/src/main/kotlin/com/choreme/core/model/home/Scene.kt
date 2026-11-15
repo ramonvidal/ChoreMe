@@ -69,14 +69,12 @@ data class SceneInput(
     /** An urgent chore is waiting: the mailbox flag goes up. */
     val urgent: Boolean = false,
     val occasion: Occasion? = null,
+    /** When the sun comes up and goes down where the house is, as hours of the day. */
+    val sunrise: Float = 6f,
+    val sunset: Float = 18.5f,
 ) {
-    val isDay: Boolean get() = hour >= DAY_START && hour <= DAY_END
+    val isDay: Boolean get() = hour >= sunrise && hour <= sunset
     val wind: Float get() = (windKmh / 20f).coerceIn(0.1f, 1.6f)
-
-    companion object {
-        const val DAY_START = 6f
-        const val DAY_END = 19.5f
-    }
 }
 
 private val DRY = setOf(Sky.CLEAR, Sky.PARTLY_CLOUDY)

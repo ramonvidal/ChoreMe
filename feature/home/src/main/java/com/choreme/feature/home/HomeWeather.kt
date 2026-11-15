@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.choreme.core.model.home.Occasion
 import com.choreme.core.model.home.SceneInput
 import com.choreme.core.model.weather.Advice
+import com.choreme.core.model.weather.SunTimes
 import com.choreme.core.model.weather.AirNote
 import com.choreme.core.model.weather.DryingTip
 import com.choreme.core.model.weather.Sky
@@ -65,6 +66,8 @@ internal data class HomeWeatherState(
     val occasion: Occasion? = null,
     /** Whether the picture moves (the phone's own choice). */
     val animated: Boolean = true,
+    /** The sun where the house is, so night falls when the sun really sets; null until the place is known. */
+    val sun: SunTimes? = null,
 ) {
     fun scene(hour: Float) = SceneInput(
         hour = hour,
@@ -73,6 +76,8 @@ internal data class HomeWeatherState(
         peopleHome = peopleHome,
         urgent = urgent,
         occasion = occasion,
+        sunrise = (sun?.sunrise ?: 6f).coerceIn(3f, 10f),
+        sunset = (sun?.sunset ?: 18.5f).coerceIn(15f, 21.5f),
     )
 }
 

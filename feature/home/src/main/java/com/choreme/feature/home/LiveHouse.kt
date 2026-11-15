@@ -160,18 +160,19 @@ private fun hash(i: Int, salt: Int): Float {
 
 private fun wrap(v: Float, size: Float): Float = ((v % size) + size) % size
 
-private val SkyKeys = listOf(
-    0f to Color(0xFF1A2856), 5f to Color(0xFF283A6E), 6.5f to Color(0xFFF4A261), 8f to Color(0xFF7EC8F2),
-    17f to Color(0xFF7EC8F2), 18.5f to Color(0xFFE76F51), 20f to Color(0xFF283A6E), 24f to Color(0xFF1A2856),
+/** The colours of the sky through the day, around the sun's real rise and set: night, dawn, day, dusk, night. */
+private fun skyKeys(s: SceneInput) = listOf(
+    0f to Color(0xFF1A2856), (s.sunrise - 1.5f) to Color(0xFF283A6E), s.sunrise to Color(0xFFF4A261), (s.sunrise + 1.5f) to Color(0xFF7EC8F2),
+    (s.sunset - 1.5f) to Color(0xFF7EC8F2), s.sunset to Color(0xFFE76F51), (s.sunset + 1.5f) to Color(0xFF283A6E), 24f to Color(0xFF1A2856),
 )
 
-private fun skyAt(hour: Float): Color {
-    for (i in 0 until SkyKeys.size - 1) {
-        val (a, ca) = SkyKeys[i]
-        val (b, cb) = SkyKeys[i + 1]
+private fun skyAt(hour: Float, keys: List<Pair<Float, Color>>): Color {
+    for (i in 0 until keys.size - 1) {
+        val (a, ca) = keys[i]
+        val (b, cb) = keys[i + 1]
         if (hour in a..b) return lerp(ca, cb, (hour - a) / (b - a))
     }
-    return SkyKeys[0].second
+    return keys[0].second
 }
 
 private fun grayOf(sky: Sky) = when (sky) {
@@ -193,7 +194,7 @@ private fun SceneInput.wet() = sky == Sky.RAIN || sky == Sky.DRIZZLE || sky == S
 
 private fun drawSky(p: Px, s: SceneInput, t: Float) {
     val gray = grayOf(s.sky) * (if (s.dark()) 0.3f else 1f)
-    val sky = lerp(skyAt(s.hour), Color(0xFF6E737D), gray)
+    val sky = lerp(skyAt(s.hour, skyKeys(s)), Color(0xFF6E737D), gray)
     p.r(0f, 0f, W.toFloat(), GY.toFloat(), sky)
     if (s.dark() && s.sky in dry) {
         for (i in 0 until 36) {
@@ -202,8 +203,8 @@ private fun drawSky(p: Px, s: SceneInput, t: Float) {
     }
     // sun or moon, on their way across
     val day = s.isDay
-    val k = if (day) (s.hour - SceneInput.DAY_START) / (SceneInput.DAY_END - SceneInput.DAY_START)
-    else (if (s.hour > SceneInput.DAY_END) s.hour - SceneInput.DAY_END else s.hour + 4.5f) / 10.5f
+    val k = if (day) (s.hour - s.sunrise) / (s.sunset - s.sunrise)
+    else (if (s.hour > s.sunset) s.hour - s.sunset else s.hour + 24f - s.sunset) / (24f - s.sunset + s.sunrise)
     val ax = 10 + k * 140
     val ay = GY - 10 - sin(k * PI.toFloat()) * (GY - 24)
     val vis = when (s.sky) { Sky.STORM -> 0f; Sky.RAIN, Sky.CLOUDY, Sky.DRIZZLE -> 0.35f; Sky.FOG -> 0.3f; else -> 1f }

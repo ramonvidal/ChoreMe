@@ -28,6 +28,7 @@ import com.choreme.core.model.home.occasionOn
 import com.choreme.core.model.home.peopleAtHome
 import com.choreme.core.model.location.MemberLocation
 import com.choreme.core.model.weather.homePlace
+import com.choreme.core.model.weather.sunTimes
 import com.choreme.core.settings.AppearanceSettings
 import java.time.Instant
 import kotlinx.coroutines.flow.onStart
@@ -169,6 +170,7 @@ class HomeViewModel @Inject internal constructor(
             urgent = timeline.urgent.isNotEmpty(),
             occasion = occasionOn(today),
             animated = data.animated,
+            sun = home?.let { sunTimes(today, it.latitude, it.longitude, ZoneId.systemDefault().rules.getOffset(Instant.now()).totalSeconds / 3600.0) },
         )
         val setup = SetupFacts(
             hasPlace = inputs.places.isNotEmpty(), sharing = data.sharing, notificationsAllowed = true,
