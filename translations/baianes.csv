@@ -595,6 +595,15 @@ feature/map,live_text,,"While you're on the move, so the family can follow your 
 feature/map,plan_title,,Weekly plan,Plano da semana
 feature/map,tab_map,,Map,Mapa
 feature/map,tab_trips,,Trips,Trajetos
+feature/map,battery_title,,The battery saver may stop the location,A economia de bateria pode parar a localização
+feature/map,battery_body,,"To keep the family map up to date when the app is closed, set Nos Corre! to ""Unrestricted"" (or ""Not optimized"") in the battery settings.","Pra manter o mapa da família em dia com o app fechado, deixe o Nos Corre! como ""Sem restrições"" (ou ""Não otimizado"") nas configurações de bateria."
+feature/map,battery_tip_xiaomi,,"Xiaomi, Redmi, Poco: also turn on Autostart and set the battery saver to ""No restrictions"".","Xiaomi, Redmi, Poco: ligue também a Inicialização automática e deixe a economia de bateria em ""Sem restrições""."
+feature/map,battery_tip_samsung,,"Samsung: also take Nos Corre! out of ""Sleeping apps"" and ""Deep sleeping apps"".","Samsung: tire também o Nos Corre! de ""Apps em suspensão"" e ""Apps em suspensão profunda""."
+feature/map,battery_tip_huawei,,"Huawei, Honor: in App launch, manage Nos Corre! manually and allow background activity.","Huawei, Honor: em Inicialização de apps, gerencie o Nos Corre! manualmente e permita atividade em segundo plano."
+feature/map,battery_tip_oppo,,"Oppo, Realme, OnePlus: also allow Auto-launch and background activity.","Oppo, Realme, OnePlus: permita também a Inicialização automática e a atividade em segundo plano."
+feature/map,battery_tip_vivo,,Vivo: also allow Autostart and high background power use.,Vivo: permita também a Inicialização automática e o consumo alto de bateria em segundo plano.
+feature/map,battery_open,,Open battery settings,Abrir configurações de bateria
+feature/map,battery_hide,,Don't show again,Não mostrar de novo
 feature/onboarding,sign_in_tagline,,"Chores, groceries and the family calendar, shared by everyone at home.","Os corres, a feira e a agenda da família, divididos com todo mundo de casa."
 feature/onboarding,sign_in_google,,Sign in with Google,Entrar com o Google
 feature/onboarding,sign_in_kid,,I'm a kid,Sou guri

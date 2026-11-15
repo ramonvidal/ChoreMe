@@ -10,11 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
+import com.choreme.core.model.location.BatteryVendor
 import com.choreme.core.model.location.GeoPoint
 import com.choreme.core.model.location.LocationStatus
 import com.choreme.core.model.location.MemberLocation
@@ -59,7 +61,7 @@ class MapTabScreenshotTest {
         instant = InstantAlerts(hasApp = true, connected = true),
     )
 
-    private fun shoot(name: String, dark: Boolean) {
+    private fun shoot(name: String, dark: Boolean, battery: BatteryVendor? = null) {
         compose.setContent {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
                 Surface(Modifier.fillMaxSize()) {
@@ -68,6 +70,7 @@ class MapTabScreenshotTest {
                         onMyWay = OnMyWay(others = listOf("Ana" to Instant.now().minusSeconds(300))),
                         error = null,
                         actions = MapActions(),
+                        batteryVendor = battery,
                         map = { _, modifier ->
                             Box(modifier.background(Color(0xFFDCE6DD)), contentAlignment = Alignment.Center) { Text("(map)") }
                         },
@@ -86,4 +89,13 @@ class MapTabScreenshotTest {
 
     @Test
     fun parentDark() = shoot("tab-map-dark", dark = true)
+
+    /** The battery saver may stop the location: the card with the maker's extra tip. */
+    @Test
+    fun batteryCard() {
+        shoot("tab-map-battery", dark = false, battery = BatteryVendor.XIAOMI)
+        compose.onNodeWithText("The battery saver may stop the location").assertExists()
+        compose.onNodeWithText("Open battery settings").assertExists()
+        compose.onNodeWithText("Xiaomi", substring = true).assertExists()
+    }
 }

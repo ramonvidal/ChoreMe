@@ -17,6 +17,7 @@ import com.choreme.core.location.DeviceLocation
 import com.choreme.core.location.SharingChoice
 import com.choreme.core.model.AlertKind
 import com.choreme.core.push.PushRegistration
+import com.choreme.core.settings.HintSettings
 import com.choreme.core.settings.NotificationSettings
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
@@ -98,7 +99,12 @@ class MapViewModel @Inject internal constructor(
     private val announcements: AnnouncementRepository,
     private val endpoints: PushEndpointRepository,
     private val sender: PushSender,
+    private val hints: HintSettings,
 ) : ViewModel() {
+    val batteryHintHidden: StateFlow<Boolean> = hints.batteryHintHidden
+
+    fun hideBatteryHint() = hints.hideBatteryHint()
+
     private val hasPushApp = MutableStateFlow(push.hasDistributor())
     private val permissions = MutableStateFlow(device.hasPermission() to device.hasBackgroundPermission())
     private val myFix = MutableStateFlow<DeviceFix?>(null)

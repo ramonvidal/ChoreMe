@@ -49,6 +49,16 @@ class HintSettings @Inject constructor(@ApplicationContext context: Context) {
     private val _firstRunHidden = MutableStateFlow(prefs.getBoolean(KEY_FIRST_RUN, false))
     val firstRunHidden: StateFlow<Boolean> = _firstRunHidden.asStateFlow()
 
+    private val _batteryHidden = MutableStateFlow(prefs.getBoolean(KEY_BATTERY, false))
+
+    /** The person hid the "battery may stop the location" card for good. */
+    val batteryHintHidden: StateFlow<Boolean> = _batteryHidden.asStateFlow()
+
+    fun hideBatteryHint() {
+        prefs.edit().putBoolean(KEY_BATTERY, true).apply()
+        _batteryHidden.value = true
+    }
+
     fun hideFirstRun() {
         prefs.edit().putBoolean(KEY_FIRST_RUN, true).apply()
         _firstRunHidden.value = true
@@ -56,5 +66,6 @@ class HintSettings @Inject constructor(@ApplicationContext context: Context) {
 
     private companion object {
         const val KEY_FIRST_RUN = "first_run_hidden"
+        const val KEY_BATTERY = "battery_hint_hidden"
     }
 }

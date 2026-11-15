@@ -58,6 +58,15 @@
     <string name="plan_title">Plano da semana</string>
     <string name="tab_map">Mapa</string>
     <string name="tab_trips">Trajetos</string>
+    <string name="battery_title">A economia de bateria pode parar a localização</string>
+    <string name="battery_body">Pra manter o mapa da família em dia com o app fechado, deixe o Nos Corre! como \"Sem restrições\" (ou \"Não otimizado\") nas configurações de bateria.</string>
+    <string name="battery_tip_xiaomi">Xiaomi, Redmi, Poco: ligue também a Inicialização automática e deixe a economia de bateria em \"Sem restrições\".</string>
+    <string name="battery_tip_samsung">Samsung: tire também o Nos Corre! de \"Apps em suspensão\" e \"Apps em suspensão profunda\".</string>
+    <string name="battery_tip_huawei">Huawei, Honor: em Inicialização de apps, gerencie o Nos Corre! manualmente e permita atividade em segundo plano.</string>
+    <string name="battery_tip_oppo">Oppo, Realme, OnePlus: permita também a Inicialização automática e a atividade em segundo plano.</string>
+    <string name="battery_tip_vivo">Vivo: permita também a Inicialização automática e o consumo alto de bateria em segundo plano.</string>
+    <string name="battery_open">Abrir configurações de bateria</string>
+    <string name="battery_hide">Não mostrar de novo</string>
     <plurals name="minutes_ago">
         <item quantity="one">há %d min</item>
         <item quantity="other">há %d min</item>

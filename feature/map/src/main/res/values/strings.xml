@@ -70,4 +70,13 @@
     <string name="plan_title">Weekly plan</string>
     <string name="tab_map">Map</string>
     <string name="tab_trips">Trips</string>
+    <string name="battery_title">The battery saver may stop the location</string>
+    <string name="battery_body">To keep the family map up to date when the app is closed, set Nos Corre! to \"Unrestricted\" (or \"Not optimized\") in the battery settings.</string>
+    <string name="battery_tip_xiaomi">Xiaomi, Redmi, Poco: also turn on Autostart and set the battery saver to \"No restrictions\".</string>
+    <string name="battery_tip_samsung">Samsung: also take Nos Corre! out of \"Sleeping apps\" and \"Deep sleeping apps\".</string>
+    <string name="battery_tip_huawei">Huawei, Honor: in App launch, manage Nos Corre! manually and allow background activity.</string>
+    <string name="battery_tip_oppo">Oppo, Realme, OnePlus: also allow Auto-launch and background activity.</string>
+    <string name="battery_tip_vivo">Vivo: also allow Autostart and high background power use.</string>
+    <string name="battery_open">Open battery settings</string>
+    <string name="battery_hide">Don\'t show again</string>
 </resources>

@@ -32,6 +32,10 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import com.choreme.core.model.location.batteryVendorOf
+import com.choreme.core.model.location.BatteryVendor
+import com.choreme.core.location.BatteryOptimization
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -87,6 +91,10 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
 
+    // Whether the battery saver may put the app to sleep, checked again every time the person comes back to the app.
+    var batteryRestricted by remember { mutableStateOf(BatteryOptimization.isRestricted(context)) }
+    val batteryHintHidden by viewModel.batteryHintHidden.collectAsStateWithLifecycle()
+
     LaunchedEffect(viewModel) {
         viewModel.placeSaved.collect { result ->
             snackbar.showSnackbar(
@@ -114,6 +122,7 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
     LaunchedEffect(Unit) { viewModel.refresh() }
     LifecycleResumeEffect(viewModel) {
         viewModel.onResume()
+        batteryRestricted = BatteryOptimization.isRestricted(context)
         onPauseOrDispose { }
     }
 
@@ -124,6 +133,9 @@ internal fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
         snackbar = snackbar,
         explainBackground = explainBackground,
         onExplainBackground = { explainBackground = it },
+        batteryVendor = if (batteryRestricted && !batteryHintHidden) batteryVendorOf(Build.MANUFACTURER) else null,
+        onOpenBatterySettings = { context.startActivity(BatteryOptimization.settingsIntent(context)) },
+        onHideBatteryHint = { viewModel.hideBatteryHint() },
         actions = MapActions(
             refresh = { viewModel.refresh() },
             setOnMyWay = { viewModel.setOnMyWay(it) },
@@ -178,6 +190,10 @@ internal fun MapContent(
     snackbar: SnackbarHostState = remember { SnackbarHostState() },
     explainBackground: Boolean = false,
     onExplainBackground: (Boolean) -> Unit = {},
+    /** Set when the battery saver may stop the location: the maker, for the extra tips. Null hides the card. */
+    batteryVendor: BatteryVendor? = null,
+    onOpenBatterySettings: () -> Unit = {},
+    onHideBatteryHint: () -> Unit = {},
 ) {
     var focus by remember { mutableStateOf<GeoPoint?>(null) }
     var addingPlace by rememberSaveable { mutableStateOf(false) }
@@ -233,6 +249,10 @@ internal fun MapContent(
                     onToggle = actions.setSharing,
                     onAllowBackground = { onExplainBackground(true) },
                 )
+            }
+
+            if (state.isSharing && batteryVendor != null) {
+                item(key = "battery") { BatteryCard(batteryVendor, onOpenBatterySettings, onHideBatteryHint) }
             }
 
             item(key = "alerts") {
@@ -309,6 +329,30 @@ internal fun MapContent(
             },
             onDismiss = { addingPlace = false },
         )
+    }
+}
+
+/** The battery saver may stop the location in the background: how to leave this app out of it. */
+@Composable
+private fun BatteryCard(vendor: BatteryVendor, onOpen: () -> Unit, onHide: () -> Unit) {
+    Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer, contentColor = MaterialTheme.colorScheme.onTertiaryContainer)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.battery_title), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.battery_body), style = MaterialTheme.typography.bodyMedium)
+            val tip = when (vendor) {
+                BatteryVendor.XIAOMI -> R.string.battery_tip_xiaomi
+                BatteryVendor.SAMSUNG -> R.string.battery_tip_samsung
+                BatteryVendor.HUAWEI -> R.string.battery_tip_huawei
+                BatteryVendor.OPPO -> R.string.battery_tip_oppo
+                BatteryVendor.VIVO -> R.string.battery_tip_vivo
+                BatteryVendor.OTHER -> null
+            }
+            tip?.let { Text(stringResource(it), style = MaterialTheme.typography.bodySmall) }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = onOpen) { Text(stringResource(R.string.battery_open)) }
+                TextButton(onClick = onHide) { Text(stringResource(R.string.battery_hide)) }
+            }
+        }
     }
 }
 
