@@ -36,6 +36,7 @@ class WeekAheadScreenshotTest {
     val compose = createComposeRule()
 
     private val ramon = Member("ramon", "Ramon", Role.PARENT)
+    private val ana = Member("ana", "Ana", Role.PARENT)
     private val entries = listOf(
         PlanEntry("a", "ramon", "Work", setOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY), LocalTime.of(8, 0), 40, TripMode.BIKE, "work"),
         PlanEntry("b", "ana", "Gym", setOf(DayOfWeek.TUESDAY), LocalTime.of(18, 30), 50, TripMode.WALK, "gym"),
@@ -56,7 +57,7 @@ class WeekAheadScreenshotTest {
         }
     }
 
-    private val state get() = WeekAheadState(outlook(), members = listOf(ramon), myMemberId = "ramon", hasTrips = true, loading = false)
+    private val state get() = WeekAheadState(outlook(), members = listOf(ramon, ana), myMemberId = "ramon", hasTrips = true, loading = false)
 
     private fun shootStore(name: String) {
         compose.setContent {

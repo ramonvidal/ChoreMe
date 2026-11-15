@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -103,6 +104,7 @@ class WeekAheadViewModel @Inject internal constructor(
 }
 
 private const val OUTLOOK_DAYS = 7
+private val DAY_LABEL_WIDTH = 64.dp
 
 /** The Week sub-tab: the week ahead, and a way to the Map tab where the trips are planned. */
 @Composable
@@ -136,11 +138,12 @@ private fun WeekAhead(state: WeekAheadState) {
     NosCard(Modifier.fillMaxWidth()) {
         state.outlook.forEachIndexed { index, day ->
             if (index > 0) HorizontalDivider(Modifier.padding(vertical = 6.dp), color = MaterialTheme.colorScheme.surfaceVariant)
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            // The day keeps a fixed width so a long description never squeezes it into one letter per line.
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     "${day.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())} ${day.date.dayOfMonth}",
                     style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.width(DAY_LABEL_WIDTH),
                 )
                 Text(
                     listOf(
@@ -150,6 +153,7 @@ private fun WeekAhead(state: WeekAheadState) {
                         if (day.drying == DryingQuality.GOOD) stringResource(R.string.week_drying) else null,
                     ).filterNotNull().joinToString(" · "),
                     style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f),
                 )
             }
             day.moments.forEach { moment ->
