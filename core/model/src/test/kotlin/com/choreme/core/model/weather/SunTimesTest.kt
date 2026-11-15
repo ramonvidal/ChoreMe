@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 class SunTimesTest {
     @Test
-    fun `Salvador in mid November: the sun sets before 18h`() {
+    fun `Salvador in mid November, the sun sets before 18h`() {
         val sun = sunTimes(LocalDate.of(2026, 11, 15), -12.97, -38.50, -3.0)!!
         assertEquals(4.96f, sun.sunrise, 0.15f)
         assertEquals(17.67f, sun.sunset, 0.15f)
