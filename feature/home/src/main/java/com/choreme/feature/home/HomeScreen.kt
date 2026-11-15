@@ -26,6 +26,19 @@ import androidx.compose.ui.Alignment
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.ui.ItemIcon
 import com.choreme.core.ui.choreTitle
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.choreme.core.model.home.FirstStep
+import com.choreme.core.model.home.StepState
+import com.choreme.core.model.home.firstRunSteps
+import com.choreme.core.model.home.showFirstRun
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -79,9 +92,20 @@ internal fun HomeScreen(
     onAddChore: () -> Unit,
     onOpenGroceries: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenMap: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    var notificationsAllowed by remember { mutableStateOf(notificationsAllowed(context)) }
+    val askNotifications = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { notificationsAllowed = it }
+    LifecycleResumeEffect(Unit) {
+        notificationsAllowed = notificationsAllowed(context)
+        onPauseOrDispose { }
+    }
+    val setupSteps = state.setup?.let { facts ->
+        firstRunSteps(facts.copy(notificationsAllowed = notificationsAllowed)).takeIf { showFirstRun(it, state.setupHidden) }
+    }.orEmpty()
     var tab by rememberSaveable { mutableStateOf(HomeTab.TODAY) }
     // Counts the "New event" requests, so the Agenda sub-tab opens its dialog once per request.
     var newEvent by rememberSaveable { mutableIntStateOf(0) }
@@ -94,6 +118,17 @@ internal fun HomeScreen(
                 onAddChore = onAddChore,
                 onOpenGroceries = onOpenGroceries,
                 onAddEvent = { newEvent++; tab = HomeTab.AGENDA },
+                setupSteps = setupSteps,
+                onSetupStep = { step ->
+                    when (step) {
+                        FirstStep.SAVE_HOME, FirstStep.SHARE_LOCATION -> onOpenMap()
+                        FirstStep.PLAN_TRIP -> onOpenSettings()
+                        FirstStep.ALLOW_NOTIFICATIONS -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    }
+                },
+                onHideSetup = viewModel::hideSetup,
             )
             HomeTab.AGENDA -> AgendaScreen(addRequest = newEvent)
             HomeTab.WEEK -> WeekAheadScreen(onPlanTrips = onOpenSettings)
@@ -109,6 +144,9 @@ internal fun HomeContent(
     onAddChore: () -> Unit,
     onOpenGroceries: () -> Unit,
     onAddEvent: () -> Unit,
+    setupSteps: List<StepState> = emptyList(),
+    onSetupStep: (FirstStep) -> Unit = {},
+    onHideSetup: () -> Unit = {},
 ) {
     var showWeather by rememberSaveable { mutableStateOf(false) }
     var addMenu by remember { mutableStateOf(false) }
@@ -127,6 +165,10 @@ internal fun HomeContent(
 
         if (timeline != null && timeline.urgent.isNotEmpty()) {
             item(key = "urgent") { UrgentCard(timeline.urgent, onClick = onOpenChores) }
+        }
+
+        if (setupSteps.isNotEmpty()) {
+            item(key = "setup") { GettingStartedCard(setupSteps, onSetupStep, onHideSetup) }
         }
 
         if (timeline != null) {
@@ -174,6 +216,51 @@ internal fun HomeContent(
 
     if (showWeather) HomeWeatherDialog(state.weather, onDismiss = { showWeather = false })
 }
+
+private fun notificationsAllowed(context: android.content.Context) = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+
+/** The setup list for a new family: each step ticks by itself when done; "Hide" removes the card for good. */
+@Composable
+private fun GettingStartedCard(steps: List<StepState>, onStep: (FirstStep) -> Unit, onHide: () -> Unit) {
+    NosCard(Modifier.fillMaxWidth()) {
+        Text(stringResource(R.string.gs_title), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.gs_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        steps.forEach { (step, done) ->
+            Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (done) {
+                    ItemIcon(CoreUiR.drawable.ic_check_circle, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.primary)
+                } else {
+                    Box(Modifier.size(22.dp).border(2.dp, MaterialTheme.colorScheme.outline, CircleShape))
+                }
+                Text(
+                    stringResource(step.label),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (done) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                    textDecoration = if (done) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
+                    modifier = Modifier.weight(1f),
+                )
+                if (!done) NosButton(stringResource(step.action), { onStep(step) }, style = NosButtonStyle.Tonal)
+            }
+        }
+        NosButton(stringResource(R.string.gs_hide), onHide, style = NosButtonStyle.Text)
+    }
+}
+
+private val FirstStep.label: Int
+    get() = when (this) {
+        FirstStep.SAVE_HOME -> R.string.gs_save_home
+        FirstStep.SHARE_LOCATION -> R.string.gs_share_location
+        FirstStep.ALLOW_NOTIFICATIONS -> R.string.gs_notifications
+        FirstStep.PLAN_TRIP -> R.string.gs_plan_trip
+    }
+
+private val FirstStep.action: Int
+    get() = when (this) {
+        FirstStep.SAVE_HOME, FirstStep.SHARE_LOCATION -> R.string.gs_open_map
+        FirstStep.ALLOW_NOTIFICATIONS -> R.string.gs_allow
+        FirstStep.PLAN_TRIP -> R.string.gs_plan
+    }
 
 /** The chores marked urgent, red and first under the weather, so they are not missed. Tap to open the Chores tab. */
 @Composable

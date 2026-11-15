@@ -41,3 +41,20 @@ class AppearanceSettings @Inject constructor(@ApplicationContext context: Contex
         const val KEY_HOUSE = "animated_house"
     }
 }
+
+/** Small one-time hints on this phone: whether the person hid the "getting started" card for good. */
+@Singleton
+class HintSettings @Inject constructor(@ApplicationContext context: Context) {
+    private val prefs = context.getSharedPreferences("hints", Context.MODE_PRIVATE)
+    private val _firstRunHidden = MutableStateFlow(prefs.getBoolean(KEY_FIRST_RUN, false))
+    val firstRunHidden: StateFlow<Boolean> = _firstRunHidden.asStateFlow()
+
+    fun hideFirstRun() {
+        prefs.edit().putBoolean(KEY_FIRST_RUN, true).apply()
+        _firstRunHidden.value = true
+    }
+
+    private companion object {
+        const val KEY_FIRST_RUN = "first_run_hidden"
+    }
+}

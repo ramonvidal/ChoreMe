@@ -83,6 +83,16 @@
     <string name="home_tab_today">Hoje</string>
     <string name="home_tab_agenda">Agenda</string>
     <string name="home_tab_week">Semana</string>
+    <string name="gs_title">Pra começar</string>
+    <string name="gs_hint">Alguns passos pro Nos Corre! funcionar pra família toda.</string>
+    <string name="gs_save_home">Salvar sua casa no mapa</string>
+    <string name="gs_share_location">Compartilhar sua localização com a família</string>
+    <string name="gs_notifications">Liberar as notificações</string>
+    <string name="gs_plan_trip">Planejar um trajeto de sempre, tipo trabalho ou academia</string>
+    <string name="gs_open_map">Abrir o mapa</string>
+    <string name="gs_allow">Liberar</string>
+    <string name="gs_plan">Planejar</string>
+    <string name="gs_hide">Esconder isso</string>
     <plurals name="morning_mine">
         <item quantity="one">%d é seu</item>
         <item quantity="other">%d são seus</item>

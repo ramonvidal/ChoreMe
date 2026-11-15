@@ -522,6 +522,16 @@ feature/home,home_add_event,,New event,Novo compromisso
 feature/home,home_tab_today,,Today,Hoje
 feature/home,home_tab_agenda,,Agenda,Agenda
 feature/home,home_tab_week,,Week,Semana
+feature/home,gs_title,,Getting started,Pra começar
+feature/home,gs_hint,,A few steps so Nos Corre! works for the whole family.,Alguns passos pro Nos Corre! funcionar pra família toda.
+feature/home,gs_save_home,,Save your home on the map,Salvar sua casa no mapa
+feature/home,gs_share_location,,Share your location with the family,Compartilhar sua localização com a família
+feature/home,gs_notifications,,Allow notifications,Liberar as notificações
+feature/home,gs_plan_trip,,"Plan a regular trip, like work or the gym","Planejar um trajeto de sempre, tipo trabalho ou academia"
+feature/home,gs_open_map,,Open the map,Abrir o mapa
+feature/home,gs_allow,,Allow,Liberar
+feature/home,gs_plan,,Plan,Planejar
+feature/home,gs_hide,,Hide this,Esconder isso
 feature/map,share_title,,Share my location,Dividir minha localização
 feature/map,share_body_off,,Off. The family can't see where you are.,Desligado. A família não vê onde você tá.
 feature/map,share_body_on,,"On. The family sees roughly where you are, updated every 15 minutes or so. Turn it off any time.","Ligado. A família vê mais ou menos onde você tá, atualizado de 15 em 15 minutos mais ou menos. Desligue quando quiser."

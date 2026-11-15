@@ -121,4 +121,14 @@
     <string name="home_tab_today">Today</string>
     <string name="home_tab_agenda">Agenda</string>
     <string name="home_tab_week">Week</string>
+    <string name="gs_title">Getting started</string>
+    <string name="gs_hint">A few steps so Nos Corre! works for the whole family.</string>
+    <string name="gs_save_home">Save your home on the map</string>
+    <string name="gs_share_location">Share your location with the family</string>
+    <string name="gs_notifications">Allow notifications</string>
+    <string name="gs_plan_trip">Plan a regular trip, like work or the gym</string>
+    <string name="gs_open_map">Open the map</string>
+    <string name="gs_allow">Allow</string>
+    <string name="gs_plan">Plan</string>
+    <string name="gs_hide">Hide this</string>
 </resources>

@@ -107,4 +107,26 @@ class HomeTabScreenshotTest {
     @Test
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     fun storePt() = shoot("store-1-home-pt", state, dark = false)
+
+    /** A new family: the getting-started card with two steps done. */
+    @Test
+    fun gettingStarted() {
+        val steps = com.choreme.core.model.home.firstRunSteps(
+            com.choreme.core.model.home.SetupFacts(hasPlace = true, sharing = false, notificationsAllowed = true, hasTrip = false, isParent = true),
+        )
+        compose.setContent {
+            ChoreMeTheme(darkTheme = false, dynamicColor = false) {
+                Surface(Modifier.fillMaxSize()) {
+                    Column {
+                        HomeSubTabs(0) {}
+                        HomeContent(state, onOpenChores = {}, onAddChore = {}, onOpenGroceries = {}, onAddEvent = {}, setupSteps = steps)
+                    }
+                }
+            }
+        }
+        compose.onNodeWithText("Getting started").assertExists()
+        compose.onNodeWithText("Save your home on the map").assertExists()
+        compose.onNodeWithText("Hide this").assertExists()
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/tab-home-getting-started.png")
+    }
 }

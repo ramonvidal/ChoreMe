@@ -20,6 +20,10 @@ import com.choreme.core.model.home.dayTimeline
 import com.choreme.core.model.location.Place
 import com.choreme.core.model.session.SessionState
 import com.choreme.core.location.RoutineLog
+import com.choreme.core.location.SharingChoice
+import com.choreme.core.model.Role
+import com.choreme.core.model.home.SetupFacts
+import com.choreme.core.settings.HintSettings
 import com.choreme.core.model.home.occasionOn
 import com.choreme.core.model.home.peopleAtHome
 import com.choreme.core.model.location.MemberLocation
@@ -62,6 +66,10 @@ internal data class HomeUiState(
     val date: LocalDate = LocalDate.now(),
     val weather: HomeWeatherState = HomeWeatherState(),
     val timeline: DayTimeline? = null,
+    /** What is set up so far, for the getting-started card; null until the family is known. */
+    val setup: SetupFacts? = null,
+    /** The person hid the getting-started card for good. */
+    val setupHidden: Boolean = false,
 )
 
 /** Reads the family's chores, groceries, calendar, trips and the weather, and refreshes every half hour. */
@@ -79,7 +87,13 @@ class HomeViewModel @Inject internal constructor(
     appearance: AppearanceSettings,
     private val day: DayWeather,
     private val routine: RoutineLog,
+    sharing: SharingChoice,
+    hints: HintSettings,
 ) : ViewModel() {
+    private val sharingNow = sharing.isSharing
+    private val setupHidden = hints.firstRunHidden
+    private val hintSettings = hints
+
     private val animatedHouse = appearance.animatedHouse
 
     private class Inputs(
@@ -88,6 +102,8 @@ class HomeViewModel @Inject internal constructor(
         val places: List<Place>,
         val names: Map<String, String>,
         val units: WeatherUnits,
+        val hasAnyTrip: Boolean,
+        val isParent: Boolean,
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -103,17 +119,23 @@ class HomeViewModel @Inject internal constructor(
                 refresh,
             ) { entries, places, members, units, _ ->
                 val active = activeEntries(entries, members, LocalDate.now(), session.memberId, routine.lastVisits())
-                Inputs(session.memberId, active, places, members.associate { it.id to it.name }, units) }
+                Inputs(session.memberId, active, places, members.associate { it.id to it.name }, units, entries.isNotEmpty(), session.role == Role.PARENT) }
             val events = combine(choice.selected, refresh) { selected, _ -> selected }.flatMapLatest { selected -> eventsToday(selected) }
             // Who is at home now (for the lit windows) and whether the little house moves.
-            val house = combine(locations.observeLocations(session.familyId).onStart { emit(emptyList()) }, animatedHouse, ::Pair)
+            val house = combine(locations.observeLocations(session.familyId).onStart { emit(emptyList()) }, animatedHouse, sharingNow, setupHidden) { l, a, sh, hid ->
+                House(l, a, sh, hid)
+            }
             combine(inputs, chores.observeChores(session.familyId), groceries.observeItems(session.familyId), events, house) { i, c, g, e, h ->
-                Data(i, c, g, e, h.first, h.second)
+                Data(i, c, g, e, h.locations, h.animated, h.sharing, h.setupHidden)
             }.mapLatest { compute(it) }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
-    private class Data(val inputs: Inputs, val chores: List<com.choreme.core.model.chore.Chore>, val groceries: List<GroceryItem>, val events: List<CalendarEvent>, val locations: List<MemberLocation>, val animated: Boolean)
+    private class Data(val inputs: Inputs, val chores: List<com.choreme.core.model.chore.Chore>, val groceries: List<GroceryItem>, val events: List<CalendarEvent>, val locations: List<MemberLocation>, val animated: Boolean, val sharing: Boolean, val setupHidden: Boolean)
+
+    private class House(val locations: List<MemberLocation>, val animated: Boolean, val sharing: Boolean, val setupHidden: Boolean)
+
+    fun hideSetup() = hintSettings.hideFirstRun()
 
     private fun eventsToday(selected: Set<Long>?) = if (!calendar.hasPermission() || selected.isNullOrEmpty()) {
         flowOf(emptyList())
@@ -148,6 +170,10 @@ class HomeViewModel @Inject internal constructor(
             occasion = occasionOn(today),
             animated = data.animated,
         )
-        return HomeUiState(loading = false, date = today, weather = weatherState, timeline = timeline)
+        val setup = SetupFacts(
+            hasPlace = inputs.places.isNotEmpty(), sharing = data.sharing, notificationsAllowed = true,
+            hasTrip = inputs.hasAnyTrip, isParent = inputs.isParent,
+        )
+        return HomeUiState(loading = false, date = today, weather = weatherState, timeline = timeline, setup = setup, setupHidden = data.setupHidden)
     }
 }
