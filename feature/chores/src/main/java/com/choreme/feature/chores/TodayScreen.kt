@@ -215,7 +215,7 @@ internal fun ChoresContent(
                 !state.hasChores -> item(key = "empty") { EmptyChores(state.isParent) }
                 else -> {
                     val board = state.board
-                    val choreCard: @Composable (Chore, Boolean) -> Unit = { chore, mine ->
+                    val choreCard: @Composable (Chore, Boolean, String?) -> Unit = { chore, mine, roomName ->
                         ChoreCard(
                             chore = chore,
                             state = state,
@@ -246,12 +246,14 @@ internal fun ChoresContent(
                                 }
                             },
                             mine = mine,
+                            roomName = roomName,
                         )
                     }
                     // What you said you'd do comes first, so it isn't forgotten.
-                    if (board.mine.isNotEmpty()) {
+                    // The tasks you took from a room are here too, tagged with the room.
+                    if (state.yours.isNotEmpty()) {
                         item(key = "mine-title") { SectionLabel(stringResource(R.string.section_yours)) }
-                        items(board.mine, key = { "mine-${it.id}" }) { chore -> choreCard(chore, true) }
+                        items(state.yours, key = { "mine-${it.chore.id}" }) { task -> choreCard(task.chore, true, task.room?.name) }
                     }
                     if (board.awaitingApproval.isNotEmpty()) {
                         item(key = "awaiting-title") { SectionLabel(stringResource(R.string.section_awaiting)) }
@@ -263,13 +265,13 @@ internal fun ChoresContent(
                         }
                     }
 
-                    if (board.toDo.isNotEmpty() || board.mine.isEmpty()) {
+                    if (board.toDo.isNotEmpty() || state.yours.isEmpty()) {
                         item(key = "todo-title") { SectionLabel(stringResource(R.string.section_to_do)) }
                     }
-                    if (board.toDo.isEmpty() && board.mine.isEmpty()) {
+                    if (board.toDo.isEmpty() && state.yours.isEmpty()) {
                         item(key = "todo-empty") { EmptyState(title = stringResource(R.string.nothing_to_do), body = stringResource(R.string.nothing_to_do_body)) }
                     }
-                    items(board.toDo, key = { "todo-${it.id}" }) { chore -> choreCard(chore, false) }
+                    items(board.toDo, key = { "todo-${it.id}" }) { chore -> choreCard(chore, false, null) }
 
                     if (board.upcoming.isNotEmpty()) {
                         item(key = "upcoming-title") { SectionLabel(stringResource(R.string.section_upcoming)) }
@@ -517,6 +519,19 @@ internal fun ChoresHeader(state: ChoresUiState, onOpenGroceries: () -> Unit, onA
 }
 
 
+/** A small pill with a room's name, on a card of a task that belongs to that room. */
+@Composable
+internal fun RoomTag(name: String) {
+    Row(
+        Modifier.background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        ItemIcon(CoreUiR.drawable.ic_tab_rooms, Modifier.size(12.dp), tint = MaterialTheme.colorScheme.onSecondaryContainer)
+        Text(name, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSecondaryContainer, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
 @Composable
 private fun EmptyChores(isParent: Boolean) {
     EmptyState(
@@ -559,6 +574,8 @@ internal fun ChoreCard(
     onRemind: () -> Unit = {},
     /** One the person said they'd do: green edge and tint, so it stands out. */
     mine: Boolean = false,
+    /** The room a room task belongs to, shown as a small tag next to the title. */
+    roomName: String? = null,
 ) {
     val me = state.me ?: return
     val overdueDays = ChronoUnit.DAYS.between(chore.dueDate, state.today).toInt()
@@ -649,6 +666,7 @@ internal fun ChoreCard(
                             itemVerticalAlignment = Alignment.CenterVertically,
                         ) {
                             if (chore.urgent) UrgentTag()
+                            if (roomName != null) RoomTag(roomName)
                             if (team.isNotEmpty() && teamText != null) AvatarStack(team, teamText, ring = cardColor)
                             if (line.isNotEmpty()) {
                                 Text(

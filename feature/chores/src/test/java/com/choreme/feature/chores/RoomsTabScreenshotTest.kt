@@ -72,7 +72,7 @@ class RoomsTabScreenshotTest {
     private fun shoot(name: String, state: RoomsUiState, dark: Boolean, open: String? = null) {
         compose.setContent {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
-                Surface(Modifier.fillMaxSize()) { Column { ChoresSubTabs(1) {}; RoomsContent(state, RoomsActions(), openRoomId = open) } }
+                Surface(Modifier.fillMaxSize()) { Column { ChoresSubTabs(1, lateRooms = com.choreme.core.model.room.lateRoomCount(state.rooms, state.today)) {}; RoomsContent(state, RoomsActions(), openRoomId = open) } }
             }
         }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")

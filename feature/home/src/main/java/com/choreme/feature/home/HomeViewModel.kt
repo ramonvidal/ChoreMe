@@ -9,6 +9,13 @@ import com.choreme.core.data.FamilyRepository
 import com.choreme.core.data.GroceryRepository
 import com.choreme.core.data.LocationRepository
 import com.choreme.core.data.PlanRepository
+import com.choreme.core.data.RoomRepository
+import com.choreme.core.model.room.Room
+import com.choreme.core.model.room.RoomNudge
+import com.choreme.core.model.room.YourTask
+import com.choreme.core.model.room.roomNudge
+import com.choreme.core.model.room.roomOverviews
+import com.choreme.core.model.room.yourTasks
 import com.choreme.core.model.agenda.CalendarEvent
 import com.choreme.core.model.chore.RoomFilter
 import com.choreme.core.model.chore.buildTodayBoard
@@ -71,6 +78,10 @@ internal data class HomeUiState(
     val setup: SetupFacts? = null,
     /** The person hid the getting-started card for good. */
     val setupHidden: Boolean = false,
+    /** What this person took, the house's chores and the rooms' tasks together; urgent first. */
+    val yours: List<YourTask> = emptyList(),
+    /** A room that is late with nobody on it, worth a look. */
+    val nudge: RoomNudge? = null,
 )
 
 /** Reads the family's chores, groceries, calendar, trips and the weather, and refreshes every ten minutes. */
@@ -81,6 +92,7 @@ class HomeViewModel @Inject internal constructor(
     locations: LocationRepository,
     chores: ChoreRepository,
     groceries: GroceryRepository,
+    rooms: RoomRepository,
     private val calendar: CalendarRepository,
     private val choice: CalendarChoice,
     private val weather: WeatherRepository,
@@ -123,18 +135,18 @@ class HomeViewModel @Inject internal constructor(
                 Inputs(session.memberId, active, places, members.associate { it.id to it.name }, units, entries.isNotEmpty(), session.role == Role.PARENT) }
             val events = combine(choice.selected, refresh) { selected, _ -> selected }.flatMapLatest { selected -> eventsToday(selected) }
             // Who is at home now (for the lit windows) and whether the little house moves.
-            val house = combine(locations.observeLocations(session.familyId).onStart { emit(emptyList()) }, animatedHouse, sharingNow, setupHidden) { l, a, sh, hid ->
-                House(l, a, sh, hid)
+            val house = combine(locations.observeLocations(session.familyId).onStart { emit(emptyList()) }, animatedHouse, sharingNow, setupHidden, rooms.observe(session.familyId)) { l, a, sh, hid, r ->
+                House(l, a, sh, hid, r)
             }
             combine(inputs, chores.observeChores(session.familyId), groceries.observeItems(session.familyId), events, house) { i, c, g, e, h ->
-                Data(i, c, g, e, h.locations, h.animated, h.sharing, h.setupHidden)
+                Data(i, c, g, e, h.locations, h.animated, h.sharing, h.setupHidden, h.rooms)
             }.mapLatest { compute(it) }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
-    private class Data(val inputs: Inputs, val chores: List<com.choreme.core.model.chore.Chore>, val groceries: List<GroceryItem>, val events: List<CalendarEvent>, val locations: List<MemberLocation>, val animated: Boolean, val sharing: Boolean, val setupHidden: Boolean)
+    private class Data(val inputs: Inputs, val chores: List<com.choreme.core.model.chore.Chore>, val groceries: List<GroceryItem>, val events: List<CalendarEvent>, val locations: List<MemberLocation>, val animated: Boolean, val sharing: Boolean, val setupHidden: Boolean, val rooms: List<Room>)
 
-    private class House(val locations: List<MemberLocation>, val animated: Boolean, val sharing: Boolean, val setupHidden: Boolean)
+    private class House(val locations: List<MemberLocation>, val animated: Boolean, val sharing: Boolean, val setupHidden: Boolean, val rooms: List<Room>)
 
     fun hideSetup() = hintSettings.hideFirstRun()
 
@@ -176,6 +188,10 @@ class HomeViewModel @Inject internal constructor(
             hasPlace = inputs.places.isNotEmpty(), sharing = data.sharing, notificationsAllowed = true,
             hasTrip = inputs.hasAnyTrip, isParent = inputs.isParent,
         )
-        return HomeUiState(loading = false, date = today, weather = weatherState, timeline = timeline, setup = setup, setupHidden = data.setupHidden)
+        return HomeUiState(
+            loading = false, date = today, weather = weatherState, timeline = timeline, setup = setup, setupHidden = data.setupHidden,
+            yours = yourTasks(board.mine, roomBoard.mine, data.rooms),
+            nudge = roomNudge(roomOverviews(data.rooms, data.chores), today),
+        )
     }
 }

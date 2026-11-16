@@ -240,6 +240,9 @@ feature/chores,hero_groceries,,Groceries,Feira
 feature/chores,rooms_title,,Rooms,Cômodos
 feature/chores,rooms_count,one,%d room,%d cômodo
 feature/chores,rooms_count,other,%d rooms,%d cômodos
+feature/chores,room_health_late,,Late,Atrasado
+feature/chores,room_health_today,,Due today,Pra hoje
+feature/chores,room_health_ok,,On track,"Em dia"
 feature/chores,rooms_late,one,%d task is late,%d tarefa atrasada
 feature/chores,rooms_late,other,%d tasks are late,%d tarefas atrasadas
 feature/chores,rooms_empty_title,,"Your home, room by room","Sua casa, cômodo por cômodo"
@@ -472,6 +475,10 @@ feature/home,home_events,other,%d events,%d compromissos
 feature/home,home_groceries,one,%d item to buy,%d item pra comprar
 feature/home,home_groceries,other,%d items to buy,%d itens pra comprar
 feature/home,home_timeline,,The day,O dia
+feature/home,home_yours,,For you today,Pra você hoje
+feature/home,home_nudge_title,,Worth a look,Dê uma espiada
+feature/home,home_nudge,one,"%1$s: %2$s, %3$d day overdue and nobody on it","%1$s: %2$s, %3$d dia atrasado e ninguém nessa"
+feature/home,home_nudge,other,"%1$s: %2$s, %3$d days overdue and nobody on it","%1$s: %2$s, %3$d dias atrasado e ninguém nessa"
 feature/home,home_all_day,,All day,O dia todo
 feature/home,home_nothing_title,,A quiet day,Dia tranquilo
 feature/home,home_nothing_body,,Nothing more on the calendar or in the trips plan for today.,Nada mais na agenda nem nos trajetos de hoje.

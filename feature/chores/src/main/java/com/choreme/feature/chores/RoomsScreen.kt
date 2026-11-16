@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -77,7 +78,10 @@ import com.choreme.core.model.chore.ChoreTemplate
 import com.choreme.core.model.room.FREQUENCY_CHOICES
 import com.choreme.core.model.room.LAST_DONE_CHOICES
 import com.choreme.core.model.room.Room
+import com.choreme.core.model.room.RoomHealth
 import com.choreme.core.model.room.RoomOverview
+import com.choreme.core.model.room.byHealth
+import com.choreme.core.model.room.health
 import com.choreme.core.model.room.RoomType
 import com.choreme.core.model.room.everyDays
 import com.choreme.core.model.room.ideasFor
@@ -201,7 +205,8 @@ private fun RoomList(state: RoomsUiState, onOpen: (String) -> Unit, onAdd: () ->
                     )
                 }
             }
-            items(state.rooms, key = { it.room.id }) { overview ->
+            // Rooms that need something come first.
+            items(state.rooms.byHealth(state.today), key = { it.room.id }) { overview ->
                 RoomCard(overview, state.today, onClick = { onOpen(overview.room.id) })
             }
         }
@@ -226,7 +231,8 @@ private fun RoomCard(overview: RoomOverview, today: LocalDate, onClick: () -> Un
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ItemIcon(room.type.icon, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(room.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(room.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                if (overview.tasks.isNotEmpty()) HealthChip(overview.health(today))
             }
             LastDoneLine(overview, today)
             val late = overview.lateCount(today)
@@ -239,6 +245,23 @@ private fun RoomCard(overview: RoomOverview, today: LocalDate, onClick: () -> Un
             }
         }
     }
+}
+
+/** How the room is doing at a glance: late (red), due today (yellow) or on track (green). */
+@Composable
+private fun HealthChip(health: RoomHealth) {
+    val colors = MaterialTheme.colorScheme
+    val (label, container, content) = when (health) {
+        RoomHealth.LATE -> Triple(R.string.room_health_late, colors.errorContainer, colors.onErrorContainer)
+        RoomHealth.DUE_TODAY -> Triple(R.string.room_health_today, colors.primaryContainer, colors.onPrimaryContainer)
+        RoomHealth.OK -> Triple(R.string.room_health_ok, colors.secondaryContainer, colors.onSecondaryContainer)
+    }
+    Text(
+        stringResource(label),
+        style = MaterialTheme.typography.labelMedium,
+        color = content,
+        modifier = Modifier.background(container, RoundedCornerShape(10.dp)).padding(horizontal = 8.dp, vertical = 2.dp),
+    )
 }
 
 /** "Last done 5 days ago", then the task due first: "Next: Clean bathroom, due in 5 days · every 10 days". */

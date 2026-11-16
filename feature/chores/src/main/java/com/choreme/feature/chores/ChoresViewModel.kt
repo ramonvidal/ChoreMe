@@ -58,6 +58,10 @@ import com.choreme.core.model.chore.RoomFilter
 import com.choreme.core.model.chore.choreDone
 import com.choreme.core.model.chore.filteredBy
 import com.choreme.core.model.chore.nextReminderTime
+import com.choreme.core.data.RoomRepository
+import com.choreme.core.model.room.Room
+import com.choreme.core.model.room.YourTask
+import com.choreme.core.model.room.yourTasks
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -75,6 +79,8 @@ data class ChoresUiState(
     val groceriesToBuy: Int = 0,
     /** Hand-typed chores kept as quick picks. */
     val savedChores: List<SavedChore> = emptyList(),
+    /** Everything this person took, the house's chores and the tasks of the rooms together (the rooms' tagged). */
+    val yours: List<YourTask> = emptyList(),
     /** Whether the family plays with points; off, they show nowhere. */
     val pointsOn: Boolean = true,
 ) {
@@ -117,6 +123,7 @@ private data class Data(
     val members: List<Member>,
     val groceryItems: List<com.choreme.core.model.grocery.GroceryItem>,
     val saved: List<SavedChore>,
+    val rooms: List<Room>,
 )
 
 sealed interface CalendarResult {
@@ -135,6 +142,7 @@ class ChoresViewModel @Inject internal constructor(
     private val calendarChoice: CalendarChoice,
     private val timedReminders: TimedReminders,
     private val changer: ChoreChanger,
+    rooms: RoomRepository,
 ) : ViewModel() {
     /** This phone's "remind me at" times, by chore id. */
     val reminders: StateFlow<Map<String, Instant>> = timedReminders.all
@@ -157,11 +165,13 @@ class ChoresViewModel @Inject internal constructor(
                     families.observeMembers(session.familyId),
                     groceries.observeItems(session.familyId),
                     chores.observeSavedChores(session.familyId),
+                    rooms.observe(session.familyId),
                     ::Data,
                 ),
                 families.observeFamily(session.familyId),
-            ) { (allChores, members, groceryItems, saved), family ->
+            ) { (allChores, members, groceryItems, saved, roomList), family ->
                 val today = LocalDate.now()
+                val house = buildTodayBoard(allChores.filteredBy(RoomFilter.NO_ROOM), today, session.memberId)
                 ChoresUiState(
                     loading = false,
                     familyId = session.familyId,
@@ -169,7 +179,8 @@ class ChoresViewModel @Inject internal constructor(
                         ?: Member(session.memberId, name = "", role = session.role),
                     today = today,
                     // The tasks of a room live under the Rooms sub-tab, so this board is the house's own chores.
-                    board = buildTodayBoard(allChores.filteredBy(RoomFilter.NO_ROOM), today, session.memberId),
+                    board = house,
+                    yours = yourTasks(house.mine, buildTodayBoard(allChores.filteredBy(RoomFilter.ROOMS), today, session.memberId).mine, roomList),
                     chores = allChores,
                     members = members.associateBy { it.id },
                     groceriesToBuy = groceryItems.groceriesToBuy(),

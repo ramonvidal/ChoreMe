@@ -148,7 +148,7 @@ fun RoomFilterRow(selected: com.choreme.core.model.chore.RoomFilter, onSelect: (
 
 
 /** What a sub-tab is called and drawn as. */
-class SubTab(val label: String, @androidx.annotation.DrawableRes val icon: Int)
+class SubTab(val label: String, @androidx.annotation.DrawableRes val icon: Int, val badge: Int = 0)
 
 /**
  * The sub-tabs of a tab (Today / Agenda / Week, Chores / Rooms) as one bar edge to edge: a thin border, a divider
@@ -182,6 +182,15 @@ fun SubTabs(tabs: List<SubTab>, selected: Int, onSelect: (Int) -> Unit, modifier
                         maxLines = 1,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                     )
+                    // A red count, e.g. the rooms that are late.
+                    if (tab.badge > 0) {
+                        Text(
+                            tab.badge.toString(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onError,
+                            modifier = Modifier.background(MaterialTheme.colorScheme.error, RoundedCornerShape(10.dp)).padding(horizontal = 6.dp, vertical = 1.dp),
+                        )
+                    }
                 }
                 val cell = Modifier
                     .weight(1f)

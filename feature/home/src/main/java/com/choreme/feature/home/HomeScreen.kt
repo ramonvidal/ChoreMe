@@ -56,6 +56,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.choreme.core.model.home.DayTimeline
+import com.choreme.core.model.room.RoomNudge
+import com.choreme.core.model.room.YourTask
 import com.choreme.core.model.home.EventEntry
 import com.choreme.core.model.home.TripEntry
 import com.choreme.core.model.weather.WeatherUnits
@@ -66,6 +68,7 @@ import com.choreme.core.ui.NosButtonStyle
 import com.choreme.core.ui.NosCard
 import com.choreme.core.ui.SectionLabel
 import com.choreme.core.ui.describe
+import com.choreme.core.ui.icon
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -203,6 +206,14 @@ internal fun HomeContent(
                     }
                 }
             }
+            if (state.yours.isNotEmpty()) {
+                item(key = "yours-title") { SectionLabel(stringResource(R.string.home_yours)) }
+                item(key = "yours") { YoursCard(state.yours, onClick = onOpenChores) }
+            }
+            state.nudge?.let { nudge ->
+                item(key = "nudge-title") { SectionLabel(stringResource(R.string.home_nudge_title)) }
+                item(key = "nudge") { NudgeCard(nudge, onClick = onOpenChores) }
+            }
             item(key = "timeline-title") { SectionLabel(stringResource(R.string.home_timeline)) }
             item(key = "timeline") {
                 if (timeline.isEmpty) {
@@ -261,6 +272,42 @@ private val FirstStep.action: Int
         FirstStep.ALLOW_NOTIFICATIONS -> R.string.gs_allow
         FirstStep.PLAN_TRIP -> R.string.gs_plan
     }
+
+/** Everything this person took, the house's chores and the tasks of the rooms together; a room task names its room. Tap opens Chores. */
+@Composable
+private fun YoursCard(tasks: List<YourTask>, onClick: () -> Unit) {
+    NosCard(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
+        tasks.forEachIndexed { index, task ->
+            if (index > 0) HorizontalDivider(Modifier.padding(vertical = 6.dp), color = MaterialTheme.colorScheme.outlineVariant)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                ItemIcon(task.chore.template.icon, Modifier.size(20.dp), tint = if (task.chore.urgent) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary)
+                Column(Modifier.weight(1f)) {
+                    Text(choreTitle(task.chore.title), style = MaterialTheme.typography.bodyLarge, maxLines = 2)
+                    task.room?.let { room ->
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            ItemIcon(CoreUiR.drawable.ic_tab_rooms, Modifier.size(12.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(room.name, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** A room that is late and has nobody on it: "Bathroom: Clean the bathroom, 9 days overdue". Tap opens Chores. */
+@Composable
+private fun NudgeCard(nudge: RoomNudge, onClick: () -> Unit) {
+    NosCard(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            ItemIcon(CoreUiR.drawable.ic_tab_rooms, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.error)
+            Text(
+                pluralStringResource(R.plurals.home_nudge, nudge.daysLate, nudge.room.name, choreTitle(nudge.task.title), nudge.daysLate),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+    }
+}
 
 /** The chores marked urgent, red and first under the weather, so they are not missed. Tap to open the Chores tab. */
 @Composable

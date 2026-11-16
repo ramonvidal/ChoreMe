@@ -14,6 +14,10 @@ import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.home.DayTimeline
 import com.choreme.core.model.home.EventEntry
 import com.choreme.core.model.home.TripEntry
+import com.choreme.core.model.room.Room
+import com.choreme.core.model.room.RoomNudge
+import com.choreme.core.model.room.RoomType
+import com.choreme.core.model.room.YourTask
 import com.choreme.core.model.weather.Moment
 import com.choreme.core.model.weather.PlanEntry
 import com.choreme.core.model.weather.TripMode
@@ -62,6 +66,11 @@ class HomeTabScreenshotTest {
     )
 
     private val state = HomeUiState(
+        yours = listOf(
+            YourTask(Chore("y1", "Water the plants", dueDate = monday), null),
+            YourTask(Chore("y2", "Mop the floor", dueDate = monday, roomId = "k"), Room("k", "Kitchen", RoomType.KITCHEN)),
+        ),
+        nudge = RoomNudge(Room("b", "Bathroom", RoomType.BATHROOM), Chore("n1", "Clean the toilet", dueDate = monday.minusDays(9), roomId = "b"), 9),
         loading = false,
         date = monday,
         weather = HomeWeatherState(loading = false, now = hour(12, 8.0, 63, 80, 1.4), moments = emptyList(), hour = 11f, peopleHome = 2, urgent = true, animated = false),
@@ -88,6 +97,11 @@ class HomeTabScreenshotTest {
         compose.onAllNodesWithText("Gym", substring = true).assertCountEquals(1)
         compose.onNodeWithText("4 chores · 2 room tasks for you", substring = true).assertExists()
         compose.onNodeWithText("Grandma visits").assertExists()
+        // What this person took, with the room of a room task, and a late room nobody is on.
+        compose.onNodeWithText("For you today").assertExists()
+        compose.onNodeWithText("Mop the floor").assertExists()
+        compose.onNodeWithText("Kitchen").assertExists()
+        compose.onNodeWithText("Bathroom: Clean the toilet, 9 days overdue and nobody on it").assertExists()
     }
 
     @Test

@@ -69,6 +69,7 @@ class ChoresTabScreenshotTest {
         me = me,
         today = today,
         board = buildTodayBoard(chores, today, me.id),
+        yours = buildTodayBoard(chores, today, me.id).mine.map { com.choreme.core.model.room.YourTask(it, null) },
         chores = chores,
         members = members.associateBy { it.id },
         groceriesToBuy = 5,

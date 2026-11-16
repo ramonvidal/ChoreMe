@@ -138,6 +138,9 @@
     <string name="hero_all_done">Tudo feito por hoje</string>
     <string name="hero_groceries">Feira</string>
     <string name="rooms_title">Cômodos</string>
+    <string name="room_health_late">Atrasado</string>
+    <string name="room_health_today">Pra hoje</string>
+    <string name="room_health_ok">Em dia</string>
     <string name="rooms_empty_title">Sua casa, cômodo por cômodo</string>
     <string name="rooms_empty_body">Adicione os cômodos que vocês cuidam, com as tarefas que mantêm tudo em ordem. Cada cômodo mostra quando foi feito pela última vez e quando vence de novo.</string>
     <string name="rooms_empty_body_kid">Um dos pais pode adicionar aqui os cômodos da casa.</string>

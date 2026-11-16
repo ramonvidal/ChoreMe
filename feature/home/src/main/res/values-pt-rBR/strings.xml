@@ -37,6 +37,8 @@
     <string name="home_open_groceries">Feira (%1$d)</string>
     <string name="home_urgent_more">e mais %d</string>
     <string name="home_timeline">O dia</string>
+    <string name="home_yours">Pra você hoje</string>
+    <string name="home_nudge_title">Dê uma espiada</string>
     <string name="home_all_day">O dia todo</string>
     <string name="home_nothing_title">Dia tranquilo</string>
     <string name="home_nothing_body">Nada mais na agenda nem nos trajetos de hoje.</string>
@@ -124,6 +126,10 @@
     <plurals name="home_groceries">
         <item quantity="one">%d item pra comprar</item>
         <item quantity="other">%d itens pra comprar</item>
+    </plurals>
+    <plurals name="home_nudge">
+        <item quantity="one">%1$s: %2$s, %3$d dia atrasado e ninguém nessa</item>
+        <item quantity="other">%1$s: %2$s, %3$d dias atrasado e ninguém nessa</item>
     </plurals>
     <plurals name="event_alert_minutes">
         <item quantity="one">%d minuto antes</item>

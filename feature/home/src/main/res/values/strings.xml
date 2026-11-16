@@ -67,6 +67,12 @@
         <item quantity="other">%d items to buy</item>
     </plurals>
     <string name="home_timeline">The day</string>
+    <string name="home_yours">For you today</string>
+    <string name="home_nudge_title">Worth a look</string>
+    <plurals name="home_nudge">
+        <item quantity="one">%1$s: %2$s, %3$d day overdue and nobody on it</item>
+        <item quantity="other">%1$s: %2$s, %3$d days overdue and nobody on it</item>
+    </plurals>
     <string name="home_all_day">All day</string>
     <string name="home_nothing_title">A quiet day</string>
     <string name="home_nothing_body">Nothing more on the calendar or in the trips plan for today.</string>

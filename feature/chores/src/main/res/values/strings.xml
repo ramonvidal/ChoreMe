@@ -191,6 +191,9 @@
         <item quantity="one">%d room</item>
         <item quantity="other">%d rooms</item>
     </plurals>
+    <string name="room_health_late">Late</string>
+    <string name="room_health_today">Due today</string>
+    <string name="room_health_ok">On track</string>
     <plurals name="rooms_late">
         <item quantity="one">%d task is late</item>
         <item quantity="other">%d tasks are late</item>
