@@ -98,4 +98,20 @@ class DayTimelineTest {
         assertEquals(listOf("leak", "fuse"), timeline.urgent.map { it.id })
         assertTrue(dayTimeline(monday, emptyList(), emptyList(), emptyMap(), board, 0, zone).urgent.isEmpty())
     }
+
+    @Test
+    fun `what is already over is left out of the day, but the all day ones stay`() {
+        val now = monday.atTime(12, 0)
+        val timeline = dayTimeline(
+            monday, listOf(holiday, event("Standup", 9, 10), event("Lunch", 11, 13), event("Dentist", 15, 16)),
+            listOf(trip("Work", 8), trip("Gym", 18)), mapOf("ramon" to "Ramon"), board, 0, zone, now = now,
+        )
+        // The standup is over and the 8:00 trip (40 minutes) too; lunch is on, the dentist and the gym are ahead.
+        assertEquals(listOf("Lunch", "Dentist"), timeline.entries.filterIsInstance<EventEntry>().map { it.title })
+        assertEquals(listOf("Gym"), timeline.entries.filterIsInstance<TripEntry>().map { it.moment.entry.title })
+        assertEquals(listOf("Grandma visits"), timeline.allDay)
+        // Looking at another day shows all of it.
+        val tomorrow = dayTimeline(monday.plusDays(1), emptyList(), emptyList(), emptyMap(), board, 0, zone, now = now)
+        assertEquals(0, tomorrow.entries.size)
+    }
 }

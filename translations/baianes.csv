@@ -474,7 +474,7 @@ feature/home,home_groceries,other,%d items to buy,%d itens pra comprar
 feature/home,home_timeline,,The day,O dia
 feature/home,home_all_day,,All day,O dia todo
 feature/home,home_nothing_title,,A quiet day,Dia tranquilo
-feature/home,home_nothing_body,,"No events and no trips today. Trips come from the weekly plan, events from the family calendar.","Nenhum compromisso nem trajeto hoje. Os trajetos vêm do plano da semana, os compromissos da agenda da família."
+feature/home,home_nothing_body,,Nothing more on the calendar or in the trips plan for today.,Nada mais na agenda nem nos trajetos de hoje.
 feature/home,agenda_title,,Agenda,Agenda
 feature/home,permission_title,,Show your family calendar,Mostrar a agenda da família
 feature/home,permission_body,,"Nos Corre! shows the calendars already on this phone, like a shared Google Calendar, next to your chores. Events you add here go to that calendar, and Google sends the alerts to everyone who shares it.","O Nos Corre! mostra as agendas que já estão neste celular, como uma Agenda Google dividida, junto dos corres. Os eventos que você adiciona aqui vão pra essa agenda, e o Google manda os avisos pra todo mundo que divide ela."

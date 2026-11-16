@@ -6,6 +6,7 @@ import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.TodayBoard
 import com.choreme.core.model.weather.Moment
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 
@@ -14,7 +15,7 @@ sealed interface TimelineEntry {
     val time: LocalTime
 }
 
-data class EventEntry(override val time: LocalTime, val title: String, val place: String?) : TimelineEntry
+data class EventEntry(override val time: LocalTime, val title: String, val place: String?, val end: LocalTime? = null) : TimelineEntry
 
 data class TripEntry(override val time: LocalTime, val moment: Moment, val who: String) : TimelineEntry
 
@@ -44,7 +45,8 @@ data class DayTimeline(
 
 /**
  * Builds [DayTimeline] for [date] from what the phone knows. [names] gives member names for the trips; [board] is the
- * house's own chores and [roomBoard] the tasks of the rooms, counted apart.
+ * house's own chores and [roomBoard] the tasks of the rooms, counted apart. With [now] on the same day, what is
+ * already over (events that ended, trips whose window passed) is left out; all-day events stay.
  */
 fun dayTimeline(
     date: LocalDate,
@@ -55,14 +57,24 @@ fun dayTimeline(
     groceriesToBuy: Int,
     zone: ZoneId,
     roomBoard: TodayBoard? = null,
+    now: LocalDateTime? = null,
 ): DayTimeline {
+    val clock = now?.takeIf { it.toLocalDate() == date }
     val today = events.filter { date in it.days(zone) }
     val timedEvents = today.filter { !it.allDay }.map { event ->
         // An event that began on an earlier day shows at the start of this one.
         val startsToday = event.start.atZone(zone).toLocalDate() == date
-        EventEntry(if (startsToday) event.start.atZone(zone).toLocalTime() else LocalTime.MIDNIGHT, event.title, event.location?.takeIf { it.isNotBlank() })
-    }
-    val trips = moments.map { TripEntry(it.entry.start, it, names[it.entry.memberId].orEmpty()) }
+        val endZoned = event.end.atZone(zone)
+        // An event that runs past midnight is still going on for the rest of this day.
+        val endsToday = endZoned.toLocalDate() == date
+        EventEntry(
+            if (startsToday) event.start.atZone(zone).toLocalTime() else LocalTime.MIDNIGHT,
+            event.title,
+            event.location?.takeIf { it.isNotBlank() },
+            end = if (endsToday) endZoned.toLocalTime() else null,
+        )
+    }.filter { event -> clock == null || event.end == null || event.end.isAfter(clock.toLocalTime()) }
+    val trips = moments.filter { clock == null || it.end.isAfter(clock) }.map { TripEntry(it.entry.start, it, names[it.entry.memberId].orEmpty()) }
     val entries = (timedEvents + trips).sortedWith(compareBy<TimelineEntry> { it.time }.thenBy { if (it is EventEntry) it.title.lowercase() else (it as TripEntry).moment.entry.title.lowercase() })
     return DayTimeline(
         date = date,

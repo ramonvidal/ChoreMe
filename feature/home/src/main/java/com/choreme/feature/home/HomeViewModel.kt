@@ -73,7 +73,7 @@ internal data class HomeUiState(
     val setupHidden: Boolean = false,
 )
 
-/** Reads the family's chores, groceries, calendar, trips and the weather, and refreshes every half hour. */
+/** Reads the family's chores, groceries, calendar, trips and the weather, and refreshes every ten minutes. */
 @HiltViewModel
 class HomeViewModel @Inject internal constructor(
     families: FamilyRepository,
@@ -111,7 +111,7 @@ class HomeViewModel @Inject internal constructor(
     internal val state: StateFlow<HomeUiState> = families.session
         .filterIsInstance<SessionState.InFamily>()
         .flatMapLatest { session ->
-            val refresh = flow { while (true) { emit(Unit); delay(30.minutes) } }
+            val refresh = flow { while (true) { emit(Unit); delay(10.minutes) } }
             val inputs = combine(
                 plans.observe(session.familyId),
                 locations.observePlaces(session.familyId),
@@ -163,7 +163,7 @@ class HomeViewModel @Inject internal constructor(
         // The house's own chores and the tasks of the rooms are counted apart, as the Chores tab keeps them apart.
         val board = buildTodayBoard(data.chores.filteredBy(RoomFilter.NO_ROOM), today, inputs.memberId)
         val roomBoard = buildTodayBoard(data.chores.filteredBy(RoomFilter.ROOMS), today, inputs.memberId)
-        val timeline = dayTimeline(today, data.events, allMoments, inputs.names, board, data.groceries.groceriesToBuy(), ZoneId.systemDefault(), roomBoard)
+        val timeline = dayTimeline(today, data.events, allMoments, inputs.names, board, data.groceries.groceriesToBuy(), ZoneId.systemDefault(), roomBoard, now)
         val weatherState = HomeWeatherState(
             loading = false, now = current, units = inputs.units, moments = upcoming, air = air, drying = drying, needsPlace = home == null,
             peopleHome = peopleAtHome(data.locations, homePlace(inputs.places), Instant.now()),

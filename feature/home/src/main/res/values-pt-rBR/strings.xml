@@ -39,7 +39,7 @@
     <string name="home_timeline">O dia</string>
     <string name="home_all_day">O dia todo</string>
     <string name="home_nothing_title">Dia tranquilo</string>
-    <string name="home_nothing_body">Nenhum compromisso nem trajeto hoje. Os trajetos vêm do plano da semana, os compromissos da agenda da família.</string>
+    <string name="home_nothing_body">Nada mais na agenda nem nos trajetos de hoje.</string>
     <string name="agenda_title">Agenda</string>
     <string name="permission_title">Mostrar a agenda da família</string>
     <string name="permission_body">O Nos Corre! mostra as agendas que já estão neste celular, como uma Agenda Google dividida, junto dos corres. Os eventos que você adiciona aqui vão pra essa agenda, e o Google manda os avisos pra todo mundo que divide ela.</string>

@@ -69,7 +69,7 @@
     <string name="home_timeline">The day</string>
     <string name="home_all_day">All day</string>
     <string name="home_nothing_title">A quiet day</string>
-    <string name="home_nothing_body">No events and no trips today. Trips come from the weekly plan, events from the family calendar.</string>
+    <string name="home_nothing_body">Nothing more on the calendar or in the trips plan for today.</string>
     <string name="agenda_title">Agenda</string>
     <string name="permission_title">Show your family calendar</string>
     <string name="permission_body">Nos Corre! shows the calendars already on this phone, like a shared Google Calendar, next to your chores. Events you add here go to that calendar, and Google sends the alerts to everyone who shares it.</string>
