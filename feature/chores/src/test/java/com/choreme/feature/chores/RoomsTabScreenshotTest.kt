@@ -14,6 +14,11 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.choreme.core.model.Member
+import com.choreme.core.model.Role
+import com.choreme.core.model.chore.ChoreStatus
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreTemplate
 import com.choreme.core.model.room.Room
@@ -48,14 +53,21 @@ class RoomsTabScreenshotTest {
         Room("garden", "Garden", RoomType.GARDEN),
     )
     private val chores: List<Chore> = listOf(
-        task("bath1", "t1", "Clean bathroom", ChoreTemplate.CLEAN_BATHROOM, 10, 5),
-        task("bath1", "t2", "Clean the toilet", ChoreTemplate.CLEAN_BATHROOM, 7, 9),
+        // Leo took the bathroom; Mia says she did the toilet and waits for a parent's OK.
+        task("bath1", "t1", "Clean bathroom", ChoreTemplate.CLEAN_BATHROOM, 10, 5).copy(status = ChoreStatus.CLAIMED, claimedBy = "leo"),
+        task("bath1", "t2", "Clean the toilet", ChoreTemplate.CLEAN_BATHROOM, 7, 9).copy(status = ChoreStatus.PENDING_APPROVAL, claimedBy = "mia", completedBy = "mia"),
         task("bath1", "t3", "Wash the towels", ChoreTemplate.LAUNDRY, 7, 2),
         task("kitchen", "t4", "Clean kitchen", ChoreTemplate.CLEAN_KITCHEN, 2, 1),
         task("bed", "t5", "Change the sheets", ChoreTemplate.MAKE_BEDS, 14, 3),
         task("garden", "t6", "Water the plants", ChoreTemplate.WATER_PLANTS, 3, 4),
     )
-    private val state = RoomsUiState(loading = false, rooms = roomOverviews(rooms, chores), canManage = true, today = today)
+    private val ramon = Member("ramon", "Ramon", Role.PARENT)
+    private val leo = Member("leo", "Leo", Role.KID, color = 1)
+    private val mia = Member("mia", "Mia", Role.KID, color = 2)
+    private val members = listOf(ramon, leo, mia).associateBy { it.id }
+    private val state = RoomsUiState(
+        loading = false, rooms = roomOverviews(rooms, chores), canManage = true, today = today, me = ramon, members = members,
+    )
 
     private fun shoot(name: String, state: RoomsUiState, dark: Boolean, open: String? = null) {
         compose.setContent {
@@ -86,6 +98,20 @@ class RoomsTabScreenshotTest {
     fun detail() {
         shoot("tab-rooms-detail", state, dark = false, open = "bath1")
         compose.onNodeWithText("Clean the toilet").assertExists()
+        // Who is on it, and what a parent can do: Leo took the bathroom, Mia's toilet waits to be approved.
+        compose.onNodeWithText("Leo is on it").assertExists()
+        compose.onNodeWithText("Mia says it's done").assertExists()
+        compose.onNodeWithText("Approve").assertExists()
+        compose.onNodeWithText("Me too").assertExists()
+        compose.onAllNodesWithText("I'll do it").assertCountEquals(1) // only the towels are free to take
+    }
+
+    /** A kid sees the same tasks: can take or finish them, but not approve. */
+    @Test
+    fun detailKid() {
+        shoot("tab-rooms-detail-kid", state.copy(me = leo, canManage = false), dark = false, open = "bath1")
+        compose.onNodeWithText("You're on it").assertExists()
+        compose.onAllNodesWithText("Approve").assertCountEquals(0)
     }
 
     @Test

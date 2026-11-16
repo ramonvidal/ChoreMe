@@ -59,6 +59,16 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.IconButton
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import com.choreme.core.model.Role
+import com.choreme.core.model.chore.ChoreStatus
+import com.choreme.core.ui.NosButton
+import com.choreme.core.ui.NosButtonStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -94,6 +104,12 @@ internal fun RoomsScreen(viewModel: RoomsViewModel = hiltViewModel()) {
             setFrequency = { task, days -> viewModel.setFrequency(task, days) },
             deleteTask = { viewModel.deleteTask(it) },
             markDone = { viewModel.markDone(it) },
+            claim = { viewModel.claim(it) },
+            unclaim = { viewModel.unclaim(it) },
+            join = { viewModel.join(it) },
+            assign = { task, people -> viewModel.assign(task, people) },
+            approve = { viewModel.approve(it) },
+            reject = { viewModel.reject(it) },
         ),
     )
 }
@@ -107,6 +123,12 @@ internal class RoomsActions(
     val setFrequency: (Chore, Int) -> Unit = { _, _ -> },
     val deleteTask: (Chore) -> Unit = {},
     val markDone: (Chore) -> Unit = {},
+    val claim: (Chore) -> Unit = {},
+    val unclaim: (Chore) -> Unit = {},
+    val join: (Chore) -> Unit = {},
+    val assign: (Chore, Set<String>) -> Unit = { _, _ -> },
+    val approve: (Chore) -> Unit = {},
+    val reject: (Chore) -> Unit = {},
 )
 
 /** The whole tab, drawn from [state] alone, so it can be screenshotted without Firebase. */
@@ -246,6 +268,7 @@ private fun RoomDetail(overview: RoomOverview, state: RoomsUiState, actions: Roo
     val room = overview.room
     var addingTask by rememberSaveable { mutableStateOf(false) }
     var editingTaskId by rememberSaveable { mutableStateOf<String?>(null) }
+    var assigningId by rememberSaveable { mutableStateOf<String?>(null) }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             androidx.compose.material3.IconButton(onClick = onBack) {
@@ -283,8 +306,9 @@ private fun RoomDetail(overview: RoomOverview, state: RoomsUiState, actions: Roo
                     if (index > 0) HorizontalDivider(Modifier.padding(horizontal = 16.dp))
                     TaskRow(
                         task = task,
-                        today = state.today,
-                        onDone = { actions.markDone(task) },
+                        state = state,
+                        actions = actions,
+                        onAssign = { assigningId = task.id },
                         onClick = if (state.canManage) ({ editingTaskId = task.id }) else null,
                     )
                 }
@@ -308,6 +332,21 @@ private fun RoomDetail(overview: RoomOverview, state: RoomsUiState, actions: Roo
             },
         )
     }
+    val assigning = overview.tasks.firstOrNull { it.id == assigningId }
+    if (assigning != null) {
+        PeopleDialog(
+            title = stringResource(R.string.who_does_title),
+            hint = stringResource(R.string.who_does_hint),
+            people = state.atHome,
+            initial = assigning.team,
+            allowNone = true,
+            onConfirm = { people ->
+                actions.assign(assigning, people)
+                assigningId = null
+            },
+            onDismiss = { assigningId = null },
+        )
+    }
     val editingTask = overview.tasks.firstOrNull { it.id == editingTaskId }
     if (editingTask != null) {
         TaskDialog(
@@ -323,32 +362,71 @@ private fun RoomDetail(overview: RoomOverview, state: RoomsUiState, actions: Roo
     }
 }
 
+/**
+ * One task of a room: what it is, when it was last done and is next due, who is on it, and what this person can do
+ * with it, the same as on the Chores list: take it ("I'll do it"), join, let go, say it's done (a kid's waits for a
+ * parent's OK), and for parents give it to someone and approve.
+ */
 @Composable
-private fun TaskRow(task: Chore, today: LocalDate, onDone: () -> Unit, onClick: (() -> Unit)?) {
+private fun TaskRow(task: Chore, state: RoomsUiState, actions: RoomsActions, onAssign: () -> Unit, onClick: (() -> Unit)?) {
+    val me = state.me
+    val isParent = me?.role == Role.PARENT
+    val mine = me != null && me.id in task.team
+    val waiting = task.status == ChoreStatus.PENDING_APPROVAL
+    val takenByOthers = task.status == ChoreStatus.CLAIMED && !mine
+    val others = (listOfNotNull(task.claimedBy) + task.helpers.sorted()).filter { it != me?.id }.mapNotNull { state.members[it]?.name }
+    var menu by remember { mutableStateOf(false) }
     Row(
         Modifier.fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 8.dp),
+            .padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         ItemIcon(task.template.icon, Modifier.size(24.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(choreTitle(task.title), style = MaterialTheme.typography.bodyLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
             val every = task.everyDays?.let { everyText(it) }
-            val last = task.lastDoneOn?.let { stringResource(R.string.room_last_done, agoText(it, today)) } ?: stringResource(R.string.room_never_done)
+            val last = task.lastDoneOn?.let { stringResource(R.string.room_last_done, agoText(it, today = state.today)) } ?: stringResource(R.string.room_never_done)
             Text(
                 if (every != null) "$last · $every" else last,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            DueText(task, today)
+            DueText(task, state.today)
+            val who = when {
+                waiting -> task.completedBy?.let { state.members[it]?.name }?.let { stringResource(R.string.finished_by, it) } ?: stringResource(R.string.waiting_for_parent)
+                mine && others.isEmpty() -> stringResource(R.string.you_are_on_it)
+                mine -> stringResource(R.string.you_and_on_it, others.joinToString(", "))
+                takenByOthers && others.size == 1 -> stringResource(R.string.on_it, others.first())
+                takenByOthers -> stringResource(R.string.on_it_many, others.joinToString(", "))
+                else -> null
+            }
+            who?.let { Text(it, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) }
         }
-        TextButton(onClick = onDone, enabled = task.isActive) { Text(stringResource(R.string.room_done)) }
+        when {
+            waiting -> if (isParent) NosButton(stringResource(CoreUiR.string.approve), { actions.approve(task) }, style = NosButtonStyle.Tonal)
+            task.status == ChoreStatus.OPEN -> NosButton(stringResource(R.string.grab), { actions.claim(task) }, style = NosButtonStyle.Tonal)
+            mine -> NosButton(stringResource(R.string.room_done), { actions.markDone(task) }, style = NosButtonStyle.Tonal)
+            takenByOthers -> NosButton(stringResource(R.string.join), { actions.join(task) }, style = NosButtonStyle.Tonal)
+        }
+        val canFinish = task.isActive && !mine
+        if (canFinish || (mine && task.isActive) || (isParent && (task.isActive || waiting))) {
+            Box {
+                IconButton(onClick = { menu = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.swipe_more)) }
+                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                    if (canFinish) DropdownMenuItem(text = { Text(stringResource(R.string.room_done)) }, onClick = { menu = false; actions.markDone(task) })
+                    if (mine && task.isActive) DropdownMenuItem(text = { Text(stringResource(R.string.let_go)) }, onClick = { menu = false; actions.unclaim(task) })
+                    if (isParent && task.isActive) DropdownMenuItem(text = { Text(stringResource(R.string.who_does)) }, onClick = { menu = false; onAssign() })
+                    if (isParent && waiting) DropdownMenuItem(text = { Text(stringResource(R.string.not_yet)) }, onClick = { menu = false; actions.reject(task) })
+                }
+            }
+        } else {
+            Spacer(Modifier.width(12.dp))
+        }
     }
 }
 
-/** When a task is due ("Due in 3 days", "2 days late") and whether that's late. */
 @Composable
 private fun dueLabel(task: Chore, today: LocalDate): Pair<String, Boolean> {
     val days = java.time.temporal.ChronoUnit.DAYS.between(today, task.dueDate).toInt()

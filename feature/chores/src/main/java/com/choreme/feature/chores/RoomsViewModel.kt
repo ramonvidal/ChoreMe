@@ -1,6 +1,5 @@
 package com.choreme.feature.chores
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.choreme.core.data.ChoreRepository
@@ -11,8 +10,13 @@ import com.choreme.core.model.Role
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreTemplate
 import com.choreme.core.model.chore.Recurrence
-import com.choreme.core.model.chore.choreDone
 import com.choreme.core.model.chore.complete
+import com.choreme.core.model.chore.reject
+import com.choreme.core.model.chore.approve
+import com.choreme.core.model.chore.assign
+import com.choreme.core.model.chore.join
+import com.choreme.core.model.chore.unclaim
+import com.choreme.core.model.chore.claim
 import com.choreme.core.model.room.Room
 import com.choreme.core.model.room.RoomOverview
 import com.choreme.core.model.room.newRoomTask
@@ -34,13 +38,20 @@ data class RoomsUiState(
     /** Parents add, change and remove rooms and their tasks; everyone can say a task is done. */
     val canManage: Boolean = false,
     val today: LocalDate = LocalDate.now(),
-)
+    /** Who is looking, and the whole family by id (names for "Leo is on it", people to give a task to). */
+    val me: Member? = null,
+    val members: Map<String, Member> = emptyMap(),
+) {
+    /** Everyone who is home, for "who's doing it" (someone away can't). */
+    val atHome get() = members.values.filter { !it.isAway(today) }.sortedBy { it.name.lowercase() }
+}
 
 @HiltViewModel
 class RoomsViewModel @Inject constructor(
     private val families: FamilyRepository,
     private val roomsRepository: RoomRepository,
     private val chores: ChoreRepository,
+    private val changer: ChoreChanger,
 ) : ViewModel() {
     private val session: StateFlow<SessionState.InFamily?> = families.session
         .filterIsInstance<SessionState.InFamily>()
@@ -54,12 +65,15 @@ class RoomsViewModel @Inject constructor(
         familySession,
         familySession.flatMapLatest { roomsRepository.observe(it.familyId) },
         familySession.flatMapLatest { chores.observeChores(it.familyId) },
-    ) { s, rooms, allChores ->
+        members,
+    ) { s, rooms, allChores, memberList ->
         RoomsUiState(
             loading = false,
             rooms = roomOverviews(rooms, allChores),
             canManage = s.role == Role.PARENT,
             today = LocalDate.now(),
+            me = memberList.firstOrNull { it.id == s.memberId } ?: Member(s.memberId, name = "", role = s.role),
+            members = memberList.associateBy { it.id },
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RoomsUiState())
 
@@ -114,20 +128,21 @@ class RoomsViewModel @Inject constructor(
         if (s.role == Role.PARENT) chores.delete(s.familyId, task.id)
     }
 
-    /** "I did it": a parent's counts straight away, a kid's waits for a parent (see the chore rules). */
-    fun markDone(task: Chore) {
+    /** Applies one of the chore rules to a task of a room; the same rules and alerts as in the Chores list. */
+    private fun change(task: Chore, transition: Chore.(me: Member, today: LocalDate) -> Chore) {
         val s = session.value ?: return
         val me = membersNow.value.firstOrNull { it.id == s.memberId } ?: return
-        val updated = try {
-            task.complete(me, LocalDate.now())
-        } catch (e: IllegalStateException) {
-            Log.i("ChoreMe", "Task change refused: ${e.message}")
-            return
-        } catch (e: IllegalArgumentException) {
-            Log.i("ChoreMe", "Task change refused: ${e.message}")
-            return
-        }
-        chores.save(s.familyId, s.memberId, task, updated)
-        if (me.role == Role.PARENT) choreDone(task, updated)?.let { chores.logDone(s.familyId, it) }
+        val parents = membersNow.value.filter { it.role == Role.PARENT }.map { it.id }.toSet()
+        changer.change(viewModelScope, s.familyId, me, parents, task, transition)
     }
+
+    /** "I did it": a parent's counts straight away, a kid's waits for a parent (see the chore rules). */
+    fun markDone(task: Chore) = change(task) { me, today -> complete(me, today) }
+
+    fun claim(task: Chore) = change(task) { me, _ -> claim(me) }
+    fun unclaim(task: Chore) = change(task) { me, _ -> unclaim(me) }
+    fun join(task: Chore) = change(task) { me, _ -> join(me) }
+    fun assign(task: Chore, people: Set<String>) = change(task) { me, _ -> assign(people, me) }
+    fun approve(task: Chore) = change(task) { me, today -> approve(me, today) }
+    fun reject(task: Chore) = change(task) { me, _ -> reject(me) }
 }

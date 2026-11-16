@@ -134,6 +134,7 @@ class ChoresViewModel @Inject internal constructor(
     private val calendar: CalendarRepository,
     private val calendarChoice: CalendarChoice,
     private val timedReminders: TimedReminders,
+    private val changer: ChoreChanger,
 ) : ViewModel() {
     /** This phone's "remind me at" times, by chore id. */
     val reminders: StateFlow<Map<String, Instant>> = timedReminders.all
@@ -288,31 +289,11 @@ class ChoresViewModel @Inject internal constructor(
         chores.delete(familyId, chore.id)
     }
 
-    /**
-     * Applies one of the chore rules from :core:model and saves the result. A rule that
-     * refuses (say, someone grabbed the chore a moment ago) leaves the chore as it is.
-     */
+    /** Applies one of the chore rules from :core:model (see [ChoreChanger]). */
     private fun change(chore: Chore, transition: Chore.(me: Member, today: LocalDate) -> Chore) {
         val (familyId, me) = context() ?: return
-        val updated = try {
-            chore.transition(me, LocalDate.now())
-        } catch (e: IllegalStateException) {
-            Log.i("ChoreMe", "Chore change refused: ${e.message}")
-            return
-        } catch (e: IllegalArgumentException) {
-            Log.i("ChoreMe", "Chore change refused: ${e.message}")
-            return
-        }
-        chores.save(familyId, me.id, chore, updated)
-        // For "who did what this week"; finishing is always a parent's step (kids' chores get approved).
-        if (me.role == Role.PARENT) choreDone(chore, updated)?.let { chores.logDone(familyId, it) }
-        if (updated.notifyWhenDone && updated.wasJustFinished(chore)) {
-            pingInBackground(PushKinds.CHORE_DONE) { endpoints.othersThan(familyId, me.id) }
-        }
-        if (updated.status == ChoreStatus.PENDING_APPROVAL && chore.status != ChoreStatus.PENDING_APPROVAL) {
-            val parents = uiState.value.members.values.filter { it.role == Role.PARENT }.map { it.id }.toSet()
-            pingInBackground(PushKinds.CHORE_TO_APPROVE) { endpoints.of(familyId, parents) }
-        }
+        val parents = uiState.value.members.values.filter { it.role == Role.PARENT }.map { it.id }.toSet()
+        changer.change(viewModelScope, familyId, me, parents, chore, transition)
     }
 
     private fun pingInBackground(kind: String, to: suspend () -> List<String>) {

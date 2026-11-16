@@ -794,7 +794,7 @@ internal fun CompactRow(chore: Chore, trailing: String, onClick: () -> Unit, don
  * phone). Everyone picked gets the chore's points.
  */
 @Composable
-private fun PeopleDialog(
+internal fun PeopleDialog(
     title: String,
     hint: String,
     people: List<Member>,
