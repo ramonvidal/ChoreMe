@@ -138,6 +138,7 @@
     <string name="hero_all_done">Tudo feito por hoje</string>
     <string name="hero_groceries">Feira</string>
     <string name="rooms_title">Cômodos</string>
+    <string name="room_you_took">Você pegou: %s</string>
     <string name="room_health_late">Atrasado</string>
     <string name="room_health_today">Pra hoje</string>
     <string name="room_health_ok">Em dia</string>

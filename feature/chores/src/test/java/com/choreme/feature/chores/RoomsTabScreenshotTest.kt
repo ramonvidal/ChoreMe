@@ -85,6 +85,13 @@ class RoomsTabScreenshotTest {
         compose.onNodeWithText("Last done 2 days ago").assertExists()
     }
 
+    /** Leo took the bathroom's task: its card says so, in a line of its own. */
+    @Test
+    fun listShowsWhatYouTook() {
+        shoot("tab-rooms-leo", state.copy(me = leo, canManage = false), dark = false)
+        compose.onNodeWithText("You took: Clean bathroom").assertExists()
+    }
+
     @Test
     fun listDark() = shoot("tab-rooms-dark", state, dark = true)
 

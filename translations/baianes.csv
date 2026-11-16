@@ -240,9 +240,10 @@ feature/chores,hero_groceries,,Groceries,Feira
 feature/chores,rooms_title,,Rooms,Cômodos
 feature/chores,rooms_count,one,%d room,%d cômodo
 feature/chores,rooms_count,other,%d rooms,%d cômodos
+feature/chores,room_you_took,,You took: %s,Você pegou: %s
 feature/chores,room_health_late,,Late,Atrasado
 feature/chores,room_health_today,,Due today,Pra hoje
-feature/chores,room_health_ok,,On track,"Em dia"
+feature/chores,room_health_ok,,On track,Em dia
 feature/chores,rooms_late,one,%d task is late,%d tarefa atrasada
 feature/chores,rooms_late,other,%d tasks are late,%d tarefas atrasadas
 feature/chores,rooms_empty_title,,"Your home, room by room","Sua casa, cômodo por cômodo"

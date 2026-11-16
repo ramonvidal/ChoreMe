@@ -82,6 +82,7 @@ import com.choreme.core.model.room.RoomHealth
 import com.choreme.core.model.room.RoomOverview
 import com.choreme.core.model.room.byHealth
 import com.choreme.core.model.room.health
+import com.choreme.core.model.room.takenBy
 import com.choreme.core.model.room.RoomType
 import com.choreme.core.model.room.everyDays
 import com.choreme.core.model.room.ideasFor
@@ -207,7 +208,7 @@ private fun RoomList(state: RoomsUiState, onOpen: (String) -> Unit, onAdd: () ->
             }
             // Rooms that need something come first.
             items(state.rooms.byHealth(state.today), key = { it.room.id }) { overview ->
-                RoomCard(overview, state.today, onClick = { onOpen(overview.room.id) })
+                RoomCard(overview, state.today, taken = overview.takenBy(state.me?.id), onClick = { onOpen(overview.room.id) })
             }
         }
         if (state.canManage) {
@@ -222,7 +223,7 @@ private fun RoomList(state: RoomsUiState, onOpen: (String) -> Unit, onAdd: () ->
 }
 
 @Composable
-private fun RoomCard(overview: RoomOverview, today: LocalDate, onClick: () -> Unit) {
+private fun RoomCard(overview: RoomOverview, today: LocalDate, taken: List<Chore>, onClick: () -> Unit) {
     val room = overview.room
     Card(
         Modifier.fillMaxWidth().clickable(onClick = onClick),
@@ -235,6 +236,14 @@ private fun RoomCard(overview: RoomOverview, today: LocalDate, onClick: () -> Un
                 if (overview.tasks.isNotEmpty()) HealthChip(overview.health(today))
             }
             LastDoneLine(overview, today)
+            if (taken.isNotEmpty()) {
+                Text(
+                    stringResource(R.string.room_you_took, taken.joinToString(", ") { choreTitle(it.title) }),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+                )
+            }
             val late = overview.lateCount(today)
             if (late > 0) {
                 Text(

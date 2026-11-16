@@ -65,4 +65,15 @@ class RoomHealthTest {
         assertEquals(listOf("trash", "mop", "dishes"), list.map { it.chore.id })
         assertEquals(listOf(null, "Kitchen", null), list.map { it.room?.name })
     }
+
+    @Test
+    fun `a room lists the tasks a person took, not the free ones or other people's`() {
+        val mine = task("mirror", bathroom, today).copy(status = ChoreStatus.CLAIMED, claimedBy = "ana")
+        val joined = task("floor", bathroom, today).copy(status = ChoreStatus.CLAIMED, claimedBy = "leo", helpers = setOf("ana"))
+        val others = task("box", bathroom, today).copy(status = ChoreStatus.CLAIMED, claimedBy = "leo")
+        val free = task("sink", bathroom, today)
+        val overview = roomOverviews(listOf(bathroom), listOf(mine, joined, others, free)).single()
+        assertEquals(setOf("mirror", "floor"), overview.takenBy("ana").map { it.id }.toSet())
+        assertEquals(emptyList<Chore>(), overview.takenBy(null))
+    }
 }

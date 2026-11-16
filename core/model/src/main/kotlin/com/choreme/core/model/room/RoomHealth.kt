@@ -14,6 +14,10 @@ fun RoomOverview.health(today: LocalDate): RoomHealth = when {
     else -> RoomHealth.OK
 }
 
+/** The tasks of this room [memberId] said they would do (grabbed, joined or been given), still to be done. */
+fun RoomOverview.takenBy(memberId: String?): List<Chore> =
+    if (memberId == null) emptyList() else tasks.filter { it.status == ChoreStatus.CLAIMED && memberId in it.team }
+
 /** How many rooms have something overdue: the red count on the Rooms sub-tab. */
 fun lateRoomCount(rooms: List<RoomOverview>, today: LocalDate): Int = rooms.count { it.health(today) == RoomHealth.LATE }
 
