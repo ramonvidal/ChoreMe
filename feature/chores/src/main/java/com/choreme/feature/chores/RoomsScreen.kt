@@ -238,7 +238,7 @@ private fun RoomCard(overview: RoomOverview, today: LocalDate, taken: List<Chore
             LastDoneLine(overview, today)
             if (taken.isNotEmpty()) {
                 Text(
-                    stringResource(R.string.room_you_took, taken.joinToString(", ") { choreTitle(it.title) }),
+                    stringResource(R.string.room_you_took, taken.map { choreTitle(it.title) }.joinToString(", ")),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.secondary,
                     fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
