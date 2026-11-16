@@ -47,7 +47,7 @@ data class RoomsUiState(
 }
 
 @HiltViewModel
-class RoomsViewModel @Inject constructor(
+class RoomsViewModel @Inject internal constructor(
     private val families: FamilyRepository,
     private val roomsRepository: RoomRepository,
     private val chores: ChoreRepository,
