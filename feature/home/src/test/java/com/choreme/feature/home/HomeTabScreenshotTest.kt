@@ -86,7 +86,7 @@ class HomeTabScreenshotTest {
         compose.onNodeWithText("Water leak under the sink").assertExists()
         // The gym trip shows once (in the day list), not again on the weather card.
         compose.onAllNodesWithText("Gym", substring = true).assertCountEquals(1)
-        compose.onNodeWithText("4 chores · 2 room tasks", substring = true).assertExists()
+        compose.onNodeWithText("4 chores · 2 room tasks for you", substring = true).assertExists()
         compose.onNodeWithText("Grandma visits").assertExists()
     }
 

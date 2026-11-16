@@ -81,10 +81,11 @@ class DayTimelineTest {
     }
 
     @Test
-    fun `room tasks are counted apart from the house's chores`() {
-        val roomBoard = TodayBoard(emptyList(), listOf(chore("r1"), chore("r2")), emptyList(), emptyList(), mine = emptyList())
+    fun `only the room tasks this person took are counted, apart from the house's chores`() {
+        // Two are free for anyone, one is mine: the day shows just mine.
+        val roomBoard = TodayBoard(emptyList(), listOf(chore("r1"), chore("r2")), emptyList(), emptyList(), mine = listOf(chore("r3")))
         val timeline = dayTimeline(monday, emptyList(), emptyList(), emptyMap(), board, 0, zone, roomBoard)
-        assertEquals(2, timeline.roomTasks)
+        assertEquals(1, timeline.roomTasks)
         assertEquals(0, dayTimeline(monday, emptyList(), emptyList(), emptyMap(), board, 0, zone).roomTasks)
     }
 

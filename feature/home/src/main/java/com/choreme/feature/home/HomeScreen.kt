@@ -284,9 +284,11 @@ private fun UrgentCard(urgent: List<Chore>, onClick: () -> Unit) {
 private const val MAX_URGENT_SHOWN = 3
 
 @Composable
-private fun summaryLine(timeline: DayTimeline): String = listOf(
+private fun summaryLine(timeline: DayTimeline): String = listOfNotNull(
     pluralStringResource(R.plurals.home_chores, timeline.choreCount, timeline.choreCount),
-    pluralStringResource(R.plurals.home_rooms, timeline.roomTasks, timeline.roomTasks),
+    // Only the room tasks this person took; free ones live inside Rooms.
+    pluralStringResource(R.plurals.home_rooms, timeline.roomTasks, timeline.roomTasks)
+        .takeIf { timeline.roomTasks > 0 },
     pluralStringResource(R.plurals.home_events, timeline.eventCount, timeline.eventCount),
     pluralStringResource(R.plurals.home_groceries, timeline.groceriesToBuy, timeline.groceriesToBuy),
 ).joinToString(" · ")

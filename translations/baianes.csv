@@ -465,8 +465,8 @@ feature/home,home_chores,other,%d chores,%d corres
 feature/home,home_urgent,one,%d urgent chore,%d corre urgente
 feature/home,home_urgent,other,%d urgent chores,%d corres urgentes
 feature/home,home_urgent_more,,and %d more,e mais %d
-feature/home,home_rooms,one,%d room task,%d tarefa de cômodo
-feature/home,home_rooms,other,%d room tasks,%d tarefas de cômodo
+feature/home,home_rooms,one,%d room task for you,%d tarefa de cômodo sua
+feature/home,home_rooms,other,%d room tasks for you,%d tarefas de cômodo suas
 feature/home,home_events,one,%d event,%d compromisso
 feature/home,home_events,other,%d events,%d compromissos
 feature/home,home_groceries,one,%d item to buy,%d item pra comprar

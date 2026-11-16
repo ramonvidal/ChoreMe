@@ -114,8 +114,8 @@
         <item quantity="other">%d corres urgentes</item>
     </plurals>
     <plurals name="home_rooms">
-        <item quantity="one">%d tarefa de cômodo</item>
-        <item quantity="other">%d tarefas de cômodo</item>
+        <item quantity="one">%d tarefa de cômodo sua</item>
+        <item quantity="other">%d tarefas de cômodo suas</item>
     </plurals>
     <plurals name="home_events">
         <item quantity="one">%d compromisso</item>

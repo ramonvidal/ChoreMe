@@ -55,8 +55,8 @@
     </plurals>
     <string name="home_urgent_more">and %d more</string>
     <plurals name="home_rooms">
-        <item quantity="one">%d room task</item>
-        <item quantity="other">%d room tasks</item>
+        <item quantity="one">%d room task for you</item>
+        <item quantity="other">%d room tasks for you</item>
     </plurals>
     <plurals name="home_events">
         <item quantity="one">%d event</item>

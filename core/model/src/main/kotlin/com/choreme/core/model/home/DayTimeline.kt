@@ -33,7 +33,7 @@ data class DayTimeline(
     /** Chores this person said they would do. */
     val choresMine: Int,
     val groceriesToBuy: Int,
-    /** Tasks of the rooms due today or earlier, counted apart from the house's own chores. */
+    /** Tasks of the rooms this person said they would do (due today or earlier), counted apart from the house's chores. */
     val roomTasks: Int = 0,
     /** The chores marked urgent that are waiting (the house's and the rooms'), to stand out on the Home tab. */
     val urgent: List<Chore> = emptyList(),
@@ -83,7 +83,7 @@ fun dayTimeline(
         choresToDo = board.toDo.size,
         choresMine = board.mine.size,
         groceriesToBuy = groceriesToBuy,
-        roomTasks = roomBoard?.let { it.toDo.size + it.mine.size } ?: 0,
+        roomTasks = roomBoard?.mine?.size ?: 0,
         urgent = (board.toDo + board.mine + roomBoard?.toDo.orEmpty() + roomBoard?.mine.orEmpty()).filter { it.urgent }.distinctBy { it.id },
     )
 }

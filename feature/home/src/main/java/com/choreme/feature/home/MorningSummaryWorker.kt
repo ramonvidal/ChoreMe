@@ -140,7 +140,7 @@ internal class MorningSummaryWorker @AssistedInject constructor(
                     }
                 }
             }
-            if (choresOn && !away) choresLine(houseBoard, roomBoard.toDo.size + roomBoard.mine.size, session.role, today)?.let { add(it) }
+            if (choresOn && !away) choresLine(houseBoard, roomBoard.mine.size, session.role, today)?.let { add(it) }
             if (choresOn && timeline.groceriesToBuy > 0) {
                 add(context.resources.getQuantityString(R.plurals.home_groceries, timeline.groceriesToBuy, timeline.groceriesToBuy))
             }
