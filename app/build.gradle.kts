@@ -74,6 +74,9 @@ android {
             // runtime; worth turning on once there are UI tests on a real device.
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // The app bundle carries the names of the native code's functions (a few libraries ship some),
+            // so Play can show readable crash and ANR reports. Adds a little to the bundle, not to the phone.
+            ndk { debugSymbolLevel = "SYMBOL_TABLE" }
         }
     }
 }
