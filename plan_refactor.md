@@ -1,6 +1,6 @@
 # Refactoring plan: simpler, smaller, same app
 
-Status: **draft for discussion**, nothing is built. Written 18 November 2026, after the owner asked to "simplify and
+Status: **draft for discussion**, nothing is built. Interface items (U1, U2) added the same day. Written 18 November 2026, after the owner asked to "simplify and
 optimise the app once more". Each phase ships on its own with CI green; nothing here changes what families see unless
 the phase says so.
 
@@ -67,6 +67,33 @@ Move `ChoreChanger` (apply a chore rule, save it, log a parent's finish, ping th
    once half the steps are done.
 3. **Merge `:feature:update` into `:feature:settings`.** It is 145 lines; the banner stays where it is.
 
+### U1. Interface fixes (visible, no change to the structure)
+
+From the screenshots of release 0.145, every tab, light and Baianês.
+
+1. **Undo** after Done, Approve and Delete: a snackbar "Done · Undo" for a few seconds, because a wrong tap (often a
+   kid's) can't be taken back today. The rule for undoing lives in `:core:model` (going back to the chore as it was).
+2. **A visible ⋮ on chore cards.** Remind, Who does it and Edit are only reachable by tapping the card or swiping, which
+   few people find.
+3. **One header for every tab**: a short title, one summary line, at most one action. Today Chores has "4 to do" with
+   a black Add button, Groceries a big title plus a count, Family the family's name, Map and Settings none.
+4. **Chores**: drop "5 on the grocery list" from its header (Casa already says it); shorter cards, with the avatars and
+   points on the status line (about 2.5 cards fit on a screen today).
+5. **Store screenshots in Portuguese with Portuguese content**: the pt-BR shots show "Hoover the living room",
+   "Pharmacy", "Dinner's ready!". The store tests get Portuguese sample data.
+
+### U2. Interface changes that go with the five tabs (R4)
+
+1. **One way to add**: a "+" in the same place on every tab, instead of today's five (black button on Chores, floating
+   button on Rooms, menu on Casa, a button mid-page on Notes, a yellow button on Trips).
+2. **Groceries**: the count shows twice ("5 to buy" and "To buy (5)") and "Feira" is both the title and the first list.
+   The list chips become the header; "I'm at the shop" sits with the list.
+3. **Map**: "Share my location" and "Arrival alerts" are this phone's settings; they move to Settings > This phone. The
+   Map keeps the map, the people and "On my way home".
+4. **Family** with sub-tabs **People**, **Notes** and **Map**, instead of one long page with messages, notes and
+   members (members at the very bottom).
+5. **TalkBack pass**: descriptions for every icon and button, checked with a screenshot test per tab.
+
 ### R5. Tests where there are none
 
 Mapping tests for `:core:data` (Firestore fields to models and back, from plain maps, no emulator), and tests for
@@ -87,6 +114,9 @@ Mapping tests for `:core:data` (Firestore fields to models and back, from plain 
 | R2 | none | low | 1 session |
 | R3 | Done button on Casa (and widget, if wanted) | medium, new module | 1 session |
 | R4 | five tabs, calmer Casa | medium, owner's choices | 1 to 2 sessions |
+| U1 | undo, ⋮ menu, one header style, shorter chore cards, store shots in Portuguese | low | 1 to 2 sessions |
+| U2 | one "+", calmer Groceries, settings out of Map, Family sub-tabs, TalkBack | medium | 1 to 2 sessions, with R4 |
 | R5 | none | low | 1 session |
 
-Recommended order: R1, R2, R5 (so later phases are covered), then R3 and R4 after the owner decides.
+Recommended order, agreed with the owner on 18 November 2026: **R1 and R2 first** (no visible change, smaller files to
+work in), then **U1**, then **R3, R4 with U2, and R5**. R3 and R4 still wait for the owner's yes.
