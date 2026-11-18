@@ -84,4 +84,5 @@
         <item quantity="one">%d person shares where they are</item>
         <item quantity="other">%d people share where they are</item>
     </plurals>
+    <string name="this_phone_title">This phone</string>
 </resources>

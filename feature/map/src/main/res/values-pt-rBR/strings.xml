@@ -68,6 +68,7 @@
     <string name="battery_open">Abrir configurações de bateria</string>
     <string name="battery_hide">Não mostrar de novo</string>
     <string name="map_title">Mapa</string>
+    <string name="this_phone_title">Este celular</string>
     <plurals name="minutes_ago">
         <item quantity="one">há %d min</item>
         <item quantity="other">há %d min</item>

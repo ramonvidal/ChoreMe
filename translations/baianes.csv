@@ -620,6 +620,7 @@ feature/map,battery_hide,,Don't show again,Não mostrar de novo
 feature/map,map_title,,Map,Mapa
 feature/map,map_sharing_count,one,%d person shares where they are,%d pessoa mostra onde tá
 feature/map,map_sharing_count,other,%d people share where they are,%d pessoas mostram onde tão
+feature/map,this_phone_title,,This phone,Este celular
 feature/onboarding,sign_in_tagline,,"Chores, groceries and the family calendar, shared by everyone at home.","Os corres, a feira e a agenda da família, divididos com todo mundo de casa."
 feature/onboarding,sign_in_google,,Sign in with Google,Entrar com o Google
 feature/onboarding,sign_in_kid,,I'm a kid,Sou guri

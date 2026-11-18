@@ -90,8 +90,8 @@ From the screenshots of release 0.145, every tab, light and Baianês.
    button on Rooms, menu on Casa, a button mid-page on Notes, a yellow button on Trips).
 2. **Groceries**: the count shows twice ("5 to buy" and "To buy (5)") and "Feira" is both the title and the first list.
    The list chips become the header; "I'm at the shop" sits with the list.
-3. **Map**: "Share my location" and "Arrival alerts" are this phone's settings; they move to Settings > This phone. The
-   Map keeps the map, the people and "On my way home".
+3. **Map**: "Share my location" and "Arrival alerts" go together in one "This phone" card at the end of the Map
+   (owner's choice, 18 November 2026: moving them to Settings would need the sharing logic in `:core:location`).
 4. **TalkBack pass**: descriptions for every icon and button, checked with a screenshot test per tab.
 
 ### R5. Tests where there are none

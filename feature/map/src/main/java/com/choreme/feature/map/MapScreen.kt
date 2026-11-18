@@ -216,40 +216,10 @@ internal fun MapContent(
             item(key = "on-my-way") {
                 OnMyWayCard(onMyWay, onChange = actions.setOnMyWay)
             }
-            item(key = "share") {
-                SharingCard(
-                    isSharing = state.isSharing,
-                    needsBackground = state.isSharing && !state.hasBackgroundPermission &&
-                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q,
-                    onToggle = actions.setSharing,
-                    onAllowBackground = { onExplainBackground(true) },
-                )
-            }
-
+            // A warning to act on stays near the top.
             if (state.isSharing && batteryVendor != null) {
                 item(key = "battery") { BatteryCard(batteryVendor, onOpenBatterySettings, onHideBatteryHint) }
             }
-
-            item(key = "alerts") {
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(stringResource(R.string.alerts_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                            Switch(checked = state.alertsEnabled, onCheckedChange = actions.setAlertsEnabled)
-                        }
-                        Text(stringResource(R.string.alerts_body), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        when {
-                            state.instant.connected -> GreyText(stringResource(R.string.instant_on))
-                            state.instant.hasApp -> GreyText(stringResource(R.string.instant_connecting))
-                            else -> {
-                                GreyText(stringResource(R.string.instant_off))
-                                TextButton(onClick = { ntfyHelp = true }) { Text(stringResource(R.string.instant_install)) }
-                            }
-                        }
-                    }
-                }
-            }
-
             item(key = "family-title") { SectionLabel(stringResource(R.string.family_title)) }
             item(key = "members") {
                 Card(Modifier.fillMaxWidth()) {
@@ -272,6 +242,21 @@ internal fun MapContent(
                         }
                     }
                 }
+            }
+            // This phone's switches, together at the end: set once, rarely touched.
+            item(key = "phone-title") { SectionLabel(stringResource(R.string.this_phone_title)) }
+            item(key = "phone") {
+                ThisPhoneCard(
+                    isSharing = state.isSharing,
+                    needsBackground = state.isSharing && !state.hasBackgroundPermission &&
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q,
+                    onShare = actions.setSharing,
+                    onAllowBackground = { onExplainBackground(true) },
+                    alertsEnabled = state.alertsEnabled,
+                    onAlerts = actions.setAlertsEnabled,
+                    instant = state.instant,
+                    onNtfyHelp = { ntfyHelp = true },
+                )
             }
             item(key = "error") { ErrorText(error) }
         }

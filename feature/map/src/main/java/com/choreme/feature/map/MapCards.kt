@@ -1,5 +1,6 @@
 package com.choreme.feature.map
 
+import androidx.compose.material3.HorizontalDivider
 import com.choreme.core.ui.R as CoreUiR
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -111,18 +112,45 @@ internal fun OnMyWayCard(state: OnMyWay, onChange: (Boolean) -> Unit) {
     }
 }
 
+/**
+ * This phone's two switches in one card, at the end of the Map: sharing where it is (and the background permission it
+ * needs), and arrival alerts (and whether they come instantly through ntfy).
+ */
 @Composable
-internal fun SharingCard(isSharing: Boolean, needsBackground: Boolean, onToggle: (Boolean) -> Unit, onAllowBackground: () -> Unit) {
+internal fun ThisPhoneCard(
+    isSharing: Boolean,
+    needsBackground: Boolean,
+    onShare: (Boolean) -> Unit,
+    onAllowBackground: () -> Unit,
+    alertsEnabled: Boolean,
+    onAlerts: (Boolean) -> Unit,
+    instant: InstantAlerts,
+    onNtfyHelp: () -> Unit,
+) {
     Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.share_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                Switch(checked = isSharing, onCheckedChange = onToggle)
+                Switch(checked = isSharing, onCheckedChange = onShare)
             }
             GreyText(stringResource(if (isSharing) R.string.share_body_on else R.string.share_body_off))
             if (needsBackground) {
                 GreyText(stringResource(R.string.share_needs_background))
                 TextButton(onClick = onAllowBackground) { Text(stringResource(R.string.share_allow_background)) }
+            }
+            HorizontalDivider(Modifier.padding(vertical = 6.dp), color = MaterialTheme.colorScheme.surfaceVariant)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.alerts_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                Switch(checked = alertsEnabled, onCheckedChange = onAlerts)
+            }
+            GreyText(stringResource(R.string.alerts_body))
+            when {
+                instant.connected -> GreyText(stringResource(R.string.instant_on))
+                instant.hasApp -> GreyText(stringResource(R.string.instant_connecting))
+                else -> {
+                    GreyText(stringResource(R.string.instant_off))
+                    TextButton(onClick = onNtfyHelp) { Text(stringResource(R.string.instant_install)) }
+                }
             }
         }
     }
