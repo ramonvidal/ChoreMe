@@ -1,5 +1,9 @@
 package com.choreme.feature.chores
 
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.choreme.core.ui.choreTitle
@@ -178,9 +182,9 @@ internal fun ChoreCard(
             ) {
                 Box {
                 Row(
-                    Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
+                    Modifier.padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     ItemIcon(chore.template.icon, Modifier.size(22.dp), tint = colors.onSurfaceVariant)
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -212,6 +216,10 @@ internal fun ChoreCard(
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.onSurface),
                         border = BorderStroke(1.dp, colors.outline),
                     ) { Text(stringResource(main.first)) }
+                    // The menu (remind me, who's doing it, edit...) can also be opened by tapping the card.
+                    IconButton(onClick = { menu = true }, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.swipe_more), tint = colors.onSurfaceVariant)
+                    }
                 }
                 }
             }

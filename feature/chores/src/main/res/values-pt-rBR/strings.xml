@@ -12,7 +12,6 @@
     <string name="empty_title">Nada pra fazer</string>
     <string name="empty_body_parent">Quando alguém nota alguma coisa, tipo a pia cheia ou o lixo transbordando, bota aqui. Qualquer um pode pegar, e os corres que os guris terminam vêm pra você aprovar.</string>
     <string name="empty_body_kid">Viu alguma coisa pra fazer? Bota aqui no botão de baixo.</string>
-    <string name="groceries_link">%1$d na lista da feira</string>
     <string name="grab">Deixa comigo</string>
     <string name="done">Feito</string>
     <string name="let_go">Largar</string>

@@ -12,7 +12,6 @@
     <string name="empty_title">Nothing needs doing</string>
     <string name="empty_body_parent">When someone notices something, like a full sink or an overflowing bin, they add it here. Anyone can grab it, and kids\' finished chores come to you to approve.</string>
     <string name="empty_body_kid">Noticed something that needs doing? Add it with the button below.</string>
-    <string name="groceries_link">%1$d on the grocery list</string>
 
     <!-- Chore cards -->
     <string name="grab">I\'ll do it</string>

@@ -404,10 +404,10 @@ private fun AskForNotificationPermission() {
 @Composable
 internal fun ChoresHeader(state: ChoresUiState, onOpenGroceries: () -> Unit, onAdd: () -> Unit) {
     val toDo = state.board.toDo.size
-    val mine = state.board.mine.size
+    // Yours counts the room tasks you took too, as the Yours list shows them. Groceries are Casa's to mention.
+    val mine = state.yours.size
     val parts = buildList {
         if (mine > 0) add(pluralStringResource(R.plurals.summary_yours, mine, mine))
-        if (state.groceriesToBuy > 0) add(stringResource(R.string.groceries_link, state.groceriesToBuy))
     }
     Row(Modifier.padding(top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -416,7 +416,7 @@ internal fun ChoresHeader(state: ChoresUiState, onOpenGroceries: () -> Unit, onA
                 style = MaterialTheme.typography.headlineSmall,
             )
             if (parts.isNotEmpty()) {
-                HeaderLine(parts.joinToString(" · "), modifier = Modifier.clickable(enabled = state.groceriesToBuy > 0 && mine == 0, onClick = onOpenGroceries))
+                HeaderLine(parts.joinToString(" · "))
             }
         }
         if (state.me != null) NosButton(stringResource(R.string.add_chore_short), onAdd)

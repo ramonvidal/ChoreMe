@@ -96,7 +96,6 @@ feature/chores,nothing_to_do_body,,The house is in good shape. Enjoy it!,"A casa
 feature/chores,empty_title,,Nothing needs doing,Nada pra fazer
 feature/chores,empty_body_parent,,"When someone notices something, like a full sink or an overflowing bin, they add it here. Anyone can grab it, and kids' finished chores come to you to approve.","Quando alguém nota alguma coisa, tipo a pia cheia ou o lixo transbordando, bota aqui. Qualquer um pode pegar, e os corres que os guris terminam vêm pra você aprovar."
 feature/chores,empty_body_kid,,Noticed something that needs doing? Add it with the button below.,Viu alguma coisa pra fazer? Bota aqui no botão de baixo.
-feature/chores,groceries_link,,%1$d on the grocery list,%1$d na lista da feira
 feature/chores,grab,,I'll do it,Deixa comigo
 feature/chores,done,,Done,Feito
 feature/chores,let_go,,Let go,Largar
