@@ -1,16 +1,11 @@
 package com.choreme.feature.chores
 
+import com.choreme.core.settings.AlertChannel
+import com.choreme.core.settings.Notifier
 import com.choreme.core.ui.ChoreNames
-import android.Manifest
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
@@ -95,6 +90,7 @@ internal class TimedReminderWorker @AssistedInject constructor(
     private val families: FamilyRepository,
     private val chores: ChoreRepository,
     private val notifications: NotificationSettings,
+    private val notifier: Notifier,
     private val reminders: TimedReminders,
 ) : CoroutineWorker(context, params) {
 
@@ -115,33 +111,24 @@ internal class TimedReminderWorker @AssistedInject constructor(
                 }
             }
         }
-        if (canNotify()) show(choreId, title)
+        if (notifier.canNotify()) show(choreId, title)
         return Result.success()
     }
 
-    private fun canNotify() = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-        ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) ==
-        PackageManager.PERMISSION_GRANTED
-
-    @Suppress("MissingPermission") // Checked in canNotify().
     private fun show(choreId: String, title: String) {
         val context = applicationContext
-        context.getSystemService(NotificationManager::class.java).createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, context.getString(R.string.timed_channel), NotificationManager.IMPORTANCE_HIGH)
-                .apply { description = context.getString(R.string.timed_channel_description) },
-        )
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, CHANNEL_ID))
-            .setSmallIcon(R.drawable.ic_notification_chores)
-            .setContentTitle(context.getString(R.string.timed_title, title))
-            .setContentText(context.getString(R.string.timed_body))
-            .setAutoCancel(true)
-            .setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
-            .build()
-        NotificationManagerCompat.from(context).notify("remind-$choreId".hashCode(), notification)
+        notifier.show(CHANNEL, "remind-$choreId".hashCode()) {
+            setSmallIcon(R.drawable.ic_notification_chores)
+            setContentTitle(context.getString(R.string.timed_title, title))
+            setContentText(context.getString(R.string.timed_body))
+            setAutoCancel(true)
+            setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
+        }
     }
 
     private companion object {
+        val CHANNEL = AlertChannel(CHANNEL_ID, R.string.timed_channel, R.string.timed_channel_description, NotificationManager.IMPORTANCE_HIGH)
         const val CHANNEL_ID = "timed-reminders"
         const val TIMEOUT_MS = 20_000L
     }

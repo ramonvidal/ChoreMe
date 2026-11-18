@@ -1,15 +1,11 @@
 package com.choreme.feature.chores
 
-import android.Manifest
-import android.app.NotificationChannel
+import com.choreme.core.settings.AlertChannel
+import com.choreme.core.settings.Notifier
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -42,12 +38,13 @@ internal class WeeklySummaryWorker @AssistedInject constructor(
     private val families: FamilyRepository,
     private val chores: ChoreRepository,
     private val notifications: NotificationSettings,
+    private val notifier: Notifier,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
         val today = LocalDate.now()
         if (today.dayOfWeek != DayOfWeek.SUNDAY) return Result.success()
-        if (!availability.isConfigured || !canNotify() || !notifications.isEnabled(AlertKind.WEEKLY_SUMMARY)) return Result.success()
+        if (!availability.isConfigured || !notifier.canNotify() || !notifications.isEnabled(AlertKind.WEEKLY_SUMMARY)) return Result.success()
         val session = withTimeoutOrNull(TIMEOUT_MS) { families.session.first { it != SessionState.Loading } }
             as? SessionState.InFamily ?: return Result.success()
         val members = withTimeoutOrNull(TIMEOUT_MS) { families.observeMembers(session.familyId).first() } ?: return Result.retry()
@@ -60,18 +57,8 @@ internal class WeeklySummaryWorker @AssistedInject constructor(
         return Result.success()
     }
 
-    private fun canNotify() = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-        ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) ==
-        PackageManager.PERMISSION_GRANTED
-
-    @Suppress("MissingPermission") // Checked in canNotify().
     private fun show(recap: WeekRecap, pointsOn: Boolean) {
         val context = applicationContext
-        val manager = context.getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, context.getString(R.string.weekly_channel), NotificationManager.IMPORTANCE_DEFAULT)
-                .apply { description = context.getString(R.string.weekly_channel_description) },
-        )
         val title = if (pointsOn) {
             context.resources.getQuantityString(R.plurals.weekly_title, recap.totalPoints, recap.totalPoints)
         } else {
@@ -88,18 +75,18 @@ internal class WeeklySummaryWorker @AssistedInject constructor(
         val contentIntent = launch?.let {
             PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
-        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, CHANNEL_ID))
-            .setSmallIcon(R.drawable.ic_notification_chores)
-            .setContentTitle(title)
-            .setContentText(text)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
-            .setContentIntent(contentIntent)
-            .setAutoCancel(true)
-            .build()
-        NotificationManagerCompat.from(context).notify(NOTIFICATION_TAG.hashCode(), notification)
+        notifier.show(CHANNEL, NOTIFICATION_TAG.hashCode()) {
+            setSmallIcon(R.drawable.ic_notification_chores)
+            setContentTitle(title)
+            setContentText(text)
+            setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            setContentIntent(contentIntent)
+            setAutoCancel(true)
+        }
     }
 
     private companion object {
+        val CHANNEL = AlertChannel(CHANNEL_ID, R.string.weekly_channel, R.string.weekly_channel_description, NotificationManager.IMPORTANCE_DEFAULT)
         const val CHANNEL_ID = "weekly-summary"
         const val NOTIFICATION_TAG = "weekly-summary"
         const val TIMEOUT_MS = 30_000L

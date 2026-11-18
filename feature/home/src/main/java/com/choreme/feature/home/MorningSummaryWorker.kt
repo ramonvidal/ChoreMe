@@ -1,15 +1,11 @@
 package com.choreme.feature.home
 
-import android.Manifest
-import android.app.NotificationChannel
+import com.choreme.core.settings.AlertChannel
+import com.choreme.core.settings.Notifier
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -77,11 +73,12 @@ internal class MorningSummaryWorker @AssistedInject constructor(
     private val day: DayWeather,
     private val units: WeatherSettings,
     private val notifications: NotificationSettings,
+    private val notifier: Notifier,
     private val routine: RoutineLog,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        if (!availability.isConfigured || !canNotify()) return Result.success()
+        if (!availability.isConfigured || !notifier.canNotify()) return Result.success()
         val weatherOn = notifications.isEnabled(AlertKind.WEATHER)
         val choresOn = notifications.isEnabled(AlertKind.MORNING_SUMMARY)
         if (!weatherOn && !choresOn) return Result.success()
@@ -177,35 +174,25 @@ internal class MorningSummaryWorker @AssistedInject constructor(
         return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")?.let { applicationContext.getString(R.string.morning_chores_line, it) }
     }
 
-    private fun canNotify() = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-        ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) ==
-        PackageManager.PERMISSION_GRANTED
-
-    @Suppress("MissingPermission") // Checked in canNotify().
     private fun show(now: String?, lines: List<String>) {
         val context = applicationContext
-        val manager = context.getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, context.getString(R.string.morning_channel), NotificationManager.IMPORTANCE_DEFAULT)
-                .apply { description = context.getString(R.string.morning_channel_description) },
-        )
         val title = now?.let { context.getString(R.string.morning_title, it) } ?: context.getString(R.string.morning_title_plain)
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
         val contentIntent = launch?.let {
             PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
-        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, CHANNEL_ID))
-            .setSmallIcon(R.drawable.ic_notification_home)
-            .setContentTitle(title)
-            .setContentText(lines.first())
-            .setStyle(NotificationCompat.BigTextStyle().bigText(lines.joinToString("\n")))
-            .setContentIntent(contentIntent)
-            .setAutoCancel(true)
-            .build()
-        NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
+        notifier.show(CHANNEL, NOTIFICATION_ID) {
+            setSmallIcon(R.drawable.ic_notification_home)
+            setContentTitle(title)
+            setContentText(lines.first())
+            setStyle(NotificationCompat.BigTextStyle().bigText(lines.joinToString("\n")))
+            setContentIntent(contentIntent)
+            setAutoCancel(true)
+        }
     }
 
     private companion object {
+        val CHANNEL = AlertChannel(CHANNEL_ID, R.string.morning_channel, R.string.morning_channel_description, NotificationManager.IMPORTANCE_DEFAULT)
         const val CHANNEL_ID = "morning-summary"
         const val NOTIFICATION_ID = 7
         const val TIMEOUT_MS = 30_000L

@@ -1,18 +1,14 @@
 package com.choreme.feature.chores
 
+import com.choreme.core.settings.AlertChannel
+import com.choreme.core.settings.Notifier
 import com.choreme.core.ui.ChoreNames
-import android.Manifest
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.choreme.core.settings.NotificationSettings
 import com.choreme.core.model.AlertKind
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -96,6 +92,7 @@ internal class NewChoreWorker @AssistedInject constructor(
     private val families: FamilyRepository,
     private val chores: ChoreRepository,
     private val notifications: NotificationSettings,
+    private val notifier: Notifier,
 ) : CoroutineWorker(context, params) {
     private val prefs = context.getSharedPreferences("new-chores", Context.MODE_PRIVATE)
 
@@ -121,7 +118,7 @@ internal class NewChoreWorker @AssistedInject constructor(
             // Look back a little: a chore added offline reaches the server later than it was made.
             val recent = chores.reportedSince(session.familyId, since.minus(LOOK_BACK))
             val fresh = recent.filter { it.id !in shown && it.reportedBy != session.memberId && it.isActive }
-            if (fresh.isNotEmpty() && canNotify() && notifications.isEnabled(AlertKind.NEW_CHORES)) {
+            if (fresh.isNotEmpty() && notifier.allows(AlertKind.NEW_CHORES)) {
                 val names = families.observeMembers(session.familyId).first().associate { it.id to it.name }
                 fresh.forEach { show(it, names[it.reportedBy], forMe = session.memberId in it.team) }
             }
@@ -146,28 +143,22 @@ internal class NewChoreWorker @AssistedInject constructor(
         val key = { chore: Chore -> "${chore.id}|${chore.lastDoneBy}|${chore.lastDoneOn}" }
         val shown = prefs.getStringSet(KEY_DONE_SHOWN, emptySet()).orEmpty()
         val fresh = done.filter { key(it) !in shown }
-        if (fresh.isNotEmpty() && canNotify() && notifications.isEnabled(AlertKind.CHORES_DONE)) {
+        if (fresh.isNotEmpty() && notifier.allows(AlertKind.CHORES_DONE)) {
             val names = families.observeMembers(familyId).first().associate { it.id to it.name }
             fresh.forEach { showDoneNotification(it, names[it.lastDoneBy]) }
         }
         prefs.edit().putStringSet(KEY_DONE_SHOWN, (shown + fresh.map(key)).takeLastKeys()).apply()
     }
 
-    @Suppress("MissingPermission") // Checked by the caller.
     private fun showDoneNotification(chore: Chore, who: String?) {
         val context = applicationContext
-        context.getSystemService(NotificationManager::class.java).createNotificationChannel(
-            NotificationChannel(DONE_CHANNEL_ID, context.getString(R.string.done_channel), NotificationManager.IMPORTANCE_LOW)
-                .apply { description = context.getString(R.string.done_channel_description) },
-        )
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, DONE_CHANNEL_ID))
-            .setSmallIcon(R.drawable.ic_notification_chores)
-            .setContentTitle(context.getString(R.string.done_title, who ?: context.getString(R.string.someone), ChoreNames.shown(context, chore.title)))
-            .setAutoCancel(true)
-            .setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
-            .build()
-        NotificationManagerCompat.from(context).notify("done-${chore.id}".hashCode(), notification)
+        notifier.show(DONE_CHANNEL, "done-${chore.id}".hashCode()) {
+            setSmallIcon(R.drawable.ic_notification_chores)
+            setContentTitle(context.getString(R.string.done_title, who ?: context.getString(R.string.someone), ChoreNames.shown(context, chore.title)))
+            setAutoCancel(true)
+            setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
+        }
     }
 
     /** Kids' finished chores waiting for this parent's OK, each shown once. */
@@ -177,68 +168,52 @@ internal class NewChoreWorker @AssistedInject constructor(
         // Keyed by chore and who did it, so the same chore finished again next week alerts again.
         val key = { chore: Chore -> "${chore.id}|${chore.completedBy}|${chore.dueDate}" }
         val fresh = waiting.filter { key(it) !in shown }
-        if (fresh.isNotEmpty() && canNotify() && notifications.isEnabled(AlertKind.APPROVALS)) {
+        if (fresh.isNotEmpty() && notifier.allows(AlertKind.APPROVALS)) {
             val names = families.observeMembers(familyId).first().associate { it.id to it.name }
             fresh.forEach { showApproval(it, names[it.completedBy]) }
         }
         prefs.edit().putStringSet(KEY_APPROVALS_SHOWN, waiting.map(key).toSet()).apply()
     }
 
-    @Suppress("MissingPermission") // Checked by the caller.
     private fun showApproval(chore: Chore, who: String?) {
         val context = applicationContext
-        context.getSystemService(NotificationManager::class.java).createNotificationChannel(
-            NotificationChannel(APPROVAL_CHANNEL_ID, context.getString(R.string.approval_channel), NotificationManager.IMPORTANCE_DEFAULT)
-                .apply { description = context.getString(R.string.approval_channel_description) },
-        )
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, APPROVAL_CHANNEL_ID))
-            .setSmallIcon(R.drawable.ic_notification_chores)
-            .setContentTitle(context.getString(R.string.approval_title, who ?: context.getString(R.string.someone), ChoreNames.shown(context, chore.title)))
-            .setContentText(context.getString(R.string.approval_body))
-            .setAutoCancel(true)
-            .setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
-            .build()
-        NotificationManagerCompat.from(context).notify("approve-${chore.id}".hashCode(), notification)
+        notifier.show(APPROVAL_CHANNEL, "approve-${chore.id}".hashCode()) {
+            setSmallIcon(R.drawable.ic_notification_chores)
+            setContentTitle(context.getString(R.string.approval_title, who ?: context.getString(R.string.someone), ChoreNames.shown(context, chore.title)))
+            setContentText(context.getString(R.string.approval_body))
+            setAutoCancel(true)
+            setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
+        }
     }
 
-    private fun canNotify() = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-        ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) ==
-        PackageManager.PERMISSION_GRANTED
-
-    @Suppress("MissingPermission") // Checked in canNotify().
     private fun show(chore: Chore, who: String?, forMe: Boolean = false) {
         val context = applicationContext
         // Urgent ones get their own channel, which pops up on screen (people can tune each in Android's settings).
-        val channel = if (chore.urgent) {
-            NotificationChannel(URGENT_CHANNEL_ID, context.getString(R.string.urgent_channel), NotificationManager.IMPORTANCE_HIGH)
-                .apply { description = context.getString(R.string.urgent_channel_description) }
-        } else {
-            NotificationChannel(CHANNEL_ID, context.getString(R.string.new_chore_channel), NotificationManager.IMPORTANCE_DEFAULT)
-                .apply { description = context.getString(R.string.new_chore_channel_description) }
-        }
-        context.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, channel.id))
-            .setSmallIcon(R.drawable.ic_notification_chores)
-            .setContentTitle(
+        notifier.show(if (chore.urgent) URGENT_CHANNEL else CHANNEL, chore.id.hashCode()) {
+            setSmallIcon(R.drawable.ic_notification_chores)
+            setContentTitle(
                 when {
                     chore.urgent -> context.getString(R.string.urgent_title, ChoreNames.shown(context, chore.title))
                     forMe -> context.getString(R.string.assigned_title, ChoreNames.shown(context, chore.title))
                     else -> ChoreNames.shown(context, chore.title)
                 },
             )
-            .setPriority(if (chore.urgent) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT)
-            .setContentText(
+            setPriority(if (chore.urgent) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT)
+            setContentText(
                 context.getString(if (forMe) R.string.assigned_body else R.string.new_chore_body, who ?: context.getString(R.string.someone)),
             )
-            .setAutoCancel(true)
-            .setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
-            .build()
-        NotificationManagerCompat.from(context).notify(chore.id.hashCode(), notification)
+            setAutoCancel(true)
+            setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
+        }
     }
 
     private companion object {
+        val CHANNEL = AlertChannel(CHANNEL_ID, R.string.new_chore_channel, R.string.new_chore_channel_description, NotificationManager.IMPORTANCE_DEFAULT)
+        val URGENT_CHANNEL = AlertChannel(URGENT_CHANNEL_ID, R.string.urgent_channel, R.string.urgent_channel_description, NotificationManager.IMPORTANCE_HIGH)
+        val DONE_CHANNEL = AlertChannel(DONE_CHANNEL_ID, R.string.done_channel, R.string.done_channel_description, NotificationManager.IMPORTANCE_LOW)
+        val APPROVAL_CHANNEL = AlertChannel(APPROVAL_CHANNEL_ID, R.string.approval_channel, R.string.approval_channel_description, NotificationManager.IMPORTANCE_DEFAULT)
         const val CHANNEL_ID = "new-chores"
         const val URGENT_CHANNEL_ID = "urgent-chores"
         const val KEY_CHECKED = "checked_until"

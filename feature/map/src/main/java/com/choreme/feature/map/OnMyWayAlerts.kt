@@ -1,15 +1,10 @@
 package com.choreme.feature.map
 
-import android.Manifest
-import android.app.NotificationChannel
+import com.choreme.core.settings.AlertChannel
+import com.choreme.core.settings.Notifier
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -74,11 +69,12 @@ internal class OnMyWayAlertWorker @AssistedInject constructor(
     private val families: FamilyRepository,
     private val announcements: AnnouncementRepository,
     private val notifications: NotificationSettings,
+    private val notifier: Notifier,
 ) : CoroutineWorker(context, params) {
     private val prefs = context.getSharedPreferences("on-my-way-alerts", Context.MODE_PRIVATE)
 
     override suspend fun doWork(): Result {
-        if (!availability.isConfigured || !notifications.isEnabled(AlertKind.ON_MY_WAY) || !canNotify()) return Result.success()
+        if (!availability.isConfigured || !notifier.allows(AlertKind.ON_MY_WAY)) return Result.success()
         val session = withTimeoutOrNull(TIMEOUT_MS) { families.session.first { it != SessionState.Loading } }
             as? SessionState.InFamily ?: return Result.success()
         return try {
@@ -96,31 +92,22 @@ internal class OnMyWayAlertWorker @AssistedInject constructor(
         }
     }
 
-    private fun canNotify() = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-        ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) ==
-        PackageManager.PERMISSION_GRANTED
-
-    @Suppress("MissingPermission") // Checked in canNotify().
     private fun show(announcement: Announcement, name: String?) {
         val context = applicationContext
-        context.getSystemService(NotificationManager::class.java).createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, context.getString(R.string.on_my_way_channel), NotificationManager.IMPORTANCE_DEFAULT)
-                .apply { description = context.getString(R.string.on_my_way_channel_description) },
-        )
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, CHANNEL_ID))
-            .setSmallIcon(R.drawable.ic_notification_place)
-            .setContentTitle(context.getString(R.string.on_my_way_title, name ?: context.getString(R.string.someone)))
-            .setWhen(announcement.at.toEpochMilli())
-            .setShowWhen(true)
-            .setTimeoutAfter(announcement.kind.lasts.toMillis())
-            .setAutoCancel(true)
-            .setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
-            .build()
-        NotificationManagerCompat.from(context).notify("on-my-way-${announcement.memberId}".hashCode(), notification)
+        notifier.show(CHANNEL, "on-my-way-${announcement.memberId}".hashCode()) {
+            setSmallIcon(R.drawable.ic_notification_place)
+            setContentTitle(context.getString(R.string.on_my_way_title, name ?: context.getString(R.string.someone)))
+            setWhen(announcement.at.toEpochMilli())
+            setShowWhen(true)
+            setTimeoutAfter(announcement.kind.lasts.toMillis())
+            setAutoCancel(true)
+            setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
+        }
     }
 
     private companion object {
+        val CHANNEL = AlertChannel(CHANNEL_ID, R.string.on_my_way_channel, R.string.on_my_way_channel_description, NotificationManager.IMPORTANCE_DEFAULT)
         const val CHANNEL_ID = "on-my-way"
         const val KEY_SHOWN = "shown"
         const val TIMEOUT_MS = 30_000L

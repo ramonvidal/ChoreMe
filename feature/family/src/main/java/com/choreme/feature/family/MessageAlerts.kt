@@ -1,15 +1,11 @@
 package com.choreme.feature.family
 
-import android.Manifest
-import android.app.NotificationChannel
+import com.choreme.core.settings.AlertChannel
+import com.choreme.core.settings.Notifier
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -91,6 +87,7 @@ internal class MessageWorker @AssistedInject constructor(
     private val families: FamilyRepository,
     private val messages: MessageRepository,
     private val notifications: NotificationSettings,
+    private val notifier: Notifier,
 ) : CoroutineWorker(context, params) {
     private val prefs = context.getSharedPreferences("family-messages", Context.MODE_PRIVATE)
 
@@ -103,7 +100,7 @@ internal class MessageWorker @AssistedInject constructor(
             val recent = messages.since(session.familyId, now.minus(FamilyMessage.NOTIFY_WITHIN))
             val shown = prefs.getStringSet(KEY_SHOWN, emptySet()).orEmpty()
             val fresh = recent.toNotify(session.memberId, now, shown)
-            if (fresh.isNotEmpty() && canNotify() && notifications.isEnabled(AlertKind.MESSAGES)) {
+            if (fresh.isNotEmpty() && notifier.allows(AlertKind.MESSAGES)) {
                 val names = families.observeMembers(session.familyId).first().associate { it.id to it.name }
                 fresh.forEach { show(it, names[it.from]) }
             }
@@ -115,33 +112,24 @@ internal class MessageWorker @AssistedInject constructor(
         }
     }
 
-    private fun canNotify() = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-        ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) ==
-        PackageManager.PERMISSION_GRANTED
-
-    @Suppress("MissingPermission") // Checked in canNotify().
     private fun show(message: FamilyMessage, name: String?) {
         val context = applicationContext
-        context.getSystemService(NotificationManager::class.java).createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, context.getString(R.string.message_channel), NotificationManager.IMPORTANCE_HIGH)
-                .apply { description = context.getString(R.string.message_channel_description) },
-        )
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, CHANNEL_ID))
-            .setSmallIcon(R.drawable.ic_notification_family)
-            .setContentTitle(name ?: context.getString(R.string.message_someone))
-            .setContentText(message.text)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(message.text))
-            .setWhen(message.at.toEpochMilli())
-            .setShowWhen(true)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true)
-            .setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
-            .build()
-        NotificationManagerCompat.from(context).notify("message-${message.id}".hashCode(), notification)
+        notifier.show(CHANNEL, "message-${message.id}".hashCode()) {
+            setSmallIcon(R.drawable.ic_notification_family)
+            setContentTitle(name ?: context.getString(R.string.message_someone))
+            setContentText(message.text)
+            setStyle(NotificationCompat.BigTextStyle().bigText(message.text))
+            setWhen(message.at.toEpochMilli())
+            setShowWhen(true)
+            setPriority(NotificationCompat.PRIORITY_HIGH)
+            setAutoCancel(true)
+            setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
+        }
     }
 
     private companion object {
+        val CHANNEL = AlertChannel(CHANNEL_ID, R.string.message_channel, R.string.message_channel_description, NotificationManager.IMPORTANCE_HIGH)
         const val CHANNEL_ID = "family-messages"
         const val KEY_SHOWN = "shown"
         const val TIMEOUT_MS = 30_000L

@@ -1,17 +1,12 @@
 package com.choreme.feature.map
 
-import android.Manifest
-import android.app.NotificationChannel
+import com.choreme.core.settings.AlertChannel
+import com.choreme.core.settings.Notifier
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.core.app.NotificationCompat
 import com.choreme.core.settings.NotificationSettings
 import com.choreme.core.model.AlertKind
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -41,6 +36,7 @@ internal class PlaceAlertWorker @AssistedInject constructor(
     private val locations: LocationRepository,
     private val store: PresenceStore,
     private val notifications: NotificationSettings,
+    private val notifier: Notifier,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
@@ -61,7 +57,7 @@ internal class PlaceAlertWorker @AssistedInject constructor(
             val shown = store.shownEventIds
             val recent = locations.eventsSince(session.familyId, since.minus(LOOK_BACK))
             val events = recent.filter { it.memberId != session.memberId && it.id !in shown }
-            if (notifications.isEnabled(AlertKind.ARRIVALS) && canNotify() && events.isNotEmpty()) {
+            if (notifier.allows(AlertKind.ARRIVALS) && events.isNotEmpty()) {
                 val names = families.observeMembers(session.familyId).first().associate { it.id to it.name }
                 events.forEach { show(it, names[it.memberId]) }
             }
@@ -75,17 +71,8 @@ internal class PlaceAlertWorker @AssistedInject constructor(
         }
     }
 
-    private fun canNotify() = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-        ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) ==
-        PackageManager.PERMISSION_GRANTED
-
-    @Suppress("MissingPermission") // Checked in canNotify().
     private fun show(event: PlaceEvent, name: String?) {
         val context = applicationContext
-        context.getSystemService(NotificationManager::class.java).createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, context.getString(R.string.alerts_channel), NotificationManager.IMPORTANCE_DEFAULT)
-                .apply { description = context.getString(R.string.alerts_channel_description) },
-        )
         val who = name ?: context.getString(R.string.someone)
         val title = context.getString(
             if (event.type == PlaceEventType.ARRIVED) R.string.alert_arrived else R.string.alert_left,
@@ -94,21 +81,21 @@ internal class PlaceAlertWorker @AssistedInject constructor(
         )
         val time = event.at.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, CHANNEL_ID))
-            .setSmallIcon(R.drawable.ic_notification_place)
-            .setContentTitle(title)
-            .setContentText(time)
-            .setWhen(event.at.toEpochMilli())
-            .setShowWhen(true)
-            .setGroup(GROUP)
-            .setAutoCancel(true)
-            .setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
-            .build()
         // One notification per member, so a new event replaces their older one.
-        NotificationManagerCompat.from(context).notify(event.memberId.hashCode(), notification)
+        notifier.show(CHANNEL, event.memberId.hashCode()) {
+            setSmallIcon(R.drawable.ic_notification_place)
+            setContentTitle(title)
+            setContentText(time)
+            setWhen(event.at.toEpochMilli())
+            setShowWhen(true)
+            setGroup(GROUP)
+            setAutoCancel(true)
+            setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
+        }
     }
 
     private companion object {
+        val CHANNEL = AlertChannel(CHANNEL_ID, R.string.alerts_channel, R.string.alerts_channel_description, NotificationManager.IMPORTANCE_DEFAULT)
         const val CHANNEL_ID = "place-alerts"
         const val GROUP = "place-alerts"
         const val TIMEOUT_MS = 30_000L

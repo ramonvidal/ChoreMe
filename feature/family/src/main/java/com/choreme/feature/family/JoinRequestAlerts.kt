@@ -1,17 +1,12 @@
 package com.choreme.feature.family
 
-import android.Manifest
-import android.app.NotificationChannel
+import com.choreme.core.settings.AlertChannel
+import com.choreme.core.settings.Notifier
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.core.app.NotificationCompat
 import com.choreme.core.settings.NotificationSettings
 import com.choreme.core.model.AlertKind
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -67,6 +62,7 @@ internal class JoinRequestWorker @AssistedInject constructor(
     private val availability: FirebaseAvailability,
     private val families: FamilyRepository,
     private val notifications: NotificationSettings,
+    private val notifier: Notifier,
 ) : CoroutineWorker(context, params) {
     private val prefs = context.getSharedPreferences("join-requests", Context.MODE_PRIVATE)
 
@@ -78,34 +74,25 @@ internal class JoinRequestWorker @AssistedInject constructor(
         val requests = withTimeoutOrNull(TIMEOUT_MS) { families.observeJoinRequests(session.familyId).first() }
             ?: return Result.retry()
         val shown = prefs.getStringSet(KEY_SHOWN, emptySet()).orEmpty()
-        if (canNotify() && notifications.isEnabled(AlertKind.JOIN_REQUESTS)) requests.filter { it.uid !in shown }.forEach { show(it.uid, it.name) }
+        if (notifier.allows(AlertKind.JOIN_REQUESTS)) requests.filter { it.uid !in shown }.forEach { show(it.uid, it.name) }
         prefs.edit().putStringSet(KEY_SHOWN, requests.map { it.uid }.toSet()).apply()
         return Result.success()
     }
 
-    private fun canNotify() = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-        ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) ==
-        PackageManager.PERMISSION_GRANTED
-
-    @Suppress("MissingPermission") // Checked in canNotify().
     private fun show(uid: String, name: String) {
         val context = applicationContext
-        context.getSystemService(NotificationManager::class.java).createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, context.getString(R.string.join_channel), NotificationManager.IMPORTANCE_HIGH)
-                .apply { description = context.getString(R.string.join_channel_description) },
-        )
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val notification = notifications.applyQuietHours(NotificationCompat.Builder(context, CHANNEL_ID))
-            .setSmallIcon(R.drawable.ic_notification_family)
-            .setContentTitle(context.getString(R.string.join_title, name))
-            .setContentText(context.getString(R.string.join_body))
-            .setAutoCancel(true)
-            .setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
-            .build()
-        NotificationManagerCompat.from(context).notify("join-$uid".hashCode(), notification)
+        notifier.show(CHANNEL, "join-$uid".hashCode()) {
+            setSmallIcon(R.drawable.ic_notification_family)
+            setContentTitle(context.getString(R.string.join_title, name))
+            setContentText(context.getString(R.string.join_body))
+            setAutoCancel(true)
+            setContentIntent(launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE) })
+        }
     }
 
     private companion object {
+        val CHANNEL = AlertChannel(CHANNEL_ID, R.string.join_channel, R.string.join_channel_description, NotificationManager.IMPORTANCE_HIGH)
         const val CHANNEL_ID = "join-requests"
         const val KEY_SHOWN = "shown"
         const val TIMEOUT_MS = 30_000L
