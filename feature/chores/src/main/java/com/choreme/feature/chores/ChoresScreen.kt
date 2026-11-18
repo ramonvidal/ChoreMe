@@ -1,42 +1,25 @@
 package com.choreme.feature.chores
 
-import com.choreme.core.ui.choreTitle
-import com.choreme.core.ui.R as CoreUiR
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Surface
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import kotlinx.coroutines.delay
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -44,73 +27,35 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import com.choreme.core.ui.AvatarStack
 import com.choreme.core.ui.EmptyState
-import androidx.compose.ui.draw.clip
-import androidx.compose.material3.rememberSwipeToDismissBoxState
-import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.choreme.core.model.Member
 import com.choreme.core.model.chore.Chore
-import com.choreme.core.model.chore.ChoreStatus
-import com.choreme.core.model.chore.Recurrence
 import com.choreme.core.ui.HeaderLine
 import com.choreme.core.ui.SectionLabel
-import com.choreme.core.ui.ItemIcon
-import com.choreme.core.ui.MemberAvatar
-import com.choreme.core.ui.HeroCard
 import com.choreme.core.ui.NosButton
-import com.choreme.core.ui.NosButtonStyle
-import com.choreme.core.ui.TabHeader
-import com.choreme.core.ui.icon
 import java.time.Instant
 import java.time.LocalTime
 import com.choreme.core.model.chore.SavedChore
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
 
 @Composable
@@ -407,78 +352,6 @@ internal fun ChoresContent(
     }
 }
 
-/** Finishing a chore: its points (0 when the family plays without points), or, for a kid, that it's gone to a parent. [at] tells two apart. */
-internal data class Cheer(val points: Int, val waiting: Boolean, val at: Long)
-
-/** A dark pill that pops up with a bouncing tick for a moment, then fades. */
-@Composable
-internal fun CheerBubble(cheer: Cheer?, onGone: () -> Unit, modifier: Modifier = Modifier) {
-    var shown by remember { mutableStateOf(cheer) }
-    if (cheer != null) shown = cheer
-    LaunchedEffect(cheer) {
-        if (cheer != null) {
-            delay(CHEER_MILLIS)
-            onGone()
-        }
-    }
-    AnimatedVisibility(
-        visible = cheer != null,
-        enter = scaleIn(spring(dampingRatio = 0.5f, stiffness = 400f)) + fadeIn(),
-        exit = fadeOut(),
-        modifier = modifier,
-    ) {
-        val current = shown ?: return@AnimatedVisibility
-        val tick = remember(current.at) { Animatable(0f) }
-        LaunchedEffect(current.at) { tick.animateTo(1f, spring(dampingRatio = 0.35f, stiffness = 300f)) }
-        Surface(shape = CircleShape, color = MaterialTheme.colorScheme.inverseSurface, shadowElevation = 6.dp) {
-            Row(Modifier.padding(horizontal = 18.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                ItemIcon(
-                    CoreUiR.drawable.ic_check_circle,
-                    Modifier.size(22.dp).graphicsLayer { scaleX = tick.value; scaleY = tick.value },
-                    tint = MaterialTheme.colorScheme.inversePrimary,
-                )
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    if (current.waiting) stringResource(R.string.cheer_waiting)
-                    else if (current.points == 0) stringResource(R.string.cheer_done)
-                    else pluralStringResource(R.plurals.cheer_points, current.points, current.points),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                )
-            }
-        }
-    }
-}
-
-private const val CHEER_MILLIS = 1_800L
-
-/** "Remind me at…": a time today (or tomorrow, if it's passed), on this phone only. */
-@Composable
-private fun RemindDialog(hasReminder: Boolean, onSet: (LocalTime) -> Unit, onRemove: () -> Unit, onDismiss: () -> Unit) {
-    val context = LocalContext.current
-    val inAnHour = LocalTime.now().plusHours(1)
-    val picker = rememberTimePickerState(inAnHour.hour, 0, android.text.format.DateFormat.is24HourFormat(context))
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.remind_title)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.remind_hint), style = MaterialTheme.typography.bodySmall)
-                TimePicker(state = picker)
-            }
-        },
-        confirmButton = { TextButton(onClick = { onSet(LocalTime.of(picker.hour, picker.minute)) }) { Text(stringResource(CoreUiR.string.save)) } },
-        dismissButton = {
-            Row {
-                if (hasReminder) TextButton(onClick = onRemove) { Text(stringResource(CoreUiR.string.remove)) }
-                TextButton(onClick = onDismiss) { Text(stringResource(CoreUiR.string.cancel)) }
-            }
-        },
-    )
-}
-
-private val SHORT_TIME: DateTimeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
-
 /** Reminders need the notification permission from Android 13 on; asked once, the first time Today opens. */
 @Composable
 private fun AskForNotificationPermission() {
@@ -518,347 +391,10 @@ internal fun ChoresHeader(state: ChoresUiState, onOpenGroceries: () -> Unit, onA
     }
 }
 
-
-/** A small pill with a room's name, on a card of a task that belongs to that room. */
-@Composable
-internal fun RoomTag(name: String) {
-    Row(
-        Modifier.background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(3.dp),
-    ) {
-        ItemIcon(CoreUiR.drawable.ic_tab_rooms, Modifier.size(12.dp), tint = MaterialTheme.colorScheme.onSecondaryContainer)
-        Text(name, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSecondaryContainer, maxLines = 1, overflow = TextOverflow.Ellipsis)
-    }
-}
-
 @Composable
 private fun EmptyChores(isParent: Boolean) {
     EmptyState(
         title = stringResource(R.string.empty_title),
         body = stringResource(if (isParent) R.string.empty_body_parent else R.string.empty_body_kid),
     )
-}
-
-/** Red is kept for urgent chores only: a small tag. */
-@Composable
-private fun UrgentTag() {
-    Text(
-        stringResource(R.string.urgent),
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.error,
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.errorContainer, MaterialTheme.shapes.extraSmall)
-            .padding(horizontal = 6.dp, vertical = 2.dp),
-    )
-}
-
-/**
- * One chore on a white card: grey icon, title, one grey line, and one small button. Who's on it
- * shows as their avatars. Colour means one thing each: a green edge is yours, a red edge urgent.
- * Swipe right for the button's action, left (or tap) for everything else.
- */
-@Composable
-internal fun ChoreCard(
-    chore: Chore,
-    state: ChoresUiState,
-    onClaim: () -> Unit,
-    onUnclaim: () -> Unit,
-    onComplete: () -> Unit,
-    onDoneBy: () -> Unit,
-    onEdit: () -> Unit,
-    onCalendar: () -> Unit,
-    onJoin: () -> Unit = {},
-    onAssign: () -> Unit = {},
-    reminder: Instant? = null,
-    onRemind: () -> Unit = {},
-    /** One the person said they'd do: green edge and tint, so it stands out. */
-    mine: Boolean = false,
-    /** The room a room task belongs to, shown as a small tag next to the title. */
-    roomName: String? = null,
-) {
-    val me = state.me ?: return
-    val overdueDays = ChronoUnit.DAYS.between(chore.dueDate, state.today).toInt()
-    val onIt = me.id in chore.team
-    val takenByOthers = chore.status == ChoreStatus.CLAIMED && !onIt
-    val others = state.teamNames(chore, me.id)
-    val team = (listOfNotNull(chore.claimedBy) + chore.helpers.sorted()).mapNotNull { state.members[it] }
-    var menu by remember { mutableStateOf(false) }
-
-    val teamText = when {
-        onIt && others.isEmpty() -> stringResource(R.string.you_are_on_it)
-        onIt -> stringResource(R.string.you_and_on_it, namesLabel(others))
-        others.size > 1 -> stringResource(R.string.on_it_many, namesLabel(others))
-        takenByOthers -> stringResource(R.string.on_it, others.firstOrNull() ?: stringResource(R.string.someone))
-        else -> null
-    }
-    val line = buildList {
-        when {
-            // With avatars, "Leo is on it" needs no name: they're in the circles.
-            teamText != null -> add(if (onIt) teamText else stringResource(R.string.on_it_short))
-            chore.reportedBy == me.id -> add(stringResource(R.string.reported_by_you))
-            chore.reportedBy != null -> state.nameOf(chore.reportedBy)?.let { add(stringResource(R.string.reported_by, it)) }
-        }
-        if (overdueDays > 0) add(pluralStringResource(R.plurals.overdue_days, overdueDays, overdueDays))
-        if (overdueDays < 0) add(dayLabel(chore.dueDate, state.today))
-        if (chore.recurrence != Recurrence.Once) {
-            add(recurrenceLabel(chore.recurrence) + (chore.repeatUntil?.let { " " + untilLabel(it) } ?: ""))
-        }
-        if (chore.points > 1 && state.pointsOn) add(pluralStringResource(CoreUiR.plurals.points, chore.points, chore.points))
-        if (reminder != null) add(stringResource(R.string.reminder_at, reminder.atZone(ZoneId.systemDefault()).format(SHORT_TIME)))
-    }.joinToString(" · ")
-
-    // The one thing to do next. "Me too" joins whoever's on it.
-    val main = when {
-        chore.status == ChoreStatus.OPEN -> R.string.grab to onClaim
-        onIt -> R.string.done to onComplete
-        else -> R.string.join to onJoin
-    }
-    val colors = MaterialTheme.colorScheme
-    val cardColor = when {
-        chore.urgent -> lerp(CardDefaults.cardColors().containerColor, colors.error, 0.06f)
-        mine -> lerp(CardDefaults.cardColors().containerColor, colors.secondary, 0.08f)
-        else -> CardDefaults.cardColors().containerColor
-    }
-    val edge = when {
-        chore.urgent -> BorderStroke(1.5.dp, colors.error)
-        mine -> BorderStroke(1.5.dp, colors.secondary)
-        else -> null
-    }
-
-    // Swiping only ever triggers; the card springs back and the list updates from the data.
-    // The swipe state outlives a change of status, so it reads the current action.
-    val action by rememberUpdatedState(main.second)
-    val swipe = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            when (value) {
-                SwipeToDismissBoxValue.StartToEnd -> action()
-                SwipeToDismissBoxValue.EndToStart -> menu = true
-                SwipeToDismissBoxValue.Settled -> Unit
-            }
-            false
-        },
-        positionalThreshold = { it * 0.35f },
-    )
-
-    Box {
-        SwipeToDismissBox(
-            state = swipe,
-            backgroundContent = { SwipeHint(swipe.dismissDirection, stringResource(main.first)) },
-        ) {
-            Card(
-                modifier = Modifier.fillMaxWidth().clickable { menu = true },
-                colors = CardDefaults.cardColors(containerColor = cardColor),
-                border = edge,
-            ) {
-                Box {
-                Row(
-                    Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                ) {
-                    ItemIcon(chore.template.icon, Modifier.size(22.dp), tint = colors.onSurfaceVariant)
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(choreTitle(chore.title), style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                            itemVerticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            if (chore.urgent) UrgentTag()
-                            if (roomName != null) RoomTag(roomName)
-                            if (team.isNotEmpty() && teamText != null) AvatarStack(team, teamText, ring = cardColor)
-                            if (line.isNotEmpty()) {
-                                Text(
-                                    line,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = colors.onSurfaceVariant,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                            }
-                        }
-                    }
-                    // Plain for every chore: green is for yours (the edge), red for urgent (the edge and tag).
-                    OutlinedButton(
-                        onClick = main.second,
-                        shape = MaterialTheme.shapes.small,
-                        contentPadding = SmallButtonPadding,
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.onSurface),
-                        border = BorderStroke(1.dp, colors.outline),
-                    ) { Text(stringResource(main.first)) }
-                }
-                }
-            }
-        }
-        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-            // Parents can always finish one; kids only one that's free or theirs.
-            if (chore.status == ChoreStatus.OPEN || (takenByOthers && state.isParent)) {
-                DropdownMenuItem(text = { Text(stringResource(R.string.done_already)) }, onClick = { menu = false; onComplete() })
-            }
-            if (onIt) {
-                DropdownMenuItem(text = { Text(stringResource(R.string.let_go)) }, onClick = { menu = false; onUnclaim() })
-            }
-            if (state.isParent && state.atHome.size > 1) {
-                DropdownMenuItem(text = { Text(stringResource(R.string.who_does)) }, onClick = { menu = false; onAssign() })
-                DropdownMenuItem(text = { Text(stringResource(R.string.done_by)) }, onClick = { menu = false; onDoneBy() })
-            }
-            DropdownMenuItem(
-                text = { Text(stringResource(if (reminder == null) R.string.remind_me else R.string.change_reminder)) },
-                onClick = { menu = false; onRemind() },
-            )
-            DropdownMenuItem(text = { Text(stringResource(R.string.add_to_calendar)) }, onClick = { menu = false; onCalendar() })
-            if (state.isParent) {
-                DropdownMenuItem(text = { Text(stringResource(R.string.edit_chore)) }, onClick = { menu = false; onEdit() })
-            }
-        }
-    }
-}
-
-/** Behind a card being swiped: its button's action on the left, "More" on the right. */
-@Composable
-private fun SwipeHint(direction: SwipeToDismissBoxValue, action: String) {
-    val colors = MaterialTheme.colorScheme
-    val right = direction == SwipeToDismissBoxValue.StartToEnd
-    if (direction == SwipeToDismissBoxValue.Settled) return
-    Box(
-        Modifier
-            .fillMaxSize()
-            .clip(MaterialTheme.shapes.medium)
-            .background(if (right) colors.secondary else colors.surfaceVariant)
-            .padding(horizontal = 20.dp),
-        contentAlignment = if (right) Alignment.CenterStart else Alignment.CenterEnd,
-    ) {
-        Text(
-            if (right) action else stringResource(R.string.swipe_more),
-            style = MaterialTheme.typography.titleSmall,
-            color = if (right) colors.onSecondary else colors.onSurface,
-        )
-    }
-}
-
-private val SmallButtonPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
-
-@Composable
-internal fun AwaitingCard(chore: Chore, state: ChoresUiState, onApprove: () -> Unit, onReject: () -> Unit) {
-    val who = state.nameOf(chore.completedBy) ?: stringResource(R.string.someone)
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                ItemIcon(chore.template.icon, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(choreTitle(chore.title), style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(
-                        stringResource(R.string.finished_by, who),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-            if (state.isParent) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(start = 36.dp)) {
-                    Button(onClick = onApprove, shape = MaterialTheme.shapes.small) { Text(stringResource(CoreUiR.string.approve)) }
-                    OutlinedButton(
-                        onClick = onReject,
-                        shape = MaterialTheme.shapes.small,
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                    ) { Text(stringResource(R.string.not_yet)) }
-                }
-            } else {
-                Text(
-                    stringResource(R.string.waiting_for_parent),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 36.dp),
-                )
-            }
-        }
-    }
-}
-
-/** Short rows inside one white card ("Coming up", "Done today"). */
-@Composable
-internal fun CompactList(rows: List<Chore>, trailing: @Composable (Chore) -> String, onClick: (Chore) -> Unit, done: Boolean = false) {
-    Card(Modifier.fillMaxWidth()) {
-        rows.forEachIndexed { index, chore ->
-            if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-            CompactRow(chore, trailing(chore), onClick = { onClick(chore) }, done = done)
-        }
-    }
-}
-
-@Composable
-internal fun CompactRow(chore: Chore, trailing: String, onClick: () -> Unit, done: Boolean = false) {
-    Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (done) {
-            ItemIcon(CoreUiR.drawable.ic_check_circle, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.secondary)
-            Spacer(Modifier.width(12.dp))
-        }
-        Text(choreTitle(chore.title), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-        if (chore.urgent && !done) {
-            UrgentTag()
-            Spacer(Modifier.width(8.dp))
-        }
-        Text(trailing, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
-}
-
-/**
- * Pick several people: who's doing a chore together, or who did it (e.g. kids without a
- * phone). Everyone picked gets the chore's points.
- */
-@Composable
-internal fun PeopleDialog(
-    title: String,
-    hint: String,
-    people: List<Member>,
-    initial: Set<String>,
-    allowNone: Boolean,
-    onConfirm: (Set<String>) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var picked by remember { mutableStateOf(initial.filter { id -> people.any { it.id == id } }.toSet()) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            Column {
-                Text(hint, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(bottom = 8.dp))
-                people.forEach { person ->
-                    val checked = person.id in picked
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .toggleable(value = checked, role = Role.Checkbox) { picked = if (it) picked + person.id else picked - person.id }
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Checkbox(checked = checked, onCheckedChange = null)
-                        Spacer(Modifier.width(12.dp))
-                        MemberAvatar(person, size = 28.dp)
-                        Spacer(Modifier.width(12.dp))
-                        Text(person.name, style = MaterialTheme.typography.bodyLarge)
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(picked) }, enabled = allowNone || picked.isNotEmpty()) {
-                Text(stringResource(CoreUiR.string.save))
-            }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(CoreUiR.string.cancel)) } },
-    )
-}
-
-/** "Leo", "Leo and Mia", "Leo, Mia and Ana". */
-@Composable
-internal fun namesLabel(names: List<String>): String = when (names.size) {
-    0 -> ""
-    1 -> names.single()
-    else -> stringResource(R.string.names_and, names.dropLast(1).joinToString(", "), names.last())
 }
