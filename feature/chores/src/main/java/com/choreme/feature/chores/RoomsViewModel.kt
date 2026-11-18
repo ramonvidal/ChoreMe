@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
 import javax.inject.Inject
 
-data class RoomsUiState(
+internal data class RoomsUiState(
     val loading: Boolean = true,
     val rooms: List<RoomOverview> = emptyList(),
     /** Parents add, change and remove rooms and their tasks; everyone can say a task is done. */
@@ -59,7 +59,7 @@ class RoomsViewModel @Inject internal constructor(
 
     private val members = familySession.flatMapLatest { families.observeMembers(it.familyId) }
 
-    val uiState: StateFlow<RoomsUiState> = combine(
+    internal val uiState: StateFlow<RoomsUiState> = combine(
         familySession,
         familySession.flatMapLatest { roomsRepository.observe(it.familyId) },
         familySession.flatMapLatest { chores.observeChores(it.familyId) },
@@ -78,19 +78,19 @@ class RoomsViewModel @Inject internal constructor(
     private val membersNow: StateFlow<List<Member>> = members.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     /** Adds a room and returns its id, so its screen can open. Null when not in a family. */
-    fun addRoom(room: Room): String? {
+    internal fun addRoom(room: Room): String? {
         val s = session.value ?: return null
         if (s.role != Role.PARENT) return null
         return roomsRepository.add(s.familyId, room)
     }
 
-    fun saveRoom(room: Room) {
+    internal fun saveRoom(room: Room) {
         val s = session.value ?: return
         if (s.role == Role.PARENT) roomsRepository.update(s.familyId, room)
     }
 
     /** Removes the room and the tasks that looked after it. */
-    fun deleteRoom(overview: RoomOverview) {
+    internal fun deleteRoom(overview: RoomOverview) {
         val s = session.value ?: return
         if (s.role != Role.PARENT) return
         overview.tasks.forEach { chores.delete(s.familyId, it.id) }
@@ -98,7 +98,7 @@ class RoomsViewModel @Inject internal constructor(
     }
 
     /** A new repeating task for the room; [lastDoneDaysAgo] null when nobody remembers. */
-    fun addTask(roomId: String, title: String, template: ChoreTemplate, everyDays: Int, lastDoneDaysAgo: Int?) {
+    internal fun addTask(roomId: String, title: String, template: ChoreTemplate, everyDays: Int, lastDoneDaysAgo: Int?) {
         val s = session.value ?: return
         if (s.role != Role.PARENT || title.isBlank()) return
         val today = LocalDate.now()
@@ -114,14 +114,14 @@ class RoomsViewModel @Inject internal constructor(
     }
 
     /** Changes how often a task comes round; the next date follows from when it was last done. */
-    fun setFrequency(task: Chore, everyDays: Int) {
+    internal fun setFrequency(task: Chore, everyDays: Int) {
         val s = session.value ?: return
         if (s.role != Role.PARENT || task.recurrence == Recurrence.EveryDays(everyDays)) return
         val due = task.lastDoneOn?.plusDays(everyDays.toLong()) ?: task.dueDate
         chores.save(s.familyId, s.memberId, task, task.copy(recurrence = Recurrence.EveryDays(everyDays), dueDate = due))
     }
 
-    fun deleteTask(task: Chore) {
+    internal fun deleteTask(task: Chore) {
         val s = session.value ?: return
         if (s.role == Role.PARENT) chores.delete(s.familyId, task.id)
     }
@@ -135,12 +135,12 @@ class RoomsViewModel @Inject internal constructor(
     }
 
     /** "I did it": a parent's counts straight away, a kid's waits for a parent (see the chore rules). */
-    fun markDone(task: Chore) = change(task) { me, today -> complete(me, today) }
+    internal fun markDone(task: Chore) = change(task) { me, today -> complete(me, today) }
 
-    fun claim(task: Chore) = change(task) { me, _ -> claim(me) }
-    fun unclaim(task: Chore) = change(task) { me, _ -> unclaim(me) }
-    fun join(task: Chore) = change(task) { me, _ -> join(me) }
-    fun assign(task: Chore, people: Set<String>) = change(task) { me, _ -> assign(people, me) }
-    fun approve(task: Chore) = change(task) { me, today -> approve(me, today) }
-    fun reject(task: Chore) = change(task) { me, _ -> reject(me) }
+    internal fun claim(task: Chore) = change(task) { me, _ -> claim(me) }
+    internal fun unclaim(task: Chore) = change(task) { me, _ -> unclaim(me) }
+    internal fun join(task: Chore) = change(task) { me, _ -> join(me) }
+    internal fun assign(task: Chore, people: Set<String>) = change(task) { me, _ -> assign(people, me) }
+    internal fun approve(task: Chore) = change(task) { me, today -> approve(me, today) }
+    internal fun reject(task: Chore) = change(task) { me, _ -> reject(me) }
 }

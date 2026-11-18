@@ -43,7 +43,7 @@ import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
 import javax.inject.Inject
 
-data class FamilyUiState(
+internal data class FamilyUiState(
     val me: SessionState.InFamily? = null,
     val family: Family? = null,
     val members: List<Member> = emptyList(),
@@ -82,7 +82,7 @@ class FamilyViewModel @Inject constructor(
         MessageAlerts.schedule(context)
     }
 
-    val uiState: StateFlow<FamilyUiState> = families.inFamily
+    internal val uiState: StateFlow<FamilyUiState> = families.inFamily
         .flatMapLatest { me ->
             val today = LocalDate.now()
             combine(
@@ -111,7 +111,7 @@ class FamilyViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FamilyUiState())
 
     /** Sends a message to everyone, and pings their phones so it shows at once (with ntfy). */
-    fun sendMessage(text: String) {
+    internal fun sendMessage(text: String) {
         val me = uiState.value.me ?: return
         val message = text.trim().take(FamilyMessage.MAX_LENGTH).takeIf { it.isNotEmpty() } ?: return
         messageRepository.send(me.familyId, me.memberId, message)
@@ -124,56 +124,56 @@ class FamilyViewModel @Inject constructor(
         }
     }
 
-    fun deleteMessage(message: FamilyMessage) {
+    internal fun deleteMessage(message: FamilyMessage) {
         val familyId = uiState.value.me?.familyId ?: return
         messageRepository.delete(familyId, message.id)
     }
 
-    fun addNote(text: String) {
+    internal fun addNote(text: String) {
         val me = uiState.value.me ?: return
         text.trim().take(Note.MAX_LENGTH).takeIf { it.isNotEmpty() }?.let { noteRepository.add(me.familyId, me.memberId, it) }
     }
 
-    fun editNote(note: Note, text: String) {
+    internal fun editNote(note: Note, text: String) {
         val familyId = uiState.value.me?.familyId ?: return
         text.trim().take(Note.MAX_LENGTH).takeIf { it.isNotEmpty() }?.let { noteRepository.edit(familyId, note, it) }
     }
 
-    fun deleteNote(note: Note) {
+    internal fun deleteNote(note: Note) {
         val familyId = uiState.value.me?.familyId ?: return
         noteRepository.delete(familyId, note.id)
     }
 
     /** Away up to and including [until]; null for back home. */
-    fun setAway(member: Member, until: LocalDate?) {
+    internal fun setAway(member: Member, until: LocalDate?) {
         val familyId = uiState.value.me?.familyId ?: return
         if (!uiState.value.canSetAway(member)) return
         families.setAway(familyId, member.id, until)
     }
 
     private val _actionState = MutableStateFlow(ActionState())
-    val actionState: StateFlow<ActionState> = _actionState
+    internal val actionState: StateFlow<ActionState> = _actionState
 
     /** Anonymous (kid) devices can't sign back in to the same account, so signing out needs a warning. */
-    val signOutNeedsApprovalAgain: Boolean get() = auth.currentAccount()?.isAnonymous == true
+    internal val signOutNeedsApprovalAgain: Boolean get() = auth.currentAccount()?.isAnonymous == true
 
-    fun approve(request: JoinRequest, linkToKidId: String?) = familyAction { familyId ->
+    internal fun approve(request: JoinRequest, linkToKidId: String?) = familyAction { familyId ->
         families.approve(familyId, request, linkToKidId, nextColor())
     }
 
-    fun decline(request: JoinRequest) = familyAction { familyId -> families.decline(familyId, request) }
+    internal fun decline(request: JoinRequest) = familyAction { familyId -> families.decline(familyId, request) }
 
-    fun addKidProfile(name: String) = familyAction { familyId ->
+    internal fun addKidProfile(name: String) = familyAction { familyId ->
         if (name.isBlank()) throw DomainException(DomainError.NAME_REQUIRED)
         families.addKidProfile(familyId, name.trim(), nextColor())
     }
 
-    fun remove(member: Member) = familyAction { familyId -> families.removeMember(familyId, member) }
+    internal fun remove(member: Member) = familyAction { familyId -> families.removeMember(familyId, member) }
 
-    fun signOut() = auth.signOut()
+    internal fun signOut() = auth.signOut()
 
     /** Leaves the family; the session then moves on to the "set up your family" screen by itself. */
-    fun leave() = familyAction { familyId ->
+    internal fun leave() = familyAction { familyId ->
         val me = uiState.value.members.firstOrNull { it.id == uiState.value.me?.memberId } ?: return@familyAction
         families.leave(familyId, me, uiState.value.members)
     }
@@ -182,7 +182,7 @@ class FamilyViewModel @Inject constructor(
      * Leaves the family and deletes the sign-in account. Google accounts are confirmed first
      * ([getGoogleIdToken] shows the account picker), as Google requires for deleting one.
      */
-    fun deleteMyData(getGoogleIdToken: suspend () -> String) = familyAction { familyId ->
+    internal fun deleteMyData(getGoogleIdToken: suspend () -> String) = familyAction { familyId ->
         val state = uiState.value
         val me = state.members.firstOrNull { it.id == state.me?.memberId } ?: return@familyAction
         if (auth.currentAccount()?.isAnonymous == false) {

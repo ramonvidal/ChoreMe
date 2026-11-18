@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed interface UpdateState {
+internal sealed interface UpdateState {
     data object None : UpdateState
     data class Available(val update: AppUpdate) : UpdateState
     data class NeedsPermission(val update: AppUpdate) : UpdateState
@@ -25,7 +25,7 @@ class UpdateViewModel @Inject constructor(
     private val installer: UpdateInstaller,
 ) : ViewModel() {
     private val _state = MutableStateFlow<UpdateState>(UpdateState.None)
-    val state: StateFlow<UpdateState> = _state
+    internal val state: StateFlow<UpdateState> = _state
 
     init {
         viewModelScope.launch {
@@ -39,7 +39,7 @@ class UpdateViewModel @Inject constructor(
         }
     }
 
-    fun install(update: AppUpdate) {
+    internal fun install(update: AppUpdate) {
         if (!installer.canInstall()) {
             _state.value = UpdateState.NeedsPermission(update)
             return
@@ -57,15 +57,15 @@ class UpdateViewModel @Inject constructor(
     }
 
     /** Each time the app is shown: checks when one is due, and carries on after "allow installs". */
-    fun onResume() {
+    internal fun onResume() {
         viewModelScope.launch { updates.refresh() }
         val waiting = _state.value as? UpdateState.NeedsPermission ?: return
         if (installer.canInstall()) install(waiting.update)
     }
 
-    fun allowInstallsIntent() = installer.allowInstallsIntent()
+    internal fun allowInstallsIntent() = installer.allowInstallsIntent()
 
-    fun later(update: AppUpdate) {
+    internal fun later(update: AppUpdate) {
         updates.dismiss(update)
         _state.value = UpdateState.None
     }

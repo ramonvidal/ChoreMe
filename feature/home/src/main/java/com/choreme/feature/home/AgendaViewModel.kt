@@ -34,7 +34,7 @@ import java.time.YearMonth
 import java.time.ZoneId
 import javax.inject.Inject
 
-data class AgendaUiState(
+internal data class AgendaUiState(
     val hasPermission: Boolean = false,
     val calendars: List<FamilyCalendar> = emptyList(),
     /** Null until this phone has chosen which calendars to show. */
@@ -57,7 +57,7 @@ data class AgendaUiState(
     fun calendarName(id: Long) = calendars.firstOrNull { it.id == id }?.name
 }
 
-enum class AgendaView { LIST, MONTH }
+internal enum class AgendaView { LIST, MONTH }
 
 @HiltViewModel
 class AgendaViewModel @Inject constructor(
@@ -95,7 +95,7 @@ class AgendaViewModel @Inject constructor(
         .flatMapLatest { chores.observeChores(it.familyId) }
         .onStart { emit(emptyList()) }
 
-    val uiState: StateFlow<AgendaUiState> = combine(
+    internal val uiState: StateFlow<AgendaUiState> = combine(
         combine(permission, calendars, choice.selected, ::Triple),
         events,
         familyChores,
@@ -122,15 +122,15 @@ class AgendaViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AgendaUiState(view = AgendaView.MONTH, roomFilter = RoomFilter.NO_ROOM))
 
-    fun setRoomFilter(filter: RoomFilter) {
+    internal fun setRoomFilter(filter: RoomFilter) {
         roomFilter.value = filter
     }
 
-    fun showView(mode: AgendaView) {
+    internal fun showView(mode: AgendaView) {
         view.value = mode
     }
 
-    fun showMonth(shown: YearMonth) {
+    internal fun showMonth(shown: YearMonth) {
         month.value = shown
         // Keep a selected day inside the month being looked at.
         if (YearMonth.from(selectedDay.value) != shown) {
@@ -138,26 +138,26 @@ class AgendaViewModel @Inject constructor(
         }
     }
 
-    fun selectDay(day: LocalDate) {
+    internal fun selectDay(day: LocalDate) {
         selectedDay.value = day
         if (YearMonth.from(day) != month.value) month.value = YearMonth.from(day)
     }
 
     private val _actionState = MutableStateFlow(ActionState())
-    val actionState: StateFlow<ActionState> = _actionState
+    internal val actionState: StateFlow<ActionState> = _actionState
 
     /** Called after the permission dialog closes, whatever the answer. */
-    fun onPermissionResult() {
+    internal fun onPermissionResult() {
         permission.value = calendar.hasPermission()
     }
 
-    fun choose(calendarIds: Set<Long>) = choice.select(calendarIds)
+    internal fun choose(calendarIds: Set<Long>) = choice.select(calendarIds)
 
-    fun addEvent(calendarId: Long, event: NewEvent) = runAction(_actionState) {
+    internal fun addEvent(calendarId: Long, event: NewEvent) = runAction(_actionState) {
         calendar.add(calendarId, event.copy(title = event.title.trim()))
     }
 
-    fun openIntent(event: CalendarEvent): Intent = calendar.openIntent(event)
+    internal fun openIntent(event: CalendarEvent): Intent = calendar.openIntent(event)
 
     private data class EventWindow(
         val granted: Boolean,

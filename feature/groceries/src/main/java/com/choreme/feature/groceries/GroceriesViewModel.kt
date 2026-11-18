@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
 
-data class GroceriesUiState(
+internal data class GroceriesUiState(
     val loading: Boolean = true,
     /** The family's lists besides groceries; [listId] null is the grocery list. */
     val lists: List<FamilyList> = emptyList(),
@@ -69,7 +69,7 @@ class GroceriesViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val _query = MutableStateFlow("")
-    val query: StateFlow<String> = _query
+    internal val query: StateFlow<String> = _query
 
     private val session = me.filterIsInstance<SessionState.InFamily>()
     private val allItems = session.flatMapLatest { groceries.observeItems(it.familyId) }
@@ -85,7 +85,7 @@ class GroceriesViewModel @Inject constructor(
         }
     }.onStart { emit(false to emptyList()) }
 
-    val uiState: StateFlow<GroceriesUiState> = combine(
+    internal val uiState: StateFlow<GroceriesUiState> = combine(
         allItems,
         _query,
         combine(lists, selectedList, ::Pair),
@@ -110,27 +110,27 @@ class GroceriesViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), GroceriesUiState())
 
-    fun selectList(listId: String?) {
+    internal fun selectList(listId: String?) {
         selectedList.value = listId
         _query.value = ""
     }
 
     /** Opens the list with that name, making it first if the family doesn't have one yet. */
-    fun createList(name: String) = withFamily { familyId, memberId ->
+    internal fun createList(name: String) = withFamily { familyId, memberId ->
         val trimmed = name.trim().take(FamilyLists.MAX_NAME)
         if (trimmed.isEmpty()) return@withFamily
         val existing = uiState.value.lists.firstOrNull { GroceryNames.key(it.name) == GroceryNames.key(trimmed) }
         selectList(existing?.id ?: groceries.createList(familyId, memberId, trimmed))
     }
 
-    fun deleteShownList() = withFamily { familyId, _ ->
+    internal fun deleteShownList() = withFamily { familyId, _ ->
         val listId = uiState.value.listId ?: return@withFamily
         groceries.deleteList(familyId, listId, uiState.value.catalog)
         selectList(null)
     }
 
     /** Shopping mode also tells the family "I'm at the shop", so they can add what's missing. */
-    fun setShopping(on: Boolean) = withFamily { familyId, memberId ->
+    internal fun setShopping(on: Boolean) = withFamily { familyId, memberId ->
         if (on) {
             announcements.announce(familyId, memberId, AnnouncementKind.SHOPPING)
             viewModelScope.launch {
@@ -145,12 +145,12 @@ class GroceriesViewModel @Inject constructor(
         }
     }
 
-    fun onQueryChange(query: String) {
+    internal fun onQueryChange(query: String) {
         _query.value = query
     }
 
     /** Adds what was typed, or puts it back on the list if the family already has it. */
-    fun submitQuery(): QuickAddResult {
+    internal fun submitQuery(): QuickAddResult {
         val result = quickAdd(_query.value, uiState.value.catalog)
         withFamily { familyId, memberId ->
             when (result) {
@@ -163,29 +163,29 @@ class GroceriesViewModel @Inject constructor(
         return result
     }
 
-    fun setNeeded(item: GroceryItem, isNeeded: Boolean) = withFamily { familyId, memberId ->
+    internal fun setNeeded(item: GroceryItem, isNeeded: Boolean) = withFamily { familyId, memberId ->
         groceries.setNeeded(familyId, memberId, item.id, isNeeded)
     }
 
     /** Picking a suggestion is the same as typing its name in full. */
-    fun pickSuggestion(item: GroceryItem) {
+    internal fun pickSuggestion(item: GroceryItem) {
         setNeeded(item, true)
         _query.value = ""
     }
 
-    fun restockStaples() = withFamily { familyId, memberId ->
+    internal fun restockStaples() = withFamily { familyId, memberId ->
         groceries.restockStaples(familyId, memberId, uiState.value.catalog)
     }
 
-    fun addStarterItems() = withFamily { familyId, memberId ->
+    internal fun addStarterItems() = withFamily { familyId, memberId ->
         groceries.addStarterItems(familyId, memberId, uiState.value.catalog, Locale.getDefault().language)
     }
 
-    fun save(item: GroceryItem) = withFamily { familyId, memberId ->
+    internal fun save(item: GroceryItem) = withFamily { familyId, memberId ->
         groceries.update(familyId, memberId, item.copy(name = item.name.trim()))
     }
 
-    fun delete(item: GroceryItem) = withFamily { familyId, _ -> groceries.delete(familyId, item.id) }
+    internal fun delete(item: GroceryItem) = withFamily { familyId, _ -> groceries.delete(familyId, item.id) }
 
     private inline fun withFamily(block: (familyId: String, memberId: String) -> Unit) {
         val session = me.value ?: return

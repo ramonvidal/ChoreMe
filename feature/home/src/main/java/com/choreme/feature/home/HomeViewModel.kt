@@ -145,7 +145,7 @@ class HomeViewModel @Inject internal constructor(
 
     private class House(val locations: List<MemberLocation>, val animated: Boolean, val sharing: Boolean, val setupHidden: Boolean, val rooms: List<Room>)
 
-    fun hideSetup() = hintSettings.hideFirstRun()
+    internal fun hideSetup() = hintSettings.hideFirstRun()
 
     private fun eventsToday(selected: Set<Long>?) = if (!calendar.hasPermission() || selected.isNullOrEmpty()) {
         flowOf(emptyList())

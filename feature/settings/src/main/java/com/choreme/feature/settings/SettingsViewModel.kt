@@ -32,7 +32,7 @@ class SettingsViewModel @Inject constructor(private val families: FamilyReposito
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUiState())
 
-    fun setPointsEnabled(enabled: Boolean) {
+    internal fun setPointsEnabled(enabled: Boolean) {
         state.value.familyId?.let { families.setPointsEnabled(it, enabled) }
     }
 }

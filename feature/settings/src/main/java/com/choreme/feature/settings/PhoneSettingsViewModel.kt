@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /** How "Check for updates" went. */
-sealed interface UpdateCheck {
+internal sealed interface UpdateCheck {
     data object Idle : UpdateCheck
     data object Checking : UpdateCheck
     data object UpToDate : UpdateCheck
@@ -42,40 +42,40 @@ class PhoneSettingsViewModel @Inject constructor(
     private val weatherSettings: WeatherSettings,
     private val diagnostics: DiagnosticsSettings,
 ) : ViewModel() {
-    val crashReports: StateFlow<Boolean> = diagnostics.crashReports
+    internal val crashReports: StateFlow<Boolean> = diagnostics.crashReports
 
-    fun setCrashReports(on: Boolean) = diagnostics.setCrashReports(on)
+    internal fun setCrashReports(on: Boolean) = diagnostics.setCrashReports(on)
 
-    val weatherUnits: StateFlow<WeatherUnits> = weatherSettings.units
+    internal val weatherUnits: StateFlow<WeatherUnits> = weatherSettings.units
 
-    fun setTemperatureUnit(unit: TemperatureUnit) = weatherSettings.setTemperature(unit)
-    fun setSpeedUnit(unit: SpeedUnit) = weatherSettings.setSpeed(unit)
-    fun setRainUnit(unit: RainUnit) = weatherSettings.setRain(unit)
+    internal fun setTemperatureUnit(unit: TemperatureUnit) = weatherSettings.setTemperature(unit)
+    internal fun setSpeedUnit(unit: SpeedUnit) = weatherSettings.setSpeed(unit)
+    internal fun setRainUnit(unit: RainUnit) = weatherSettings.setRain(unit)
 
-    val themeMode: StateFlow<ThemeMode> = appearance.mode
+    internal val themeMode: StateFlow<ThemeMode> = appearance.mode
 
-    fun setThemeMode(mode: ThemeMode) = appearance.set(mode)
+    internal fun setThemeMode(mode: ThemeMode) = appearance.set(mode)
 
-    val animatedHouse: StateFlow<Boolean> = appearance.animatedHouse
+    internal val animatedHouse: StateFlow<Boolean> = appearance.animatedHouse
 
-    fun setAnimatedHouse(on: Boolean) = appearance.setAnimatedHouse(on)
+    internal fun setAnimatedHouse(on: Boolean) = appearance.setAnimatedHouse(on)
 
-    val settings: StateFlow<AlertSettings> = notifications.settings
-    val pushEndpoint: StateFlow<String?> = push.endpoint
+    internal val settings: StateFlow<AlertSettings> = notifications.settings
+    internal val pushEndpoint: StateFlow<String?> = push.endpoint
 
-    fun setEnabled(kind: AlertKind, enabled: Boolean) = notifications.setEnabled(kind, enabled)
+    internal fun setEnabled(kind: AlertKind, enabled: Boolean) = notifications.setEnabled(kind, enabled)
 
-    fun setQuietHours(quietHours: QuietHours?) = notifications.setQuietHours(quietHours)
+    internal fun setQuietHours(quietHours: QuietHours?) = notifications.setQuietHours(quietHours)
 
-    val installedVersion: String = updates.installedVersion
+    internal val installedVersion: String = updates.installedVersion
 
     /** False in the Play Store build, which Google updates. */
-    val canSelfUpdate: Boolean = updates.enabled
+    internal val canSelfUpdate: Boolean = updates.enabled
 
     private val _updateCheck = MutableStateFlow<UpdateCheck>(UpdateCheck.Idle)
-    val updateCheck: StateFlow<UpdateCheck> = _updateCheck
+    internal val updateCheck: StateFlow<UpdateCheck> = _updateCheck
 
-    fun checkForUpdates() {
+    internal fun checkForUpdates() {
         _updateCheck.value = UpdateCheck.Checking
         viewModelScope.launch {
             _updateCheck.value = try {

@@ -66,7 +66,7 @@ import java.time.LocalTime
 import java.time.ZoneId
 import javax.inject.Inject
 
-data class ChoresUiState(
+internal data class ChoresUiState(
     val loading: Boolean = true,
     val familyId: String? = null,
     val me: Member? = null,
@@ -101,7 +101,7 @@ data class ChoresUiState(
 }
 
 /** What the person typed in the chore editor. */
-data class ChoreDraft(
+internal data class ChoreDraft(
     val title: String,
     val template: ChoreTemplate,
     val recurrence: Recurrence,
@@ -124,7 +124,7 @@ private data class Data(
     val rooms: List<Room>,
 )
 
-sealed interface CalendarResult {
+internal sealed interface CalendarResult {
     data class Added(val calendarName: String) : CalendarResult
     data class OpenApp(val intent: Intent) : CalendarResult
 }
@@ -143,16 +143,16 @@ class ChoresViewModel @Inject internal constructor(
     rooms: RoomRepository,
 ) : ViewModel() {
     /** This phone's "remind me at" times, by chore id. */
-    val reminders: StateFlow<Map<String, Instant>> = timedReminders.all
+    internal val reminders: StateFlow<Map<String, Instant>> = timedReminders.all
 
     /** Returns when it'll go off: the next [at], today or tomorrow. */
-    fun remind(chore: Chore, at: LocalTime): LocalDateTime {
+    internal fun remind(chore: Chore, at: LocalTime): LocalDateTime {
         val time = nextReminderTime(LocalDateTime.now(), at)
         timedReminders.set(chore.id, chore.title, time.atZone(ZoneId.systemDefault()).toInstant())
         return time
     }
 
-    fun cancelReminder(chore: Chore) = timedReminders.cancel(chore.id)
+    internal fun cancelReminder(chore: Chore) = timedReminders.cancel(chore.id)
 
     private val baseState: Flow<ChoresUiState> = families.inFamily
         .flatMapLatest { session ->
@@ -187,19 +187,19 @@ class ChoresViewModel @Inject internal constructor(
             }
         }
 
-    val uiState: StateFlow<ChoresUiState> = baseState.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ChoresUiState())
+    internal val uiState: StateFlow<ChoresUiState> = baseState.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ChoresUiState())
 
-    fun claim(chore: Chore) = change(chore) { me, _ -> claim(me) }
-    fun unclaim(chore: Chore) = change(chore) { me, _ -> unclaim(me) }
-    fun complete(chore: Chore) = change(chore) { me, today -> complete(me, today) }
-    fun join(chore: Chore) = change(chore) { me, _ -> join(me) }
-    fun assign(chore: Chore, people: Set<String>) = change(chore) { me, _ -> assign(people, me) }
-    fun completeFor(chore: Chore, people: Set<String>) = change(chore) { me, today -> completeFor(people, me, today) }
-    fun approve(chore: Chore) = change(chore) { me, today -> approve(me, today) }
-    fun reject(chore: Chore) = change(chore) { me, _ -> reject(me) }
+    internal fun claim(chore: Chore) = change(chore) { me, _ -> claim(me) }
+    internal fun unclaim(chore: Chore) = change(chore) { me, _ -> unclaim(me) }
+    internal fun complete(chore: Chore) = change(chore) { me, today -> complete(me, today) }
+    internal fun join(chore: Chore) = change(chore) { me, _ -> join(me) }
+    internal fun assign(chore: Chore, people: Set<String>) = change(chore) { me, _ -> assign(people, me) }
+    internal fun completeFor(chore: Chore, people: Set<String>) = change(chore) { me, today -> completeFor(people, me, today) }
+    internal fun approve(chore: Chore) = change(chore) { me, today -> approve(me, today) }
+    internal fun reject(chore: Chore) = change(chore) { me, _ -> reject(me) }
 
     /** Adds the chore unless the same thing is already waiting to be done; returns that one if so. */
-    fun create(draft: ChoreDraft): Chore? {
+    internal fun create(draft: ChoreDraft): Chore? {
         findOpenDuplicate(draft.title, uiState.value.chores)?.let { existing ->
             // "It's already on the list, and now it's urgent": parents can raise it.
             if (draft.urgent && !existing.urgent && uiState.value.isParent) change(existing) { _, _ -> copy(urgent = true) }
@@ -245,7 +245,7 @@ class ChoresViewModel @Inject internal constructor(
      * Calendar. Goes straight in when the agenda shows exactly one calendar this phone can
      * write to; otherwise the calendar app opens, filled in, to pick one.
      */
-    suspend fun addToCalendar(chore: Chore): CalendarResult {
+    internal suspend fun addToCalendar(chore: Chore): CalendarResult {
         val event = NewEvent(title = chore.title, date = chore.dueDate, startTime = null)
         val target = if (calendar.hasPermission()) {
             calendarForChores(calendar.observeCalendars().first(), calendarChoice.selected.value)
@@ -265,14 +265,14 @@ class ChoresViewModel @Inject internal constructor(
         }
     }
 
-    fun removeSaved(saved: SavedChore) {
+    internal fun removeSaved(saved: SavedChore) {
         val (familyId, _) = context() ?: return
         chores.deleteSaved(familyId, saved.id)
     }
 
 
 
-    fun update(chore: Chore, draft: ChoreDraft) = change(chore) { me, _ ->
+    internal fun update(chore: Chore, draft: ChoreDraft) = change(chore) { me, _ ->
         // Who it's for changes only when a parent picked differently, and only while it's to do.
         // Saving the same people again also makes it last (chores given out before assignments stayed).
         val reassigned = if (me.role == Role.PARENT && isActive && (draft.people != team || draft.people != assignedTo)) {
@@ -292,7 +292,7 @@ class ChoresViewModel @Inject internal constructor(
         )
     }
 
-    fun delete(chore: Chore) {
+    internal fun delete(chore: Chore) {
         val (familyId, _) = context() ?: return
         chores.delete(familyId, chore.id)
     }

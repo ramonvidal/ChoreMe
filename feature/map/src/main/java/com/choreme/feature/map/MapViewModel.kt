@@ -42,9 +42,9 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import javax.inject.Inject
 
-data class MemberOnMap(val member: Member, val status: LocationStatus)
+internal data class MemberOnMap(val member: Member, val status: LocationStatus)
 
-data class MapUiState(
+internal data class MapUiState(
     val loading: Boolean = true,
     val familyId: String? = null,
     val me: Member? = null,
@@ -61,7 +61,7 @@ data class MapUiState(
     val isParent get() = me?.role == Role.PARENT
 }
 
-sealed interface PlaceSaved {
+internal sealed interface PlaceSaved {
     data class Saved(val name: String) : PlaceSaved
 
     /** Saved on this phone; it reaches the family once there's a connection. */
@@ -78,10 +78,10 @@ private data class Settings(
 )
 
 /** "On my way home": whether this phone's person said so, and who else is on the way (name, since when). */
-data class OnMyWay(val mine: Boolean = false, val others: List<Pair<String, Instant>> = emptyList())
+internal data class OnMyWay(val mine: Boolean = false, val others: List<Pair<String, Instant>> = emptyList())
 
 /** Instant alerts through a UnifiedPush app such as ntfy. */
-data class InstantAlerts(val hasApp: Boolean, val connected: Boolean)
+internal data class InstantAlerts(val hasApp: Boolean, val connected: Boolean)
 
 @HiltViewModel
 class MapViewModel @Inject internal constructor(
@@ -99,15 +99,15 @@ class MapViewModel @Inject internal constructor(
     private val sender: PushSender,
     private val hints: HintSettings,
 ) : ViewModel() {
-    val batteryHintHidden: StateFlow<Boolean> = hints.batteryHintHidden
+    internal val batteryHintHidden: StateFlow<Boolean> = hints.batteryHintHidden
 
-    fun hideBatteryHint() = hints.hideBatteryHint()
+    internal fun hideBatteryHint() = hints.hideBatteryHint()
 
     private val hasPushApp = MutableStateFlow(push.hasDistributor())
     private val permissions = MutableStateFlow(device.hasPermission() to device.hasBackgroundPermission())
     private val myFix = MutableStateFlow<DeviceFix?>(null)
 
-    val uiState: StateFlow<MapUiState> = families.inFamily
+    internal val uiState: StateFlow<MapUiState> = families.inFamily
         .flatMapLatest { session ->
             combine(
                 families.observeMembers(session.familyId),
@@ -138,7 +138,7 @@ class MapViewModel @Inject internal constructor(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MapUiState())
 
-    val onMyWay: StateFlow<OnMyWay> = families.inFamily
+    internal val onMyWay: StateFlow<OnMyWay> = families.inFamily
         .flatMapLatest { s ->
             combine(announcements.observeCurrent(s.familyId), families.observeMembers(s.familyId)) { (news, now), members ->
                 val names = members.associate { it.id to it.name }
@@ -152,7 +152,7 @@ class MapViewModel @Inject internal constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), OnMyWay())
 
     /** One tap tells the family "on my way home"; tapping again ("I'm home") takes it back. */
-    fun setOnMyWay(on: Boolean) {
+    internal fun setOnMyWay(on: Boolean) {
         val state = uiState.value
         val familyId = state.familyId ?: return
         val memberId = state.me?.id ?: return
@@ -171,17 +171,17 @@ class MapViewModel @Inject internal constructor(
     }
 
     private val _actionState = MutableStateFlow(ActionState())
-    val actionState: StateFlow<ActionState> = _actionState
+    internal val actionState: StateFlow<ActionState> = _actionState
 
     /** After any permission dialog; also refreshes this phone's position. */
-    fun onPermissionsChanged() {
+    internal fun onPermissionsChanged() {
         permissions.value = device.hasPermission() to device.hasBackgroundPermission()
         // "Allow all the time" may have just been given: start watching for the phone moving.
         if (sharing.isSharing.value) viewModelScope.launch { LiveShare.arm(context, device) }
         refresh()
     }
 
-    fun setSharing(on: Boolean) {
+    internal fun setSharing(on: Boolean) {
         sharing.set(on)
         if (on) {
             LocationSharing.start(context)
@@ -202,7 +202,7 @@ class MapViewModel @Inject internal constructor(
      * Gets a fresh position and, when sharing, sends it if it's worth sending. Waits for the
      * family to load first, so opening the map shares right away instead of skipping it.
      */
-    fun refresh() {
+    internal fun refresh() {
         viewModelScope.launch {
             val fix = device.current()
             if (fix == null) {
@@ -230,9 +230,9 @@ class MapViewModel @Inject internal constructor(
     private val _placeSaved = MutableSharedFlow<PlaceSaved>(extraBufferCapacity = 1)
 
     /** How saving a place went, for a short message on screen. */
-    val placeSaved: SharedFlow<PlaceSaved> = _placeSaved
+    internal val placeSaved: SharedFlow<PlaceSaved> = _placeSaved
 
-    fun addPlace(name: String, radiusMeters: Int) {
+    internal fun addPlace(name: String, radiusMeters: Int) {
         val familyId = uiState.value.familyId ?: return
         val fix = myFix.value ?: return
         val trimmed = name.trim()
@@ -247,15 +247,15 @@ class MapViewModel @Inject internal constructor(
         }
     }
 
-    fun setAlertsEnabled(enabled: Boolean) = notifications.setEnabled(AlertKind.ARRIVALS, enabled)
+    internal fun setAlertsEnabled(enabled: Boolean) = notifications.setEnabled(AlertKind.ARRIVALS, enabled)
 
     /** When the map is shown again, e.g. after installing ntfy. */
-    fun onResume() {
+    internal fun onResume() {
         hasPushApp.value = push.hasDistributor()
         push.register()
     }
 
-    fun deletePlace(place: Place) {
+    internal fun deletePlace(place: Place) {
         val familyId = uiState.value.familyId ?: return
         runAction(_actionState) { locations.deletePlace(familyId, place.id) }
     }

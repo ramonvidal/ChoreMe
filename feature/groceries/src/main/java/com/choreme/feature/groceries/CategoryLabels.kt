@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import com.choreme.core.model.grocery.GroceryCategory
 
 @get:StringRes
-val GroceryCategory.label: Int
+internal val GroceryCategory.label: Int
     get() = when (this) {
         GroceryCategory.PRODUCE -> R.string.category_produce
         GroceryCategory.BAKERY -> R.string.category_bakery
