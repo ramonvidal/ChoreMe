@@ -1,5 +1,7 @@
 package com.choreme.feature.chores
 
+import com.choreme.core.ui.LocalShowAddButton
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -84,9 +86,12 @@ class RoomsTabScreenshotTest {
 
     private fun shoot(name: String, state: RoomsUiState, dark: Boolean, open: String? = null) {
         compose.setContent {
+            // The Play Store pictures leave out the floating Add button.
+            CompositionLocalProvider(LocalShowAddButton provides !name.startsWith("store-")) {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
                 Surface(Modifier.fillMaxSize()) { Column { ChoresSubTabs(1, lateRooms = com.choreme.core.model.room.lateRoomCount(state.rooms, state.today)) {}; RoomsContent(state, RoomsActions(), openRoomId = open) } }
             }
+        }
         }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")
     }

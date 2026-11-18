@@ -1,5 +1,6 @@
 package com.choreme.feature.chores
 
+import com.choreme.core.ui.LocalShowAddButton
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.Box
@@ -97,6 +98,8 @@ class ChoresTabScreenshotTest {
 
     private fun shoot(name: String, me: Member, dark: Boolean, fontScale: Float = 1f, pointsOn: Boolean = true, pt: Boolean = false) {
         compose.setContent {
+            // The Play Store pictures leave out the floating Add button.
+            CompositionLocalProvider(LocalShowAddButton provides !name.startsWith("store-")) {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
                 CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
                 Surface(Modifier.fillMaxSize()) {
@@ -104,6 +107,7 @@ class ChoresTabScreenshotTest {
                 }
             }
             }
+        }
         }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")
     }

@@ -1,5 +1,7 @@
 package com.choreme.feature.home
 
+import com.choreme.core.ui.LocalShowAddButton
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Surface
@@ -97,9 +99,12 @@ class HomeTabScreenshotTest {
 
     private fun shoot(name: String, state: HomeUiState, dark: Boolean) {
         compose.setContent {
+            // The Play Store pictures leave out the floating Add button.
+            CompositionLocalProvider(LocalShowAddButton provides !name.startsWith("store-")) {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
                 Surface(Modifier.fillMaxSize()) { Column { HomeSubTabs(0) {}; HomeContent(state, onOpenChores = {}, onAddChore = {}, onOpenGroceries = {}, onAddEvent = {}) } }
             }
+        }
         }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")
     }
