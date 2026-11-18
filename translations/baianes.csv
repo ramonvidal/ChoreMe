@@ -375,7 +375,7 @@ feature/family,message_remove_confirm,,Remove this message for everyone?,Apagar 
 feature/family,message_channel,,Family messages,Recados da família
 feature/family,message_channel_description,,When someone sends a message to the whole family,Quando alguém manda um recado pra família toda
 feature/groceries,grocery_quick_add,,Out of something? Type it here,Acabou alguma coisa? Escreva aqui
-feature/groceries,grocery_to_buy,,To buy (%1$d),Pra comprar (%1$d)
+feature/groceries,grocery_to_buy,,To buy,Pra comprar
 feature/groceries,grocery_restock,,Restock usuals (%1$d),Repor o de sempre (%1$d)
 feature/groceries,grocery_nothing_to_buy,,Nothing to buy. Tap below whatever runs out.,Nada pra comprar. Toque aqui embaixo no que for acabando.
 feature/groceries,grocery_at_home,,At home,Em casa

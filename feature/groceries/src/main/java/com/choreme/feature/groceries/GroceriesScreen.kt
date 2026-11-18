@@ -203,7 +203,8 @@ internal fun GroceriesContent(state: GroceriesUiState, query: String, actions: G
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                stringResource(R.string.grocery_to_buy, state.toBuyCount),
+                                // The count is in the header already.
+                                stringResource(R.string.grocery_to_buy),
                                 style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.weight(1f),
                             )

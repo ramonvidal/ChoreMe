@@ -2,7 +2,7 @@
 <!-- Baianês. Made from translations/baianes.csv by translations/i18n.py: edit the table, not this file. -->
 <resources>
     <string name="grocery_quick_add">Acabou alguma coisa? Escreva aqui</string>
-    <string name="grocery_to_buy">Pra comprar (%1$d)</string>
+    <string name="grocery_to_buy">Pra comprar</string>
     <string name="grocery_restock">Repor o de sempre (%1$d)</string>
     <string name="grocery_nothing_to_buy">Nada pra comprar. Toque aqui embaixo no que for acabando.</string>
     <string name="grocery_at_home">Em casa</string>
