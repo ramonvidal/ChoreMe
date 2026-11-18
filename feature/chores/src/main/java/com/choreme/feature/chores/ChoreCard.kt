@@ -181,44 +181,59 @@ internal fun ChoreCard(
                 border = edge,
             ) {
                 Box {
+                // Title with the menu in the corner; the status and the one button share the line under it.
                 Row(
-                    Modifier.padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                    Modifier.padding(start = 16.dp, end = 4.dp, top = 6.dp, bottom = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    ItemIcon(chore.template.icon, Modifier.size(22.dp), tint = colors.onSurfaceVariant)
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(choreTitle(chore.title), style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                            itemVerticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            if (chore.urgent) UrgentTag()
-                            if (roomName != null) RoomTag(roomName)
-                            if (team.isNotEmpty() && teamText != null) AvatarStack(team, teamText, ring = cardColor)
-                            if (line.isNotEmpty()) {
-                                Text(
-                                    line,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = colors.onSurfaceVariant,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
+                    ItemIcon(chore.template.icon, Modifier.padding(top = 8.dp).size(22.dp), tint = colors.onSurfaceVariant)
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                choreTitle(chore.title),
+                                style = MaterialTheme.typography.titleMedium,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f).padding(top = 6.dp),
+                            )
+                            // The menu (remind me, who's doing it, edit...) can also be opened by tapping the card.
+                            IconButton(onClick = { menu = true }, modifier = Modifier.size(36.dp)) {
+                                Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.swipe_more), tint = colors.onSurfaceVariant)
                             }
                         }
-                    }
-                    // Plain for every chore: green is for yours (the edge), red for urgent (the edge and tag).
-                    OutlinedButton(
-                        onClick = main.second,
-                        shape = MaterialTheme.shapes.small,
-                        contentPadding = SmallButtonPadding,
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.onSurface),
-                        border = BorderStroke(1.dp, colors.outline),
-                    ) { Text(stringResource(main.first)) }
-                    // The menu (remind me, who's doing it, edit...) can also be opened by tapping the card.
-                    IconButton(onClick = { menu = true }, modifier = Modifier.size(32.dp)) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.swipe_more), tint = colors.onSurfaceVariant)
+                        Row(
+                            Modifier.padding(end = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            FlowRow(
+                                Modifier.weight(1f),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                itemVerticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                if (chore.urgent) UrgentTag()
+                                if (roomName != null) RoomTag(roomName)
+                                if (team.isNotEmpty() && teamText != null) AvatarStack(team, teamText, ring = cardColor)
+                                if (line.isNotEmpty()) {
+                                    Text(
+                                        line,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = colors.onSurfaceVariant,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+                            }
+                            // Plain for every chore: green is for yours (the edge), red for urgent (the edge and tag).
+                            OutlinedButton(
+                                onClick = main.second,
+                                shape = MaterialTheme.shapes.small,
+                                contentPadding = SmallButtonPadding,
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.onSurface),
+                                border = BorderStroke(1.dp, colors.outline),
+                            ) { Text(stringResource(main.first)) }
+                        }
                     }
                 }
                 }
