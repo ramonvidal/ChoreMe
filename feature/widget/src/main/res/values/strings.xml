@@ -8,4 +8,5 @@
     <string name="widget_out_of">Out of…</string>
     <string name="widget_open">Open</string>
     <string name="widget_not_set_up">Open Nos Corre! to join your family</string>
+    <string name="widget_done">Mark %1$s done</string>
 </resources>

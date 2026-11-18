@@ -1,5 +1,13 @@
 package com.choreme.feature.widget
 
+import kotlinx.coroutines.coroutineScope
+import com.choreme.core.model.chore.complete
+import com.choreme.core.model.Role
+import com.choreme.core.chores.ChoreChanger
+import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.action.ActionCallback
+import androidx.glance.action.actionParametersOf
+import androidx.glance.action.ActionParameters
 import com.choreme.core.ui.ChoreNames
 import android.content.Context
 import android.content.Intent
@@ -63,6 +71,7 @@ interface WidgetEntryPoint {
     fun families(): FamilyRepository
     fun chores(): ChoreRepository
     fun groceries(): GroceryRepository
+    fun changer(): ChoreChanger
 }
 
 internal data class WidgetData(val inFamily: Boolean, val toDo: List<Chore>, val toBuy: Int)
@@ -87,7 +96,9 @@ internal class ChoreWidget : GlanceAppWidget() {
             as? SessionState.InFamily ?: return WidgetData(false, emptyList(), 0)
         val chores = withTimeoutOrNull(TIMEOUT_MS) { deps.chores().observeChores(session.familyId).first() }.orEmpty()
         val items = withTimeoutOrNull(TIMEOUT_MS) { deps.groceries().observeItems(session.familyId).first() }.orEmpty()
-        return WidgetData(true, buildTodayBoard(chores, LocalDate.now()).toDo, items.groceriesToBuy())
+        // Yours first, then what's waiting for anyone.
+        val board = buildTodayBoard(chores, LocalDate.now(), session.memberId)
+        return WidgetData(true, board.mine + board.toDo, items.groceriesToBuy())
     }
 
     private companion object {
@@ -142,6 +153,14 @@ private fun Content(context: Context, data: WidgetData) {
                                 style = TextStyle(fontSize = 11.sp, color = GlanceTheme.colors.onSurfaceVariant),
                             )
                         }
+                        // Done from here: a parent's counts at once, a kid's goes to a parent (as in the app).
+                        Spacer(GlanceModifier.width(6.dp))
+                        Image(
+                            provider = ImageProvider(com.choreme.core.ui.R.drawable.ic_check_circle),
+                            contentDescription = context.getString(R.string.widget_done, ChoreNames.shown(context, chore.title)),
+                            modifier = GlanceModifier.size(24.dp).clickable(actionRunCallback<DoneAction>(actionParametersOf(CHORE_ID to chore.id))),
+                            colorFilter = ColorFilter.tint(GlanceTheme.colors.primary),
+                        )
                     }
                 }
                 if (data.toDo.size > MAX_ROWS) {
@@ -169,3 +188,30 @@ private fun Content(context: Context, data: WidgetData) {
 }
 
 private const val MAX_ROWS = 5
+
+private val CHORE_ID = ActionParameters.Key<String>("choreId")
+
+/** The widget's Done: the same step as the app's (see ChoreChanger), then the widget redraws. */
+internal class DoneAction : ActionCallback {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        val choreId = parameters[CHORE_ID] ?: return
+        val deps = EntryPointAccessors.fromApplication(context.applicationContext, WidgetEntryPoint::class.java)
+        if (!deps.availability().isConfigured) return
+        val session = withTimeoutOrNull(TIMEOUT_MS) { deps.families().session.first { it != SessionState.Loading } }
+            as? SessionState.InFamily ?: return
+        val members = withTimeoutOrNull(TIMEOUT_MS) { deps.families().observeMembers(session.familyId).first() }.orEmpty()
+        val me = members.firstOrNull { it.id == session.memberId } ?: return
+        val chore = withTimeoutOrNull(TIMEOUT_MS) { deps.chores().observeChores(session.familyId).first() }
+            ?.firstOrNull { it.id == choreId } ?: return
+        val parents = members.filter { it.role == Role.PARENT }.map { it.id }.toSet()
+        // Waits for the pings to the family to go out before the widget's work ends.
+        coroutineScope {
+            deps.changer().change(this, session.familyId, me, parents, chore) { who, today -> complete(who, today) }
+        }
+        ChoreWidget().update(context, glanceId)
+    }
+
+    private companion object {
+        const val TIMEOUT_MS = 15_000L
+    }
+}

@@ -9,6 +9,8 @@ android {
 
 dependencies {
     implementation(projects.core.push)
+    // "Done" right from the widget, with the same rules as the app.
+    implementation(projects.core.chores)
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.startup)
