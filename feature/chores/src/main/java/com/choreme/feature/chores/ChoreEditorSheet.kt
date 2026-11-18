@@ -4,25 +4,8 @@ import androidx.compose.ui.platform.LocalContext
 import com.choreme.core.ui.title
 import com.choreme.core.ui.ChoreNames
 import com.choreme.core.ui.R as CoreUiR
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Icon
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.text.style.TextOverflow
 import com.choreme.core.model.chore.ChoreChoice
-import com.choreme.core.model.chore.ChoreGroup
 import com.choreme.core.model.chore.choreChoices
-import com.choreme.core.model.chore.group
-import com.choreme.core.model.chore.searchChoices
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -34,21 +17,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -62,7 +39,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -70,25 +46,13 @@ import androidx.compose.ui.unit.dp
 import com.choreme.core.model.Member
 import com.choreme.core.ui.ItemIcon
 import com.choreme.core.ui.MemberAvatar
-import com.choreme.core.ui.icon
 import com.choreme.core.model.chore.Chore
 import com.choreme.core.model.chore.ChoreTemplate
 import com.choreme.core.model.chore.Recurrence
 import com.choreme.core.model.chore.SavedChore
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.util.Locale
-import java.time.format.DateTimeFormatter
-import java.time.ZoneOffset
-import java.time.Instant
 import com.choreme.core.model.chore.firstDueDate
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.SelectableDates
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DatePicker
-
-private enum class RepeatKind { ONCE, EVERY_DAYS, WEEKLY, MONTHLY }
-
 /**
  * Reports something that needs doing ([chore] null) or edits a chore. Picking a template
  * fills in the title. Repeating is an extra, folded away under "Repeat".
@@ -347,285 +311,6 @@ private fun PointsRow(points: Int, onPoints: (Int) -> Unit) {
             }
         }
     }
-}
-
-private fun choiceTitle(choice: ChoreChoice, templateTitles: Map<ChoreTemplate, String>): String = when (choice) {
-    is ChoreChoice.BuiltIn -> templateTitles.getValue(choice.template)
-    is ChoreChoice.Saved -> choice.saved.title
-}
-
-/**
- * The chores to pick from, kept short: what matches the [query] while typing; otherwise the
- * family's most used in one row, then groups (Kitchen, Cleaning, ... and "Your own"), folded
- * closed, one open at a time.
- */
-@Composable
-internal fun ChoicePicker(
-    choices: List<ChoreChoice>,
-    popular: List<ChoreChoice>,
-    query: String,
-    titleOf: (ChoreChoice) -> String,
-    isSelected: (ChoreChoice) -> Boolean,
-    onPick: (ChoreChoice) -> Unit,
-    onLongPress: (ChoreChoice) -> Unit,
-) {
-    var open by rememberSaveable { mutableStateOf<String?>(null) }
-    val chip: @Composable (ChoreChoice) -> Unit = { choice ->
-        ChoiceChip(
-            title = titleOf(choice),
-            icon = choice.template.icon,
-            selected = isSelected(choice),
-            onClick = { onPick(choice) },
-            onLongClick = { onLongPress(choice) },
-        )
-    }
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (query.isNotBlank()) {
-            val found = searchChoices(query, choices, titleOf).take(MAX_FOUND)
-            if (found.isEmpty()) {
-                Text(stringResource(R.string.editor_new_chore_hint), style = MaterialTheme.typography.bodySmall)
-            } else {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    found.forEach { chip(it) }
-                }
-            }
-            return@Column
-        }
-        if (popular.isNotEmpty()) {
-            Text(stringResource(R.string.editor_most_used), style = MaterialTheme.typography.labelLarge)
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                popular.forEach { chip(it) }
-            }
-        }
-        val groups = ChoreGroup.entries.map { group -> group.name to choices.filter { it.group == group } } +
-            ("OWN" to choices.filter { it.group == null })
-        groups.filter { it.second.isNotEmpty() }.forEach { (key, inGroup) ->
-            val group = ChoreGroup.entries.firstOrNull { it.name == key }
-            GroupRow(
-                title = stringResource(group?.label ?: R.string.group_own),
-                icon = group?.icon ?: ChoreTemplate.OTHER.icon,
-                count = inGroup.size,
-                open = open == key,
-                onToggle = { open = if (open == key) null else key },
-            )
-            AnimatedVisibility(open == key) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)) {
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        inGroup.forEach { chip(it) }
-                    }
-                    if (inGroup.any { it is ChoreChoice.Saved }) {
-                        Text(stringResource(R.string.saved_chore_hint), style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-            }
-        }
-    }
-}
-
-/** One group, folded: its icon, name and how many chores, and an arrow. */
-@Composable
-private fun GroupRow(title: String, @DrawableRes icon: Int, count: Int, open: Boolean, onToggle: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small).clickable(onClick = onToggle).padding(vertical = 8.dp, horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        ItemIcon(icon, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.width(12.dp))
-        Text(title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        Text(count.toString(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Icon(if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown, contentDescription = null)
-    }
-}
-
-/** A chore to pick: its icon and name on one line (long names end in "…"); long-press for a saved one's options. */
-@Composable
-private fun ChoiceChip(title: String, @DrawableRes icon: Int, selected: Boolean, onClick: () -> Unit, onLongClick: () -> Unit) {
-    val shape = RoundedCornerShape(8.dp)
-    Surface(
-        shape = shape,
-        color = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.outline),
-        modifier = Modifier.widthIn(max = 240.dp).clip(shape).combinedClickable(onClick = onClick, onLongClick = onLongClick),
-    ) {
-        Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            ItemIcon(icon, Modifier.size(18.dp))
-            Spacer(Modifier.width(8.dp))
-            Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        }
-    }
-}
-
-@get:StringRes
-private val ChoreGroup.label: Int
-    get() = when (this) {
-        ChoreGroup.KITCHEN -> R.string.group_kitchen
-        ChoreGroup.CLEANING -> R.string.group_cleaning
-        ChoreGroup.LAUNDRY -> R.string.group_laundry
-        ChoreGroup.BINS -> R.string.group_bins
-        ChoreGroup.CARE -> R.string.group_care
-        ChoreGroup.ERRANDS -> R.string.group_errands
-    }
-
-@get:DrawableRes
-private val ChoreGroup.icon: Int
-    get() = when (this) {
-        ChoreGroup.KITCHEN -> ChoreTemplate.DISHES.icon
-        ChoreGroup.CLEANING -> ChoreTemplate.VACUUM.icon
-        ChoreGroup.LAUNDRY -> ChoreTemplate.LAUNDRY.icon
-        ChoreGroup.BINS -> ChoreTemplate.TRASH.icon
-        ChoreGroup.CARE -> ChoreTemplate.TAKE_MEDICINE.icon
-        ChoreGroup.ERRANDS -> ChoreTemplate.GROCERIES.icon
-    }
-
-private const val MAX_FOUND = 12
-
-@Composable
-private fun RepeatSection(
-    kind: RepeatKind,
-    everyDays: Int,
-    weekDays: Set<DayOfWeek>,
-    monthDay: Int,
-    dueDate: LocalDate,
-    firstDue: LocalDate,
-    repeatUntil: LocalDate?,
-    today: LocalDate,
-    onKind: (RepeatKind) -> Unit,
-    onEveryDays: (Int) -> Unit,
-    onWeekDays: (Set<DayOfWeek>) -> Unit,
-    onMonthDay: (Int) -> Unit,
-    onDueDate: (LocalDate) -> Unit,
-    onRepeatUntil: (LocalDate?) -> Unit,
-) {
-    var pickingEnd by remember { mutableStateOf(false) }
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        RepeatOption(stringResource(R.string.repeat_once), kind == RepeatKind.ONCE) { onKind(RepeatKind.ONCE) }
-        RepeatOption(stringResource(R.string.repeat_daily), kind == RepeatKind.EVERY_DAYS && everyDays == 1) {
-            onKind(RepeatKind.EVERY_DAYS)
-            onEveryDays(1)
-        }
-        RepeatOption(stringResource(R.string.editor_every_n_days), kind == RepeatKind.EVERY_DAYS && everyDays > 1) {
-            onKind(RepeatKind.EVERY_DAYS)
-            if (everyDays == 1) onEveryDays(2)
-        }
-        if (kind == RepeatKind.EVERY_DAYS && everyDays > 1) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 40.dp)) {
-                OutlinedIconButton(onClick = { if (everyDays > 2) onEveryDays(everyDays - 1) }) {
-                    Text("−", style = MaterialTheme.typography.titleLarge)
-                }
-                Text(recurrenceLabel(Recurrence.EveryDays(everyDays)), modifier = Modifier.padding(horizontal = 16.dp))
-                OutlinedIconButton(onClick = { if (everyDays < Recurrence.MAX_DAYS) onEveryDays(everyDays + 1) }) {
-                    Text("+", style = MaterialTheme.typography.titleLarge)
-                }
-            }
-        }
-        RepeatOption(stringResource(R.string.editor_weekdays), kind == RepeatKind.WEEKLY) { onKind(RepeatKind.WEEKLY) }
-        if (kind == RepeatKind.WEEKLY) {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(start = 40.dp)) {
-                WEEK.forEach { day ->
-                    FilterChip(
-                        selected = day in weekDays,
-                        onClick = { onWeekDays(if (day in weekDays) weekDays - day else weekDays + day) },
-                        label = { Text(day.shortName()) },
-                    )
-                }
-            }
-        }
-        RepeatOption(stringResource(R.string.editor_monthly), kind == RepeatKind.MONTHLY) { onKind(RepeatKind.MONTHLY) }
-        if (kind == RepeatKind.MONTHLY) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 40.dp)) {
-                OutlinedIconButton(onClick = { onMonthDay(if (monthDay > 1) monthDay - 1 else 31) }) {
-                    Text("−", style = MaterialTheme.typography.titleLarge)
-                }
-                Text(stringResource(R.string.editor_month_day, ordinal(monthDay)), modifier = Modifier.padding(horizontal = 16.dp))
-                OutlinedIconButton(onClick = { onMonthDay(if (monthDay < 31) monthDay + 1 else 1) }) {
-                    Text("+", style = MaterialTheme.typography.titleLarge)
-                }
-            }
-        }
-        if (kind != RepeatKind.ONCE) {
-            Text(stringResource(R.string.editor_starts), style = MaterialTheme.typography.labelLarge)
-            if (kind == RepeatKind.MONTHLY) {
-                // Monthly starts on the next of its days; nothing to choose.
-                Text(stringResource(R.string.editor_starts_on, dayLabel(firstDue, today)), modifier = Modifier.padding(start = 4.dp))
-            } else {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf(today, today.plusDays(1)).forEach { date ->
-                        FilterChip(selected = dueDate == date, onClick = { onDueDate(date) }, label = { Text(dayLabel(date, today)) })
-                    }
-                    if (firstDue != today && firstDue != today.plusDays(1)) {
-                        FilterChip(selected = true, onClick = {}, label = { Text(stringResource(R.string.editor_starts_on, dayLabel(firstDue, today))) })
-                    }
-                }
-            }
-            // "Until the end of next year": the last day it can be due.
-            Text(stringResource(R.string.editor_ends), style = MaterialTheme.typography.labelLarge)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(selected = repeatUntil == null, onClick = { onRepeatUntil(null) }, label = { Text(stringResource(R.string.editor_ends_never)) })
-                FilterChip(
-                    selected = repeatUntil != null,
-                    onClick = { pickingEnd = true },
-                    label = { Text(repeatUntil?.let { stringResource(R.string.editor_ends_on, endLabel(it)) } ?: stringResource(R.string.editor_ends_pick)) },
-                )
-            }
-        }
-    }
-
-    if (pickingEnd) {
-        val start = maxOf(firstDue, today)
-        val utcStart = start.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
-        val picker = rememberDatePickerState(
-            initialSelectedDateMillis = (repeatUntil ?: start.withDayOfYear(1).plusYears(2).minusDays(1))
-                .atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
-            selectableDates = object : SelectableDates {
-                override fun isSelectableDate(utcTimeMillis: Long) = utcTimeMillis >= utcStart
-            },
-        )
-        DatePickerDialog(
-            onDismissRequest = { pickingEnd = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        picker.selectedDateMillis?.let { onRepeatUntil(Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()) }
-                        pickingEnd = false
-                    },
-                    enabled = picker.selectedDateMillis != null,
-                ) { Text(stringResource(CoreUiR.string.save)) }
-            },
-            dismissButton = { TextButton(onClick = { pickingEnd = false }) { Text(stringResource(CoreUiR.string.cancel)) } },
-        ) { DatePicker(state = picker) }
-    }
-}
-
-/** "31 Dec 2027". */
-private fun endLabel(date: LocalDate): String = date.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault()))
-
-@Composable
-private fun currentRecurrenceLabel(kind: RepeatKind, everyDays: Int, weekDays: Set<DayOfWeek>, monthDay: Int): String = when (kind) {
-    RepeatKind.ONCE -> recurrenceLabel(Recurrence.Once)
-    RepeatKind.EVERY_DAYS -> recurrenceLabel(Recurrence.EveryDays(everyDays))
-    RepeatKind.WEEKLY -> if (weekDays.isEmpty()) recurrenceLabel(Recurrence.Once) else recurrenceLabel(Recurrence.Weekly(weekDays))
-    RepeatKind.MONTHLY -> recurrenceLabel(Recurrence.Monthly(monthDay))
-}
-
-@Composable
-private fun RepeatOption(label: String, selected: Boolean, onSelect: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .selectable(selected = selected, onClick = onSelect, role = Role.RadioButton),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        RadioButton(selected = selected, onClick = null)
-        Spacer(Modifier.width(8.dp))
-        Text(label)
-    }
-}
-
-private fun Recurrence.kind() = when (this) {
-    Recurrence.Once -> RepeatKind.ONCE
-    is Recurrence.EveryDays -> RepeatKind.EVERY_DAYS
-    is Recurrence.Weekly -> RepeatKind.WEEKLY
-    is Recurrence.Monthly -> RepeatKind.MONTHLY
 }
 
 // Matches the limit in firestore.rules.
