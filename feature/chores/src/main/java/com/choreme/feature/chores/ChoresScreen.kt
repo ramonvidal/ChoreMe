@@ -1,5 +1,6 @@
 package com.choreme.feature.chores
 
+import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.ChoreNames
 import com.choreme.core.ui.R as CoreUiR
 import androidx.compose.material3.SnackbarResult
@@ -409,18 +410,12 @@ internal fun ChoresHeader(state: ChoresUiState, onOpenGroceries: () -> Unit, onA
     val parts = buildList {
         if (mine > 0) add(pluralStringResource(R.plurals.summary_yours, mine, mine))
     }
-    Row(Modifier.padding(top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                if (toDo + mine == 0) stringResource(R.string.hero_all_done) else pluralStringResource(R.plurals.summary_to_do, toDo, toDo),
-                style = MaterialTheme.typography.headlineSmall,
-            )
-            if (parts.isNotEmpty()) {
-                HeaderLine(parts.joinToString(" · "))
-            }
-        }
-        if (state.me != null) NosButton(stringResource(R.string.add_chore_short), onAdd)
-    }
+    TabHeader(
+        title = if (toDo + mine == 0) stringResource(R.string.hero_all_done) else pluralStringResource(R.plurals.summary_to_do, toDo, toDo),
+        modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+        action = if (state.me != null) ({ NosButton(stringResource(R.string.add_chore_short), onAdd) }) else null,
+        subtitle = if (parts.isNotEmpty()) ({ HeaderLine(parts.joinToString(" · ")) }) else null,
+    )
 }
 
 @Composable

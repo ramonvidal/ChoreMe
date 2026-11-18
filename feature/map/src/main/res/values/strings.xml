@@ -79,4 +79,9 @@
     <string name="battery_tip_vivo">Vivo: also allow Autostart and high background power use.</string>
     <string name="battery_open">Open battery settings</string>
     <string name="battery_hide">Don\'t show again</string>
+    <string name="map_title">Map</string>
+    <plurals name="map_sharing_count">
+        <item quantity="one">%d person shares where they are</item>
+        <item quantity="other">%d people share where they are</item>
+    </plurals>
 </resources>

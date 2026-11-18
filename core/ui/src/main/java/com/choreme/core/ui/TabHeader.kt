@@ -75,16 +75,23 @@ fun AvatarStack(members: List<Member>, description: String, ring: Color, modifie
     }
 }
 
-/** The top of each tab: its title and one grey line under it ("3 need doing"). */
+/**
+ * The top of every tab, the same everywhere: its title, one grey line under it ("3 need doing") and at most one
+ * action on the right (say, Add).
+ */
 @Composable
 fun TabHeader(
     title: String,
     modifier: Modifier = Modifier,
+    action: @Composable (() -> Unit)? = null,
     subtitle: @Composable (() -> Unit)? = null,
 ) {
-    Column(modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(title, style = MaterialTheme.typography.headlineMedium)
-        subtitle?.invoke()
+    Row(modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(title, style = MaterialTheme.typography.headlineMedium)
+            subtitle?.invoke()
+        }
+        action?.invoke()
     }
 }
 

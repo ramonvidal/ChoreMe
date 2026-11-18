@@ -148,7 +148,7 @@ internal fun GroceriesContent(state: GroceriesUiState, query: String, actions: G
             item(key = "header") {
                 TabHeader(
                     title = state.listName ?: stringResource(R.string.list_groceries),
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                    modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
                 ) { HeaderLine(pluralStringResource(R.plurals.grocery_to_buy_count, state.toBuyCount, state.toBuyCount)) }
             }
             item(key = "lists") {

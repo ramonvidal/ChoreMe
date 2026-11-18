@@ -67,6 +67,7 @@
     <string name="battery_tip_vivo">Vivo: permita também a Inicialização automática e o consumo alto de bateria em segundo plano.</string>
     <string name="battery_open">Abrir configurações de bateria</string>
     <string name="battery_hide">Não mostrar de novo</string>
+    <string name="map_title">Mapa</string>
     <plurals name="minutes_ago">
         <item quantity="one">há %d min</item>
         <item quantity="other">há %d min</item>
@@ -78,5 +79,9 @@
     <plurals name="days_ago">
         <item quantity="one">há %d dia</item>
         <item quantity="other">há %d dias</item>
+    </plurals>
+    <plurals name="map_sharing_count">
+        <item quantity="one">%d pessoa mostra onde tá</item>
+        <item quantity="other">%d pessoas mostram onde tão</item>
     </plurals>
 </resources>

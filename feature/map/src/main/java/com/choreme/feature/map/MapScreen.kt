@@ -1,5 +1,8 @@
 package com.choreme.feature.map
 
+import androidx.compose.ui.res.pluralStringResource
+import com.choreme.core.ui.HeaderLine
+import com.choreme.core.ui.TabHeader
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -173,6 +176,11 @@ internal fun MapContent(
     var addingPlace by rememberSaveable { mutableStateOf(false) }
     var ntfyHelp by rememberSaveable { mutableStateOf(false) }
     Column(Modifier.fillMaxSize()) {
+        // The same header as every tab: what this is, and how many share where they are.
+        val sharing = state.members.count { it.status is LocationStatus.Known }
+        TabHeader(stringResource(R.string.map_title), Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 12.dp)) {
+            HeaderLine(pluralStringResource(R.plurals.map_sharing_count, sharing, sharing))
+        }
         Box(Modifier.fillMaxWidth().weight(1f)) {
             map(focus, Modifier.fillMaxSize())
             SmallFloatingActionButton(
