@@ -97,6 +97,7 @@
     <string name="gs_allow">Liberar</string>
     <string name="gs_plan">Planejar</string>
     <string name="gs_hide">Esconder isso</string>
+    <string name="month_cell_chores">tem corre</string>
     <plurals name="morning_mine">
         <item quantity="one">%d é seu</item>
         <item quantity="other">%d são seus</item>
@@ -140,5 +141,9 @@
     <plurals name="duration_hours">
         <item quantity="one">%d hora</item>
         <item quantity="other">%d horas</item>
+    </plurals>
+    <plurals name="month_cell_events">
+        <item quantity="one">%d compromisso</item>
+        <item quantity="other">%d compromissos</item>
     </plurals>
 </resources>

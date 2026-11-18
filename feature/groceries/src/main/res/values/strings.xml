@@ -49,4 +49,6 @@
         <item quantity="one">%d to buy</item>
         <item quantity="other">%d to buy</item>
     </plurals>
+    <string name="grocery_mark_bought">mark as bought</string>
+    <string name="grocery_edit_item">edit</string>
 </resources>

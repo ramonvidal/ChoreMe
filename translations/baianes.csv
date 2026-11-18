@@ -422,6 +422,8 @@ feature/groceries,list_delete_body,,The list and everything on it are removed fo
 feature/groceries,list_empty,,Nothing on this list yet. Type above to add something.,Nada nessa lista ainda. Escreva aí em cima pra adicionar.
 feature/groceries,grocery_to_buy_count,one,%d to buy,%d pra comprar
 feature/groceries,grocery_to_buy_count,other,%d to buy,%d pra comprar
+feature/groceries,grocery_mark_bought,,mark as bought,marcar como comprado
+feature/groceries,grocery_edit_item,,edit,editar
 feature/home,weather_title,,Weather,Tempo
 feature/home,weather_loading,,Checking the sky…,Olhando o céu…
 feature/home,weather_unavailable,,No forecast right now. Check the connection.,Sem previsão agora. Veja a conexão.
@@ -540,6 +542,9 @@ feature/home,gs_open_map,,Open the map,Abrir o mapa
 feature/home,gs_allow,,Allow,Liberar
 feature/home,gs_plan,,Plan,Planejar
 feature/home,gs_hide,,Hide this,Esconder isso
+feature/home,month_cell_events,one,%d event,%d compromisso
+feature/home,month_cell_events,other,%d events,%d compromissos
+feature/home,month_cell_chores,,chores due,tem corre
 feature/map,share_title,,Share my location,Dividir minha localização
 feature/map,share_body_off,,Off. The family can't see where you are.,Desligado. A família não vê onde você tá.
 feature/map,share_body_on,,"On. The family sees roughly where you are, updated every 15 minutes or so. Turn it off any time.","Ligado. A família vê mais ou menos onde você tá, atualizado de 15 em 15 minutos mais ou menos. Desligue quando quiser."

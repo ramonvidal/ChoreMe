@@ -1,5 +1,11 @@
 package com.choreme.feature.home
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -126,6 +132,12 @@ private fun DayCell(
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(10.dp)
+    // Read out as "Wednesday, 18 November 2026, 2 events, chores due" instead of a bare "18" and coloured dots.
+    val spoken = listOfNotNull(
+        date.format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.FULL)),
+        eventColors.size.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.month_cell_events, it, it) },
+        stringResource(R.string.month_cell_chores).takeIf { hasChores },
+    ).joinToString(", ")
     Box(
         modifier = modifier
             .aspectRatio(1f)
@@ -133,7 +145,12 @@ private fun DayCell(
             .clip(shape)
             // The picked day is black; today is green text.
             .background(if (isSelected) MaterialTheme.colorScheme.inverseSurface else Color.Transparent)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .clearAndSetSemantics {
+                contentDescription = spoken
+                selected = isSelected
+                role = Role.Button
+            },
         contentAlignment = Alignment.TopCenter,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize().padding(top = 4.dp)) {

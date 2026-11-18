@@ -54,7 +54,12 @@ internal fun ToBuyRow(item: GroceryItem, large: Boolean, onBought: () -> Unit, o
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceContainerLowest)
             .heightIn(min = if (large) 64.dp else 54.dp)
-            .combinedClickable(onClick = { ticked = true; onBought() }, onLongClick = onEdit)
+            .combinedClickable(
+                onClickLabel = stringResource(R.string.grocery_mark_bought),
+                onLongClickLabel = stringResource(R.string.grocery_edit_item),
+                onClick = { ticked = true; onBought() },
+                onLongClick = onEdit,
+            )
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

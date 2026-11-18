@@ -47,6 +47,8 @@
     <string name="list_delete_title">Remover \"%1$s\"?</string>
     <string name="list_delete_body">A lista e tudo que tem nela somem pra família toda.</string>
     <string name="list_empty">Nada nessa lista ainda. Escreva aí em cima pra adicionar.</string>
+    <string name="grocery_mark_bought">marcar como comprado</string>
+    <string name="grocery_edit_item">editar</string>
     <plurals name="grocery_to_buy_count">
         <item quantity="one">%d pra comprar</item>
         <item quantity="other">%d pra comprar</item>

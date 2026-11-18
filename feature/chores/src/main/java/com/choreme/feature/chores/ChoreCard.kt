@@ -176,7 +176,7 @@ internal fun ChoreCard(
             backgroundContent = { SwipeHint(swipe.dismissDirection, stringResource(main.first)) },
         ) {
             Card(
-                modifier = Modifier.fillMaxWidth().clickable { menu = true },
+                modifier = Modifier.fillMaxWidth().clickable(onClickLabel = stringResource(R.string.swipe_more)) { menu = true },
                 colors = CardDefaults.cardColors(containerColor = cardColor),
                 border = edge,
             ) {

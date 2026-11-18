@@ -37,7 +37,9 @@ class MonthViewTest {
         compose.setContent { MonthView(state, onMonth = {}, onSelect = { tapped = it }, onOpenEvent = {}) }
 
         compose.onNodeWithText("October 2026").assertExists()
-        compose.onNodeWithText("15").performClick()
+        // A day is read out as its full date (and what's on it), so it's found by that.
+        val day = java.time.LocalDate.of(2026, 10, 15).format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.FULL))
+        compose.onNode(androidx.compose.ui.test.hasContentDescription(day, substring = true)).performClick()
         assertEquals(LocalDate.of(2026, 10, 15), tapped)
     }
 

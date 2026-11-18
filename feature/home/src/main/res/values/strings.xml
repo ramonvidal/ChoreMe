@@ -139,4 +139,9 @@
     <string name="gs_allow">Allow</string>
     <string name="gs_plan">Plan</string>
     <string name="gs_hide">Hide this</string>
+    <plurals name="month_cell_events">
+        <item quantity="one">%d event</item>
+        <item quantity="other">%d events</item>
+    </plurals>
+    <string name="month_cell_chores">chores due</string>
 </resources>
