@@ -1,5 +1,6 @@
 package com.choreme.feature.map
 
+import com.choreme.core.ui.AddButton
 import androidx.compose.ui.res.pluralStringResource
 import com.choreme.core.ui.HeaderLine
 import com.choreme.core.ui.TabHeader
@@ -193,16 +194,8 @@ internal fun MapContent(
                 modifier = Modifier.align(Alignment.TopEnd).padding(12.dp),
             ) { Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.refresh)) }
             if (state.isParent && state.myFix != null) {
-                // Black, like the add button on every tab.
-                ExtendedFloatingActionButton(
-                    onClick = { addingPlace = true },
-                    containerColor = MaterialTheme.colorScheme.inverseSurface,
-                    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-                    shape = MaterialTheme.shapes.medium,
-                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                    text = { Text(stringResource(R.string.save_place)) },
-                    modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
-                )
+                // The same add button as every tab.
+                AddButton(stringResource(R.string.save_place), { addingPlace = true }, Modifier.align(Alignment.BottomEnd).padding(12.dp))
             }
             SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter))
             Text(

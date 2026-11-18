@@ -1,5 +1,6 @@
 package com.choreme.feature.home
 
+import com.choreme.core.ui.AddButton
 import com.choreme.core.ui.offerUndo
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
@@ -150,7 +151,7 @@ internal fun HomeScreen(
             HomeTab.WEEK -> WeekAheadScreen(onPlanTrips = onOpenSettings)
         }
     }
-    SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp))
+    SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 88.dp))
     }
 }
 
@@ -174,69 +175,71 @@ internal fun HomeContent(
         state.date.format(DateTimeFormatter.ofPattern("EEEE, d MMMM")).replaceFirstChar { it.uppercase() }
     }
 
-    LazyColumn(
-        Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        // The little house with the real weather, first.
-        item(key = "weather") { HomeWeatherCard(state.weather, onClick = { showWeather = true }) }
+    Box(Modifier.fillMaxSize()) {
+        LazyColumn(
+            Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            // The little house with the real weather, first.
+            item(key = "weather") { HomeWeatherCard(state.weather, onClick = { showWeather = true }) }
 
-        if (timeline != null && timeline.urgent.isNotEmpty()) {
-            item(key = "urgent") { UrgentCard(timeline.urgent, onClick = onOpenChores) }
-        }
+            if (timeline != null && timeline.urgent.isNotEmpty()) {
+                item(key = "urgent") { UrgentCard(timeline.urgent, onClick = onOpenChores) }
+            }
 
-        if (setupSteps.isNotEmpty()) {
-            item(key = "setup") { GettingStartedCard(setupSteps, onSetupStep, onHideSetup) }
-        }
+            if (setupSteps.isNotEmpty()) {
+                item(key = "setup") { GettingStartedCard(setupSteps, onSetupStep, onHideSetup) }
+            }
 
-        if (timeline != null) {
-            item(key = "day") {
-                HeroCard(
-                    title = stringResource(R.string.home_today),
-                    kicker = date,
-                    line = summaryLine(timeline),
-                ) {
-                    // The one filled button: the three things done every day.
-                    Box {
-                        NosButton(stringResource(R.string.home_add), { addMenu = true }, Modifier.fillMaxWidth())
-                        DropdownMenu(expanded = addMenu, onDismissRequest = { addMenu = false }) {
-                            DropdownMenuItem(text = { Text(stringResource(R.string.home_add_chore)) }, onClick = { addMenu = false; onAddChore() })
-                            DropdownMenuItem(text = { Text(stringResource(R.string.home_add_grocery)) }, onClick = { addMenu = false; onOpenGroceries() })
-                            DropdownMenuItem(text = { Text(stringResource(R.string.home_add_event)) }, onClick = { addMenu = false; onAddEvent() })
+            if (timeline != null) {
+                item(key = "day") {
+                    HeroCard(
+                        title = stringResource(R.string.home_today),
+                        kicker = date,
+                        line = summaryLine(timeline),
+                    ) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            NosButton(
+                                stringResource(R.string.home_open_chores, timeline.choreCount),
+                                onOpenChores,
+                                Modifier.weight(1f),
+                                style = NosButtonStyle.Tonal,
+                            )
+                            NosButton(
+                                stringResource(R.string.home_open_groceries, timeline.groceriesToBuy),
+                                onOpenGroceries,
+                                Modifier.weight(1f),
+                                style = NosButtonStyle.Tonal,
+                            )
                         }
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        NosButton(
-                            stringResource(R.string.home_open_chores, timeline.choreCount),
-                            onOpenChores,
-                            Modifier.weight(1f),
-                            style = NosButtonStyle.Tonal,
-                        )
-                        NosButton(
-                            stringResource(R.string.home_open_groceries, timeline.groceriesToBuy),
-                            onOpenGroceries,
-                            Modifier.weight(1f),
-                            style = NosButtonStyle.Tonal,
-                        )
+                }
+                if (state.yours.isNotEmpty()) {
+                    item(key = "yours-title") { SectionLabel(stringResource(R.string.home_yours)) }
+                    item(key = "yours") { YoursCard(state.yours, onClick = onOpenChores, onDone = onDone) }
+                }
+                state.nudge?.let { nudge ->
+                    item(key = "nudge-title") { SectionLabel(stringResource(R.string.home_nudge_title)) }
+                    item(key = "nudge") { NudgeCard(nudge, onClick = onOpenChores) }
+                }
+                item(key = "timeline-title") { SectionLabel(stringResource(R.string.home_timeline)) }
+                item(key = "timeline") {
+                    if (timeline.isEmpty) {
+                        EmptyState(title = stringResource(R.string.home_nothing_title), body = stringResource(R.string.home_nothing_body))
+                    } else {
+                        TimelineCard(timeline, state.weather.units)
                     }
                 }
             }
-            if (state.yours.isNotEmpty()) {
-                item(key = "yours-title") { SectionLabel(stringResource(R.string.home_yours)) }
-                item(key = "yours") { YoursCard(state.yours, onClick = onOpenChores, onDone = onDone) }
-            }
-            state.nudge?.let { nudge ->
-                item(key = "nudge-title") { SectionLabel(stringResource(R.string.home_nudge_title)) }
-                item(key = "nudge") { NudgeCard(nudge, onClick = onOpenChores) }
-            }
-            item(key = "timeline-title") { SectionLabel(stringResource(R.string.home_timeline)) }
-            item(key = "timeline") {
-                if (timeline.isEmpty) {
-                    EmptyState(title = stringResource(R.string.home_nothing_title), body = stringResource(R.string.home_nothing_body))
-                } else {
-                    TimelineCard(timeline, state.weather.units)
-                }
+        }
+        // Add, where it is on every tab: the three things added every day.
+        Box(Modifier.align(Alignment.BottomEnd).padding(16.dp)) {
+            AddButton(stringResource(R.string.home_add), { addMenu = true })
+            DropdownMenu(expanded = addMenu, onDismissRequest = { addMenu = false }) {
+                DropdownMenuItem(text = { Text(stringResource(R.string.home_add_chore)) }, onClick = { addMenu = false; onAddChore() })
+                DropdownMenuItem(text = { Text(stringResource(R.string.home_add_grocery)) }, onClick = { addMenu = false; onOpenGroceries() })
+                DropdownMenuItem(text = { Text(stringResource(R.string.home_add_event)) }, onClick = { addMenu = false; onAddEvent() })
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.choreme.feature.chores
 
+import com.choreme.core.ui.AddButton
 import com.choreme.core.ui.offerUndo
 import com.choreme.core.chores.ChoreChange
 import kotlinx.coroutines.launch
@@ -195,12 +196,7 @@ private fun RoomList(state: RoomsUiState, onOpen: (String) -> Unit, onAdd: () ->
             }
         }
         if (state.canManage) {
-            ExtendedFloatingActionButton(
-                onClick = onAdd,
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.rooms_add)) },
-            )
+            AddButton(stringResource(R.string.rooms_add), onAdd, Modifier.align(Alignment.BottomEnd).padding(16.dp))
         }
     }
 }

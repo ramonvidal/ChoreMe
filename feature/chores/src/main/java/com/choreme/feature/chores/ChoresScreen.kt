@@ -1,5 +1,6 @@
 package com.choreme.feature.chores
 
+import com.choreme.core.ui.AddButton
 import com.choreme.core.ui.offerUndo
 import com.choreme.core.chores.ChoreChange
 import com.choreme.core.ui.TabHeader
@@ -284,6 +285,8 @@ internal fun ChoresContent(
             }
         }
 
+        // Adding sits where it sits on every tab.
+        if (state.me != null) AddButton(stringResource(R.string.add_chore_short), { adding = true }, Modifier.align(Alignment.BottomEnd).padding(16.dp))
         SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp))
         CheerBubble(cheer, onGone = { cheer = null }, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 152.dp))
     }
@@ -401,7 +404,6 @@ internal fun ChoresHeader(state: ChoresUiState, onOpenGroceries: () -> Unit, onA
     TabHeader(
         title = if (toDo + mine == 0) stringResource(R.string.hero_all_done) else pluralStringResource(R.plurals.summary_to_do, toDo, toDo),
         modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
-        action = if (state.me != null) ({ NosButton(stringResource(R.string.add_chore_short), onAdd) }) else null,
         subtitle = if (parts.isNotEmpty()) ({ HeaderLine(parts.joinToString(" · ")) }) else null,
     )
 }

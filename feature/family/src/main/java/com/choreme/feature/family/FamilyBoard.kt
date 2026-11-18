@@ -1,5 +1,6 @@
 package com.choreme.feature.family
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import com.choreme.core.ui.ChoreNames
 import com.choreme.core.ui.R as CoreUiR
@@ -56,8 +57,10 @@ import java.time.format.FormatStyle
 
 /** The family board: short notes everyone sees. Tap one you may change to edit it. */
 @Composable
-internal fun NotesSection(notes: List<Note>, members: List<Member>, me: Member?, onAdd: (String) -> Unit, onEdit: (Note, String) -> Unit, onDelete: (Note) -> Unit) {
+internal fun NotesSection(notes: List<Note>, members: List<Member>, me: Member?, onAdd: (String) -> Unit, onEdit: (Note, String) -> Unit, onDelete: (Note) -> Unit, addRequest: Int = 0) {
     var editing by rememberSaveable { mutableStateOf<String?>(null) } // note id, or "" for a new one
+    // The tab's add button asks for a new note.
+    LaunchedEffect(addRequest) { if (addRequest > 0) editing = "" }
     val names = members.associate { it.id to it.name }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (notes.isEmpty()) Text(stringResource(R.string.notes_empty), style = MaterialTheme.typography.bodySmall)
@@ -76,12 +79,6 @@ internal fun NotesSection(notes: List<Note>, members: List<Member>, me: Member?,
                 }
             }
         }
-        OutlinedButton(
-            onClick = { editing = "" },
-            shape = MaterialTheme.shapes.small,
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        ) { Text(stringResource(R.string.notes_add)) }
     }
 
     val id = editing ?: return

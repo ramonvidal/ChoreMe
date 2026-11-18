@@ -1,5 +1,9 @@
 package com.choreme.feature.family
 
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.mutableIntStateOf
+import com.choreme.core.ui.AddButton
 import com.choreme.core.ui.R as CoreUiR
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -104,116 +108,122 @@ internal fun FamilyContent(
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     var awayFor by remember { mutableStateOf<Member?>(null) }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        item(key = "header") {
-            TabHeader(state.family?.name ?: stringResource(R.string.family_title), Modifier.padding(top = 4.dp)) {
-                HeaderLine(pluralStringResource(R.plurals.family_member_count, state.members.size, state.members.size))
+    // Counts the "Add a note" taps, so the notes open their editor once per tap.
+    var addNote by remember { mutableIntStateOf(0) }
+    Box(Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            item(key = "header") {
+                TabHeader(state.family?.name ?: stringResource(R.string.family_title), Modifier.padding(top = 4.dp)) {
+                    HeaderLine(pluralStringResource(R.plurals.family_member_count, state.members.size, state.members.size))
+                }
             }
-        }
 
-        item { SectionLabel(stringResource(R.string.message_title)) }
-        item(key = "messages") {
-            FamilyMessages(
-                messages = state.messages,
-                members = state.members,
-                me = state.meMember,
-                onSend = actions.sendMessage,
-                onDelete = actions.deleteMessage,
-            )
-        }
-
-        if (state.joinRequests.isNotEmpty()) {
-            item { SectionLabel(stringResource(R.string.family_requests_title)) }
-            items(state.joinRequests, key = { "request-${it.uid}" }) { request ->
-                JoinRequestCard(
-                    request = request,
-                    kidProfiles = state.kidProfiles,
-                    enabled = !actionState.busy,
-                    onApprove = { linkTo -> actions.approve(request, linkTo) },
-                    onDecline = { actions.decline(request) },
+            item { SectionLabel(stringResource(R.string.message_title)) }
+            item(key = "messages") {
+                FamilyMessages(
+                    messages = state.messages,
+                    members = state.members,
+                    me = state.meMember,
+                    onSend = actions.sendMessage,
+                    onDelete = actions.deleteMessage,
                 )
             }
-        }
 
-        item { SectionLabel(stringResource(R.string.notes_title)) }
-        item(key = "notes") {
-            NotesSection(
-                notes = state.notes,
-                members = state.members,
-                me = state.meMember,
-                onAdd = actions.addNote,
-                onEdit = actions.editNote,
-                onDelete = actions.deleteNote,
-            )
-        }
-
-        item { SectionLabel(stringResource(R.string.family_members_title)) }
-        item(key = "members") {
-            Card(Modifier.fillMaxWidth()) {
-                state.members.forEachIndexed { index, member ->
-                    if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                    MemberRow(
-                        member = member,
-                        isMe = member.id == state.me?.memberId,
-                        canRemove = state.isParent && member.id != state.me?.memberId,
-                        onRemove = { memberToRemove = member },
-                        away = awayLabel(member, state.today),
-                        onAway = if (state.canSetAway(member)) ({ awayFor = member }) else null,
+            if (state.joinRequests.isNotEmpty()) {
+                item { SectionLabel(stringResource(R.string.family_requests_title)) }
+                items(state.joinRequests, key = { "request-${it.uid}" }) { request ->
+                    JoinRequestCard(
+                        request = request,
+                        kidProfiles = state.kidProfiles,
+                        enabled = !actionState.busy,
+                        onApprove = { linkTo -> actions.approve(request, linkTo) },
+                        onDecline = { actions.decline(request) },
                     )
                 }
             }
-        }
 
-        item { ErrorText(actionState.error) }
+            item { SectionLabel(stringResource(R.string.notes_title)) }
+            item(key = "notes") {
+                NotesSection(
+                addRequest = addNote,
+                    notes = state.notes,
+                    members = state.members,
+                    me = state.meMember,
+                    onAdd = actions.addNote,
+                    onEdit = actions.editNote,
+                    onDelete = actions.deleteNote,
+                )
+            }
 
-        item(key = "invite-actions") {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                state.family?.let { family -> InviteButton(family) }
-                if (state.isParent) {
-                    OutlinedButton(
-                        onClick = { showAddKid = true },
-                        shape = MaterialTheme.shapes.small,
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                    ) { Text(stringResource(R.string.family_add_kid)) }
+            item { SectionLabel(stringResource(R.string.family_members_title)) }
+            item(key = "members") {
+                Card(Modifier.fillMaxWidth()) {
+                    state.members.forEachIndexed { index, member ->
+                        if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                        MemberRow(
+                            member = member,
+                            isMe = member.id == state.me?.memberId,
+                            canRemove = state.isParent && member.id != state.me?.memberId,
+                            onRemove = { memberToRemove = member },
+                            away = awayLabel(member, state.today),
+                            onAway = if (state.canSetAway(member)) ({ awayFor = member }) else null,
+                        )
+                    }
+                }
+            }
+
+            item { ErrorText(actionState.error) }
+
+            item(key = "invite-actions") {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    state.family?.let { family -> InviteButton(family) }
+                    if (state.isParent) {
+                        OutlinedButton(
+                            onClick = { showAddKid = true },
+                            shape = MaterialTheme.shapes.small,
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        ) { Text(stringResource(R.string.family_add_kid)) }
+                    }
+                }
+            }
+
+            if (state.isParent && state.pointsOn && state.week.isNotEmpty()) {
+                item { SectionLabel(stringResource(R.string.week_title)) }
+                item(key = "week") { WeekSection(state.week) }
+            }
+
+            item {
+                TextButton(
+                    onClick = {
+                        if (signOutNeedsApprovalAgain) confirmSignOut = true else actions.signOut()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(stringResource(R.string.sign_out)) }
+            }
+
+            item {
+                HorizontalDivider()
+                Text(
+                    stringResource(R.string.privacy_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 12.dp),
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
+                    OutlinedButton(onClick = { confirmLeave = true }, enabled = !actionState.busy) {
+                        Text(stringResource(R.string.leave_family))
+                    }
+                    TextButton(onClick = { confirmDelete = true }, enabled = !actionState.busy) {
+                        Text(stringResource(R.string.delete_my_data), color = MaterialTheme.colorScheme.error)
+                    }
                 }
             }
         }
-
-        if (state.isParent && state.pointsOn && state.week.isNotEmpty()) {
-            item { SectionLabel(stringResource(R.string.week_title)) }
-            item(key = "week") { WeekSection(state.week) }
-        }
-
-        item {
-            TextButton(
-                onClick = {
-                    if (signOutNeedsApprovalAgain) confirmSignOut = true else actions.signOut()
-                },
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text(stringResource(R.string.sign_out)) }
-        }
-
-        item {
-            HorizontalDivider()
-            Text(
-                stringResource(R.string.privacy_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(top = 12.dp),
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
-                OutlinedButton(onClick = { confirmLeave = true }, enabled = !actionState.busy) {
-                    Text(stringResource(R.string.leave_family))
-                }
-                TextButton(onClick = { confirmDelete = true }, enabled = !actionState.busy) {
-                    Text(stringResource(R.string.delete_my_data), color = MaterialTheme.colorScheme.error)
-                }
-            }
-        }
+        AddButton(stringResource(R.string.notes_add), { addNote++ }, Modifier.align(Alignment.BottomEnd).padding(16.dp))
     }
 
     if (confirmLeave) {
