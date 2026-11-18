@@ -58,7 +58,8 @@ class ChoreCardsScreenshotTest {
             ChoreMeTheme(darkTheme = false, dynamicColor = false) {
                 Surface {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        ChoresHeader(state.copy(chores = listOf(leak, dishes, laundry, hoover), board = buildTodayBoard(listOf(leak, dishes, laundry, hoover), today, "mom"), groceriesToBuy = 5), onOpenGroceries = {}, onAdd = {})
+                        val board = buildTodayBoard(listOf(leak, dishes, laundry, hoover), today, "mom")
+                        ChoresHeader(state.copy(chores = listOf(leak, dishes, laundry, hoover), board = board, yours = board.mine.map { com.choreme.core.model.room.YourTask(it, null) }, groceriesToBuy = 5), onOpenGroceries = {}, onAdd = {})
                         ChoreCard(trash, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
                         ChoreCard(hoover, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {}, mine = true)
                         ChoreCard(rent, state, onClaim = {}, onUnclaim = {}, onComplete = {}, onDoneBy = {}, onEdit = {}, onCalendar = {})
@@ -76,7 +77,7 @@ class ChoreCardsScreenshotTest {
         compose.onNodeWithText("Wash the dishes").assertExists()
         compose.onNodeWithText("Urgent").assertExists()
         compose.onNodeWithText("2 points").assertExists()
-        // The hero card joins "1 is yours" and the grocery count in one line.
+        // The header says how many are yours (the grocery count is Casa's to tell).
         compose.onNodeWithText("1 is yours", substring = true).assertExists()
         compose.onNodeWithText("You and Mia are on it").assertExists()
         compose.onNodeWithText("On it · 4 points").assertExists()
