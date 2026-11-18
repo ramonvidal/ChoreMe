@@ -1,6 +1,6 @@
 # Refactoring plan: simpler, smaller, same app
 
-Status: **agreed, not started**. Interface items (U1, U2) added the same day; the owner approved R3 and turned down R4. Written 18 November 2026, after the owner asked to "simplify and
+Status: **agreed; R1 built 18 November 2026** (waiting for CI and the owner's test). Interface items (U1, U2) added the same day; the owner approved R3 and turned down R4. Written 18 November 2026, after the owner asked to "simplify and
 optimise the app once more". Each phase ships on its own with CI green; nothing here changes what families see unless
 the phase says so.
 
@@ -30,8 +30,8 @@ About 19,000 lines of Kotlin in 19 modules (plus `:app`). `:core:model` holds th
 1. **One notifier.** `:core:settings` already owns which alerts a phone shows and the quiet hours, so it gets an
    `AlertNotifier.show(kind, channel, title, text, tapIntent)` that checks the permission, creates the channel, applies the
    alert switch and quiet hours, and posts. The ten callers shrink to one call each.
-2. **One "ping starts work" helper** in `:core:push`: `PushWork.on(kind) { enqueue<Worker>(name) }`, so each feature's
-   listener is two lines.
+2. ~~One "ping starts work" helper~~: **dropped**. Measured again, only three listeners repeat the enqueue (about 15
+   lines), and a helper would put WorkManager into `:core:push`. Not worth it.
 3. **`FamilyRepository.inFamily`**: one shared flow of the signed-in family, used by every view model.
 4. **Names**: `TodayScreen` becomes `ChoresScreen`, `TODAY_ROUTE` becomes `CHORES_ROUTE`, and the like.
 5. **State classes `internal`** where Hilt doesn't need them public (the view model exposes `internal val state`, as Casa
