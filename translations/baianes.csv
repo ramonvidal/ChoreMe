@@ -238,14 +238,10 @@ feature/chores,cheer_waiting,,Well done! A parent will check it,Arretado! Mainha
 feature/chores,hero_all_done,,All done for today,Tudo feito por hoje
 feature/chores,hero_groceries,,Groceries,Feira
 feature/chores,rooms_title,,Rooms,Cômodos
-feature/chores,rooms_count,one,%d room,%d cômodo
-feature/chores,rooms_count,other,%d rooms,%d cômodos
 feature/chores,room_you_took,,You took: %s,Você pegou: %s
 feature/chores,room_health_late,,Late,Atrasado
 feature/chores,room_health_today,,Due today,Pra hoje
 feature/chores,room_health_ok,,On track,Em dia
-feature/chores,rooms_late,one,%d task is late,%d tarefa atrasada
-feature/chores,rooms_late,other,%d tasks are late,%d tarefas atrasadas
 feature/chores,rooms_empty_title,,"Your home, room by room","Sua casa, cômodo por cômodo"
 feature/chores,rooms_empty_body,,"Add the rooms you look after, with the tasks that keep them tidy. Each room shows when it was last done and when it's due again.","Adicione os cômodos que vocês cuidam, com as tarefas que mantêm tudo em ordem. Cada cômodo mostra quando foi feito pela última vez e quando vence de novo."
 feature/chores,rooms_empty_body_kid,,A parent can add the rooms of the house here.,Um dos pais pode adicionar aqui os cômodos da casa.

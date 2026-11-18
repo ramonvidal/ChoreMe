@@ -233,14 +233,6 @@
         <item quantity="one">Essa semana: %d corre feito</item>
         <item quantity="other">Essa semana: %d corres feitos</item>
     </plurals>
-    <plurals name="rooms_count">
-        <item quantity="one">%d cômodo</item>
-        <item quantity="other">%d cômodos</item>
-    </plurals>
-    <plurals name="rooms_late">
-        <item quantity="one">%d tarefa atrasada</item>
-        <item quantity="other">%d tarefas atrasadas</item>
-    </plurals>
     <plurals name="room_delete_body">
         <item quantity="one">O cômodo e a sua %d tarefa somem de vez.</item>
         <item quantity="other">O cômodo e as suas %d tarefas somem de vez.</item>

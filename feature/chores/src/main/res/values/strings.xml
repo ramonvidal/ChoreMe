@@ -187,18 +187,10 @@
     <string name="hero_all_done">All done for today</string>
     <string name="hero_groceries">Groceries</string>
     <string name="rooms_title">Rooms</string>
-    <plurals name="rooms_count">
-        <item quantity="one">%d room</item>
-        <item quantity="other">%d rooms</item>
-    </plurals>
     <string name="room_you_took">You took: %s</string>
     <string name="room_health_late">Late</string>
     <string name="room_health_today">Due today</string>
     <string name="room_health_ok">On track</string>
-    <plurals name="rooms_late">
-        <item quantity="one">%d task is late</item>
-        <item quantity="other">%d tasks are late</item>
-    </plurals>
     <string name="rooms_empty_title">Your home, room by room</string>
     <string name="rooms_empty_body">Add the rooms you look after, with the tasks that keep them tidy. Each room shows when it was last done and when it\'s due again.</string>
     <string name="rooms_empty_body_kid">A parent can add the rooms of the house here.</string>

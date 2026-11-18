@@ -87,7 +87,6 @@ import com.choreme.core.model.room.RoomType
 import com.choreme.core.model.room.everyDays
 import com.choreme.core.model.room.ideasFor
 import com.choreme.core.ui.EmptyState
-import com.choreme.core.ui.HeaderLine
 import com.choreme.core.ui.ItemIcon
 import com.choreme.core.ui.R as CoreUiR
 import com.choreme.core.ui.SectionLabel
@@ -187,17 +186,6 @@ private fun RoomList(state: RoomsUiState, onOpen: (String) -> Unit, onAdd: () ->
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item(key = "header") {
-                // The sub-tab already says "Rooms": only how many there are, or how many tasks are late.
-                if (state.rooms.isNotEmpty()) {
-                    val late = state.rooms.sumOf { it.lateCount(state.today) }
-                    HeaderLine(
-                        if (late > 0) pluralStringResource(R.plurals.rooms_late, late, late)
-                        else pluralStringResource(R.plurals.rooms_count, state.rooms.size, state.rooms.size),
-                        modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
-                    )
-                }
-            }
             if (state.rooms.isEmpty() && !state.loading) {
                 item(key = "empty") {
                     EmptyState(
