@@ -99,6 +99,12 @@ From the screenshots of release 0.145, every tab, light and Baianês.
 Mapping tests for `:core:data` (Firestore fields to models and back, from plain maps, no emulator), and tests for
 `AlertSettings`/quiet hours, `UnifiedPush` kinds, the update version check and the location sharing choice.
 
+
+Built 18 November 2026: `ChoreMappingTest` (`:core:data`; the chore reading was split into `choreFrom(id, fields)` so
+it runs without Firestore), `ReleaseTest` (`:core:update`; `releaseFrom(json)` split out of the network call),
+`NotificationSettingsTest` (`:core:settings`) and `RoutineLogTest` (`:core:location`), the last three on Robolectric.
+`:core:push` has no logic of its own worth a test (it passes pings along).
+
 ## 3. Not in this plan, on purpose
 
 - **R8 shrinking**: worth doing only after testing on a real phone (it can break Hilt, Firebase and Firestore mapping).

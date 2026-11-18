@@ -12,4 +12,7 @@ dependencies {
     api(projects.core.model)
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
+    // Tests that need the phone's storage or JSON run on Robolectric.
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.ext.junit)
 }

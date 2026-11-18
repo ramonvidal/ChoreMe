@@ -85,12 +85,7 @@ class UpdateRepository @Inject constructor(
         connection.setRequestProperty("Accept", "application/vnd.github+json")
         try {
             check(connection.responseCode == HttpURLConnection.HTTP_OK) { "Release page answered ${connection.responseCode}" }
-            val json = JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
-            val build = Updates.buildNumber(json.optString("tag_name")) ?: return null
-            val assets = json.optJSONArray("assets") ?: return null
-            val apk = (0 until assets.length()).map { assets.getJSONObject(it) }.firstOrNull { it.optString("name") == APK_NAME }
-                ?: return null
-            return AppUpdate(build, "0.$build", apk.getString("browser_download_url"), apk.optLong("size"))
+            return releaseFrom(connection.inputStream.bufferedReader().use { it.readText() })
         } finally {
             connection.disconnect()
         }
@@ -125,4 +120,14 @@ class UpdateRepository @Inject constructor(
         private const val KEY_URL = "latest_url"
         private const val KEY_SIZE = "latest_size"
     }
+}
+
+/** The build on GitHub's "latest release" answer: its v0.<build> tag and the app's APK. Null when either is missing. */
+internal fun releaseFrom(body: String): AppUpdate? {
+    val json = JSONObject(body)
+    val build = Updates.buildNumber(json.optString("tag_name")) ?: return null
+    val assets = json.optJSONArray("assets") ?: return null
+    val apk = (0 until assets.length()).map { assets.getJSONObject(it) }.firstOrNull { it.optString("name") == UpdateRepository.APK_NAME }
+        ?: return null
+    return AppUpdate(build, "0.$build", apk.getString("browser_download_url"), apk.optLong("size"))
 }

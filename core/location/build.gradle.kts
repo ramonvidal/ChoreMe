@@ -13,4 +13,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.play.services.location)
     implementation(libs.kotlinx.coroutines.play.services)
+    // Tests that need the phone's storage or JSON run on Robolectric.
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.ext.junit)
 }

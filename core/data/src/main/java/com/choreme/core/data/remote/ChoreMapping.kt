@@ -67,39 +67,46 @@ internal fun Chore.toFields(): Map<String, Any?> = mapOf(
 )
 
 /** Null for documents that can't be read as a chore, so one bad document doesn't hide the rest. */
-internal fun DocumentSnapshot.toChore(): Chore? = runCatching {
-    val recurrence = when (getString(RECURRENCE_TYPE)) {
-        "EVERY_DAYS" -> Recurrence.EveryDays(checkNotNull(getLong(EVERY_DAYS)).toInt())
+internal fun DocumentSnapshot.toChore(): Chore? = data?.let { choreFrom(id, it) }
+
+/** A chore from a document's fields (the other half of [toFields]); kept apart from Firestore so it can be tested. */
+internal fun choreFrom(id: String, fields: Map<String, Any?>): Chore? = runCatching {
+    fun string(key: String) = fields[key] as? String
+    fun long(key: String) = (fields[key] as? Number)?.toLong()
+    fun boolean(key: String) = fields[key] as? Boolean
+    fun people(key: String) = (fields[key] as? List<*>).orEmpty().filterIsInstance<String>().toSet()
+    val recurrence = when (string(RECURRENCE_TYPE)) {
+        "EVERY_DAYS" -> Recurrence.EveryDays(checkNotNull(long(EVERY_DAYS)).toInt())
         "WEEKLY" -> Recurrence.Weekly(
-            (get(WEEK_DAYS) as List<*>).map { DayOfWeek.of((it as Number).toInt()) }.toSet(),
+            (fields[WEEK_DAYS] as List<*>).map { DayOfWeek.of((it as Number).toInt()) }.toSet(),
         )
-        "MONTHLY" -> Recurrence.Monthly(checkNotNull(getLong(MONTH_DAY)).toInt())
+        "MONTHLY" -> Recurrence.Monthly(checkNotNull(long(MONTH_DAY)).toInt())
         else -> Recurrence.Once
     }
     Chore(
         id = id,
-        title = getString(TITLE).orEmpty(),
-        template = runCatching { ChoreTemplate.valueOf(getString(TEMPLATE).orEmpty()) }.getOrDefault(ChoreTemplate.OTHER),
+        title = string(TITLE).orEmpty(),
+        template = runCatching { ChoreTemplate.valueOf(string(TEMPLATE).orEmpty()) }.getOrDefault(ChoreTemplate.OTHER),
         recurrence = recurrence,
-        repeatUntil = getString(REPEAT_UNTIL)?.let(LocalDate::parse),
-        dueDate = LocalDate.parse(getString(DUE_DATE)),
-        status = ChoreStatus.valueOf(getString(STATUS).orEmpty()),
-        claimedBy = getString(CLAIMED_BY),
+        repeatUntil = string(REPEAT_UNTIL)?.let(LocalDate::parse),
+        dueDate = LocalDate.parse(string(DUE_DATE)),
+        status = ChoreStatus.valueOf(string(STATUS).orEmpty()),
+        claimedBy = string(CLAIMED_BY),
         helpers = people(HELPERS),
         assignedTo = people(ASSIGNED_TO),
-        completedBy = getString(COMPLETED_BY),
-        approvedBy = getString(APPROVED_BY),
-        lastDoneBy = getString(LAST_DONE_BY),
-        lastDoneOn = getString(LAST_DONE_ON)?.let(LocalDate::parse),
+        completedBy = string(COMPLETED_BY),
+        approvedBy = string(APPROVED_BY),
+        lastDoneBy = string(LAST_DONE_BY),
+        lastDoneOn = string(LAST_DONE_ON)?.let(LocalDate::parse),
         lastHelpers = people(LAST_HELPERS),
         // Written once when the chore is reported, never changed afterwards.
-        reportedBy = getString(CREATED_BY),
+        reportedBy = string(CREATED_BY),
         // Chores from before this option existed announce too.
-        notifyWhenDone = getBoolean(NOTIFY_WHEN_DONE) ?: true,
-        urgent = getBoolean(URGENT) ?: false,
-        points = getLong(POINTS)?.toInt()?.coerceIn(Chore.POINTS) ?: 1,
-        doneCount = getLong(DONE_COUNT)?.toInt() ?: 0,
-        roomId = getString(ROOM_ID),
+        notifyWhenDone = boolean(NOTIFY_WHEN_DONE) ?: true,
+        urgent = boolean(URGENT) ?: false,
+        points = long(POINTS)?.toInt()?.coerceIn(Chore.POINTS) ?: 1,
+        doneCount = long(DONE_COUNT)?.toInt() ?: 0,
+        roomId = string(ROOM_ID),
     )
 }.getOrNull()
 
