@@ -112,9 +112,6 @@ internal fun ChoresUiState.without(ids: Set<String>): ChoresUiState = if (ids.is
     yours = yours.filter { it.chore.id !in ids },
 )
 
-/** How long Undo is offered before a deleted chore really goes. */
-private const val UNDO_WINDOW = 5_000L
-
 /** What the person typed in the chore editor. */
 internal data class ChoreDraft(
     val title: String,
@@ -169,9 +166,8 @@ class ChoresViewModel @Inject internal constructor(
 
     internal fun cancelReminder(chore: Chore) = timedReminders.cancel(chore.id)
 
-    /** Chores deleted a moment ago: hidden at once, really deleted after [UNDO_WINDOW] unless taken back. */
-    private val deleting = MutableStateFlow<Map<String, Job>>(emptyMap())
-    private val deletingIds = deleting.map { it.keys }
+    /** Chores deleted a moment ago: hidden at once, really deleted after a few seconds unless undone. */
+    private val deleting = PendingDeletes(viewModelScope) { id -> uiState.value.familyId?.let { chores.delete(it, id) } }
 
     private val baseState: Flow<ChoresUiState> = families.inFamily
         .flatMapLatest { session ->
@@ -206,7 +202,7 @@ class ChoresViewModel @Inject internal constructor(
             }
         }
 
-    internal val uiState: StateFlow<ChoresUiState> = combine(baseState, deletingIds) { state, hidden -> state.without(hidden) }
+    internal val uiState: StateFlow<ChoresUiState> = combine(baseState, deleting.ids) { state, hidden -> state.without(hidden) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ChoresUiState())
 
     internal fun claim(chore: Chore) = change(chore) { me, _ -> claim(me) }
@@ -313,19 +309,10 @@ class ChoresViewModel @Inject internal constructor(
     }
 
     internal fun delete(chore: Chore) {
-        val (familyId, _) = context() ?: return
-        val job = viewModelScope.launch {
-            delay(UNDO_WINDOW)
-            chores.delete(familyId, chore.id)
-            deleting.update { it - chore.id }
-        }
-        deleting.update { it + (chore.id to job) }
+        if (context() != null) deleting.delete(chore.id)
     }
 
-    internal fun undoDelete(chore: Chore) {
-        deleting.value[chore.id]?.cancel()
-        deleting.update { it - chore.id }
-    }
+    internal fun undoDelete(chore: Chore) = deleting.undo(chore.id)
 
     internal fun undo(change: ChoreChange) {
         val (familyId, me) = context() ?: return
@@ -334,8 +321,7 @@ class ChoresViewModel @Inject internal constructor(
 
     /** Leaving the tab doesn't keep a chore that was deleted: the waiting deletes happen now. */
     override fun onCleared() {
-        val familyId = uiState.value.familyId
-        if (familyId != null) deleting.value.keys.forEach { chores.delete(familyId, it) }
+        deleting.flush()
         super.onCleared()
     }
 

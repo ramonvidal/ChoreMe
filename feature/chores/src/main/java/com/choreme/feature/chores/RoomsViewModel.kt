@@ -59,15 +59,19 @@ class RoomsViewModel @Inject internal constructor(
 
     private val members = familySession.flatMapLatest { families.observeMembers(it.familyId) }
 
+    /** Tasks deleted a moment ago: hidden at once, really deleted after a few seconds unless undone. */
+    private val deleting = PendingDeletes(viewModelScope) { id -> session.value?.let { chores.delete(it.familyId, id) } }
+
     internal val uiState: StateFlow<RoomsUiState> = combine(
         familySession,
         familySession.flatMapLatest { roomsRepository.observe(it.familyId) },
         familySession.flatMapLatest { chores.observeChores(it.familyId) },
         members,
-    ) { s, rooms, allChores, memberList ->
+        deleting.ids,
+    ) { s, rooms, allChores, memberList, hidden ->
         RoomsUiState(
             loading = false,
-            rooms = roomOverviews(rooms, allChores),
+            rooms = roomOverviews(rooms, allChores.filter { it.id !in hidden }),
             canManage = s.role == Role.PARENT,
             today = LocalDate.now(),
             me = memberList.firstOrNull { it.id == s.memberId } ?: Member(s.memberId, name = "", role = s.role),
@@ -123,15 +127,29 @@ class RoomsViewModel @Inject internal constructor(
 
     internal fun deleteTask(task: Chore) {
         val s = session.value ?: return
-        if (s.role == Role.PARENT) chores.delete(s.familyId, task.id)
+        if (s.role == Role.PARENT) deleting.delete(task.id)
+    }
+
+    internal fun undoDeleteTask(task: Chore) = deleting.undo(task.id)
+
+    internal fun undo(change: ChoreChange) {
+        val s = session.value ?: return
+        val me = membersNow.value.firstOrNull { it.id == s.memberId } ?: return
+        changer.undo(s.familyId, me, change)
+    }
+
+    /** Leaving the tab doesn't keep a task that was deleted: the waiting deletes happen now. */
+    override fun onCleared() {
+        deleting.flush()
+        super.onCleared()
     }
 
     /** Applies one of the chore rules to a task of a room; the same rules and alerts as in the Chores list. */
-    private fun change(task: Chore, transition: Chore.(me: Member, today: LocalDate) -> Chore) {
-        val s = session.value ?: return
-        val me = membersNow.value.firstOrNull { it.id == s.memberId } ?: return
+    private fun change(task: Chore, transition: Chore.(me: Member, today: LocalDate) -> Chore): ChoreChange? {
+        val s = session.value ?: return null
+        val me = membersNow.value.firstOrNull { it.id == s.memberId } ?: return null
         val parents = membersNow.value.filter { it.role == Role.PARENT }.map { it.id }.toSet()
-        changer.change(viewModelScope, s.familyId, me, parents, task, transition)
+        return changer.change(viewModelScope, s.familyId, me, parents, task, transition)
     }
 
     /** "I did it": a parent's counts straight away, a kid's waits for a parent (see the chore rules). */

@@ -156,14 +156,7 @@ internal fun ChoresContent(
     val context = LocalContext.current
     // "Done · Undo" for a few seconds after a step, for the wrong tap (often a kid's).
     fun offerUndo(message: Int, chore: Chore, change: ChoreChange) {
-        scope.launch {
-            val undo = snackbar.showSnackbar(
-                context.getString(message, ChoreNames.shown(context, chore.title)),
-                actionLabel = context.getString(CoreUiR.string.undo),
-                duration = SnackbarDuration.Short,
-            )
-            if (undo == SnackbarResult.ActionPerformed) actions.undo(change)
-        }
+        scope.launch { if (snackbar.offerUndo(context, message, chore.title)) actions.undo(change) }
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -327,14 +320,7 @@ internal fun ChoresContent(
             onDelete = {
                 actions.delete(chore)
                 editing = null
-                scope.launch {
-                    val undo = snackbar.showSnackbar(
-                        context.getString(R.string.undo_deleted, ChoreNames.shown(context, chore.title)),
-                        actionLabel = context.getString(CoreUiR.string.undo),
-                        duration = SnackbarDuration.Short,
-                    )
-                    if (undo == SnackbarResult.ActionPerformed) actions.undoDelete(chore)
-                }
+                scope.launch { if (snackbar.offerUndo(context, R.string.undo_deleted, chore.title)) actions.undoDelete(chore) }
             },
             onDismiss = { editing = null },
         )

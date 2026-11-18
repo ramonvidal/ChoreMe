@@ -1,5 +1,11 @@
 package com.choreme.feature.chores
 
+import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarHost
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -63,6 +69,8 @@ internal fun RoomsScreen(viewModel: RoomsViewModel = hiltViewModel()) {
             addTask = { room, title, template, days, ago -> viewModel.addTask(room, title, template, days, ago) },
             setFrequency = { task, days -> viewModel.setFrequency(task, days) },
             deleteTask = { viewModel.deleteTask(it) },
+            undoDeleteTask = { viewModel.undoDeleteTask(it) },
+            undo = { viewModel.undo(it) },
             markDone = { viewModel.markDone(it) },
             claim = { viewModel.claim(it) },
             unclaim = { viewModel.unclaim(it) },
@@ -81,19 +89,48 @@ internal class RoomsActions(
     val deleteRoom: (RoomOverview) -> Unit = {},
     val addTask: (roomId: String, title: String, template: ChoreTemplate, everyDays: Int, lastDoneDaysAgo: Int?) -> Unit = { _, _, _, _, _ -> },
     val setFrequency: (Chore, Int) -> Unit = { _, _ -> },
+    /** Deleting a task waits a few seconds, so [undoDeleteTask] can keep it. */
     val deleteTask: (Chore) -> Unit = {},
-    val markDone: (Chore) -> Unit = {},
+    val undoDeleteTask: (Chore) -> Unit = {},
+    /** Steps that can be undone return what they changed, for the Undo button. */
+    val markDone: (Chore) -> ChoreChange? = { null },
+    val undo: (ChoreChange) -> Unit = {},
     val claim: (Chore) -> Unit = {},
     val unclaim: (Chore) -> Unit = {},
     val join: (Chore) -> Unit = {},
     val assign: (Chore, Set<String>) -> Unit = { _, _ -> },
-    val approve: (Chore) -> Unit = {},
+    val approve: (Chore) -> ChoreChange? = { null },
     val reject: (Chore) -> Unit = {},
+)
+
+/** The same actions, each step that can be undone followed by [offer] (message, task, what Undo does). */
+private fun RoomsActions.withUndo(offer: (Int, Chore, () -> Unit) -> Unit) = RoomsActions(
+    addRoom = addRoom, saveRoom = saveRoom, deleteRoom = deleteRoom, addTask = addTask, setFrequency = setFrequency,
+    deleteTask = { task -> deleteTask(task); offer(R.string.undo_deleted, task) { undoDeleteTask(task) } },
+    undoDeleteTask = undoDeleteTask,
+    markDone = { task -> markDone(task)?.also { change -> offer(R.string.undo_done, task) { undo(change) } } },
+    undo = undo,
+    claim = claim, unclaim = unclaim, join = join, assign = assign,
+    approve = { task -> approve(task)?.also { change -> offer(R.string.undo_approved, task) { undo(change) } } },
+    reject = reject,
 )
 
 /** The whole tab, drawn from [state] alone, so it can be screenshotted without Firebase. */
 @Composable
 internal fun RoomsContent(state: RoomsUiState, actions: RoomsActions, openRoomId: String? = null) {
+    // "Done · Undo" after finishing, approving or deleting a task, as on the Chores list.
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val undoable = actions.withUndo { message, task, undo -> scope.launch { if (snackbar.offerUndo(context, message, task.title)) undo() } }
+    Box(Modifier.fillMaxSize()) {
+        RoomsBody(state, undoable, openRoomId)
+        SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp))
+    }
+}
+
+@Composable
+private fun RoomsBody(state: RoomsUiState, actions: RoomsActions, openRoomId: String?) {
     var openId by rememberSaveable { mutableStateOf(openRoomId) }
     var editing by rememberSaveable { mutableStateOf<String?>(null) }
     var adding by rememberSaveable { mutableStateOf(false) }
