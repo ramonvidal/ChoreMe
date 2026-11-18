@@ -38,7 +38,6 @@ import com.choreme.core.model.chore.reject
 import com.choreme.core.model.chore.shouldSaveForLater
 import com.choreme.core.model.chore.unclaim
 import com.choreme.core.model.chore.wasJustFinished
-import com.choreme.core.model.session.SessionState
 import com.choreme.core.push.PushKinds
 import com.choreme.core.push.PushSender
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -47,7 +46,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onStart
@@ -156,8 +154,7 @@ class ChoresViewModel @Inject internal constructor(
 
     fun cancelReminder(chore: Chore) = timedReminders.cancel(chore.id)
 
-    private val baseState: Flow<ChoresUiState> = families.session
-        .filterIsInstance<SessionState.InFamily>()
+    private val baseState: Flow<ChoresUiState> = families.inFamily
         .flatMapLatest { session ->
             combine(
                 combine(

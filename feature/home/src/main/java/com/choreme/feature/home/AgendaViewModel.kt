@@ -18,7 +18,6 @@ import com.choreme.core.model.agenda.suggestFamilyCalendars
 import com.choreme.core.model.chore.RoomFilter
 import com.choreme.core.model.chore.filteredBy
 import com.choreme.core.model.chore.hasRoomTasks
-import com.choreme.core.model.session.SessionState
 import com.choreme.core.ui.ActionState
 import com.choreme.core.ui.runAction
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,7 +25,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onStart
@@ -93,8 +91,7 @@ class AgendaViewModel @Inject constructor(
             calendar.observeEvents(selected, from = from.atStartOfDay(zone).toInstant(), until = until.atStartOfDay(zone).toInstant())
         }
 
-    private val familyChores = families.session
-        .filterIsInstance<SessionState.InFamily>()
+    private val familyChores = families.inFamily
         .flatMapLatest { chores.observeChores(it.familyId) }
         .onStart { emit(emptyList()) }
 

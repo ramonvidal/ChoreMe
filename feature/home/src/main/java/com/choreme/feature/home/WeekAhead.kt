@@ -29,7 +29,6 @@ import com.choreme.core.data.PlanRepository
 import com.choreme.core.location.RoutineLog
 import com.choreme.core.model.Member
 import com.choreme.core.model.location.Place
-import com.choreme.core.model.session.SessionState
 import com.choreme.core.model.weather.DayOutlook
 import com.choreme.core.model.weather.DryingQuality
 import com.choreme.core.model.weather.WeatherUnits
@@ -49,7 +48,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
@@ -86,7 +84,7 @@ class WeekAheadViewModel @Inject internal constructor(
     private class Inputs(val memberId: String, val entries: List<com.choreme.core.model.weather.PlanEntry>, val places: List<Place>, val members: List<Member>)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    internal val state: StateFlow<WeekAheadState> = families.session.filterIsInstance<SessionState.InFamily>().flatMapLatest { s ->
+    internal val state: StateFlow<WeekAheadState> = families.inFamily.flatMapLatest { s ->
         combine(plans.observe(s.familyId), locations.observePlaces(s.familyId), families.observeMembers(s.familyId), settings.units) { entries, places, members, units ->
             Pair(Inputs(s.memberId, entries, places, members), units)
         }

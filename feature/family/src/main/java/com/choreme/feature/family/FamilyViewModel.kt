@@ -36,7 +36,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onStart
@@ -83,8 +82,7 @@ class FamilyViewModel @Inject constructor(
         MessageAlerts.schedule(context)
     }
 
-    val uiState: StateFlow<FamilyUiState> = families.session
-        .filterIsInstance<SessionState.InFamily>()
+    val uiState: StateFlow<FamilyUiState> = families.inFamily
         .flatMapLatest { me ->
             val today = LocalDate.now()
             combine(

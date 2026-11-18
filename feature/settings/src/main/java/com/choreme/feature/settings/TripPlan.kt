@@ -37,7 +37,6 @@ import com.choreme.core.data.PlanRepository
 import com.choreme.core.model.Member
 import com.choreme.core.model.Role
 import com.choreme.core.model.location.Place
-import com.choreme.core.model.session.SessionState
 import java.time.LocalDate
 import com.choreme.core.location.RoutineLog
 import com.choreme.core.model.weather.PauseReason
@@ -58,7 +57,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import java.time.DayOfWeek
@@ -92,7 +90,7 @@ class TripPlanViewModel @Inject internal constructor(
     private val routine: RoutineLog,
 ) : ViewModel() {
     private val refresh = MutableStateFlow(0)
-    private val session = families.session.filterIsInstance<SessionState.InFamily>()
+    private val session = families.inFamily
     private var familyId: String? = null
 
     @OptIn(ExperimentalCoroutinesApi::class)

@@ -65,8 +65,7 @@ class GroceriesViewModel @Inject constructor(
     private val endpoints: PushEndpointRepository,
     private val push: PushSender,
 ) : ViewModel() {
-    private val me: StateFlow<SessionState.InFamily?> = families.session
-        .filterIsInstance<SessionState.InFamily>()
+    private val me: StateFlow<SessionState.InFamily?> = families.inFamily
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val _query = MutableStateFlow("")

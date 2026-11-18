@@ -26,7 +26,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
@@ -53,11 +52,10 @@ class RoomsViewModel @Inject internal constructor(
     private val chores: ChoreRepository,
     private val changer: ChoreChanger,
 ) : ViewModel() {
-    private val session: StateFlow<SessionState.InFamily?> = families.session
-        .filterIsInstance<SessionState.InFamily>()
+    private val session: StateFlow<SessionState.InFamily?> = families.inFamily
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private val familySession = families.session.filterIsInstance<SessionState.InFamily>()
+    private val familySession = families.inFamily
 
     private val members = familySession.flatMapLatest { families.observeMembers(it.familyId) }
 

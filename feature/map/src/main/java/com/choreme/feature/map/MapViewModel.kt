@@ -24,7 +24,6 @@ import com.choreme.core.model.Role
 import com.choreme.core.model.location.LocationStatus
 import com.choreme.core.model.location.Place
 import com.choreme.core.model.location.locationStatus
-import com.choreme.core.model.session.SessionState
 import com.choreme.core.ui.ActionState
 import com.choreme.core.ui.runAction
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,7 +34,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.flatMapLatest
@@ -109,8 +107,7 @@ class MapViewModel @Inject internal constructor(
     private val permissions = MutableStateFlow(device.hasPermission() to device.hasBackgroundPermission())
     private val myFix = MutableStateFlow<DeviceFix?>(null)
 
-    val uiState: StateFlow<MapUiState> = families.session
-        .filterIsInstance<SessionState.InFamily>()
+    val uiState: StateFlow<MapUiState> = families.inFamily
         .flatMapLatest { session ->
             combine(
                 families.observeMembers(session.familyId),
@@ -141,8 +138,7 @@ class MapViewModel @Inject internal constructor(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MapUiState())
 
-    val onMyWay: StateFlow<OnMyWay> = families.session
-        .filterIsInstance<SessionState.InFamily>()
+    val onMyWay: StateFlow<OnMyWay> = families.inFamily
         .flatMapLatest { s ->
             combine(announcements.observeCurrent(s.familyId), families.observeMembers(s.familyId)) { (news, now), members ->
                 val names = members.associate { it.id to it.name }

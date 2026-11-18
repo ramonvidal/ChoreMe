@@ -42,6 +42,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Source
 import dagger.Lazy
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -67,6 +68,9 @@ class FamilyRepository @Inject constructor(
     private fun userPointer(uid: String) = db.collection(FirestoreSchema.USERS).document(uid)
 
     private fun requireUid(): String = checkNotNull(auth.currentAccount()) { "Not signed in" }.uid
+
+    /** The session while signed in to a family; nothing while signed out or still joining. What every tab reads. */
+    val inFamily: Flow<SessionState.InFamily> get() = session.filterIsInstance()
 
     val session: Flow<SessionState> = auth.account.flatMapLatest { account ->
         if (account == null) return@flatMapLatest flowOf(SessionState.SignedOut)

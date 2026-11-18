@@ -1,6 +1,6 @@
 module,key,quantity,english,baianes
 app,nav_home,,Home,Casa
-app,nav_today,,Chores,Corres
+app,nav_chores,,Chores,Corres
 app,nav_groceries,,Groceries,Feira
 app,nav_rooms,,Rooms,Cômodos
 app,nav_agenda,,Agenda,Agenda

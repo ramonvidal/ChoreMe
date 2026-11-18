@@ -114,7 +114,7 @@ import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun TodayScreen(
+internal fun ChoresScreen(
     onOpenGroceries: () -> Unit,
     openAdd: Boolean = false,
     onOpenAddHandled: () -> Unit = {},
@@ -149,7 +149,7 @@ internal fun TodayScreen(
     )
 }
 
-/** What the Chores tab can ask for; [TodayScreen] passes the view model's, tests pass their own. */
+/** What the Chores tab can ask for; [ChoresScreen] passes the view model's, tests pass their own. */
 internal class ChoresActions(
     val claim: (Chore) -> Unit = {},
     val unclaim: (Chore) -> Unit = {},

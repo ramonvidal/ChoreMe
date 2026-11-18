@@ -48,7 +48,7 @@ internal fun ChoresTabs(onOpenGroceries: () -> Unit, addRequested: Boolean, onAd
     Column(Modifier.fillMaxSize()) {
         ChoresSubTabs(tab.ordinal, lateRooms = lateRoomCount(rooms.rooms, rooms.today)) { tab = ChoresTab.entries[it] }
         when (tab) {
-            ChoresTab.CHORES -> TodayScreen(onOpenGroceries, openAdd = addRequested, onOpenAddHandled = onAddHandled)
+            ChoresTab.CHORES -> ChoresScreen(onOpenGroceries, openAdd = addRequested, onOpenAddHandled = onAddHandled)
             ChoresTab.ROOMS -> RoomsScreen(roomsModel)
         }
     }

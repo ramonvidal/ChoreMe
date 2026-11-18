@@ -2,7 +2,7 @@
 <!-- Baianês. Made from translations/baianes.csv by translations/i18n.py: edit the table, not this file. -->
 <resources>
     <string name="nav_home">Casa</string>
-    <string name="nav_today">Corres</string>
+    <string name="nav_chores">Corres</string>
     <string name="nav_groceries">Feira</string>
     <string name="nav_rooms">Cômodos</string>
     <string name="nav_agenda">Agenda</string>

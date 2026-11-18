@@ -25,7 +25,6 @@ import com.choreme.core.model.grocery.groceriesToBuy
 import com.choreme.core.model.home.DayTimeline
 import com.choreme.core.model.home.dayTimeline
 import com.choreme.core.model.location.Place
-import com.choreme.core.model.session.SessionState
 import com.choreme.core.location.RoutineLog
 import com.choreme.core.location.SharingChoice
 import com.choreme.core.model.Role
@@ -56,7 +55,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -120,8 +118,7 @@ class HomeViewModel @Inject internal constructor(
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    internal val state: StateFlow<HomeUiState> = families.session
-        .filterIsInstance<SessionState.InFamily>()
+    internal val state: StateFlow<HomeUiState> = families.inFamily
         .flatMapLatest { session ->
             val refresh = flow { while (true) { emit(Unit); delay(10.minutes) } }
             val inputs = combine(
