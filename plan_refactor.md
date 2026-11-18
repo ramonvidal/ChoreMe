@@ -1,6 +1,6 @@
 # Refactoring plan: simpler, smaller, same app
 
-Status: **draft for discussion**, nothing is built. Interface items (U1, U2) added the same day. Written 18 November 2026, after the owner asked to "simplify and
+Status: **agreed, not started**. Interface items (U1, U2) added the same day; the owner approved R3 and turned down R4. Written 18 November 2026, after the owner asked to "simplify and
 optimise the app once more". Each phase ships on its own with CI green; nothing here changes what families see unless
 the phase says so.
 
@@ -46,7 +46,7 @@ Move code only, no logic changes: `ChoresScreen` into the list, `ChoreCard` and 
 detail and dialogs; the chore editor into its sections; `GroceriesScreen`, `MapScreen` and `FamilyScreen` likewise.
 Goal: no file over about 350 lines. Screenshots must come out identical.
 
-### R3. Chore actions in one place (needs the owner's yes: a new core module)
+### R3. Chore actions in one place (approved by the owner, 18 November 2026: a new core module)
 
 Move `ChoreChanger` (apply a chore rule, save it, log a parent's finish, ping the family) into a new
 **`:core:chores`** module that may depend on `:core:model`, `:core:data` and `:core:push`. It goes into
@@ -56,7 +56,9 @@ Move `ChoreChanger` (apply a chore rule, save it, log a parent's finish, ping th
 - the widget can finish a chore without opening the app;
 - the morning summary and the weekly summary read chores the same way the tabs do.
 
-### R4. A simpler app for families (visible; each item needs the owner's yes)
+### R4. A simpler app for families: **not doing** (the owner said no, 18 November 2026)
+
+Kept here as a record. Six tabs stay, Casa keeps its cards, `:feature:update` stays its own module.
 
 1. **Five tabs instead of six.** Recommended: **Mapa** becomes a sub-tab of **Família** (people, where they are,
    notes). Casa, Corres, Mercado, Família, Ajustes. The two features stay separate modules; `:app` shows them under one
@@ -82,7 +84,7 @@ From the screenshots of release 0.145, every tab, light and Baianês.
 5. **Store screenshots in Portuguese with Portuguese content**: the pt-BR shots show "Hoover the living room",
    "Pharmacy", "Dinner's ready!". The store tests get Portuguese sample data.
 
-### U2. Interface changes that go with the five tabs (R4)
+### U2. More interface changes (the six tabs stay)
 
 1. **One way to add**: a "+" in the same place on every tab, instead of today's five (black button on Chores, floating
    button on Rooms, menu on Casa, a button mid-page on Notes, a yellow button on Trips).
@@ -90,9 +92,7 @@ From the screenshots of release 0.145, every tab, light and Baianês.
    The list chips become the header; "I'm at the shop" sits with the list.
 3. **Map**: "Share my location" and "Arrival alerts" are this phone's settings; they move to Settings > This phone. The
    Map keeps the map, the people and "On my way home".
-4. **Family** with sub-tabs **People**, **Notes** and **Map**, instead of one long page with messages, notes and
-   members (members at the very bottom).
-5. **TalkBack pass**: descriptions for every icon and button, checked with a screenshot test per tab.
+4. **TalkBack pass**: descriptions for every icon and button, checked with a screenshot test per tab.
 
 ### R5. Tests where there are none
 
@@ -113,10 +113,10 @@ Mapping tests for `:core:data` (Firestore fields to models and back, from plain 
 | R1 | none | low | 1 to 2 sessions |
 | R2 | none | low | 1 session |
 | R3 | Done button on Casa (and widget, if wanted) | medium, new module | 1 session |
-| R4 | five tabs, calmer Casa | medium, owner's choices | 1 to 2 sessions |
+| R4 | not doing | | |
 | U1 | undo, ⋮ menu, one header style, shorter chore cards, store shots in Portuguese | low | 1 to 2 sessions |
-| U2 | one "+", calmer Groceries, settings out of Map, Family sub-tabs, TalkBack | medium | 1 to 2 sessions, with R4 |
+| U2 | one "+", calmer Groceries, settings out of Map, TalkBack | medium | 1 to 2 sessions |
 | R5 | none | low | 1 session |
 
 Recommended order, agreed with the owner on 18 November 2026: **R1 and R2 first** (no visible change, smaller files to
-work in), then **U1**, then **R3, R4 with U2, and R5**. R3 and R4 still wait for the owner's yes.
+work in), then **U1**, then **R3** (approved), **U2** and **R5**. R4 was turned down.
