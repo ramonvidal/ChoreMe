@@ -99,6 +99,7 @@ class GroceriesTabScreenshotTest {
     @Test
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     fun storePt() {
-        shoot("store-3-groceries-pt", state, dark = false)
+        // A list the family named themselves, in Portuguese (the items show in Portuguese by themselves).
+        shoot("store-3-groceries-pt", state.copy(lists = listOf(FamilyList("p", "Farmácia", "mom"))), dark = false)
     }
 }

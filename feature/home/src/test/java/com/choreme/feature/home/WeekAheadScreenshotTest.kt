@@ -42,7 +42,10 @@ class WeekAheadScreenshotTest {
         PlanEntry("b", "ana", "Gym", setOf(DayOfWeek.TUESDAY), LocalTime.of(18, 30), 50, TripMode.WALK, "gym"),
     )
 
-    private fun outlook(): List<DayOutlook> {
+    /** The same trips named in Portuguese, for the Baianês store pictures. */
+    private val portugueseEntries = entries.map { it.copy(title = mapOf("Work" to "Trabalho", "Gym" to "Academia")[it.title] ?: it.title) }
+
+    private fun outlook(entries: List<PlanEntry> = this.entries): List<DayOutlook> {
         val monday = LocalDate.of(2026, 11, 16)
         fun hour(date: LocalDate, h: Int, code: Int, temp: Double, rain: Int, wind: Double) =
             WeatherHour(date.atTime(h, 0), temp, rainProbability = rain, rainMm = if (rain > 50) 0.4 else 0.0, windKmh = wind, humidity = 55, weatherCode = code)
@@ -59,7 +62,8 @@ class WeekAheadScreenshotTest {
 
     private val state get() = WeekAheadState(outlook(), members = listOf(ramon, ana), myMemberId = "ramon", hasTrips = true, loading = false)
 
-    private fun shootStore(name: String) {
+    private fun shootStore(name: String, pt: Boolean = false) {
+        val state = if (pt) state.copy(outlook = outlook(portugueseEntries)) else state
         compose.setContent {
             ChoreMeTheme(darkTheme = false, dynamicColor = false) {
                 Surface(Modifier.fillMaxSize()) {
@@ -80,7 +84,7 @@ class WeekAheadScreenshotTest {
 
     @Test
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
-    fun storePt() = shootStore("store-6-week-pt")
+    fun storePt() = shootStore("store-6-week-pt", pt = true)
 
     @Test
     fun weekAhead() {

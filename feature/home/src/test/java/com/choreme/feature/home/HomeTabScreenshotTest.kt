@@ -77,6 +77,24 @@ class HomeTabScreenshotTest {
         timeline = timeline,
     )
 
+    /** The same day typed in Portuguese, for the Baianês store pictures. */
+    private val portugueseState = state.copy(
+        yours = listOf(
+            YourTask(Chore("y1", "Aguar as plantas", dueDate = monday), null),
+            YourTask(Chore("y2", "Passar pano", dueDate = monday, roomId = "k"), Room("k", "Cozinha", RoomType.KITCHEN)),
+        ),
+        nudge = RoomNudge(Room("b", "Banheiro", RoomType.BATHROOM), Chore("n1", "Limpar o vaso", dueDate = monday.minusDays(9), roomId = "b"), 9),
+        timeline = timeline.copy(
+            allDay = listOf("Vovó vem visitar"),
+            entries = listOf(
+                trip("Ramon", "Trabalho", 8, TripMode.BIKE, listOf(hour(8, 6.0, 63, 80, 1.4))),
+                EventEntry(LocalTime.of(15, 30), "Dentista: Mia", "Dr. Weber"),
+                trip("Ana", "Academia", 18, TripMode.WALK, listOf(hour(18, 11.0, 0))),
+            ),
+            urgent = listOf(Chore("u1", "Vazamento debaixo da pia", dueDate = monday, urgent = true), Chore("u2", "Trocar o fusível", dueDate = monday, urgent = true)),
+        ),
+    )
+
     private fun shoot(name: String, state: HomeUiState, dark: Boolean) {
         compose.setContent {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
@@ -120,7 +138,10 @@ class HomeTabScreenshotTest {
 
     @Test
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
-    fun storePt() = shoot("store-1-home-pt", state, dark = false)
+    fun storePt() {
+        shoot("store-1-home-pt", portugueseState, dark = false)
+        compose.onNodeWithText("Vazamento debaixo da pia").assertExists()
+    }
 
     /** A new family: the getting-started card with two steps done. */
     @Test

@@ -59,6 +59,17 @@ class AgendaTabScreenshotTest {
         selectedDay = today.plusDays(1),
     )
 
+    /** The same week typed in Portuguese, for the Baianês store pictures. */
+    private val portugueseState: AgendaUiState get() {
+        val ptDays = listOf(
+            AgendaDay(today, listOf(event(1, "Natação", today, 17, "Clube")), listOf(Chore("c1", "Aspirar a casa", ChoreTemplate.VACUUM, dueDate = today))),
+            AgendaDay(today.plusDays(1), listOf(event(2, "Dentista: Mia", today.plusDays(1), 9), event(3, "Reunião de pais", today.plusDays(1), 19)), emptyList()),
+            AgendaDay(today.plusDays(2), emptyList(), emptyList()),
+            AgendaDay(today.plusDays(3), listOf(event(4, "Vovó vem visitar", today.plusDays(3), 12)), listOf(Chore("c2", "Aguar as plantas", ChoreTemplate.WATER_PLANTS, dueDate = today.plusDays(3)))),
+        )
+        return state.copy(calendars = listOf(family.copy(name = "Família")), days = ptDays, monthDays = ptDays.associateBy { it.date })
+    }
+
     private fun shoot(name: String, state: AgendaUiState, dark: Boolean) {
         compose.setContent {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
@@ -96,6 +107,6 @@ class AgendaTabScreenshotTest {
     @Test
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     fun storePt() {
-        shoot("store-5-agenda-pt", state.copy(view = AgendaView.MONTH), dark = false)
+        shoot("store-5-agenda-pt", portugueseState.copy(view = AgendaView.MONTH), dark = false)
     }
 }

@@ -69,6 +69,19 @@ class RoomsTabScreenshotTest {
         loading = false, rooms = roomOverviews(rooms, chores), canManage = true, today = today, me = ramon, members = members,
     )
 
+    /** The same rooms and tasks typed in Portuguese, for the Baianês store pictures. */
+    private val portugueseState: RoomsUiState get() {
+        val names = mapOf(
+            "Bathroom 1" to "Banheiro 1", "Kitchen" to "Cozinha", "Our bedroom" to "Nosso quarto",
+            "Leo and Mia's room" to "Quarto de Leo e Mia", "Garden" to "Jardim",
+            "Clean bathroom" to "Limpar o banheiro", "Clean the toilet" to "Limpar o vaso", "Wash the towels" to "Lavar as toalhas",
+            "Clean kitchen" to "Limpar a cozinha", "Change the sheets" to "Trocar os lençóis", "Water the plants" to "Aguar as plantas",
+        )
+        val ptRooms = rooms.map { it.copy(name = names[it.name] ?: it.name, description = "") }
+        val ptChores = chores.map { it.copy(title = names[it.title] ?: it.title) }
+        return state.copy(rooms = roomOverviews(ptRooms, ptChores))
+    }
+
     private fun shoot(name: String, state: RoomsUiState, dark: Boolean, open: String? = null) {
         compose.setContent {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
@@ -134,6 +147,7 @@ class RoomsTabScreenshotTest {
     @Test
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     fun storePt() {
-        shoot("store-4-rooms-pt", state, dark = false)
+        shoot("store-4-rooms-pt", portugueseState, dark = false)
+        compose.onNodeWithText("Cozinha").assertExists()
     }
 }

@@ -63,7 +63,26 @@ class ChoresTabScreenshotTest {
         ChoreDone("12", "Fold clothes", "mia", today.minusDays(3), points = 2, helpers = setOf("leo")),
     )
 
-    private fun state(me: Member, pointsOn: Boolean = true) = ChoresUiState(
+    /** The same chores typed in Portuguese, for the Baianês store pictures. */
+    private val portuguese = mapOf(
+        "Water leak under the sink" to "Vazamento debaixo da pia",
+        "Hoover the living room" to "Aspirar a sala",
+        "Tidy the garage" to "Arrumar a garagem",
+        "Wash dishes" to "Lavar a louça",
+        "Laundry" to "Lavar roupa",
+        "Clean the bathroom" to "Limpar o banheiro",
+        "Take out the trash" to "Botar o lixo pra fora",
+        "Water the plants" to "Aguar as plantas",
+        "Pay the rent" to "Pagar o aluguel",
+        "Make the beds" to "Arrumar as camas",
+    )
+
+    private fun state(me: Member, pointsOn: Boolean = true, pt: Boolean = false): ChoresUiState {
+        val chores = if (pt) chores.map { it.copy(title = portuguese[it.title] ?: it.title) } else chores
+        return stateOf(chores, me, pointsOn)
+    }
+
+    private fun stateOf(chores: List<Chore>, me: Member, pointsOn: Boolean) = ChoresUiState(
         loading = false,
         familyId = "f",
         me = me,
@@ -76,12 +95,12 @@ class ChoresTabScreenshotTest {
         pointsOn = pointsOn,
     )
 
-    private fun shoot(name: String, me: Member, dark: Boolean, fontScale: Float = 1f, pointsOn: Boolean = true) {
+    private fun shoot(name: String, me: Member, dark: Boolean, fontScale: Float = 1f, pointsOn: Boolean = true, pt: Boolean = false) {
         compose.setContent {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
                 CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
                 Surface(Modifier.fillMaxSize()) {
-                    Column { ChoresSubTabs(0) {}; ChoresContent(state(me, pointsOn), reminders = emptyMap(), onOpenGroceries = {}, actions = ChoresActions()) }
+                    Column { ChoresSubTabs(0) {}; ChoresContent(state(me, pointsOn, pt), reminders = emptyMap(), onOpenGroceries = {}, actions = ChoresActions()) }
                 }
             }
             }
@@ -147,7 +166,8 @@ class ChoresTabScreenshotTest {
     @Test
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     fun storePt() {
-        shoot("store-2-chores-pt", mom, dark = false)
+        shoot("store-2-chores-pt", mom, dark = false, pt = true)
+        compose.onNodeWithText("Aspirar a sala").assertExists()
     }
 }
 

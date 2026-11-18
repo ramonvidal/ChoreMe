@@ -73,7 +73,20 @@ class FamilyTabScreenshotTest {
         today = today,
     )
 
-    private fun shoot(name: String, dark: Boolean, fontScale: Float = 1f) {
+    /** The same family writing in Portuguese, for the Baianês store pictures. */
+    private val portugueseState = state.copy(
+        family = Family("f", "Os Vidal", "ABC234"),
+        notes = listOf(
+            Note("1", "Vovó chega sexta às 18h", "ana", Instant.now().minusSeconds(7200)),
+            Note("2", "Wi-Fi: CasaVidal / senha na geladeira", "mom", Instant.now().minusSeconds(86_400)),
+        ),
+        messages = listOf(
+            FamilyMessage("m2", "A comida tá pronta!", "ana", Instant.now().minusSeconds(120)),
+            FamilyMessage("m1", "Vou chegar 20 minutos atrasado, podem começar", "mom", Instant.now().minusSeconds(3600)),
+        ),
+    )
+
+    private fun shoot(name: String, dark: Boolean, fontScale: Float = 1f, state: FamilyUiState = this.state) {
         compose.setContent {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
                 CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
@@ -139,6 +152,7 @@ class FamilyTabScreenshotTest {
     @Test
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     fun storePt() {
-        shoot("store-7-family-pt", dark = false)
+        shoot("store-7-family-pt", dark = false, state = portugueseState)
+        compose.onNodeWithText("A comida tá pronta!").assertExists()
     }
 }
