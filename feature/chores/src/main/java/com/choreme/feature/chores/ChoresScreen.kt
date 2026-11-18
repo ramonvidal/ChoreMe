@@ -1,5 +1,9 @@
 package com.choreme.feature.chores
 
+import com.choreme.core.ui.ChoreNames
+import com.choreme.core.ui.R as CoreUiR
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import android.Manifest
@@ -86,6 +90,8 @@ internal fun ChoresScreen(
             create = { viewModel.create(it) },
             update = { chore, draft -> viewModel.update(chore, draft) },
             delete = { viewModel.delete(it) },
+            undoDelete = { viewModel.undoDelete(it) },
+            undo = { viewModel.undo(it) },
             removeSaved = { viewModel.removeSaved(it) },
             remind = { chore, time -> viewModel.remind(chore, time) },
             cancelReminder = { viewModel.cancelReminder(it) },
@@ -98,16 +104,20 @@ internal fun ChoresScreen(
 internal class ChoresActions(
     val claim: (Chore) -> Unit = {},
     val unclaim: (Chore) -> Unit = {},
-    val complete: (Chore) -> Unit = {},
+    /** Each step that can be undone returns what it changed, for the Undo button. */
+    val complete: (Chore) -> ChoreChange? = { null },
     val join: (Chore) -> Unit = {},
     val assign: (Chore, Set<String>) -> Unit = { _, _ -> },
-    val completeFor: (Chore, Set<String>) -> Unit = { _, _ -> },
-    val approve: (Chore) -> Unit = {},
+    val completeFor: (Chore, Set<String>) -> ChoreChange? = { _, _ -> null },
+    val approve: (Chore) -> ChoreChange? = { null },
+    val undo: (ChoreChange) -> Unit = {},
     val reject: (Chore) -> Unit = {},
     /** Returns the chore already on the list with that name, if any. */
     val create: (ChoreDraft) -> Chore? = { null },
     val update: (Chore, ChoreDraft) -> Unit = { _, _ -> },
+    /** Deleting waits a few seconds, so [undoDelete] can keep the chore. */
     val delete: (Chore) -> Unit = {},
+    val undoDelete: (Chore) -> Unit = {},
     val removeSaved: (SavedChore) -> Unit = {},
     val remind: (Chore, LocalTime) -> LocalDateTime = { _, time -> LocalDateTime.now().with(time) },
     val cancelReminder: (Chore) -> Unit = {},
@@ -143,6 +153,17 @@ internal fun ChoresContent(
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    // "Done · Undo" for a few seconds after a step, for the wrong tap (often a kid's).
+    fun offerUndo(message: Int, chore: Chore, change: ChoreChange) {
+        scope.launch {
+            val undo = snackbar.showSnackbar(
+                context.getString(message, ChoreNames.shown(context, chore.title)),
+                actionLabel = context.getString(CoreUiR.string.undo),
+                duration = SnackbarDuration.Short,
+            )
+            if (undo == SnackbarResult.ActionPerformed) actions.undo(change)
+        }
+    }
 
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
@@ -167,8 +188,9 @@ internal fun ChoresContent(
                             onClaim = { actions.claim(chore) },
                             onUnclaim = { actions.unclaim(chore) },
                             onComplete = {
-                                actions.complete(chore)
+                                val change = actions.complete(chore)
                                 finished(chore)
+                                change?.let { offerUndo(R.string.undo_done, chore, it) }
                             },
                             onDoneBy = { doneByFor = chore },
                             onJoin = { actions.join(chore) },
@@ -204,8 +226,9 @@ internal fun ChoresContent(
                         item(key = "awaiting-title") { SectionLabel(stringResource(R.string.section_awaiting)) }
                         items(board.awaitingApproval, key = { "awaiting-${it.id}" }) { chore ->
                             AwaitingCard(chore, state, onApprove = {
-                                    actions.approve(chore)
+                                    val change = actions.approve(chore)
                                     finished(chore, approved = true)
+                                    change?.let { offerUndo(R.string.undo_approved, chore, it) }
                                 }, onReject = { actions.reject(chore) })
                         }
                     }
@@ -266,7 +289,7 @@ internal fun ChoresContent(
         }
 
         SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp))
-        CheerBubble(cheer, onGone = { cheer = null }, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 88.dp))
+        CheerBubble(cheer, onGone = { cheer = null }, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 152.dp))
     }
 
     if (adding) {
@@ -303,6 +326,14 @@ internal fun ChoresContent(
             onDelete = {
                 actions.delete(chore)
                 editing = null
+                scope.launch {
+                    val undo = snackbar.showSnackbar(
+                        context.getString(R.string.undo_deleted, ChoreNames.shown(context, chore.title)),
+                        actionLabel = context.getString(CoreUiR.string.undo),
+                        duration = SnackbarDuration.Short,
+                    )
+                    if (undo == SnackbarResult.ActionPerformed) actions.undoDelete(chore)
+                }
             },
             onDismiss = { editing = null },
         )
@@ -330,8 +361,9 @@ internal fun ChoresContent(
             initial = chore.team,
             allowNone = false,
             onConfirm = { people ->
-                actions.completeFor(chore, people)
+                val change = actions.completeFor(chore, people)
                 doneByFor = null
+                change?.let { offerUndo(R.string.undo_done, chore, it) }
             },
             onDismiss = { doneByFor = null },
         )

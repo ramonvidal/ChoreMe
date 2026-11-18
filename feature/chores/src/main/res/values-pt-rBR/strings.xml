@@ -42,6 +42,9 @@
     <string name="someone">Alguém</string>
     <string name="add_chore">Tem coisa pra fazer</string>
     <string name="add_chore_title">O que tem pra fazer?</string>
+    <string name="undo_done">Feito: %1$s</string>
+    <string name="undo_approved">Aprovado: %1$s</string>
+    <string name="undo_deleted">Apagado: %1$s</string>
     <string name="already_on_list">%1$s já tá na lista</string>
     <string name="reported_by">%1$s viu</string>
     <string name="reported_by_you">Você viu</string>

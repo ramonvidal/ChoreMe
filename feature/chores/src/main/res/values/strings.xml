@@ -48,6 +48,9 @@
     <string name="someone">Someone</string>
     <string name="add_chore">Something needs doing</string>
     <string name="add_chore_title">What needs doing?</string>
+    <string name="undo_done">Done: %1$s</string>
+    <string name="undo_approved">Approved: %1$s</string>
+    <string name="undo_deleted">Deleted: %1$s</string>
     <string name="already_on_list">%1$s is already on the list</string>
     <string name="reported_by">%1$s noticed</string>
     <string name="reported_by_you">You noticed</string>

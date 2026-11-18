@@ -46,3 +46,17 @@ fun buildTodayBoard(chores: List<Chore>, today: LocalDate, memberId: String? = n
             .sortedWith(compareBy<Chore> { it.dueDate }.then(byTitle)),
     )
 }
+
+/** The board without some chores (say, ones being deleted that can still be undone). */
+fun TodayBoard.without(ids: Set<String>): TodayBoard {
+    if (ids.isEmpty()) return this
+    val keep = { c: Chore -> c.id !in ids }
+    return TodayBoard(
+        awaitingApproval = awaitingApproval.filter(keep),
+        toDo = toDo.filter(keep),
+        upcoming = upcoming.filter(keep),
+        doneToday = doneToday.filter(keep),
+        mine = mine.filter(keep),
+        later = later.filter(keep),
+    )
+}

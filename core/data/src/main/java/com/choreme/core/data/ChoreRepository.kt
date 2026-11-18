@@ -93,8 +93,9 @@ class ChoreRepository @Inject constructor(
             .mapNotNull { it.toChore() }
 
     /** Notes down a finished chore for "who did what this week" (parents only, see firestore.rules). */
-    fun logDone(familyId: String, done: ChoreDone) {
-        log(familyId).document()
+    fun logDone(familyId: String, done: ChoreDone): String {
+        val entry = log(familyId).document()
+        entry
             .set(
                 mapOf(
                     CHORE_ID to done.choreId,
@@ -107,6 +108,12 @@ class ChoreRepository @Inject constructor(
                 ),
             )
             .logFailure()
+        return entry.id
+    }
+
+    /** Takes a finish back out of the log (Undo). */
+    fun deleteLog(familyId: String, entryId: String) {
+        log(familyId).document(entryId).delete().logFailure()
     }
 
     /** Chores finished on [since] or later. */

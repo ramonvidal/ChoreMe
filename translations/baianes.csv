@@ -128,6 +128,9 @@ feature/chores,overdue_days,other,%d days late,%d dias atrasado
 feature/chores,someone,,Someone,Alguém
 feature/chores,add_chore,,Something needs doing,Tem coisa pra fazer
 feature/chores,add_chore_title,,What needs doing?,O que tem pra fazer?
+feature/chores,undo_done,,Done: %1$s,Feito: %1$s
+feature/chores,undo_approved,,Approved: %1$s,Aprovado: %1$s
+feature/chores,undo_deleted,,Deleted: %1$s,Apagado: %1$s
 feature/chores,already_on_list,,%1$s is already on the list,%1$s já tá na lista
 feature/chores,reported_by,,%1$s noticed,%1$s viu
 feature/chores,reported_by_you,,You noticed,Você viu

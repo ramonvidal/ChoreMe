@@ -130,7 +130,7 @@ service cloud.firestore {
     }
 
     // Kids can grab an open chore, join or leave one someone is doing, let go of one they
-    // hold (handing it to a helper, if any), or say they finished it. Kids only ever add or
+    // hold (handing it to a helper, if any), say they finished it, or take that back (Undo). Kids only ever add or
     // remove themselves. Finishing only sends it to a parent; kids never mark chores done.
     function isKidChoreStep(f) {
       let before = resource.data;
@@ -152,6 +152,10 @@ service cloud.firestore {
           || (before.status in ['OPEN', 'CLAIMED'] && (before.claimedBy == null || before.claimedBy == me || me in was)
               && after.status == 'PENDING_APPROVAL' && after.completedBy == me && now == was
               && after.claimedBy == (before.claimedBy == null ? me : before.claimedBy))
+          // Undo of their own "I'm done": on it again, as before saying it.
+          || (before.status == 'PENDING_APPROVAL' && before.completedBy == me
+              && after.status == 'CLAIMED' && after.claimedBy == before.claimedBy
+              && after.get('completedBy', null) == null && now == was)
         );
     }
 

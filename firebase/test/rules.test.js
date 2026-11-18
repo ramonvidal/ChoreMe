@@ -261,6 +261,15 @@ describe('chores', () => {
     await assertSucceeds(updateDoc(ref(db), { status: 'PENDING_APPROVAL', claimedBy: 'member-kid1', completedBy: 'member-kid1' }));
   });
 
+  test('a kid takes back their own "done" (Undo), and only that', async () => {
+    const leo = kidDevice('kid1');
+    await updateDoc(ref(leo), { status: 'PENDING_APPROVAL', claimedBy: 'member-kid1', completedBy: 'member-kid1' });
+    await assertFails(updateDoc(ref(kidDevice('kid2')), { status: 'CLAIMED', completedBy: null })); // not Mia's report
+    await assertFails(updateDoc(ref(leo), { status: 'OPEN', claimedBy: null, completedBy: null })); // only back to being on it
+    await assertFails(updateDoc(ref(leo), { status: 'CLAIMED', completedBy: null, claimedBy: 'member-kid2' }));
+    await assertSucceeds(updateDoc(ref(leo), { status: 'CLAIMED', completedBy: null }));
+  });
+
   test('a kid cannot grab a chore in someone else\'s name or take over a sibling\'s', async () => {
     await assertFails(updateDoc(ref(kidDevice('kid1')), { status: 'CLAIMED', claimedBy: 'member-kid2' }));
     await updateDoc(ref(kidDevice('kid2')), { status: 'CLAIMED', claimedBy: 'member-kid2' });
