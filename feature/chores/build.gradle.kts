@@ -8,6 +8,8 @@ android {
 }
 
 dependencies {
+    // Finishing, approving and undoing chores (shared with Casa).
+    implementation(projects.core.chores)
     // Telling the family's other phones when a chore is added.
     implementation(projects.core.push)
     implementation(projects.core.settings)

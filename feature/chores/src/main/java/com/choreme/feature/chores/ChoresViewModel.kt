@@ -1,5 +1,7 @@
 package com.choreme.feature.chores
 
+import com.choreme.core.chores.ChoreChange
+import com.choreme.core.chores.ChoreChanger
 import com.choreme.core.model.chore.without
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update

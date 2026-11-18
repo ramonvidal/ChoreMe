@@ -1,5 +1,10 @@
 package com.choreme.feature.home
 
+import com.choreme.core.ui.offerUndo
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -112,6 +117,9 @@ internal fun HomeScreen(
     var tab by rememberSaveable { mutableStateOf(HomeTab.TODAY) }
     // Counts the "New event" requests, so the Agenda sub-tab opens its dialog once per request.
     var newEvent by rememberSaveable { mutableIntStateOf(0) }
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    Box(Modifier.fillMaxSize()) {
     Column(Modifier.fillMaxSize()) {
         HomeSubTabs(tab.ordinal) { tab = HomeTab.entries[it] }
         when (tab) {
@@ -132,10 +140,17 @@ internal fun HomeScreen(
                     }
                 },
                 onHideSetup = viewModel::hideSetup,
+                onDone = { chore ->
+                    viewModel.complete(chore)?.let { change ->
+                        scope.launch { if (snackbar.offerUndo(context, R.string.home_done_undo, chore.title)) viewModel.undo(change) }
+                    }
+                },
             )
             HomeTab.AGENDA -> AgendaScreen(addRequest = newEvent)
             HomeTab.WEEK -> WeekAheadScreen(onPlanTrips = onOpenSettings)
         }
+    }
+    SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp))
     }
 }
 
@@ -150,6 +165,7 @@ internal fun HomeContent(
     setupSteps: List<StepState> = emptyList(),
     onSetupStep: (FirstStep) -> Unit = {},
     onHideSetup: () -> Unit = {},
+    onDone: (Chore) -> Unit = {},
 ) {
     var showWeather by rememberSaveable { mutableStateOf(false) }
     var addMenu by remember { mutableStateOf(false) }
@@ -208,7 +224,7 @@ internal fun HomeContent(
             }
             if (state.yours.isNotEmpty()) {
                 item(key = "yours-title") { SectionLabel(stringResource(R.string.home_yours)) }
-                item(key = "yours") { YoursCard(state.yours, onClick = onOpenChores) }
+                item(key = "yours") { YoursCard(state.yours, onClick = onOpenChores, onDone = onDone) }
             }
             state.nudge?.let { nudge ->
                 item(key = "nudge-title") { SectionLabel(stringResource(R.string.home_nudge_title)) }
@@ -275,7 +291,7 @@ private val FirstStep.action: Int
 
 /** Everything this person took, the house's chores and the tasks of the rooms together; a room task names its room. Tap opens Chores. */
 @Composable
-private fun YoursCard(tasks: List<YourTask>, onClick: () -> Unit) {
+private fun YoursCard(tasks: List<YourTask>, onClick: () -> Unit, onDone: (Chore) -> Unit) {
     NosCard(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         tasks.forEachIndexed { index, task ->
             if (index > 0) HorizontalDivider(Modifier.padding(vertical = 6.dp), color = MaterialTheme.colorScheme.outlineVariant)
@@ -290,6 +306,8 @@ private fun YoursCard(tasks: List<YourTask>, onClick: () -> Unit) {
                         }
                     }
                 }
+                // Finished right here, as on the Chores tab (a kid's goes to a parent); Undo follows.
+                NosButton(stringResource(R.string.home_done), { onDone(task.chore) }, style = NosButtonStyle.Tonal)
             }
         }
     }

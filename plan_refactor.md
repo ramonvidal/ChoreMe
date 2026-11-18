@@ -1,6 +1,6 @@
 # Refactoring plan: simpler, smaller, same app
 
-Status: **agreed; R1, R2 and U1 done 18 November 2026** (CI green; Undo also on Rooms). Next: R3. Interface items (U1, U2) added the same day; the owner approved R3 and turned down R4. Written 18 November 2026, after the owner asked to "simplify and
+Status: **agreed; R1, R2 and U1 done 18 November 2026** (CI green; Undo also on Rooms). R3 built (waiting for CI); then U2 and R5. Interface items (U1, U2) added the same day; the owner approved R3 and turned down R4. Written 18 November 2026, after the owner asked to "simplify and
 optimise the app once more". Each phase ships on its own with CI green; nothing here changes what families see unless
 the phase says so.
 

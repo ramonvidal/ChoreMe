@@ -1,5 +1,7 @@
 package com.choreme.feature.chores
 
+import com.choreme.core.chores.ChoreChange
+import com.choreme.core.chores.ChoreChanger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.choreme.core.data.ChoreRepository

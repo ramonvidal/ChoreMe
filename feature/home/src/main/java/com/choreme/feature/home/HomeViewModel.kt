@@ -1,5 +1,8 @@
 package com.choreme.feature.home
 
+import com.choreme.core.model.chore.complete
+import com.choreme.core.chores.ChoreChange
+import com.choreme.core.chores.ChoreChanger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.choreme.core.calendar.CalendarChoice
@@ -100,6 +103,7 @@ class HomeViewModel @Inject internal constructor(
     private val routine: RoutineLog,
     sharing: SharingChoice,
     hints: HintSettings,
+    private val changer: ChoreChanger,
 ) : ViewModel() {
     private val sharingNow = sharing.isSharing
     private val setupHidden = hints.firstRunHidden
@@ -146,6 +150,25 @@ class HomeViewModel @Inject internal constructor(
     private class House(val locations: List<MemberLocation>, val animated: Boolean, val sharing: Boolean, val setupHidden: Boolean, val rooms: List<Room>)
 
     internal fun hideSetup() = hintSettings.hideFirstRun()
+
+    // Who is looking and the family, for "Done" on For you today (the same rules as the Chores tab).
+    private val sessionNow = families.inFamily.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    private val membersNow = families.inFamily.flatMapLatest { families.observeMembers(it.familyId) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    /** "Done" on one of yours: a parent's counts at once, a kid's goes to a parent. What changed, for Undo. */
+    internal fun complete(chore: com.choreme.core.model.chore.Chore): ChoreChange? {
+        val session = sessionNow.value ?: return null
+        val me = membersNow.value.firstOrNull { it.id == session.memberId } ?: return null
+        val parents = membersNow.value.filter { it.role == Role.PARENT }.map { it.id }.toSet()
+        return changer.change(viewModelScope, session.familyId, me, parents, chore) { who, today -> complete(who, today) }
+    }
+
+    internal fun undo(change: ChoreChange) {
+        val session = sessionNow.value ?: return
+        val me = membersNow.value.firstOrNull { it.id == session.memberId } ?: return
+        changer.undo(session.familyId, me, change)
+    }
 
     private fun eventsToday(selected: Set<Long>?) = if (!calendar.hasPermission() || selected.isNullOrEmpty()) {
         flowOf(emptyList())

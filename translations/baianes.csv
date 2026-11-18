@@ -475,6 +475,8 @@ feature/home,home_groceries,one,%d item to buy,%d item pra comprar
 feature/home,home_groceries,other,%d items to buy,%d itens pra comprar
 feature/home,home_timeline,,The day,O dia
 feature/home,home_yours,,For you today,Pra você hoje
+feature/home,home_done,,Done,Feito
+feature/home,home_done_undo,,Done: %1$s,Feito: %1$s
 feature/home,home_nudge_title,,Worth a look,Dê uma espiada
 feature/home,home_nudge,one,"%1$s: %2$s, %3$d day overdue and nobody on it","%1$s: %2$s, %3$d dia atrasado e ninguém nessa"
 feature/home,home_nudge,other,"%1$s: %2$s, %3$d days overdue and nobody on it","%1$s: %2$s, %3$d dias atrasado e ninguém nessa"

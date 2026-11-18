@@ -38,6 +38,8 @@
     <string name="home_urgent_more">e mais %d</string>
     <string name="home_timeline">O dia</string>
     <string name="home_yours">Pra você hoje</string>
+    <string name="home_done">Feito</string>
+    <string name="home_done_undo">Feito: %1$s</string>
     <string name="home_nudge_title">Dê uma espiada</string>
     <string name="home_all_day">O dia todo</string>
     <string name="home_nothing_title">Dia tranquilo</string>

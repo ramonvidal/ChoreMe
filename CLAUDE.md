@@ -23,6 +23,7 @@ in the way and what you propose, before writing the code.
 | `:core:update` | Updating the app itself: checks the GitHub release page, downloads the APK, hands it to Android's installer | `:core:model` |
 | `:core:weather` | The weather forecast, air quality and pollen for the places and times of the family's routine (Open-Meteo: free, no key; only coordinates rounded to about 1 km leave the phone) | `:core:model` |
 | `:core:push` | Free instant wake-up pings between family phones (UnifiedPush, e.g. the ntfy app). Pings carry no family data; features react through `PushListener` | `:core:model` |
+| `:core:chores` | Doing things to chores the same way on every screen (finish, approve, undo...): the rules from `:core:model`, saved through `:core:data`, the family pinged through `:core:push`. Used by Chores, Rooms and Casa | `:core:model`, `:core:data`, `:core:push` |
 | `:feature:<name>` | One tab or flow: `onboarding`, `home` (Casa: the weather house, the day, Agenda and the week ahead as sub-tabs), `chores` (with Rooms as a sub-tab), `groceries`, `map`, `family`, `settings` (the family's points switch, the regular trips plan, "This phone"), `widget`, `update` | `:core:*` only |
 | `:app` | Wires features together: activity, root screen, navigation | anything; nothing depends on it |
 

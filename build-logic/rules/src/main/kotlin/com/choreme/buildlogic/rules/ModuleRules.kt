@@ -29,6 +29,9 @@ object ModuleRules {
         ":core:update" to setOf(":core:model"),
         // Forecasts for the places and times of the family's routine (Open-Meteo, free, no key).
         ":core:weather" to setOf(":core:model"),
+        // Chore actions shared by Chores, Rooms and Casa (finish, approve, undo...): the rules, saving, and pinging
+        // the family. Approved by the owner on 18 November 2026 (refactoring plan, R3).
+        ":core:chores" to setOf(":core:model", ":core:data", ":core:push"),
     )
 
     val PURE_KOTLIN: Set<String> = setOf(":core:model")

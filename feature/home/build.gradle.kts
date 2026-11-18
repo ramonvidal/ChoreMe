@@ -8,6 +8,8 @@ android {
 }
 
 dependencies {
+    // "Done" on the chores and room tasks of For you today.
+    implementation(projects.core.chores)
     // The day's calendar events.
     implementation(projects.core.calendar)
     // The weather outside and for the family's trips.

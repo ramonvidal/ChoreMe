@@ -1,12 +1,5 @@
 package com.choreme.feature.chores
 
-import android.content.Context
-import androidx.annotation.StringRes
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
-import com.choreme.core.ui.ChoreNames
-import com.choreme.core.ui.R as CoreUiR
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -46,11 +39,3 @@ internal class PendingDeletes(private val scope: CoroutineScope, private val del
         waiting.value = emptyMap()
     }
 }
-
-/** "Done: Dishes · Undo" for a few seconds; true when the person tapped Undo. */
-internal suspend fun SnackbarHostState.offerUndo(context: Context, @StringRes message: Int, choreTitle: String): Boolean =
-    showSnackbar(
-        context.getString(message, ChoreNames.shown(context, choreTitle)),
-        actionLabel = context.getString(CoreUiR.string.undo),
-        duration = SnackbarDuration.Short,
-    ) == SnackbarResult.ActionPerformed

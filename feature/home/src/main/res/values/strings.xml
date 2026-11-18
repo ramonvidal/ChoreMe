@@ -68,6 +68,8 @@
     </plurals>
     <string name="home_timeline">The day</string>
     <string name="home_yours">For you today</string>
+    <string name="home_done">Done</string>
+    <string name="home_done_undo">Done: %1$s</string>
     <string name="home_nudge_title">Worth a look</string>
     <plurals name="home_nudge">
         <item quantity="one">%1$s: %2$s, %3$d day overdue and nobody on it</item>

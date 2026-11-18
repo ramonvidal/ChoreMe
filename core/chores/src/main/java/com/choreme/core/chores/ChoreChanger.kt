@@ -1,4 +1,4 @@
-package com.choreme.feature.chores
+package com.choreme.core.chores
 
 import android.util.Log
 import com.choreme.core.data.ChoreRepository
@@ -18,14 +18,14 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 /** One step taken on a chore, kept for a few seconds so it can be undone. [logId] is its "who did what" entry, if any. */
-internal data class ChoreChange(val before: Chore, val after: Chore, val logId: String?)
+data class ChoreChange(val before: Chore, val after: Chore, val logId: String?)
 
 /**
- * Applies one of the chore rules from :core:model and saves the result, for the Chores list and for the tasks of the
- * Rooms alike: a rule that refuses (say, someone grabbed the chore a moment ago) leaves the chore as it is, a parent's
+ * Applies one of the chore rules from :core:model and saves the result, for the Chores list, the tasks of the Rooms
+ * and Casa alike: a rule that refuses (say, someone grabbed the chore a moment ago) leaves the chore as it is, a parent's
  * finish goes into "who did what this week", and a kid's finish pings the parents to check it.
  */
-internal class ChoreChanger @Inject constructor(
+class ChoreChanger @Inject constructor(
     private val chores: ChoreRepository,
     private val endpoints: PushEndpointRepository,
     private val push: PushSender,

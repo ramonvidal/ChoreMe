@@ -1,5 +1,7 @@
 package com.choreme.feature.chores
 
+import com.choreme.core.ui.offerUndo
+import com.choreme.core.chores.ChoreChange
 import com.choreme.core.ui.TabHeader
 import com.choreme.core.ui.ChoreNames
 import com.choreme.core.ui.R as CoreUiR
