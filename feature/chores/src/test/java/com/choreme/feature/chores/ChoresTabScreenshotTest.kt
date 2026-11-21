@@ -103,7 +103,7 @@ class ChoresTabScreenshotTest {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
                 CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
                 Surface(Modifier.fillMaxSize()) {
-                    Column { ChoresSubTabs(0) {}; ChoresContent(state(me, pointsOn, pt), reminders = emptyMap(), onOpenGroceries = {}, actions = ChoresActions(), rooms = RoomsLink(hasRooms = true, late = 1)) }
+                    Column { ChoresSubTabs(0, lateRooms = 1) {}; ChoresContent(state(me, pointsOn, pt), reminders = emptyMap(), onOpenGroceries = {}, actions = ChoresActions(), rooms = RoomsLink(hasRooms = true, late = 1)) }
                 }
             }
             }

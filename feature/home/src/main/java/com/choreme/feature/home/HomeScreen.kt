@@ -239,10 +239,11 @@ internal fun HomeContent(
                 }
                 // The day's title, with the way to the other sub-tabs right where people look for "what's on".
             item(key = "timeline-title") {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-                    SectionLabel(stringResource(R.string.home_timeline), Modifier.weight(1f))
-                    TextButton(onClick = onOpenAgenda) { Text(stringResource(R.string.home_see_agenda)) }
-                    TextButton(onClick = onOpenWeek) { Text(stringResource(R.string.home_see_week)) }
+                // Lined up on the text, so the links sit on the same line as the title.
+                Row(Modifier.fillMaxWidth()) {
+                    SectionLabel(stringResource(R.string.home_timeline), Modifier.weight(1f).alignByBaseline())
+                    TextButton(onClick = onOpenAgenda, modifier = Modifier.alignByBaseline()) { Text(stringResource(R.string.home_see_agenda)) }
+                    TextButton(onClick = onOpenWeek, modifier = Modifier.alignByBaseline()) { Text(stringResource(R.string.home_see_week)) }
                 }
             }
                 item(key = "timeline") {
