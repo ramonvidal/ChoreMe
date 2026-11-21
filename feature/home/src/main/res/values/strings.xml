@@ -144,4 +144,6 @@
         <item quantity="other">%d events</item>
     </plurals>
     <string name="month_cell_chores">chores due</string>
+    <string name="home_see_agenda">Agenda ›</string>
+    <string name="home_see_week">Week ›</string>
 </resources>

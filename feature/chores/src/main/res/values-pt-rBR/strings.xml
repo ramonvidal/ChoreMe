@@ -203,6 +203,8 @@
     <string name="tab_chores">Corres</string>
     <string name="tab_rooms">Cômodos</string>
     <string name="add_chore_short">Adicionar</string>
+    <string name="rooms_link_ok">Cômodos: tudo em dia</string>
+    <string name="rooms_link_open">Ver ›</string>
     <plurals name="overdue_days">
         <item quantity="one">%d dia atrasado</item>
         <item quantity="other">%d dias atrasado</item>
@@ -262,5 +264,9 @@
     <plurals name="every_days_choice">
         <item quantity="one">Todo dia</item>
         <item quantity="other">A cada %d dias</item>
+    </plurals>
+    <plurals name="rooms_link_late">
+        <item quantity="one">Cômodos: %d atrasado</item>
+        <item quantity="other">Cômodos: %d atrasados</item>
     </plurals>
 </resources>

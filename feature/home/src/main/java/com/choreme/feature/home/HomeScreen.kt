@@ -1,5 +1,9 @@
 package com.choreme.feature.home
 
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.pager.HorizontalPager
 import com.choreme.core.ui.AddButton
 import com.choreme.core.ui.offerUndo
 import kotlinx.coroutines.launch
@@ -82,11 +86,12 @@ private enum class HomeTab { TODAY, AGENDA, WEEK }
 
 /** Today / Agenda / Week under the top edge. */
 @Composable
-internal fun HomeSubTabs(selected: Int, onSelect: (Int) -> Unit) {
+internal fun HomeSubTabs(selected: Int, eventsToday: Int = 0, onSelect: (Int) -> Unit) {
     SubTabs(
         listOf(
             SubTab(stringResource(R.string.home_tab_today), CoreUiR.drawable.ic_tab_today),
-            SubTab(stringResource(R.string.home_tab_agenda), CoreUiR.drawable.ic_tab_agenda),
+            // How many events are still to come today: news, not a warning, so a quiet grey count.
+            SubTab(stringResource(R.string.home_tab_agenda), CoreUiR.drawable.ic_tab_agenda, badge = eventsToday, alert = false),
             SubTab(stringResource(R.string.home_tab_week), CoreUiR.drawable.ic_tab_week),
         ),
         selected,
@@ -115,21 +120,27 @@ internal fun HomeScreen(
     val setupSteps = state.setup?.let { facts ->
         firstRunSteps(facts.copy(notificationsAllowed = notificationsAllowed)).takeIf { showFirstRun(it, state.setupHidden) }
     }.orEmpty()
-    var tab by rememberSaveable { mutableStateOf(HomeTab.TODAY) }
+    // The sub-tabs swipe too; the pager remembers the page across going to another tab and back.
+    var savedTab by rememberSaveable { mutableIntStateOf(HomeTab.TODAY.ordinal) }
+    val pager = rememberPagerState(initialPage = savedTab) { HomeTab.entries.size }
+    LaunchedEffect(pager.currentPage) { savedTab = pager.currentPage }
     // Counts the "New event" requests, so the Agenda sub-tab opens its dialog once per request.
     var newEvent by rememberSaveable { mutableIntStateOf(0) }
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     Box(Modifier.fillMaxSize()) {
     Column(Modifier.fillMaxSize()) {
-        HomeSubTabs(tab.ordinal) { tab = HomeTab.entries[it] }
-        when (tab) {
+        HomeSubTabs(pager.currentPage, eventsToday = state.timeline?.eventCount ?: 0) { scope.launch { pager.animateScrollToPage(it) } }
+        HorizontalPager(pager, Modifier.fillMaxSize(), verticalAlignment = Alignment.Top) { page ->
+        when (HomeTab.entries[page]) {
             HomeTab.TODAY -> HomeContent(
                 state,
                 onOpenChores = onOpenChores,
                 onAddChore = onAddChore,
                 onOpenGroceries = onOpenGroceries,
-                onAddEvent = { newEvent++; tab = HomeTab.AGENDA },
+                onAddEvent = { newEvent++; scope.launch { pager.animateScrollToPage(HomeTab.AGENDA.ordinal) } },
+                onOpenAgenda = { scope.launch { pager.animateScrollToPage(HomeTab.AGENDA.ordinal) } },
+                onOpenWeek = { scope.launch { pager.animateScrollToPage(HomeTab.WEEK.ordinal) } },
                 setupSteps = setupSteps,
                 onSetupStep = { step ->
                     when (step) {
@@ -150,6 +161,7 @@ internal fun HomeScreen(
             HomeTab.AGENDA -> AgendaScreen(addRequest = newEvent)
             HomeTab.WEEK -> WeekAheadScreen(onPlanTrips = onOpenSettings)
         }
+        }
     }
     SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 88.dp))
     }
@@ -167,6 +179,8 @@ internal fun HomeContent(
     onSetupStep: (FirstStep) -> Unit = {},
     onHideSetup: () -> Unit = {},
     onDone: (Chore) -> Unit = {},
+    onOpenAgenda: () -> Unit = {},
+    onOpenWeek: () -> Unit = {},
 ) {
     var showWeather by rememberSaveable { mutableStateOf(false) }
     var addMenu by remember { mutableStateOf(false) }
@@ -223,7 +237,14 @@ internal fun HomeContent(
                     item(key = "nudge-title") { SectionLabel(stringResource(R.string.home_nudge_title)) }
                     item(key = "nudge") { NudgeCard(nudge, onClick = onOpenChores) }
                 }
-                item(key = "timeline-title") { SectionLabel(stringResource(R.string.home_timeline)) }
+                // The day's title, with the way to the other sub-tabs right where people look for "what's on".
+            item(key = "timeline-title") {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+                    SectionLabel(stringResource(R.string.home_timeline), Modifier.weight(1f))
+                    TextButton(onClick = onOpenAgenda) { Text(stringResource(R.string.home_see_agenda)) }
+                    TextButton(onClick = onOpenWeek) { Text(stringResource(R.string.home_see_week)) }
+                }
+            }
                 item(key = "timeline") {
                     if (timeline.isEmpty) {
                         EmptyState(title = stringResource(R.string.home_nothing_title), body = stringResource(R.string.home_nothing_body))

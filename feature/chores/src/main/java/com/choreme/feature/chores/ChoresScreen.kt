@@ -1,5 +1,9 @@
 package com.choreme.feature.chores
 
+import com.choreme.core.ui.ItemIcon
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import com.choreme.core.ui.AddButton
 import com.choreme.core.ui.offerUndo
 import com.choreme.core.chores.ChoreChange
@@ -71,12 +75,16 @@ internal fun ChoresScreen(
     onOpenGroceries: () -> Unit,
     openAdd: Boolean = false,
     onOpenAddHandled: () -> Unit = {},
+    rooms: RoomsLink = RoomsLink(),
+    onOpenRooms: () -> Unit = {},
     viewModel: ChoresViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val reminders by viewModel.reminders.collectAsStateWithLifecycle()
     AskForNotificationPermission()
     ChoresContent(
+        rooms = rooms,
+        onOpenRooms = onOpenRooms,
         state = state,
         reminders = reminders,
         onOpenGroceries = onOpenGroceries,
@@ -102,6 +110,34 @@ internal fun ChoresScreen(
             addToCalendar = { viewModel.addToCalendar(it) },
         ),
     )
+}
+
+/** How the rooms are doing, for the link to the Rooms sub-tab on the Chores list. */
+internal data class RoomsLink(val hasRooms: Boolean = false, val late: Int = 0)
+
+/** "Rooms: 1 late ›" (red) or "Rooms: all on track ›": the Rooms sub-tab, one tap away. */
+@Composable
+internal fun RoomsLinkRow(rooms: RoomsLink, onOpen: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (rooms.late > 0) colors.errorContainer else colors.surfaceVariant)
+            .clickable(onClick = onOpen)
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        ItemIcon(CoreUiR.drawable.ic_tab_rooms, Modifier.size(18.dp), tint = if (rooms.late > 0) colors.onErrorContainer else colors.onSurfaceVariant)
+        Text(
+            if (rooms.late > 0) pluralStringResource(R.plurals.rooms_link_late, rooms.late, rooms.late) else stringResource(R.string.rooms_link_ok),
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (rooms.late > 0) colors.onErrorContainer else colors.onSurface,
+            modifier = Modifier.weight(1f),
+        )
+        Text(stringResource(R.string.rooms_link_open), style = MaterialTheme.typography.labelLarge, color = if (rooms.late > 0) colors.onErrorContainer else colors.onSurface)
+    }
 }
 
 /** What the Chores tab can ask for; [ChoresScreen] passes the view model's, tests pass their own. */
@@ -137,6 +173,8 @@ internal fun ChoresContent(
     actions: ChoresActions,
     openAdd: Boolean = false,
     onOpenAddHandled: () -> Unit = {},
+    rooms: RoomsLink = RoomsLink(),
+    onOpenRooms: () -> Unit = {},
 ) {
     var cheer by remember { mutableStateOf<Cheer?>(null) }
     val haptics = LocalHapticFeedback.current
@@ -171,6 +209,8 @@ internal fun ChoresContent(
             item(key = "header") {
                 ChoresHeader(state, onOpenGroceries, onAdd = { adding = true })
             }
+            // The way to the Rooms sub-tab, with how they're doing, right under the header.
+            if (rooms.hasRooms) item(key = "rooms-link") { RoomsLinkRow(rooms, onOpenRooms) }
             when {
                 state.loading -> item(key = "loading") {
                     Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }

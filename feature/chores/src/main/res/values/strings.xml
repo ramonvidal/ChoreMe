@@ -286,4 +286,10 @@
     <string name="tab_chores">Chores</string>
     <string name="tab_rooms">Rooms</string>
     <string name="add_chore_short">Add</string>
+    <plurals name="rooms_link_late">
+        <item quantity="one">Rooms: %d is late</item>
+        <item quantity="other">Rooms: %d are late</item>
+    </plurals>
+    <string name="rooms_link_ok">Rooms: all on track</string>
+    <string name="rooms_link_open">See ›</string>
 </resources>

@@ -317,6 +317,10 @@ feature/chores,idea_mow_lawn,,Mow the lawn,Cortar a grama
 feature/chores,tab_chores,,Chores,Corres
 feature/chores,tab_rooms,,Rooms,Cômodos
 feature/chores,add_chore_short,,Add,Adicionar
+feature/chores,rooms_link_late,one,Rooms: %d is late,Cômodos: %d atrasado
+feature/chores,rooms_link_late,other,Rooms: %d are late,Cômodos: %d atrasados
+feature/chores,rooms_link_ok,,Rooms: all on track,Cômodos: tudo em dia
+feature/chores,rooms_link_open,,See ›,Ver ›
 feature/family,family_invite_hint,,Share this code so others can ask to join:,Mande este código pra galera pedir pra entrar:
 feature/family,family_share_invite,,Share invite code,Mandar o código de convite
 feature/family,family_invite_message,,Join the %1$s family on Nos Corre! with the code %2$s,Entra na família %1$s no Nos Corre! com o código %2$s
@@ -545,6 +549,8 @@ feature/home,gs_hide,,Hide this,Esconder isso
 feature/home,month_cell_events,one,%d event,%d compromisso
 feature/home,month_cell_events,other,%d events,%d compromissos
 feature/home,month_cell_chores,,chores due,tem corre
+feature/home,home_see_agenda,,Agenda ›,Agenda ›
+feature/home,home_see_week,,Week ›,Semana ›
 feature/map,share_title,,Share my location,Dividir minha localização
 feature/map,share_body_off,,Off. The family can't see where you are.,Desligado. A família não vê onde você tá.
 feature/map,share_body_on,,"On. The family sees roughly where you are, updated every 15 minutes or so. Turn it off any time.","Ligado. A família vê mais ou menos onde você tá, atualizado de 15 em 15 minutos mais ou menos. Desligue quando quiser."
