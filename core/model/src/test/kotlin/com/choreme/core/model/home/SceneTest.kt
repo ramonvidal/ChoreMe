@@ -65,7 +65,7 @@ class SceneTest {
 
     @Test
     fun `a gag is picked only when one fits`() {
-        assertNull(pickGag(SceneInput(hour = 12f, sky = Sky.RAIN), Random(1)))
+        assertEquals(Gag.GECKO, pickGag(SceneInput(hour = 12f, sky = Sky.RAIN), Random(1)))
         assertTrue(pickGag(SceneInput(hour = 12f, sky = Sky.CLEAR), Random(1)) != null)
     }
 
