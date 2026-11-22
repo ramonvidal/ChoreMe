@@ -43,7 +43,8 @@ class SceneTest {
         val sunny = SceneInput(hour = 12f, sky = Sky.CLEAR, windKmh = 12f)
         assertTrue(Gag.BIRD in eligibleGags(sunny) && Gag.KITE in eligibleGags(sunny) && Gag.BUTTERFLY in eligibleGags(sunny))
         val rainy = SceneInput(hour = 12f, sky = Sky.RAIN)
-        assertEquals(emptyList<Gag>(), eligibleGags(rainy))
+        // In the rain only the gecko comes out, on the wall under the eaves.
+        assertEquals(listOf(Gag.GECKO), eligibleGags(rainy))
         val night = SceneInput(hour = 23f, sky = Sky.CLEAR)
         assertTrue(Gag.SHOOTING_STAR in eligibleGags(night))
         assertFalse(Gag.BIRD in eligibleGags(night))
@@ -91,5 +92,60 @@ class SceneTest {
     fun `wind scales between calm and a gale`() {
         assertEquals(0.1f, SceneInput(windKmh = 0f).wind, 0f)
         assertEquals(1.6f, SceneInput(windKmh = 90f).wind, 0f)
+    }
+
+    @Test
+    fun `Bahia's own dates and the family days`() {
+        assertEquals(LocalDate.of(2026, 1, 15), bonfimDay(2026))
+        assertEquals(LocalDate.of(2025, 1, 16), bonfimDay(2025))
+        assertEquals(Occasion.BONFIM, occasionOn(LocalDate.of(2026, 1, 15)))
+        assertEquals(Occasion.IEMANJA, occasionOn(LocalDate.of(2026, 2, 2)))
+        assertEquals(Occasion.DOIS_DE_JULHO, occasionOn(LocalDate.of(2026, 7, 2)))
+        assertEquals(LocalDate.of(2026, 5, 10), nthSunday(2026, 5, 2))
+        assertEquals(Occasion.MOTHERS_DAY, occasionOn(LocalDate.of(2026, 5, 9)))
+        assertEquals(Occasion.FATHERS_DAY, occasionOn(LocalDate.of(2026, 8, 9)))
+        assertEquals(Occasion.SPRING, occasionOn(LocalDate.of(2026, 9, 23)))
+        assertEquals(null, occasionOn(LocalDate.of(2026, 3, 18)))
+    }
+
+    @Test
+    fun `the moon's phase follows the real sky`() {
+        // Full moons on 15 December 2024 and 24 November 2026; new moon on 30 December 2024.
+        assertEquals(0.5f, moonPhase(java.time.Instant.parse("2024-12-15T12:00:00Z")), 0.04f)
+        assertEquals(0.5f, moonPhase(java.time.Instant.parse("2026-11-24T12:00:00Z")), 0.04f)
+        val newMoon = moonPhase(java.time.Instant.parse("2024-12-30T12:00:00Z"))
+        assertTrue(newMoon < 0.04f || newMoon > 0.96f)
+    }
+
+    @Test
+    fun `meteors, the warm season, the washing and the bin`() {
+        assertTrue(meteorShower(LocalDate.of(2026, 8, 12)) && meteorShower(LocalDate.of(2026, 12, 13)))
+        assertFalse(meteorShower(LocalDate.of(2026, 8, 20)))
+        assertTrue(warmSeason(LocalDate.of(2026, 1, 10)) && !warmSeason(LocalDate.of(2026, 7, 10)))
+        assertTrue(laundryOut(laundryDue = true, sky = Sky.CLEAR, isDay = true))
+        assertFalse(laundryOut(laundryDue = true, sky = Sky.RAIN, isDay = true))
+        assertFalse(laundryOut(laundryDue = true, sky = Sky.CLEAR, isDay = false))
+        val today = LocalDate.of(2026, 11, 22)
+        val bins = com.choreme.core.model.chore.Chore(id = "b", title = "Bins", template = com.choreme.core.model.chore.ChoreTemplate.TRASH, dueDate = today)
+        assertTrue(trashOut(listOf(bins), today))
+        assertFalse(trashOut(listOf(bins.copy(dueDate = today.plusDays(1))), today))
+    }
+
+    @Test
+    fun `finishing chores is celebrated, the last one of the day with fireworks`() {
+        assertEquals(Gag.CONFETTI, celebrationFor(doneBefore = 1, doneNow = 2, leftNow = 3))
+        assertEquals(Gag.FIREWORKS, celebrationFor(doneBefore = 2, doneNow = 3, leftNow = 0))
+        assertEquals(null, celebrationFor(doneBefore = 2, doneNow = 2, leftNow = 0))
+    }
+
+    @Test
+    fun `new gags show at their moment, and a meteor shower comes up often`() {
+        val clearDay = SceneInput(hour = 12f, sky = Sky.CLEAR, warm = true)
+        assertTrue(Gag.HUMMINGBIRD in eligibleGags(clearDay) && Gag.ICE_CREAM in eligibleGags(clearDay) && Gag.PLANE_BANNER in eligibleGags(clearDay))
+        assertFalse(Gag.ICE_CREAM in eligibleGags(clearDay.copy(warm = false)))
+        val meteorNight = SceneInput(hour = 23f, sky = Sky.CLEAR, meteors = true)
+        assertEquals(3, eligibleGags(meteorNight).count { it == Gag.METEORS })
+        assertTrue(Gag.HEARTS in eligibleGags(SceneInput(occasion = Occasion.MOTHERS_DAY)))
+        assertTrue(tapGags(clearDay).isNotEmpty())
     }
 }

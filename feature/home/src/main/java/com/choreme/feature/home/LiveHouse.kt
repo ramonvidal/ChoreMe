@@ -13,14 +13,19 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.choreme.core.model.home.Gag
 import com.choreme.core.model.home.SceneInput
+import com.choreme.core.model.home.celebrationFor
 import com.choreme.core.model.home.pickGag
 import com.choreme.core.model.home.rainbowAfter
+import com.choreme.core.model.home.tapGags
+import com.choreme.core.model.weather.Sky
 import kotlinx.coroutines.delay
 import java.time.LocalTime
 import kotlin.random.Random
@@ -31,8 +36,10 @@ internal const val H = 84
 internal const val GY = 60
 internal const val HOUSE_RATIO = W.toFloat() / H
 
-/** Frames a second: low on purpose, like an old game, and kind to the battery. */
+/** Frames a second: low on purpose, like an old game, and kind to the battery; fewer still when little moves. */
 private const val FPS = 12f
+private const val FPS_CALM = 8f
+private const val FPS_NIGHT = 6f
 /** The moment shown when nothing moves (animations off, screenshots). */
 private const val STILL_T = 4.2f
 
@@ -54,6 +61,9 @@ internal fun rememberHour(): Float {
 private fun reducedMotion(context: android.content.Context): Boolean =
     Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
 
+/** Weather that moves on its own needs the full frame rate. */
+private val BUSY_SKIES = setOf(Sky.RAIN, Sky.DRIZZLE, Sky.STORM, Sky.SNOW)
+
 private class ActiveGag(val gag: Gag, val startedAt: Float)
 
 /**
@@ -63,6 +73,8 @@ private class ActiveGag(val gag: Gag, val startedAt: Float)
  * (a bird lands, the cat passes, a kite, a rainbow...), like the old castaway screensaver. It only moves while on
  * screen and in the foreground, a dozen frames a second, and stands still when [animated] is off or the phone asks for
  * no animations. [previewGag] (with the progress [previewAt], 0 to 1) shows a gag in a still picture, for screenshots.
+ * When [doneToday] goes up it throws confetti, or fireworks once [leftToday] is down to none. A tap on the picture
+ * sets something off (the cat, a bird, a gecko...).
  */
 @Composable
 internal fun LiveHouse(
@@ -71,6 +83,8 @@ internal fun LiveHouse(
     animated: Boolean = true,
     previewGag: Gag? = null,
     previewAt: Float = 0.5f,
+    doneToday: Int = 0,
+    leftToday: Int = 0,
 ) {
     val context = LocalContext.current
     val moves = animated && previewGag == null && !reducedMotion(context)
@@ -78,6 +92,14 @@ internal fun LiveHouse(
     var gag by remember { mutableStateOf<ActiveGag?>(null) }
     val latest by rememberUpdatedState(scene)
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+    // a gag asked for from outside the loop: a celebration or a tap
+    var wanted by remember { mutableStateOf<Gag?>(null) }
+    var doneBefore by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(doneToday, leftToday) {
+        val before = doneBefore
+        if (before != null) celebrationFor(before, doneToday, leftToday)?.let { wanted = it }
+        doneBefore = doneToday
+    }
 
     LaunchedEffect(moves) {
         if (!moves) return@LaunchedEffect
@@ -88,7 +110,9 @@ internal fun LiveHouse(
             var skyBefore = latest.sky
             while (true) {
                 val now = androidx.compose.runtime.withFrameNanos { it }
-                if (last < 0 || (now - last) / 1e9f >= 1f / FPS) {
+                val busy = gag != null || latest.arriving.isNotEmpty() || latest.sky in BUSY_SKIES
+                val fps = if (busy) FPS else if (latest.isDay) FPS_CALM else FPS_NIGHT
+                if (last < 0 || (now - last) / 1e9f >= 1f / fps) {
                     t += if (last < 0) 1f / FPS else (now - last) / 1e9f
                     last = now
                     val current = latest
@@ -97,7 +121,11 @@ internal fun LiveHouse(
                         gag = null
                         nextGagAt = t + 8f + random.nextFloat() * 8f
                     }
-                    if (gag == null && rainbowAfter(skyBefore, current)) {
+                    val asked = wanted
+                    if (asked != null) {
+                        wanted = null
+                        gag = ActiveGag(asked, t)
+                    } else if (gag == null && rainbowAfter(skyBefore, current)) {
                         gag = ActiveGag(Gag.RAINBOW, t)
                     } else if (gag == null && t >= nextGagAt) {
                         pickGag(current, random)?.let { gag = ActiveGag(it, t) } ?: run { nextGagAt = t + 10f }
@@ -108,7 +136,14 @@ internal fun LiveHouse(
         }
     }
 
-    Canvas(modifier.aspectRatio(HOUSE_RATIO).clipToBounds()) {
+    val tap = if (moves) {
+        Modifier.pointerInput(Unit) {
+            detectTapGestures { if (gag == null) tapGags(latest).randomOrNull()?.let { wanted = it } }
+        }
+    } else {
+        Modifier
+    }
+    Canvas(modifier.aspectRatio(HOUSE_RATIO).clipToBounds().then(tap)) {
         val px = Px(this, size.width / W)
         val time = if (moves) t else STILL_T
         drawSky(px, scene, time)
@@ -116,10 +151,12 @@ internal fun LiveHouse(
         val progress = shown?.let { ((time - it.startedAt) / it.gag.seconds).coerceIn(0f, 1f) } ?: 0f
         // The rainbow stands behind the house; every other event is in front.
         if (shown?.gag == Gag.RAINBOW) drawGag(px, Gag.RAINBOW, progress, scene, time)
+        drawDistance(px, scene, time)
         drawGround(px, scene, time)
         drawBackdropDecor(px, scene, time)
         drawTree(px, scene, time)
         drawHouse(px, scene, time)
+        drawYard(px, scene, time)
         drawWeather(px, scene, time)
         if (shown != null && shown.gag != Gag.RAINBOW) drawGag(px, shown.gag, progress, scene, time)
     }

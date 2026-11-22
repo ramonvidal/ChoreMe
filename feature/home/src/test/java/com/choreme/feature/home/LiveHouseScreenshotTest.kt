@@ -50,7 +50,7 @@ class LiveHouseScreenshotTest {
     }
 
     private fun scene(hour: Float, sky: Sky = Sky.CLEAR, occasion: Occasion? = null, people: Int = 2, urgent: Boolean = false, wind: Float = 14f) =
-        SceneInput(hour, sky, wind, people, urgent, occasion)
+        SceneInput(hour, sky, wind, people, urgent, occasion, homeColors = (0 until people).toList())
 
     /** Every special date, in the weather and at the hour that suits it. */
     @Test
@@ -82,6 +82,36 @@ class LiveHouseScreenshotTest {
             scene(11f, Sky.CLOUDY) to (null to 0f),
             scene(22f, Sky.RAIN, urgent = true) to (null to 0f),
             scene(16f, Sky.STORM, people = 3) to (null to 0f),
+        ),
+    )
+
+    /** Bahia's own dates and the family days. */
+    @Test
+    fun bahia() = gallery(
+        "live-house-bahia",
+        listOf(
+            scene(10f, occasion = Occasion.BONFIM) to (Gag.CONFETTI to 0.3f),
+            scene(17f, occasion = Occasion.IEMANJA) to (null to 0f),
+            scene(11f, occasion = Occasion.DOIS_DE_JULHO) to (Gag.BALLOONS to 0.5f),
+            scene(12f, occasion = Occasion.MOTHERS_DAY) to (Gag.HEARTS to 0.5f),
+            scene(10f, occasion = Occasion.SPRING) to (Gag.HUMMINGBIRD to 0.5f),
+            scene(21f, occasion = Occasion.FATHERS_DAY) to (null to 0f),
+        ),
+    )
+
+    /** The new little events, the family in the yard and the moon in its phases. */
+    @Test
+    fun family() = gallery(
+        "live-house-family",
+        listOf(
+            scene(11f).copy(laundryOut = true, trashOut = true, arriving = listOf(3)) to (null to 0f),
+            scene(6.2f, people = 1) to (Gag.PLANE_BANNER to 0.5f),
+            scene(15f) to (Gag.ICE_CREAM to 0.5f),
+            scene(14f, Sky.RAIN, people = 3) to (Gag.GECKO to 0.5f),
+            scene(23f).copy(meteors = true) to (Gag.METEORS to 0.5f),
+            scene(18.3f).copy(arriving = listOf(1, 4)) to (null to 0f),
+            scene(22f).copy(moonPhase = 0.25f) to (null to 0f),
+            scene(2f).copy(moonPhase = 0.8f, warm = true) to (null to 0f),
         ),
     )
 }

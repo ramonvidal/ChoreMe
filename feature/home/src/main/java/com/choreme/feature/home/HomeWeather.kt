@@ -1,5 +1,6 @@
 package com.choreme.feature.home
 
+import com.choreme.core.model.home.laundryOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -68,6 +69,19 @@ internal data class HomeWeatherState(
     val animated: Boolean = true,
     /** The sun where the house is, so night falls when the sun really sets; null until the place is known. */
     val sun: SunTimes? = null,
+    /** The colours of the people at home, and of those on their way home. */
+    val homeColors: List<Int> = emptyList(),
+    val arriving: List<Int> = emptyList(),
+    /** Laundry is waiting (the washing goes out on the line when the sky allows). */
+    val laundryDue: Boolean = false,
+    /** A bin chore is due: the bin is out. */
+    val trashOut: Boolean = false,
+    val moonPhase: Float = 0.5f,
+    val meteors: Boolean = false,
+    val warm: Boolean = true,
+    /** Chores finished today and still to do, for the house's little celebrations. */
+    val doneToday: Int = 0,
+    val leftToday: Int = 0,
 ) {
     fun scene(hour: Float) = SceneInput(
         hour = hour,
@@ -78,7 +92,13 @@ internal data class HomeWeatherState(
         occasion = occasion,
         sunrise = (sun?.sunrise ?: 6f).coerceIn(3f, 10f),
         sunset = (sun?.sunset ?: 18.5f).coerceIn(15f, 21.5f),
-    )
+        homeColors = homeColors,
+        arriving = arriving,
+        trashOut = trashOut,
+        moonPhase = moonPhase,
+        meteors = meteors,
+        warm = warm,
+    ).let { it.copy(laundryOut = laundryOut(laundryDue, it.sky, it.isDay)) }
 }
 
 /** The little house with the real weather, the temperature and the next trips. Tap for the day. */
@@ -90,7 +110,13 @@ internal fun HomeWeatherCard(state: HomeWeatherState, onClick: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
     ) {
         Box {
-            LiveHouse(state.scene(state.hour ?: rememberHour()), Modifier.fillMaxWidth(), animated = state.animated)
+            LiveHouse(
+                state.scene(state.hour ?: rememberHour()),
+                Modifier.fillMaxWidth(),
+                animated = state.animated,
+                doneToday = state.doneToday,
+                leftToday = state.leftToday,
+            )
             state.now?.let { now ->
                 Text(
                     state.units.degrees(now.temperatureC),

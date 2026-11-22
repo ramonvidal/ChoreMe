@@ -1,5 +1,14 @@
 package com.choreme.feature.home
 
+import kotlinx.coroutines.flow.map
+import com.choreme.core.model.home.warmSeason
+import com.choreme.core.model.home.meteorShower
+import com.choreme.core.model.home.moonPhase
+import com.choreme.core.model.home.trashOut
+import com.choreme.core.model.home.membersAtHome
+import com.choreme.core.model.AnnouncementKind
+import com.choreme.core.model.Announcement
+import com.choreme.core.data.AnnouncementRepository
 import com.choreme.core.model.grocery.urgentToBuy
 import com.choreme.core.model.chore.complete
 import com.choreme.core.chores.ChoreChange
@@ -97,6 +106,7 @@ class HomeViewModel @Inject internal constructor(
     chores: ChoreRepository,
     groceries: GroceryRepository,
     rooms: RoomRepository,
+    announcements: AnnouncementRepository,
     private val calendar: CalendarRepository,
     private val choice: CalendarChoice,
     private val weather: WeatherRepository,
@@ -119,6 +129,8 @@ class HomeViewModel @Inject internal constructor(
         val plans: List<PlanEntry>,
         val places: List<Place>,
         val names: Map<String, String>,
+        /** Each member's colour index, for the little figures on the house. */
+        val colors: Map<String, Int>,
         val units: WeatherUnits,
         val hasAnyTrip: Boolean,
         val isParent: Boolean,
@@ -136,21 +148,25 @@ class HomeViewModel @Inject internal constructor(
                 refresh,
             ) { entries, places, members, units, _ ->
                 val active = activeEntries(entries, members, LocalDate.now(), session.memberId, routine.lastVisits())
-                Inputs(session.memberId, active, places, members.associate { it.id to it.name }, units, entries.isNotEmpty(), session.role == Role.PARENT) }
+                Inputs(session.memberId, active, places, members.associate { it.id to it.name }, members.associate { it.id to it.color }, units, entries.isNotEmpty(), session.role == Role.PARENT) }
             val events = combine(choice.selected, refresh) { selected, _ -> selected }.flatMapLatest { selected -> eventsToday(selected) }
             // Who is at home now (for the lit windows) and whether the little house moves.
-            val house = combine(locations.observeLocations(session.familyId).onStart { emit(emptyList()) }, animatedHouse, sharingNow, setupHidden, rooms.observe(session.familyId)) { l, a, sh, hid, r ->
+            val houseBase = combine(locations.observeLocations(session.familyId).onStart { emit(emptyList()) }, animatedHouse, sharingNow, setupHidden, rooms.observe(session.familyId)) { l, a, sh, hid, r ->
                 House(l, a, sh, hid, r)
             }
+            // Who said "on my way home": they walk up the path on the house.
+            val onMyWay = announcements.observeCurrent(session.familyId).onStart { emit(emptyList<Announcement>() to Instant.now()) }
+                .map { (news, now) -> news.filter { it.kind == AnnouncementKind.ON_MY_WAY && it.isCurrent(now) }.map { it.memberId } }
+            val house = combine(houseBase, onMyWay) { h, arriving -> h.copy(arriving = arriving) }
             combine(inputs, chores.observeChores(session.familyId), groceries.observeItems(session.familyId), events, house) { i, c, g, e, h ->
-                Data(i, c, g, e, h.locations, h.animated, h.sharing, h.setupHidden, h.rooms)
+                Data(i, c, g, e, h.locations, h.animated, h.sharing, h.setupHidden, h.rooms, h.arriving)
             }.mapLatest { compute(it) }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
-    private class Data(val inputs: Inputs, val chores: List<com.choreme.core.model.chore.Chore>, val groceries: List<GroceryItem>, val events: List<CalendarEvent>, val locations: List<MemberLocation>, val animated: Boolean, val sharing: Boolean, val setupHidden: Boolean, val rooms: List<Room>)
+    private class Data(val inputs: Inputs, val chores: List<com.choreme.core.model.chore.Chore>, val groceries: List<GroceryItem>, val events: List<CalendarEvent>, val locations: List<MemberLocation>, val animated: Boolean, val sharing: Boolean, val setupHidden: Boolean, val rooms: List<Room>, val arriving: List<String>)
 
-    private class House(val locations: List<MemberLocation>, val animated: Boolean, val sharing: Boolean, val setupHidden: Boolean, val rooms: List<Room>)
+    private data class House(val locations: List<MemberLocation>, val animated: Boolean, val sharing: Boolean, val setupHidden: Boolean, val rooms: List<Room>, val arriving: List<String> = emptyList())
 
     internal fun hideSetup() = hintSettings.hideFirstRun()
 
@@ -202,6 +218,16 @@ class HomeViewModel @Inject internal constructor(
         val weatherState = HomeWeatherState(
             loading = false, now = current, units = inputs.units, moments = upcoming, air = air, drying = drying, needsPlace = home == null,
             peopleHome = peopleAtHome(data.locations, homePlace(inputs.places), Instant.now()),
+            homeColors = membersAtHome(data.locations, homePlace(inputs.places), Instant.now()).mapNotNull { inputs.colors[it] },
+            arriving = data.arriving.mapNotNull { inputs.colors[it] },
+            laundryDue = laundryDue(data.chores, today),
+            trashOut = trashOut(data.chores, today),
+            moonPhase = moonPhase(Instant.now()),
+            meteors = meteorShower(today),
+            warm = warmSeason(today),
+            // For the little celebrations: what was finished today, and what is left.
+            doneToday = data.chores.count { it.lastDoneOn == today },
+            leftToday = timeline.choreCount,
             urgent = timeline.urgent.isNotEmpty(),
             occasion = occasionOn(today),
             animated = data.animated,
