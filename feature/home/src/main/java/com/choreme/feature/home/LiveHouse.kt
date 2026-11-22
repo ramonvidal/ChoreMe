@@ -1,6 +1,5 @@
 package com.choreme.feature.home
 
-import android.provider.Settings
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.runtime.Composable
@@ -15,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
@@ -58,8 +56,8 @@ internal fun rememberHour(): Float {
     return hour
 }
 
-private fun reducedMotion(context: android.content.Context): Boolean =
-    Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
+// The system's "remove animations" switch is not followed here: some phones turn it on by themselves in battery
+// saving, which left the house standing still for good. The app's own "Animated house" switch decides.
 
 /** Weather that moves on its own needs the full frame rate. */
 private val BUSY_SKIES = setOf(Sky.RAIN, Sky.DRIZZLE, Sky.STORM, Sky.SNOW)
@@ -71,8 +69,8 @@ private class ActiveGag(val gag: Gag, val startedAt: Float)
  * the sky, clouds, rain, snow, fog, storms, wind in the tree and the smoke), lights its windows for the people at home,
  * raises the mailbox flag for an urgent chore, dresses up for the special dates and now and then lets something happen
  * (a bird lands, the cat passes, a kite, a rainbow...), like the old castaway screensaver. It only moves while on
- * screen and in the foreground, a dozen frames a second, and stands still when [animated] is off or the phone asks for
- * no animations. [previewGag] (with the progress [previewAt], 0 to 1) shows a gag in a still picture, for screenshots.
+ * screen and in the foreground, a dozen frames a second at most, and stands still when [animated] is off (the app's
+ * own switch). [previewGag] (with the progress [previewAt], 0 to 1) shows a gag in a still picture, for screenshots.
  * When [doneToday] goes up it throws confetti, or fireworks once [leftToday] is down to none. A tap on the picture
  * sets something off (the cat, a bird, a gecko...).
  */
@@ -87,8 +85,7 @@ internal fun LiveHouse(
     leftToday: Int = 0,
     onGag: ((Gag) -> Unit)? = null,
 ) {
-    val context = LocalContext.current
-    val moves = animated && previewGag == null && !reducedMotion(context)
+    val moves = animated && previewGag == null
     var t by remember { mutableFloatStateOf(STILL_T) }
     var gag by remember { mutableStateOf<ActiveGag?>(null) }
     val latest by rememberUpdatedState(scene)
