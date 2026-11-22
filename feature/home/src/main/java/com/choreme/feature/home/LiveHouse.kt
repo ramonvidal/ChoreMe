@@ -85,12 +85,14 @@ internal fun LiveHouse(
     previewAt: Float = 0.5f,
     doneToday: Int = 0,
     leftToday: Int = 0,
+    onGag: ((Gag) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val moves = animated && previewGag == null && !reducedMotion(context)
     var t by remember { mutableFloatStateOf(STILL_T) }
     var gag by remember { mutableStateOf<ActiveGag?>(null) }
     val latest by rememberUpdatedState(scene)
+    val gagStarted by rememberUpdatedState(onGag)
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     // a gag asked for from outside the loop: a celebration or a tap
     var wanted by remember { mutableStateOf<Gag?>(null) }
@@ -124,11 +126,11 @@ internal fun LiveHouse(
                     val asked = wanted
                     if (asked != null) {
                         wanted = null
-                        gag = ActiveGag(asked, t)
+                        gag = ActiveGag(asked, t).also { gagStarted?.invoke(asked) }
                     } else if (gag == null && rainbowAfter(skyBefore, current)) {
-                        gag = ActiveGag(Gag.RAINBOW, t)
+                        gag = ActiveGag(Gag.RAINBOW, t).also { gagStarted?.invoke(Gag.RAINBOW) }
                     } else if (gag == null && t >= nextGagAt) {
-                        pickGag(current, random)?.let { gag = ActiveGag(it, t) } ?: run { nextGagAt = t + 10f }
+                        pickGag(current, random)?.let { gag = ActiveGag(it, t); gagStarted?.invoke(it) } ?: run { nextGagAt = t + 10f }
                     }
                     skyBefore = current.sky
                 }

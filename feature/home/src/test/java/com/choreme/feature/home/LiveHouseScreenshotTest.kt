@@ -114,4 +114,18 @@ class LiveHouseScreenshotTest {
             scene(2f).copy(moonPhase = 0.8f, warm = true) to (null to 0f),
         ),
     )
+
+    /** Left alone on screen, the house lets something happen within about twenty seconds, and again after. */
+    @Test
+    fun gagsHappenWhileOnScreen() {
+        val seen = mutableListOf<Gag>()
+        compose.mainClock.autoAdvance = false
+        compose.setContent {
+            ChoreMeTheme(darkTheme = false, dynamicColor = false) {
+                LiveHouse(scene(11f), Modifier.fillMaxWidth(), animated = true, onGag = { seen += it })
+            }
+        }
+        repeat(60) { compose.mainClock.advanceTimeBy(1_000) }
+        org.junit.Assert.assertTrue("no gag in a minute: $seen", seen.size >= 2)
+    }
 }
