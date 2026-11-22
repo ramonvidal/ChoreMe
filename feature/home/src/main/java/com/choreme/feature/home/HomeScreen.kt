@@ -1,5 +1,6 @@
 package com.choreme.feature.home
 
+import com.choreme.core.ui.groceryName
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.pager.rememberPagerState
@@ -202,6 +203,10 @@ internal fun HomeContent(
                 item(key = "urgent") { UrgentCard(timeline.urgent, onClick = onOpenChores) }
             }
 
+        if (state.urgentGroceries.isNotEmpty()) {
+            item(key = "urgent-groceries") { UrgentGroceriesCard(state.urgentGroceries, onClick = onOpenGroceries) }
+        }
+
             if (setupSteps.isNotEmpty()) {
                 item(key = "setup") { GettingStartedCard(setupSteps, onSetupStep, onHideSetup) }
             }
@@ -348,6 +353,24 @@ private fun NudgeCard(nudge: RoomNudge, onClick: () -> Unit) {
                 pluralStringResource(R.plurals.home_nudge, nudge.daysLate, nudge.room.name, choreTitle(nudge.task.title), nudge.daysLate),
                 style = MaterialTheme.typography.bodyMedium,
             )
+        }
+    }
+}
+
+/** Essentials that ran out ("Missing: nappies, milk"), red like urgent chores. Tap opens the grocery list. */
+@Composable
+private fun UrgentGroceriesCard(names: List<String>, onClick: () -> Unit) {
+    val shown = names.map { groceryName(it) }
+    Card(
+        Modifier.fillMaxWidth().clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer),
+    ) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            ItemIcon(CoreUiR.drawable.ic_shopping_cart, Modifier.size(26.dp), tint = MaterialTheme.colorScheme.error)
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(pluralStringResource(R.plurals.home_urgent_groceries, names.size, names.size), style = MaterialTheme.typography.titleMedium)
+                Text(shown.joinToString(", "), style = MaterialTheme.typography.bodyMedium)
+            }
         }
     }
 }

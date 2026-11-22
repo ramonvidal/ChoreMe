@@ -148,4 +148,8 @@
         <item quantity="one">%d compromisso</item>
         <item quantity="other">%d compromissos</item>
     </plurals>
+    <plurals name="home_urgent_groceries">
+        <item quantity="one">%d coisa essencial faltando</item>
+        <item quantity="other">%d coisas essenciais faltando</item>
+    </plurals>
 </resources>

@@ -36,7 +36,7 @@ class GroceriesTabScreenshotTest {
         item("Eggs", GroceryCategory.DAIRY_EGGS, needed = true),
         item("Bananas", GroceryCategory.PRODUCE, needed = true),
         item("Tomatoes", GroceryCategory.PRODUCE, needed = true),
-        item("Toilet paper", GroceryCategory.HOUSEHOLD, needed = true, staple = true),
+        item("Toilet paper", GroceryCategory.HOUSEHOLD, needed = true, staple = true).copy(urgent = true),
         item("Bread", GroceryCategory.BAKERY, needed = false, staple = true),
         item("Pasta", GroceryCategory.PANTRY, needed = false),
         item("Coffee", GroceryCategory.PANTRY, needed = false, staple = true),
@@ -46,7 +46,8 @@ class GroceriesTabScreenshotTest {
         loading = false,
         lists = listOf(FamilyList("p", "Pharmacy", "mom")),
         catalog = catalog,
-        toBuy = groupByCategory(catalog.filter { it.isNeeded }),
+        urgent = catalog.filter { it.isNeeded && it.urgent },
+        toBuy = groupByCategory(catalog.filter { it.isNeeded && !it.urgent }),
         atHome = groupByCategory(catalog.filter { !it.isNeeded }),
     )
 
@@ -65,6 +66,8 @@ class GroceriesTabScreenshotTest {
     fun atHome() {
         shoot("tab-groceries", state, dark = false)
         compose.onNodeWithText("Milk").assertExists()
+        // The essential that ran out sits first, in its own red card.
+        compose.onNodeWithText("Urgent: missing essentials").assertExists()
     }
 
     /** In Baianês: the family's items (saved in English) show in Portuguese. */
@@ -84,7 +87,7 @@ class GroceriesTabScreenshotTest {
     }
 
     @Test
-    fun nothingToBuy() = shoot("tab-groceries-nothing-to-buy", state.copy(toBuy = emptyList()), dark = false)
+    fun nothingToBuy() = shoot("tab-groceries-nothing-to-buy", state.copy(toBuy = emptyList(), urgent = emptyList()), dark = false)
 
     @Test
     fun shopping() = shoot("tab-groceries-shopping", state.copy(shopping = true, othersShopping = listOf("Leo")), dark = false)

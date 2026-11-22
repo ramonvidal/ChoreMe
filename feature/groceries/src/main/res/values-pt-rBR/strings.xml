@@ -49,6 +49,9 @@
     <string name="list_empty">Nada nessa lista ainda. Escreva aí em cima pra adicionar.</string>
     <string name="grocery_mark_bought">marcar como comprado</string>
     <string name="grocery_edit_item">editar</string>
+    <string name="grocery_urgent">Urgente</string>
+    <string name="grocery_urgent_hint">Coisa essencial que acabou: vai pro topo da lista, em vermelho, e aparece na Casa até alguém comprar.</string>
+    <string name="grocery_urgent_section">Urgente: faltando o essencial</string>
     <plurals name="grocery_to_buy_count">
         <item quantity="one">%d pra comprar</item>
         <item quantity="other">%d pra comprar</item>

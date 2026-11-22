@@ -158,4 +158,5 @@ fun DocumentSnapshot.toGroceryItem() = GroceryItem(
     isNeeded = getBoolean(FirestoreSchema.IS_NEEDED) ?: false,
     isStaple = getBoolean(FirestoreSchema.IS_STAPLE) ?: false,
     listId = getString(FirestoreSchema.LIST_ID),
+    urgent = getBoolean(FirestoreSchema.URGENT) ?: false,
 )

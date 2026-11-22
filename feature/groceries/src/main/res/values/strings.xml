@@ -51,4 +51,7 @@
     </plurals>
     <string name="grocery_mark_bought">mark as bought</string>
     <string name="grocery_edit_item">edit</string>
+    <string name="grocery_urgent">Urgent</string>
+    <string name="grocery_urgent_hint">Something essential ran out: first on the list, in red, and on Casa until someone buys it.</string>
+    <string name="grocery_urgent_section">Urgent: missing essentials</string>
 </resources>

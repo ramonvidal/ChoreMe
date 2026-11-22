@@ -203,6 +203,14 @@ describe('grocery list', () => {
     await assertFails(setDoc(ref, { ...milk, name: 'x'.repeat(61) }));
     await assertFails(setDoc(ref, { ...milk, isNeeded: 'yes' }));
     await assertFails(setDoc(ref, { name: 'Milk' }));
+    await assertFails(setDoc(ref, { ...milk, urgent: 'very' }));
+  });
+
+  test('anyone, kids too, can mark an item urgent and clear it', async () => {
+    const ref = doc(kidDevice('kid1'), 'families', FAMILY, 'groceryItems', 'nappies');
+    await assertSucceeds(setDoc(ref, { ...milk, name: 'Nappies', urgent: true }));
+    await assertSucceeds(updateDoc(ref, { isNeeded: false, urgent: false }));
+    await assertFails(updateDoc(ref, { urgent: 1 }));
   });
 });
 

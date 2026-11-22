@@ -428,6 +428,9 @@ feature/groceries,grocery_to_buy_count,one,%d to buy,%d pra comprar
 feature/groceries,grocery_to_buy_count,other,%d to buy,%d pra comprar
 feature/groceries,grocery_mark_bought,,mark as bought,marcar como comprado
 feature/groceries,grocery_edit_item,,edit,editar
+feature/groceries,grocery_urgent,,Urgent,Urgente
+feature/groceries,grocery_urgent_hint,,"Something essential ran out: first on the list, in red, and on Casa until someone buys it.","Coisa essencial que acabou: vai pro topo da lista, em vermelho, e aparece na Casa até alguém comprar."
+feature/groceries,grocery_urgent_section,,Urgent: missing essentials,Urgente: faltando o essencial
 feature/home,weather_title,,Weather,Tempo
 feature/home,weather_loading,,Checking the sky…,Olhando o céu…
 feature/home,weather_unavailable,,No forecast right now. Check the connection.,Sem previsão agora. Veja a conexão.
@@ -551,6 +554,8 @@ feature/home,month_cell_events,other,%d events,%d compromissos
 feature/home,month_cell_chores,,chores due,tem corre
 feature/home,home_see_agenda,,Agenda ›,Agenda ›
 feature/home,home_see_week,,Week ›,Semana ›
+feature/home,home_urgent_groceries,one,%d essential missing,%d coisa essencial faltando
+feature/home,home_urgent_groceries,other,%d essentials missing,%d coisas essenciais faltando
 feature/map,share_title,,Share my location,Dividir minha localização
 feature/map,share_body_off,,Off. The family can't see where you are.,Desligado. A família não vê onde você tá.
 feature/map,share_body_on,,"On. The family sees roughly where you are, updated every 15 minutes or so. Turn it off any time.","Ligado. A família vê mais ou menos onde você tá, atualizado de 15 em 15 minutos mais ou menos. Desligue quando quiser."

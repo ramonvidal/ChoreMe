@@ -1,5 +1,7 @@
 package com.choreme.feature.groceries
 
+import com.choreme.core.ui.groceryName
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.choreme.core.ui.R as CoreUiR
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -72,10 +74,24 @@ internal fun ToBuyRow(item: GroceryItem, large: Boolean, onBought: () -> Unit, o
         ) {
             Text(groceryName(item.name), style = if (large) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge)
             if (item.isStaple) UsualTag()
+            if (item.urgent) UrgentItemTag()
         }
         Spacer(Modifier.width(12.dp))
         TickCircle(ticked, large)
     }
+}
+
+/** "Urgent" in red: an essential that ran out. */
+@Composable
+internal fun UrgentItemTag() {
+    Text(
+        stringResource(R.string.grocery_urgent),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.error,
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(8.dp))
+            .padding(horizontal = 8.dp, vertical = 2.dp),
+    )
 }
 
 /** An empty ring that fills green with a tick when tapped. */

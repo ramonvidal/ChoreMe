@@ -1,5 +1,6 @@
 package com.choreme.feature.groceries
 
+import androidx.compose.foundation.BorderStroke
 import com.choreme.core.ui.R as CoreUiR
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
@@ -223,8 +224,31 @@ internal fun GroceriesContent(state: GroceriesUiState, query: String, actions: G
                             label = { Text(stringResource(if (shopping) R.string.grocery_shopping_on else R.string.grocery_shopping_off)) },
                         )
                     }
-                    if (state.toBuy.isEmpty()) {
+                    if (state.toBuy.isEmpty() && state.urgent.isEmpty()) {
                         item(key = "to-buy-empty") { EmptyState(title = stringResource(R.string.grocery_nothing_to_buy)) }
+                    }
+                    // The essentials that ran out, first, in a red-edged card.
+                    if (state.urgent.isNotEmpty()) {
+                        item(key = "urgent-header") {
+                            Text(
+                                stringResource(R.string.grocery_urgent_section),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(start = 4.dp, top = 12.dp, bottom = 4.dp),
+                            )
+                        }
+                        item(key = "urgent-card") {
+                            Card(Modifier.fillMaxWidth(), border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.error)) {
+                                state.urgent.forEachIndexed { index, item ->
+                                    key(item.id) {
+                                        if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.padding(start = 56.dp))
+                                        SwipeToBuy(onBought = { markBought(item) }) {
+                                            ToBuyRow(item, large = shopping, onBought = { markBought(item) }, onEdit = { editing = item })
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     // One white card per aisle, rows split by thin lines, like the rest of the app.
                     state.toBuy.forEach { group ->
@@ -307,9 +331,4 @@ internal fun GroceriesContent(state: GroceriesUiState, query: String, actions: G
 @get:DrawableRes
 internal val GroceryItem.icon: Int get() = GroceryIcons.forItem(name, category).drawable
 
-/** A known grocery's name in this phone's language ("Milk" is "Leite" in Baianês); others as typed. */
-@Composable
-internal fun groceryName(name: String): String {
-    val language = LocalConfiguration.current.locales[0].language
-    return remember(name, language) { GroceryTranslations.inLanguage(name, language) }
-}
+

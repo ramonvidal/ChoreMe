@@ -6,6 +6,7 @@ import com.choreme.core.data.remote.FirestoreSchema.CATEGORY
 import com.choreme.core.data.remote.FirestoreSchema.CREATED_BY
 import com.choreme.core.data.remote.FirestoreSchema.IS_NEEDED
 import com.choreme.core.data.remote.FirestoreSchema.IS_STAPLE
+import com.choreme.core.data.remote.FirestoreSchema.URGENT
 import com.choreme.core.data.remote.FirestoreSchema.LIST_ID
 import com.choreme.core.data.remote.FirestoreSchema.NAME
 import com.choreme.core.data.remote.FirestoreSchema.UPDATED_AT
@@ -86,8 +87,16 @@ class GroceryRepository @Inject constructor(
         batch.commit().logFailure()
     }
 
+    /** Bought (or back at home) also clears "urgent": it's no longer missing. */
     fun setNeeded(familyId: String, memberId: String, itemId: String, isNeeded: Boolean) {
-        items(familyId).document(itemId).update(change(memberId, IS_NEEDED to isNeeded)).logFailure()
+        val fields = if (isNeeded) arrayOf(IS_NEEDED to true) else arrayOf(IS_NEEDED to false, URGENT to false)
+        items(familyId).document(itemId).update(change(memberId, *fields)).logFailure()
+    }
+
+    /** Marks an essential that ran out (it goes on the list too), or takes the mark off. */
+    fun setUrgent(familyId: String, memberId: String, itemId: String, urgent: Boolean) {
+        val fields = if (urgent) arrayOf(URGENT to true, IS_NEEDED to true) else arrayOf(URGENT to false)
+        items(familyId).document(itemId).update(change(memberId, *fields)).logFailure()
     }
 
     fun update(familyId: String, memberId: String, item: GroceryItem) {

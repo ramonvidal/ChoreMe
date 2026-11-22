@@ -46,6 +46,8 @@ service cloud.firestore {
         && item.category is string && item.category.size() <= 30
         && item.isNeeded is bool
         && item.isStaple is bool
+        // "Urgent": something essential ran out. Anyone in the family can say so, kids too.
+        && (!('urgent' in item) || item.urgent is bool)
         && (!('listId' in item) || item.listId == null || (item.listId is string && item.listId.size() <= 40));
     }
 

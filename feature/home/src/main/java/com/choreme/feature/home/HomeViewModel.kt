@@ -1,5 +1,6 @@
 package com.choreme.feature.home
 
+import com.choreme.core.model.grocery.urgentToBuy
 import com.choreme.core.model.chore.complete
 import com.choreme.core.chores.ChoreChange
 import com.choreme.core.chores.ChoreChanger
@@ -83,6 +84,8 @@ internal data class HomeUiState(
     val yours: List<YourTask> = emptyList(),
     /** A room that is late with nobody on it, worth a look. */
     val nudge: RoomNudge? = null,
+    /** Essentials that ran out (urgent grocery items), by name, for the red line on Casa. */
+    val urgentGroceries: List<String> = emptyList(),
 )
 
 /** Reads the family's chores, groceries, calendar, trips and the weather, and refreshes every ten minutes. */
@@ -212,6 +215,7 @@ class HomeViewModel @Inject internal constructor(
             loading = false, date = today, weather = weatherState, timeline = timeline, setup = setup, setupHidden = data.setupHidden,
             yours = yourTasks(board.mine, roomBoard.mine, data.rooms),
             nudge = roomNudge(roomOverviews(data.rooms, data.chores), today),
+            urgentGroceries = data.groceries.urgentToBuy().map { it.name },
         )
     }
 }

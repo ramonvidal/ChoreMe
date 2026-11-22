@@ -28,7 +28,12 @@ data class GroceryItem(
     val isStaple: Boolean,
     /** Which list it's on; null for the grocery list. */
     val listId: String? = null,
+    /** Something essential that ran out ("no nappies left"): first on the list, in red, and on Casa. Cleared once bought. */
+    val urgent: Boolean = false,
 )
 
 /** What's left to buy on the grocery list itself (the other lists don't count here). */
 fun List<GroceryItem>.groceriesToBuy(): Int = count { it.listId == null && it.isNeeded }
+
+/** The essentials still to buy, on any list: urgent ones that haven't been bought yet. */
+fun List<GroceryItem>.urgentToBuy(): List<GroceryItem> = filter { it.isNeeded && it.urgent }.sortedBy { it.name.lowercase() }

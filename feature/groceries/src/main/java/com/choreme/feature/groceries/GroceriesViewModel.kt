@@ -1,5 +1,6 @@
 package com.choreme.feature.groceries
 
+import com.choreme.core.model.grocery.urgentToBuy
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -47,13 +48,15 @@ internal data class GroceriesUiState(
     val othersShopping: List<String> = emptyList(),
     /** Items on the list being shown. */
     val catalog: List<GroceryItem> = emptyList(),
+    /** Essentials that ran out, shown first in red (see [GroceryItem.urgent]). */
+    val urgent: List<GroceryItem> = emptyList(),
     val toBuy: List<CategoryGroup> = emptyList(),
     val atHome: List<CategoryGroup> = emptyList(),
     val suggestions: List<GroceryItem> = emptyList(),
 ) {
     val isGroceries get() = listId == null
     val listName get() = lists.firstOrNull { it.id == listId }?.name
-    val toBuyCount get() = toBuy.sumOf { it.items.size }
+    val toBuyCount get() = urgent.size + toBuy.sumOf { it.items.size }
     val staplesAtHome get() = catalog.count { it.isStaple && !it.isNeeded }
 }
 
@@ -104,7 +107,9 @@ class GroceriesViewModel @Inject constructor(
             shopping = shopping,
             othersShopping = others,
             catalog = items,
-            toBuy = groupByCategory(items.filter { it.isNeeded }),
+            // Essentials that ran out sit apart, first; the rest by aisle.
+            urgent = items.urgentToBuy(),
+            toBuy = groupByCategory(items.filter { it.isNeeded && !it.urgent }),
             atHome = groupByCategory(items.filter { !it.isNeeded }),
             suggestions = suggestions(query, items),
         )
@@ -183,6 +188,13 @@ class GroceriesViewModel @Inject constructor(
 
     internal fun save(item: GroceryItem) = withFamily { familyId, memberId ->
         groceries.update(familyId, memberId, item.copy(name = item.name.trim()))
+        // "Urgent" is its own field, written apart (marking it also puts the item on the list).
+        val before = uiState.value.catalog.firstOrNull { it.id == item.id }
+        if (before != null && before.urgent != item.urgent) groceries.setUrgent(familyId, memberId, item.id, item.urgent)
+    }
+
+    internal fun setUrgent(item: GroceryItem, urgent: Boolean) = withFamily { familyId, memberId ->
+        groceries.setUrgent(familyId, memberId, item.id, urgent)
     }
 
     internal fun delete(item: GroceryItem) = withFamily { familyId, _ -> groceries.delete(familyId, item.id) }

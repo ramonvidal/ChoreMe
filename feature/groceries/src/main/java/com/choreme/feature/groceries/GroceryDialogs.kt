@@ -142,6 +142,7 @@ internal fun EditItemDialog(
     var name by rememberSaveable(item.id) { mutableStateOf(GroceryTranslations.inLanguage(item.name, Locale.getDefault().language)) }
     var category by rememberSaveable(item.id) { mutableStateOf(item.category) }
     var isStaple by rememberSaveable(item.id) { mutableStateOf(item.isStaple) }
+    var urgent by rememberSaveable(item.id) { mutableStateOf(item.urgent) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -169,6 +170,20 @@ internal fun EditItemDialog(
                         Text(stringResource(R.string.grocery_staple_hint), style = MaterialTheme.typography.bodySmall)
                     }
                 }
+                // An essential that ran out: first on the list, in red, and on Casa until someone buys it.
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .toggleable(value = urgent, onValueChange = { urgent = it }, role = Role.Checkbox),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(checked = urgent, onCheckedChange = null)
+                    Spacer(Modifier.width(8.dp))
+                    Column {
+                        Text(stringResource(R.string.grocery_urgent), color = MaterialTheme.colorScheme.error)
+                        Text(stringResource(R.string.grocery_urgent_hint), style = MaterialTheme.typography.bodySmall)
+                    }
+                }
                 Text(stringResource(R.string.grocery_category), style = MaterialTheme.typography.labelLarge)
                 GroceryCategory.entries.forEach { option ->
                     Row(
@@ -189,7 +204,7 @@ internal fun EditItemDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { onSave(item.copy(name = name, category = category, isStaple = isStaple)) },
+                onClick = { onSave(item.copy(name = name, category = category, isStaple = isStaple, urgent = urgent)) },
                 enabled = name.isNotBlank(),
             ) { Text(stringResource(CoreUiR.string.save)) }
         },

@@ -146,4 +146,8 @@
     <string name="month_cell_chores">chores due</string>
     <string name="home_see_agenda">Agenda ›</string>
     <string name="home_see_week">Week ›</string>
+    <plurals name="home_urgent_groceries">
+        <item quantity="one">%d essential missing</item>
+        <item quantity="other">%d essentials missing</item>
+    </plurals>
 </resources>

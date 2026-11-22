@@ -68,6 +68,7 @@ class HomeTabScreenshotTest {
     )
 
     private val state = HomeUiState(
+        urgentGroceries = listOf("Nappies"),
         yours = listOf(
             YourTask(Chore("y1", "Water the plants", dueDate = monday), null),
             YourTask(Chore("y2", "Mop the floor", dueDate = monday, roomId = "k"), Room("k", "Kitchen", RoomType.KITCHEN)),
@@ -116,6 +117,7 @@ class HomeTabScreenshotTest {
         compose.onNodeWithText("Dentist: Mia").assertExists()
         compose.onNodeWithText("2 urgent chores").assertExists()
         compose.onNodeWithText("Water leak under the sink").assertExists()
+        compose.onNodeWithText("1 essential missing").assertExists()
         // The gym trip shows once (in the day list), not again on the weather card.
         compose.onAllNodesWithText("Gym", substring = true).assertCountEquals(1)
         compose.onNodeWithText("4 chores · 2 room tasks for you", substring = true).assertExists()
