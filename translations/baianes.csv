@@ -5,7 +5,6 @@ app,nav_groceries,,Groceries,Feira
 app,nav_rooms,,Rooms,Cômodos
 app,nav_agenda,,Agenda,Agenda
 app,nav_family,,Family,Família
-app,nav_map,,Map,Mapa
 app,nav_settings,,Settings,Ajustes
 core/ui,app_name,,Nos Corre!,Nos Corre!
 core/ui,coming_soon,,Coming soon,Já já tá aí
@@ -85,6 +84,49 @@ core/ui,ntfy_help_step3,,3. Done: the status says that instant alerts are on.,3.
 core/ui,ntfy_help_stuck,,"Still off after a minute? Open ntfy once, then open Nos Corre! again.",Ainda desligado depois de um minuto? Abra o ntfy uma vez e depois abra o Nos Corre! de novo.
 core/ui,ntfy_help_open,,Open Google Play,Abrir a Google Play
 core/ui,ntfy_help_later,,Not now,Agora não
+feature/agenda,duration_hours,one,%d hour,%d hora
+feature/agenda,duration_hours,other,%d hours,%d horas
+feature/agenda,event_alert_minutes,one,%d minute before,%d minuto antes
+feature/agenda,event_alert_minutes,other,%d minutes before,%d minutos antes
+feature/agenda,month_cell_events,one,%d event,%d compromisso
+feature/agenda,month_cell_events,other,%d events,%d compromissos
+feature/agenda,add_event,,Add event,Adicionar evento
+feature/agenda,all_day,,All day,O dia todo
+feature/agenda,change_calendars,,Change,Mudar
+feature/agenda,choose_hint,,This choice is only for this phone.,Essa escolha vale só pra este celular.
+feature/agenda,choose_save,,Show these,Mostrar essas
+feature/agenda,choose_title,,Which calendars should the agenda show?,Quais agendas mostrar?
+feature/agenda,chore_due,,Chore,Corre
+feature/agenda,duration_minutes,,%1$d min,%1$d min
+feature/agenda,event_alert,,Alert,Aviso
+feature/agenda,event_alert_day,,1 day before,1 dia antes
+feature/agenda,event_alert_evening_before,,The evening before at %1$s,Na noite anterior às %1$s
+feature/agenda,event_alert_hour,,1 hour before,1 hora antes
+feature/agenda,event_all_day,,All day,O dia todo
+feature/agenda,event_calendar,,Calendar,Agenda
+feature/agenda,event_change_time,,Change,Mudar
+feature/agenda,event_day,,Day,Dia
+feature/agenda,event_duration,,How long,Quanto tempo
+feature/agenda,event_pick_day,,Pick a day,Escolher um dia
+feature/agenda,event_starts,,Starts at %1$s,Começa às %1$s
+feature/agenda,event_title,,What's happening,O que vai rolar
+feature/agenda,month_cell_chores,,chores due,tem corre
+feature/agenda,next_month,,Next month,Próximo mês
+feature/agenda,no_calendars,,There are no calendars on this phone. Add a Google account with the family calendar in the phone's settings to see it here. Repeating and planned chores still show below.,Não tem nenhuma agenda neste celular. Adicione nas configurações do celular uma conta do Google com a agenda da família pra ver aqui. Os corres que repetem ou estão marcados aparecem aqui embaixo do mesmo jeito.
+feature/agenda,nothing_this_day,,Nothing on this day,Nada nesse dia
+feature/agenda,nothing_today,,Nothing planned today,Nada marcado hoje
+feature/agenda,ok,,OK,OK
+feature/agenda,open_failed,,No calendar app to open this event,Nenhum app de agenda pra abrir esse evento
+feature/agenda,permission_allow,,Allow calendar access,Permitir acesso à agenda
+feature/agenda,permission_body,,"Nos Corre! shows the calendars already on this phone, like a shared Google Calendar, next to your chores. Events you add here go to that calendar, and Google sends the alerts to everyone who shares it.","O Nos Corre! mostra as agendas que já estão neste celular, como uma Agenda Google dividida, junto dos corres. Os eventos que você adiciona aqui vão pra essa agenda, e o Google manda os avisos pra todo mundo que divide ela."
+feature/agenda,permission_title,,Show your family calendar,Mostrar a agenda da família
+feature/agenda,previous_month,,Previous month,Mês anterior
+feature/agenda,read_only,,read only,só leitura
+feature/agenda,time_range,,%1$s – %2$s,%1$s – %2$s
+feature/agenda,today,,Today,Hoje
+feature/agenda,tomorrow,,Tomorrow,Amanhã
+feature/agenda,view_list,,Next 2 weeks,Próximas 2 semanas
+feature/agenda,view_month,,Month,Mês
 feature/chores,section_awaiting,,Waiting for a parent's OK,Esperando o OK de mainha ou painho
 feature/chores,section_to_do,,Needs doing,Pra fazer
 feature/chores,section_later,,Later (%1$d),Mais pra frente (%1$d)
@@ -378,6 +420,8 @@ feature/family,message_show_less,,Show less,Ver menos
 feature/family,message_remove_confirm,,Remove this message for everyone?,Apagar esse recado pra todo mundo?
 feature/family,message_channel,,Family messages,Recados da família
 feature/family,message_channel_description,,When someone sends a message to the whole family,Quando alguém manda um recado pra família toda
+feature/family,family_tab_people,,People,Galera
+feature/family,family_tab_map,,Map,Mapa
 feature/groceries,grocery_quick_add,,Out of something? Type it here,Acabou alguma coisa? Escreva aqui
 feature/groceries,grocery_to_buy,,To buy,Pra comprar
 feature/groceries,grocery_restock,,Restock usuals (%1$d),Repor o de sempre (%1$d)
@@ -459,7 +503,6 @@ feature/home,drying_today,,Laundry is due and today is a good day to dry it outs
 feature/home,drying_wait,,Laundry is due: the best day to hang it out is %1$s,Tem roupa pra lavar: o melhor dia pra estender é %1$s
 feature/home,drying_indoors,,"Laundry is due, but no dry day is coming: dry it indoors","Tem roupa pra lavar, mas não vem dia seco: seque dentro de casa"
 feature/home,week_drying,,good for drying,bom pra secar roupa
-feature/home,ok,,OK,OK
 feature/home,week_title,,The week ahead,A semana que vem
 feature/home,week_unavailable,,No forecast for the week yet. Save your home on the Map tab and check your connection.,Ainda sem previsão da semana. Salve sua casa na aba Mapa e veja a conexão.
 feature/home,week_trips_hint,,Trips are planned under Settings.,Os trajetos são planejados em Configurações.
@@ -493,51 +536,11 @@ feature/home,home_all_day,,All day,O dia todo
 feature/home,home_nothing_title,,A quiet day,Dia tranquilo
 feature/home,home_nothing_body,,Nothing more on the calendar or in the trips plan for today.,Nada mais na agenda nem nos trajetos de hoje.
 feature/home,agenda_title,,Agenda,Agenda
-feature/home,permission_title,,Show your family calendar,Mostrar a agenda da família
-feature/home,permission_body,,"Nos Corre! shows the calendars already on this phone, like a shared Google Calendar, next to your chores. Events you add here go to that calendar, and Google sends the alerts to everyone who shares it.","O Nos Corre! mostra as agendas que já estão neste celular, como uma Agenda Google dividida, junto dos corres. Os eventos que você adiciona aqui vão pra essa agenda, e o Google manda os avisos pra todo mundo que divide ela."
-feature/home,permission_allow,,Allow calendar access,Permitir acesso à agenda
-feature/home,no_calendars,,There are no calendars on this phone. Add a Google account with the family calendar in the phone's settings to see it here. Repeating and planned chores still show below.,Não tem nenhuma agenda neste celular. Adicione nas configurações do celular uma conta do Google com a agenda da família pra ver aqui. Os corres que repetem ou estão marcados aparecem aqui embaixo do mesmo jeito.
-feature/home,choose_title,,Which calendars should the agenda show?,Quais agendas mostrar?
-feature/home,choose_hint,,This choice is only for this phone.,Essa escolha vale só pra este celular.
-feature/home,choose_save,,Show these,Mostrar essas
-feature/home,change_calendars,,Change,Mudar
-feature/home,read_only,,read only,só leitura
-feature/home,all_day,,All day,O dia todo
-feature/home,time_range,,%1$s – %2$s,%1$s – %2$s
-feature/home,nothing_today,,Nothing planned today,Nada marcado hoje
-feature/home,chore_due,,Chore,Corre
-feature/home,open_failed,,No calendar app to open this event,Nenhum app de agenda pra abrir esse evento
-feature/home,add_event,,Add event,Adicionar evento
-feature/home,event_title,,What's happening,O que vai rolar
-feature/home,event_calendar,,Calendar,Agenda
-feature/home,event_day,,Day,Dia
-feature/home,event_pick_day,,Pick a day,Escolher um dia
-feature/home,event_all_day,,All day,O dia todo
-feature/home,event_starts,,Starts at %1$s,Começa às %1$s
-feature/home,event_change_time,,Change,Mudar
-feature/home,event_duration,,How long,Quanto tempo
-feature/home,event_alert,,Alert,Aviso
-feature/home,event_alert_evening_before,,The evening before at %1$s,Na noite anterior às %1$s
-feature/home,event_alert_minutes,one,%d minute before,%d minuto antes
-feature/home,event_alert_minutes,other,%d minutes before,%d minutos antes
-feature/home,event_alert_hour,,1 hour before,1 hora antes
-feature/home,event_alert_day,,1 day before,1 dia antes
-feature/home,duration_minutes,,%1$d min,%1$d min
-feature/home,duration_hours,one,%d hour,%d hora
-feature/home,duration_hours,other,%d hours,%d horas
-feature/home,today,,Today,Hoje
-feature/home,tomorrow,,Tomorrow,Amanhã
-feature/home,view_list,,Next 2 weeks,Próximas 2 semanas
-feature/home,view_month,,Month,Mês
-feature/home,previous_month,,Previous month,Mês anterior
-feature/home,next_month,,Next month,Próximo mês
-feature/home,nothing_this_day,,Nothing on this day,Nada nesse dia
 feature/home,home_add,,Add,Adicionar
 feature/home,home_add_chore,,Something needs doing,Tem coisa pra fazer
 feature/home,home_add_grocery,,Out of something,Acabou algo
 feature/home,home_add_event,,New event,Novo compromisso
 feature/home,home_tab_today,,Today,Hoje
-feature/home,home_tab_agenda,,Agenda,Agenda
 feature/home,home_tab_week,,Week,Semana
 feature/home,gs_title,,Getting started,Pra começar
 feature/home,gs_hint,,A few steps so Nos Corre! works for the whole family.,Alguns passos pro Nos Corre! funcionar pra família toda.
@@ -549,9 +552,6 @@ feature/home,gs_open_map,,Open the map,Abrir o mapa
 feature/home,gs_allow,,Allow,Liberar
 feature/home,gs_plan,,Plan,Planejar
 feature/home,gs_hide,,Hide this,Esconder isso
-feature/home,month_cell_events,one,%d event,%d compromisso
-feature/home,month_cell_events,other,%d events,%d compromissos
-feature/home,month_cell_chores,,chores due,tem corre
 feature/home,home_see_agenda,,Agenda ›,Agenda ›
 feature/home,home_see_week,,Week ›,Semana ›
 feature/home,home_urgent_groceries,one,%d essential missing,%d coisa essencial faltando
@@ -628,7 +628,6 @@ feature/map,battery_tip_oppo,,"Oppo, Realme, OnePlus: also allow Auto-launch and
 feature/map,battery_tip_vivo,,Vivo: also allow Autostart and high background power use.,Vivo: permita também a Inicialização automática e o consumo alto de bateria em segundo plano.
 feature/map,battery_open,,Open battery settings,Abrir configurações de bateria
 feature/map,battery_hide,,Don't show again,Não mostrar de novo
-feature/map,map_title,,Map,Mapa
 feature/map,map_sharing_count,one,%d person shares where they are,%d pessoa mostra onde tá
 feature/map,map_sharing_count,other,%d people share where they are,%d pessoas mostram onde tão
 feature/map,this_phone_title,,This phone,Este celular

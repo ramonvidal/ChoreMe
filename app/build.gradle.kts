@@ -90,6 +90,7 @@ dependencies {
     implementation(projects.core.update)
     implementation(projects.feature.onboarding)
     implementation(projects.feature.home)
+    implementation(projects.feature.agenda)
     implementation(projects.feature.chores)
     implementation(projects.feature.groceries)
     implementation(projects.feature.map)

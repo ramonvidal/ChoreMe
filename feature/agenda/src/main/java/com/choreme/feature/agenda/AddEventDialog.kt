@@ -1,4 +1,4 @@
-package com.choreme.feature.home
+package com.choreme.feature.agenda
 
 import com.choreme.core.ui.R as CoreUiR
 import androidx.compose.foundation.layout.Arrangement

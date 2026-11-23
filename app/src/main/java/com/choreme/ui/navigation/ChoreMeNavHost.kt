@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -51,8 +50,11 @@ import com.choreme.feature.home.homeScreen
 import com.choreme.feature.family.familyScreen
 import com.choreme.feature.groceries.GROCERIES_ROUTE
 import com.choreme.feature.groceries.groceriesScreen
-import com.choreme.feature.map.MAP_ROUTE
-import com.choreme.feature.map.mapScreen
+import com.choreme.feature.map.FamilyMapTab
+import com.choreme.feature.agenda.ADD_EVENT_KEY
+import com.choreme.feature.agenda.AGENDA_ROUTE
+import com.choreme.feature.agenda.agendaScreen
+import com.choreme.feature.family.OPEN_MAP_KEY
 import com.choreme.feature.chores.ADD_CHORE_KEY
 import com.choreme.feature.settings.SETTINGS_ROUTE
 import com.choreme.feature.settings.settingsScreen
@@ -66,8 +68,8 @@ enum class TopLevelDestination(
 ) {
     Home(HOME_ROUTE, R.string.nav_home, Icons.Filled.Home),
     Chores(CHORES_ROUTE, R.string.nav_chores, Icons.Filled.CheckCircle),
+    Agenda(AGENDA_ROUTE, R.string.nav_agenda, iconRes = CoreUiR.drawable.ic_tab_agenda),
     Groceries(GROCERIES_ROUTE, R.string.nav_groceries, Icons.Filled.ShoppingCart),
-    Places(MAP_ROUTE, R.string.nav_map, Icons.Filled.Place),
     Family(FAMILY_ROUTE, R.string.nav_family, Icons.Filled.Person),
     Settings(SETTINGS_ROUTE, R.string.nav_settings, Icons.Filled.Settings),
 }
@@ -159,12 +161,23 @@ fun ChoreMeNavHost(pendingJoinRequests: Int = 0, choresBadge: Int = 0, groceries
                 },
                 onOpenGroceries = { navController.navigateToTab(TopLevelDestination.Groceries.route) },
                 onOpenSettings = { navController.navigateToTab(TopLevelDestination.Settings.route) },
-                onOpenMap = { navController.navigateToTab(TopLevelDestination.Places.route) },
+                onOpenMap = {
+                    navController.navigateToTab(TopLevelDestination.Family.route)
+                    // Tells the Family tab to show its Map sub-tab.
+                    runCatching { navController.getBackStackEntry(TopLevelDestination.Family.route).savedStateHandle[OPEN_MAP_KEY] = true }
+                },
+                onOpenAgenda = { navController.navigateToTab(TopLevelDestination.Agenda.route) },
+                onAddEvent = {
+                    navController.navigateToTab(TopLevelDestination.Agenda.route)
+                    // Tells the Agenda tab to open its "New event" dialog.
+                    runCatching { navController.getBackStackEntry(TopLevelDestination.Agenda.route).savedStateHandle[ADD_EVENT_KEY] = true }
+                },
             )
             choresScreen(onOpenGroceries = { navController.navigateToTab(TopLevelDestination.Groceries.route) })
+            agendaScreen()
             groceriesScreen()
-            mapScreen()
-            familyScreen()
+            // The map is the Family tab's second sub-tab; :app hands it over so the two features stay apart.
+            familyScreen(map = { FamilyMapTab() })
             settingsScreen()
         }
     }

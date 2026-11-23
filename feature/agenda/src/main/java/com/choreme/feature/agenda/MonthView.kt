@@ -1,4 +1,4 @@
-package com.choreme.feature.home
+package com.choreme.feature.agenda
 
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role

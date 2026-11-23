@@ -83,16 +83,14 @@ import com.choreme.core.ui.icon
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-private enum class HomeTab { TODAY, AGENDA, WEEK }
+private enum class HomeTab { TODAY, WEEK }
 
-/** Today / Agenda / Week under the top edge. */
+/** Today / Week under the top edge (the Agenda is a tab of its own). */
 @Composable
-internal fun HomeSubTabs(selected: Int, eventsToday: Int = 0, onSelect: (Int) -> Unit) {
+internal fun HomeSubTabs(selected: Int, onSelect: (Int) -> Unit) {
     SubTabs(
         listOf(
             SubTab(stringResource(R.string.home_tab_today), CoreUiR.drawable.ic_tab_today),
-            // How many events are still to come today: news, not a warning, so a quiet grey count.
-            SubTab(stringResource(R.string.home_tab_agenda), CoreUiR.drawable.ic_tab_agenda, badge = eventsToday, alert = false),
             SubTab(stringResource(R.string.home_tab_week), CoreUiR.drawable.ic_tab_week),
         ),
         selected,
@@ -100,7 +98,7 @@ internal fun HomeSubTabs(selected: Int, eventsToday: Int = 0, onSelect: (Int) ->
     )
 }
 
-/** Casa: the sub-tabs Today (the weather house and the day), Agenda (the family calendar) and Week (the regular trips). */
+/** Casa: the sub-tabs Today (the weather house and the day) and Week (the regular trips). */
 @Composable
 internal fun HomeScreen(
     onOpenChores: () -> Unit,
@@ -108,6 +106,8 @@ internal fun HomeScreen(
     onOpenGroceries: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenMap: () -> Unit,
+    onOpenAgenda: () -> Unit,
+    onAddEvent: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -125,13 +125,11 @@ internal fun HomeScreen(
     var savedTab by rememberSaveable { mutableIntStateOf(HomeTab.TODAY.ordinal) }
     val pager = rememberPagerState(initialPage = savedTab) { HomeTab.entries.size }
     LaunchedEffect(pager.currentPage) { savedTab = pager.currentPage }
-    // Counts the "New event" requests, so the Agenda sub-tab opens its dialog once per request.
-    var newEvent by rememberSaveable { mutableIntStateOf(0) }
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     Box(Modifier.fillMaxSize()) {
     Column(Modifier.fillMaxSize()) {
-        HomeSubTabs(pager.currentPage, eventsToday = state.timeline?.eventCount ?: 0) { scope.launch { pager.animateScrollToPage(it) } }
+        HomeSubTabs(pager.currentPage) { scope.launch { pager.animateScrollToPage(it) } }
         HorizontalPager(pager, Modifier.fillMaxSize(), verticalAlignment = Alignment.Top) { page ->
         when (HomeTab.entries[page]) {
             HomeTab.TODAY -> HomeContent(
@@ -139,8 +137,8 @@ internal fun HomeScreen(
                 onOpenChores = onOpenChores,
                 onAddChore = onAddChore,
                 onOpenGroceries = onOpenGroceries,
-                onAddEvent = { newEvent++; scope.launch { pager.animateScrollToPage(HomeTab.AGENDA.ordinal) } },
-                onOpenAgenda = { scope.launch { pager.animateScrollToPage(HomeTab.AGENDA.ordinal) } },
+                onAddEvent = onAddEvent,
+                onOpenAgenda = onOpenAgenda,
                 onOpenWeek = { scope.launch { pager.animateScrollToPage(HomeTab.WEEK.ordinal) } },
                 setupSteps = setupSteps,
                 onSetupStep = { step ->
@@ -159,7 +157,6 @@ internal fun HomeScreen(
                     }
                 },
             )
-            HomeTab.AGENDA -> AgendaScreen(addRequest = newEvent)
             HomeTab.WEEK -> WeekAheadScreen(onPlanTrips = onOpenSettings)
         }
         }

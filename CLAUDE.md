@@ -24,7 +24,7 @@ in the way and what you propose, before writing the code.
 | `:core:weather` | The weather forecast, air quality and pollen for the places and times of the family's routine (Open-Meteo: free, no key; only coordinates rounded to about 1 km leave the phone) | `:core:model` |
 | `:core:push` | Free instant wake-up pings between family phones (UnifiedPush, e.g. the ntfy app). Pings carry no family data; features react through `PushListener` | `:core:model` |
 | `:core:chores` | Doing things to chores the same way on every screen (finish, approve, undo...): the rules from `:core:model`, saved through `:core:data`, the family pinged through `:core:push`. Used by Chores, Rooms and Casa | `:core:model`, `:core:data`, `:core:push` |
-| `:feature:<name>` | One tab or flow: `onboarding`, `home` (Casa: the weather house, the day, Agenda and the week ahead as sub-tabs), `chores` (with Rooms as a sub-tab), `groceries`, `map`, `family`, `settings` (the family's points switch, the regular trips plan, "This phone"), `widget`, `update` | `:core:*` only |
+| `:feature:<name>` | One tab or flow: `onboarding`, `home` (Casa: the weather house and the day, and the week ahead as sub-tabs), `chores` (with Rooms as a sub-tab), `agenda` (the family calendar, its own tab), `groceries`, `family` (People, with the Map as a sub-tab), `map`, `settings` (the family's points switch, the regular trips plan, "This phone"), `widget`, `update` | `:core:*` only |
 | `:app` | Wires features together: activity, root screen, navigation | anything; nothing depends on it |
 
 - **Features never depend on each other.** What two features share moves down into
@@ -36,6 +36,9 @@ in the way and what you propose, before writing the code.
   - `:feature:chores`: `ChoreReminders.schedule()`, which `:app` calls at startup.
   - `:feature:map`: `PlaceAlerts.schedule()`, which `:app` calls at startup, so every
     phone gets arrival alerts, even one that never opened the map.
+  - `:feature:map` has no route of its own: it exposes `FamilyMapTab()`, which `:app` hands to
+    `:feature:family`'s `familyScreen(map = ...)` as the Family tab's Map sub-tab (owner's choice,
+    23 November 2026). Family never depends on Map.
   - `:feature:home`: `WeatherAlerts.schedule()`, which `:app` calls at startup, for the morning weather notification.
   - `:feature:update`: `UpdateBanner()`, which `:app` shows at the top of the screen.
   - `:feature:widget` has no screen in the app. Android needs its receiver, startup

@@ -103,7 +103,7 @@ class HomeTabScreenshotTest {
             // The Play Store pictures leave out the floating Add button.
             CompositionLocalProvider(LocalShowAddButton provides !name.startsWith("store-")) {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
-                Surface(Modifier.fillMaxSize()) { Column { HomeSubTabs(0, eventsToday = state.timeline?.eventCount ?: 0) {}; HomeContent(state, onOpenChores = {}, onAddChore = {}, onOpenGroceries = {}, onAddEvent = {}) } }
+                Surface(Modifier.fillMaxSize()) { Column { HomeSubTabs(0) {}; HomeContent(state, onOpenChores = {}, onAddChore = {}, onOpenGroceries = {}, onAddEvent = {}) } }
             }
         }
         }

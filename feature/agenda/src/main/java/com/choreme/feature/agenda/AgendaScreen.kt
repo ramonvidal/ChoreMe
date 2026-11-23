@@ -1,4 +1,4 @@
-package com.choreme.feature.home
+package com.choreme.feature.agenda
 
 import com.choreme.core.ui.choreTitle
 import android.content.ActivityNotFoundException
@@ -123,7 +123,7 @@ internal class AgendaActions(
 internal fun AgendaContent(state: AgendaUiState, error: Int?, actions: AgendaActions, addRequest: Int = 0) {
     var choosing by rememberSaveable { mutableStateOf(false) }
     var adding by rememberSaveable { mutableStateOf(false) }
-    // "Add > New event" on the Today sub-tab opens the dialog here.
+    // "Add > New event" on Casa opens the dialog here.
     androidx.compose.runtime.LaunchedEffect(addRequest) { if (addRequest > 0 && state.writableSelected.isNotEmpty()) adding = true }
     val open = actions.open
 

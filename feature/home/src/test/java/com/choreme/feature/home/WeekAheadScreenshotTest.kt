@@ -68,7 +68,7 @@ class WeekAheadScreenshotTest {
             ChoreMeTheme(darkTheme = false, dynamicColor = false) {
                 Surface(Modifier.fillMaxSize()) {
                     Column {
-                        HomeSubTabs(2) {}
+                        HomeSubTabs(1) {}
                         WeekAheadContent(state, onPlanTrips = {})
                     }
                 }
@@ -92,7 +92,7 @@ class WeekAheadScreenshotTest {
             ChoreMeTheme(darkTheme = false, dynamicColor = false) {
                 Surface(Modifier.fillMaxSize()) {
                     Column {
-                        HomeSubTabs(2) {}
+                        HomeSubTabs(1) {}
                         WeekAheadContent(state, onPlanTrips = {})
                     }
                 }

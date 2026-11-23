@@ -94,7 +94,10 @@ class FamilyTabScreenshotTest {
             ChoreMeTheme(darkTheme = dark, dynamicColor = false) {
                 CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
                 Surface(Modifier.fillMaxSize()) {
-                    FamilyContent(state, ActionState(), signOutNeedsApprovalAgain = false, actions = FamilyActions())
+                    androidx.compose.foundation.layout.Column {
+                        FamilySubTabs(0) {}
+                        FamilyContent(state, ActionState(), signOutNeedsApprovalAgain = false, actions = FamilyActions())
+                    }
                 }
             }
             }

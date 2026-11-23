@@ -1,4 +1,4 @@
-package com.choreme.feature.home
+package com.choreme.feature.agenda
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText

@@ -34,13 +34,13 @@ class SubTabsScreenshotTest {
                 CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
                     Surface {
                         Column(Modifier.padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            (0..2).forEach { HomeSubTabs(it) {} }
+                            (0..1).forEach { HomeSubTabs(it) {} }
                         }
                     }
                 }
             }
         }
-        compose.onAllNodesWithText("Agenda").assertCountEquals(3) // one in each of the three bars
+        compose.onAllNodesWithText("Week").assertCountEquals(2) // one in each of the two bars
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")
     }
 

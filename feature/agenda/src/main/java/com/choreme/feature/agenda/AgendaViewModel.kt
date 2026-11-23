@@ -1,4 +1,4 @@
-package com.choreme.feature.home
+package com.choreme.feature.agenda
 
 import android.content.Intent
 import androidx.lifecycle.ViewModel

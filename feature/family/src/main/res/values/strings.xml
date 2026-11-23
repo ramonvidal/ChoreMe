@@ -65,4 +65,6 @@
     <string name="message_remove_confirm">Remove this message for everyone?</string>
     <string name="message_channel">Family messages</string>
     <string name="message_channel_description">When someone sends a message to the whole family</string>
+    <string name="family_tab_people">People</string>
+    <string name="family_tab_map">Map</string>
 </resources>
