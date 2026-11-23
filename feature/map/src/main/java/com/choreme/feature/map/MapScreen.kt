@@ -45,6 +45,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -179,7 +180,7 @@ internal fun MapContent(
         // The sub-tab above already says "Map" (it is a sub-tab of Family): only how many share where they are.
         val sharing = state.members.count { it.status is LocationStatus.Known }
         HeaderLine(pluralStringResource(R.plurals.map_sharing_count, sharing, sharing), Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp))
-        Box(Modifier.fillMaxWidth().weight(1f)) {
+        Box(Modifier.fillMaxWidth().weight(1f).clipToBounds()) {
             map(focus, Modifier.fillMaxSize())
             SmallFloatingActionButton(
                 onClick = {

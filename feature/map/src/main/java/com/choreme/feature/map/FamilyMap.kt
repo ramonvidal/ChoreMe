@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -50,6 +51,9 @@ internal fun FamilyMap(
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
             controller.setZoom(DEFAULT_ZOOM)
+            // Kept inside its own box on the Android side too, not only by Compose.
+            outlineProvider = android.view.ViewOutlineProvider.BOUNDS
+            clipToOutline = true
         }
     }
     MapLifecycle(mapView)
@@ -67,7 +71,8 @@ internal fun FamilyMap(
     }
     AndroidView(
         factory = { mapView },
-        modifier = modifier,
+        // The map's tiles would otherwise be drawn past its edges, over the sub-tab bar above it.
+        modifier = modifier.clipToBounds(),
         update = { map ->
             map.overlays.clear()
             places.forEach { place ->

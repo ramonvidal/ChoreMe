@@ -13,6 +13,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.res.stringResource
 import com.choreme.core.ui.SubTab
 import com.choreme.core.ui.SubTabs
@@ -54,7 +55,8 @@ internal fun FamilyTabs(map: @Composable () -> Unit, openMap: Boolean = false, o
         FamilySubTabs(pager.currentPage) { scope.launch { pager.animateScrollToPage(it) } }
         HorizontalPager(
             pager,
-            Modifier.fillMaxSize(),
+            // Nothing on a page (the map above all) may draw over the sub-tab bar.
+            Modifier.fillMaxSize().clipToBounds(),
             verticalAlignment = Alignment.Top,
             userScrollEnabled = pager.currentPage == FamilyTab.PEOPLE.ordinal,
             // The map is heavy: build it only when its page is shown.
