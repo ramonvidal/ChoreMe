@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Baianês. Made from translations/baianes.csv by translations/i18n.py: edit the table, not this file. -->
 <resources>
+    <string name="agenda_title">Agenda</string>
     <string name="add_event">Adicionar evento</string>
     <string name="all_day">O dia todo</string>
     <string name="change_calendars">Mudar</string>

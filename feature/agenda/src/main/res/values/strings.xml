@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="agenda_title">Agenda</string>
     <plurals name="duration_hours">
         <item quantity="one">%d hour</item>
         <item quantity="other">%d hours</item>

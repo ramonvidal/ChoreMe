@@ -84,6 +84,7 @@ core/ui,ntfy_help_step3,,3. Done: the status says that instant alerts are on.,3.
 core/ui,ntfy_help_stuck,,"Still off after a minute? Open ntfy once, then open Nos Corre! again.",Ainda desligado depois de um minuto? Abra o ntfy uma vez e depois abra o Nos Corre! de novo.
 core/ui,ntfy_help_open,,Open Google Play,Abrir a Google Play
 core/ui,ntfy_help_later,,Not now,Agora não
+feature/agenda,agenda_title,,Agenda,Agenda
 feature/agenda,duration_hours,one,%d hour,%d hora
 feature/agenda,duration_hours,other,%d hours,%d horas
 feature/agenda,event_alert_minutes,one,%d minute before,%d minuto antes
